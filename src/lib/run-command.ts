@@ -30,9 +30,13 @@ export interface RunCommandProcess {
 
 function buildShellArgs(command: string): { program: string; args: string[] } {
   const isWindows = platform() === "windows";
-  return isWindows
-    ? { program: "cmd", args: ["/C", command] }
-    : { program: "sh", args: ["-c", command] };
+  if (isWindows) {
+    return { program: "cmd", args: ["/C", command] };
+  }
+
+  return platform() === "macos"
+    ? { program: "zsh", args: ["-lc", command] }
+    : { program: "sh", args: ["-lc", command] };
 }
 
 export function spawnCommand(command: string, options: RunCommandOptions = {}): RunCommandProcess {

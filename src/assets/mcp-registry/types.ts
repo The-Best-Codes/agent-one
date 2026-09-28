@@ -53,14 +53,11 @@ export type PurpleIoModelcontextprotocolRegistryPublisherProvided = {
   count?: number;
   description?: string;
   name?: string;
-  config?: ConfigConfig | string;
-  note?: string;
-  command?: string;
-  example?: Example;
-  canonical?: string;
+  plan?: string;
   title?: string;
   metered?: boolean;
   readOnly?: boolean;
+  capability_level?: string;
   answers?: string;
   annotations?: Annotations;
   auth?: string;
@@ -71,14 +68,29 @@ export type PurpleIoModelcontextprotocolRegistryPublisherProvided = {
   returns?: string;
   task?: string;
   type?: string;
+  endpoint?: string;
   upgrade?: string;
   args?: string[];
   side_effect?: string;
+  inputSchema?: InputSchema;
+  config?: ConfigConfig | string;
+  note?: string;
+  command?: string;
+  example?: Example;
+  canonical?: string;
   id?: string;
+  method?: string;
+  paid?: boolean;
+  path?: string;
+  price_usdc?: string;
+  registry_label?: string;
   url?: string;
   uriTemplate?: string;
   label?: string;
   network?: string;
+  report_version?: string;
+  version?: string;
+  scenario?: Scenario;
   mimeType?: string;
   purpose?: string;
   sizes?: string;
@@ -128,21 +140,75 @@ export type Parameters = {
   q: string;
 };
 
+export type InputSchema = {
+  properties: Properties;
+  type: string;
+  required?: string[];
+};
+
+export type Properties = {
+  category?: Category;
+  search?: Category;
+  serviceId?: Category;
+  name?: Category;
+  signature?: Category;
+  wallet?: Category;
+  params?: Category;
+  url?: Category;
+};
+
+export type Category = {
+  description: string;
+  type: string;
+};
+
+export type Scenario = {
+  action_call_limit?: number;
+  budget_credits?: number;
+  cost_per_independent_attempt?: number;
+  independent_attempts_before_success?: number;
+  variant: string;
+  expected_record_count?: number;
+  page_size?: number;
+};
+
 export type FluffyIoModelcontextprotocolRegistryPublisherProvided = {
   description?: string;
   name?: string;
+  free_item_limit?: number | null;
+  pricing?: string;
+  tool?: string;
+  meter?: Meter;
+  price?: PriceClass | number;
+  pricing_version?: string;
   purpose?: string;
   usd_per_month?: number | string;
   credits?: number;
-  price?: number;
+  config?: CodeixClass;
   level?: string;
   organization?: string;
   url?: string;
   install?: string;
   required?: boolean;
-  config?: CodeixClass;
+  repository?: string;
+  command?: string;
+  distribution?: string;
+  installation?: string;
+  pypi?: string;
+  pythonImport?: string;
   equivalentCommand?: string;
   remoteCommands?: string[];
+};
+
+export type Meter = {
+  items_per_charge_unit: number;
+  unit: string;
+};
+
+export type PriceClass = {
+  base_micro_usd: number;
+  per_unit_micro_usd: number;
+  source: string;
 };
 
 export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
@@ -154,6 +220,13 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   read?: string[];
   reply?: string[];
   send?: string[] | string;
+  api_key_env?: string;
+  api_key_header?: string;
+  requires_api_key?: boolean;
+  auth?: string;
+  limits?: string;
+  tools?: string[] | number;
+  url?: string;
   actionSafety?: string;
   authorizationQuorum?: string;
   compensation?: string;
@@ -173,6 +246,13 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   textSafety?: string;
   vetoWindow?: string;
   webhookInbox?: string;
+  api?: string;
+  discovery?: string;
+  docs?: string;
+  registration?: string;
+  reviewedAt?: Date;
+  specification?: string;
+  status?: string;
   aml_screen?: string;
   kyc_check?: string;
   risk_report?: string;
@@ -185,40 +265,44 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   "/profitlens/ranking"?: string;
   "/profitlens/returns"?: string;
   "/verify_claim"?: string;
+  lobeHub?: string;
+  pulseMCP?: string;
   formula?: string;
   install?: string[];
   tap?: string;
-  codingAgentSetup?: string;
-  llmsTxt?: string;
+  channels?: Channels;
+  endpoints?: string[] | EndpointsClass;
+  errorCode?: number;
+  keyFormat?: string;
+  modes?: string[];
+  noRecovery?: boolean;
   "exchange:attempt"?: string;
   "exchange:propose"?: string;
   "exchange:read"?: string;
-  billing?: string;
-  limit?: number;
-  period?: string;
-  scope?: string;
-  api_key_env?: string;
-  api_key_header?: string;
-  requires_api_key?: boolean;
-  addressScoping?: boolean;
-  audience?: string;
-  issuance?: string;
-  scheme?: string;
-  discovery?: string;
-  dynamicClientRegistration?: boolean;
-  pkce?: string;
+  grant_types?: string[];
+  metadata_endpoint?: string;
+  token_endpoint?: string;
+  type?: string;
+  description?: string;
+  image?: string;
+  env_var?: string;
+  command?: string;
+  install_url?: string;
+  authorizationUrl?: string;
+  clientId?: string;
   scopes?: Array<ScopeClass | string>;
-  billingBasis?: string;
-  deepUsdPerHandle?: string;
-  internalActorFailoverHasNoExtraCharge?: boolean;
-  livePreflightAnd402AreAuthoritative?: boolean;
-  minimumTaskUsd?: string;
-  normalProgressiveTiers?: string[];
-  pricingVersion?: string;
-  deep?: string;
-  normal?: string;
-  alsoSupported?: string[];
-  primary?: string;
+  tokenUrl?: TokenURLClass | string;
+  protected_resource_metadata?: string;
+  downloads?: string;
+  enterprise?: EnterpriseClass | string;
+  hosted_discovery?: string;
+  hosted_execution?: string;
+  micro_usd_per_credit?: number;
+  statement?: string;
+  usd_per_credit?: number;
+  compute_cost_role?: string;
+  rule?: string;
+  substitution_value_role?: string;
   barrier_create?: string;
   barrier_signal?: string;
   barrier_status?: string;
@@ -304,28 +388,39 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   x402_seller_rank?: string;
   x402_top_movers?: string;
   x402_trending_services?: string;
-  channels?: Channels;
-  endpoints?: string[] | EndpointsClass;
-  errorCode?: number;
-  keyFormat?: string;
-  modes?: string[];
-  noRecovery?: boolean;
-  grant_types?: string[];
-  metadata_endpoint?: string;
-  token_endpoint?: string;
-  type?: string;
-  description?: string;
-  image?: string;
-  env_var?: string;
-  command?: string;
-  install_url?: string;
-  status?: string;
-  authorizationUrl?: string;
-  clientId?: string;
-  tokenUrl?: TokenURLClass | string;
+  billing?: string;
+  limit?: number;
+  period?: string;
+  scope?: string;
+  codingAgentSetup?: string;
+  llmsTxt?: string;
+  addressScoping?: boolean;
+  audience?: string;
+  issuance?: string;
+  scheme?: string;
+  dynamicClientRegistration?: boolean;
+  pkce?: string;
+  billingBasis?: string;
+  deepUsdPerHandle?: string;
+  internalActorFailoverHasNoExtraCharge?: boolean;
+  livePreflightAnd402AreAuthoritative?: boolean;
+  minimumTaskUsd?: string;
+  normalProgressiveTiers?: string[];
+  pricingVersion?: string;
+  deep?: string;
+  normal?: string;
+  alsoSupported?: string[];
+  primary?: string;
+  enabled?: boolean;
+  note?: string;
+  dedicatedRestPrefix?: string;
+  initialPriceUsd?: number;
+  supportedOnSelectedStatelessTextTools?: boolean;
   changelog?: string;
   health?: string;
   metadata?: string;
+  discoverable?: boolean;
+  label?: string;
   wellKnownIssuer?: string;
   docsUrl?: string;
   oauthDiscoveryUrl?: string;
@@ -337,33 +432,43 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   nervapack?: Nervapack;
   "nervapack-memory"?: Nervapack;
   mcpServers?: IoModelcontextprotocolRegistryPublisherProvidedMCPServers;
+  balanceRequiresAuthentication?: boolean;
+  commerceEvidencePreviews?: CommerceEvidencePreviews;
+  currency?: string;
+  freeHelpers?: string[];
+  freePreviewLimits?: FreePreviewLimits;
+  fundingPackOptionsCents?: number[];
+  maximumMicroUsd?: number;
+  minimumFundingCents?: number;
+  minimumMicroUsd?: number;
+  offerPreviewLimits?: OfferPreviewLimits;
+  paidTools?: number;
+  paymentOptions?: PaymentOptions;
   protocol?: string;
-  resources?: string[] | boolean;
-  auth?: string;
+  resources?: string[] | boolean | number;
   homepage?: string;
   quickstart?: string;
   recipes?: string;
   reference?: string;
+  demo?: string;
+  demoApi?: string;
+  openapi?: string;
   developers?: string;
   guide?: string;
-  openapi?: string;
   partners?: string;
   agentCard?: string[] | string;
   examples?: string;
   githubExamples?: string;
   llms?: string;
-  enabled?: boolean;
-  note?: string;
-  dedicatedRestPrefix?: string;
-  initialPriceUsd?: number;
-  supportedOnSelectedStatelessTextTools?: boolean;
   admin?: string;
   contacts?: string;
   messaging?: string;
   workflows?: string;
+  get_ptc_rates?: string[];
+  get_utility_by_zip?: string[];
+  search_plans?: string[];
   github?: string;
   name?: string;
-  url?: string;
   documentation?: string;
   howItWorks?: string;
   pricing?: string;
@@ -380,11 +485,30 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   llmsFullTxt?: string;
   types?: string[];
   sources?: string[];
+  existing_mailbox_required?: boolean;
+  format?: string;
+  runtime?: string;
+  sdk?: string;
+  source_bundle_url?: string;
+  version?: number | string;
+  archive_sha256?: string;
+  bundle_digest_scope?: string;
+  bundle_sha256?: string;
+  python_requires?: string;
+  setup_guide?: string;
+  supported_host?: string;
+  prompts?: boolean | number;
+  resourceTemplates?: number;
+  clients?: string[];
+  guideUrl?: string;
+  indexUrl?: string;
+  verification?: string;
+  credential?: string;
+  obtainKey?: string;
   analyst?: number;
-  enterprise?: string;
   free?: number;
   team?: number;
-  args?: unknown[];
+  args?: string[];
   hkRegistry?: string[];
   node?: string;
   monthly?: number;
@@ -392,6 +516,10 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   default?: string;
   environmentVariable?: string;
   values?: Values;
+  input?: string;
+  requires?: string;
+  submitsPayment?: boolean;
+  tool?: string;
   consentUrl?: string;
   grantTypes?: string[];
   notes?: string;
@@ -401,22 +529,18 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   transport?: string;
   levels?: string[];
   presets?: Preset[];
-  version?: number;
   npm?: string[];
+  tags?: string[];
+  tier?: string;
   company_baseline?: string;
   evidence_packet?: string;
   program_search?: string;
   quota_before_batch?: string;
-  prompts?: boolean;
-  tools?: string[] | number;
   campaign?: string;
   source?: string;
-  tags?: string[];
-  tier?: string;
   hosted?: Hosted;
   localDaemon?: LocalDaemon;
   deferred_chains?: string[];
-  label?: string;
   live_chains?: string[];
   planned_chains?: string[];
   protocol_coverage?: ProtocolCoverage;
@@ -429,10 +553,29 @@ export type Channels = {
   header: string;
 };
 
+export type CommerceEvidencePreviews = {
+  htmlBodyBytes: number;
+  packBodyBytes: number;
+  packQuantities: number;
+};
+
 export type EndpointsClass = {
   lock: string;
   unlock: string;
   verify: string;
+};
+
+export type EnterpriseClass = {
+  contact: string;
+  mode: string;
+};
+
+export type FreePreviewLimits = {
+  maxInputBytes: number;
+  maxOffers: number;
+  maxPacksPerOffer: number;
+  maxRequiredUnits: number;
+  maxUnitsPerPack: number;
 };
 
 export type Hosted = {
@@ -480,12 +623,26 @@ export type Env = {
   LUMEN_MCP_AUTH_TOKEN: string;
 };
 
+export type OfferPreviewLimits = {
+  maxInputBytes: number;
+  maxOffers: number;
+};
+
 export type Params = {
   arguments: Arguments;
   name: string;
 };
 
 export type Arguments = {};
+
+export type PaymentOptions = {
+  arguments: Arguments;
+  authenticationRequired: boolean;
+  automaticallyFunds: boolean;
+  createsAccount: boolean;
+  createsCheckout: boolean;
+  tool: string;
+};
 
 export type Preset = {
   id: string;
@@ -550,12 +707,28 @@ export type EnvironmentVariable = {
 };
 
 export type EnvironmentVariableVariables = {
+  tenant?: AgentAtlasHost;
+  license_key?: ApifyAPIToken;
+  server?: ApifyAPIToken;
+  database?: Account;
+  password?: ApifyAPIToken;
+  port?: ApifyAPIToken;
+  user?: ApifyAPIToken;
+  service_name?: Account;
+  sandbox?: ApifyAPIToken;
+  host?: ApifyAPIToken;
+  client_id?: Account;
+  client_secret?: ApifyAPIToken;
+  refresh_token?: ApifyAPIToken;
+  subdomain?: Account;
+  domain?: ApifyAPIToken;
+  data_center?: ApifyAPIToken;
   weather_choices?: Account;
   comfyui_base_url?: AimarketHost;
   connection_string?: ApifyAPIToken;
   default_top?: AimarketHost;
   max_top?: AimarketHost;
-  essentials_search_engine?: AllowSecrets;
+  essentials_search_engine?: ApifyAPIToken;
   essentials_search_api_key?: SgpDirectoryAPIKey;
   serper_api_key?: SgpDirectoryAPIKey;
   serpapi_api_key?: SgpDirectoryAPIKey;
@@ -579,7 +752,7 @@ export type EnvironmentVariableVariables = {
   metered_private_key?: SgpDirectoryAPIKey;
   ls_appkey?: ApifyAPIToken;
   ls_appsecretkey?: ApifyAPIToken;
-  ls_market?: AllowSecrets;
+  ls_market?: ApifyAPIToken;
   garnet_host?: ProjectRef;
   garnet_port?: ProjectRef;
   embeddings_provider?: ProjectRef;
@@ -596,9 +769,9 @@ export type SgpDirectoryAPIKey = {
   isSecret: boolean;
 };
 
-export type AimarketHost = {
+export type Account = {
   description: string;
-  default: string;
+  isRequired?: boolean;
 };
 
 export type ApifyAPIToken = {
@@ -608,21 +781,24 @@ export type ApifyAPIToken = {
   format?: string;
   default?: string;
   placeholder?: string;
+  choices?: string[];
+};
+
+export type AimarketHost = {
+  description: string;
+  default: string;
 };
 
 export type ProjectRef = {
   description: string;
 };
 
-export type AllowSecrets = {
-  description: string;
-  default: string;
-  choices: string[];
-};
-
-export type Account = {
+export type AgentAtlasHost = {
   description: string;
   isRequired?: boolean;
+  format?: string;
+  placeholder?: string;
+  isSecret?: boolean;
 };
 
 export type PackageArgument = {
@@ -644,20 +820,16 @@ export type PackageArgument = {
 export type PackageArgumentVariables = {
   region?: ApifyAPIToken;
   store_path?: ApifyAPIToken;
+  project_path?: Account;
   workspace?: AgentAtlasHost;
   user_id?: AgentAtlasHost;
+  repo_path?: Account;
+  api_url?: ApifyAPIToken;
   config_path?: AgentAtlasHost;
   workflow_dir?: ApifyAPIToken;
   workingDirectory?: AgentAtlasHost;
   toolFilter?: ToolFilter;
-};
-
-export type AgentAtlasHost = {
-  description: string;
-  isRequired?: boolean;
-  format?: string;
-  placeholder?: string;
-  isSecret?: boolean;
+  project_root?: AgentAtlasHost;
 };
 
 export type ToolFilter = {
@@ -684,9 +856,17 @@ export type RuntimeArgument = {
 
 export type RuntimeArgumentVariables = {
   config_file?: AgentAtlasHost;
-  workspace?: Account;
+  workspace?: ApifyAPIToken;
   host_port?: AimarketHost;
   network?: AimarketHost;
+  files_dir?: Account;
+  adapter_jar_host_path?: AgentAtlasHost;
+  adapter_jar_name?: Account;
+  config_host_path?: AgentAtlasHost;
+  version?: VersionClass;
+  container_user?: ApifyAPIToken;
+  input_directory?: Account;
+  output_directory?: Account;
   MCP_SERVER_PORT?: AimarketHost;
   HOST_CONTROL_PANEL?: ProjectRef;
   PORT_CONTROL_PANEL?: AimarketHost;
@@ -702,6 +882,7 @@ export type RuntimeArgumentVariables = {
   decoder_file?: ApifyAPIToken;
   tokens_file?: ApifyAPIToken;
   port?: ApifyAPIToken;
+  library?: AgentAtlasHost;
   configDir?: AgentAtlasHost;
   contentDir?: AgentAtlasHost;
   dataDir?: AgentAtlasHost;
@@ -720,8 +901,10 @@ export type RuntimeArgumentVariables = {
   ssh_key?: Account;
   logs_dir?: ProjectRef;
   host?: ApifyAPIToken;
+  host_workspace?: AgentAtlasHost;
   address?: Address;
   enabled?: Address;
+  data_dir?: AgentAtlasHost;
   kubeconfig_dir?: Account;
   inventory_path?: AgentAtlasHost;
   key_path?: ApifyAPIToken;
@@ -761,6 +944,10 @@ export type ExportsDir = {
   format: string;
 };
 
+export type VersionClass = {
+  value: string;
+};
+
 export type Transport = {
   type: string;
   url?: string;
@@ -782,9 +969,11 @@ export type TransportHeader = {
 };
 
 export type PurpleVariables = {
-  token?: ApifyAPIToken;
+  token?: AgentAtlasHost;
+  mcp_token?: ApifyAPIToken;
   MCP_AUTH_TOKEN?: ApifyAPIToken;
   OT_SECURITY__BEARER_TOKEN?: ApifyAPIToken;
+  api_token?: ApifyAPIToken;
 };
 
 export type TransportVariables = {
@@ -813,34 +1002,46 @@ export type RemoteHeader = {
 };
 
 export type FluffyVariables = {
-  api_key?: AgentAtlasHost;
+  api_key?: ApifyAPIToken;
   mcp_client_secret?: ApifyAPIToken;
   token?: ApifyAPIToken;
   postfleet_api_key?: ApifyAPIToken;
   PRIMATE_API_KEY?: ApifyAPIToken;
-  seaotter_api_key?: AgentAtlasHost;
-  mcp_token?: AgentAtlasHost;
+  seaotter_api_key?: ApifyAPIToken;
+  mcp_token?: ApifyAPIToken;
+  typesearch_api_key?: ApifyAPIToken;
+  ACTIONDOCK_API_KEY?: ApifyAPIToken;
+  FOXNFE_API_KEY?: ApifyAPIToken;
+  FOXNFE_TENANT_ID?: Account;
+  MUMO_API_KEY?: ApifyAPIToken;
   TRILO_PAT?: ApifyAPIToken;
+  smolabot_api_key?: ApifyAPIToken;
+  bernuvia_token?: ApifyAPIToken;
   CAMBER_API_KEY?: ApifyAPIToken;
-  chad_mcp_token?: AgentAtlasHost;
-  agent_token?: ApifyAPIToken;
+  chad_mcp_token?: ApifyAPIToken;
+  agent_token?: AgentAtlasHost;
   INFOBIP_API_KEY?: ApifyAPIToken;
-  LADDRO_API_KEY?: AgentAtlasHost;
+  LADDRO_API_KEY?: ApifyAPIToken;
   agentfarm_token?: ApifyAPIToken;
   NEURA_RELAY_MCP_TOKEN?: ApifyAPIToken;
-  partglyph_api_key?: AgentAtlasHost;
+  partglyph_api_key?: ApifyAPIToken;
   rankcusp_api_key?: ApifyAPIToken;
   access_key?: ApifyAPIToken;
+  SCRIPTHAUL_API_KEY?: ApifyAPIToken;
   scriptivox_api_key?: ApifyAPIToken;
   IFR_COWORKER_TOKEN?: ApifyAPIToken;
+  SWAMIX_API_KEY?: ApifyAPIToken;
+  holon_agent_key?: ApifyAPIToken;
   access_token?: ProjectRef;
-  bot_token?: AgentAtlasHost;
+  zetto_api_key?: ApifyAPIToken;
+  bot_token?: ApifyAPIToken;
   cernion_token?: ApifyAPIToken;
-  e2a_api_key?: AgentAtlasHost;
+  e2a_api_key?: ApifyAPIToken;
+  robase_api_key?: ApifyAPIToken;
   agent_key?: ApifyAPIToken;
   calmloop_mcp_token?: ApifyAPIToken;
   NINELAYER_API_KEY?: ApifyAPIToken;
-  adtao_api_key?: AgentAtlasHost;
+  adtao_api_key?: ApifyAPIToken;
   project_token?: ApifyAPIToken;
   CATHEDRAL_API_KEY?: ApifyAPIToken;
   UPTOCODE_API_KEY?: ApifyAPIToken;
@@ -848,104 +1049,116 @@ export type FluffyVariables = {
   LTD_API_TOKEN?: ApifyAPIToken;
   imagcon_api_key?: ApifyAPIToken;
   hosttracker_api_token?: ApifyAPIToken;
-  agent_push_kit_token?: AgentAtlasHost;
+  agent_push_kit_token?: ApifyAPIToken;
   AUTH_TOKEN?: ApifyAPIToken;
   YUOR_MCP_TOKEN?: ApifyAPIToken;
   BRIGHTSEC_API_KEY?: ApifyAPIToken;
   normi_api_key?: ApifyAPIToken;
-  EVERALICE_API_KEY?: AgentAtlasHost;
-  revinho_token?: AgentAtlasHost;
+  EVERALICE_API_KEY?: ApifyAPIToken;
+  revinho_token?: ApifyAPIToken;
   FIRSTDATA_API_KEY?: ApifyAPIToken;
   YO_API_KEY?: ApifyAPIToken;
   agent_name?: AgentAtlasHost;
+  BAIZHI_API_KEY?: ApifyAPIToken;
   apiKey?: ApifyAPIToken;
+  ray_api_key?: ApifyAPIToken;
   indicate_api_key?: ApifyAPIToken;
+  ipinfo_token?: ApifyAPIToken;
   NETDATA_CLOUD_API_TOKEN?: SgpDirectoryAPIKey;
   mcp_access_token?: SgpDirectoryAPIKey;
   pixelvault_api_key?: ApifyAPIToken;
   rendley_api_key?: ApifyAPIToken;
-  signaliz_api_key?: AgentAtlasHost;
+  SERPAPI_API_KEY?: ApifyAPIToken;
+  signaliz_api_key?: ApifyAPIToken;
   credentials?: ApifyAPIToken;
+  TOOLTRACE_API_KEY?: ApifyAPIToken;
   patsol_api_key?: ApifyAPIToken;
+  private_key?: ApifyAPIToken;
+  public_key?: Account;
+  agent_pass?: ApifyAPIToken;
   RUNLOG_API_KEY?: ApifyAPIToken;
-  hilos_token?: AgentAtlasHost;
+  hilos_token?: ApifyAPIToken;
+  systra_mcp_key?: ApifyAPIToken;
 };
 
 export type RemoteVariables = {
-  api_host?: APIHost;
+  api_host?: ApifyAPIToken;
   project_slug?: Account;
   domain?: Account;
   HAPI_FQDN?: ApifyAPIToken;
   HAPI_PORT?: ApifyAPIToken;
   core?: AimarketHost;
   user?: AimarketHost;
+  memory?: Account;
+  host?: ApifyAPIToken;
   hub?: AgentAtlasHost;
   workspaceSlug?: Account;
-  api_key?: AgentAtlasHost;
+  api_key?: ApifyAPIToken;
   roster_host?: AgentAtlasHost;
   ATLAS_MCP_URL?: ApifyAPIToken;
-  token?: APIHost;
-  workspace?: APIHost;
+  token?: ApifyAPIToken;
+  workspace?: ApifyAPIToken;
   mcp_token?: ApifyAPIToken;
   tenant_domain?: Account;
   storefront?: AimarketHost;
   sysname?: ProjectRef;
   shop_id?: AimarketHost;
-  API_KEY?: AgentAtlasHost;
+  API_KEY?: ApifyAPIToken;
+  publisher?: ApifyAPIToken;
   connector_token?: ApifyAPIToken;
   channel_key?: ApifyAPIToken;
   instance?: ApifyAPIToken;
-  subdomain?: APIHost;
-  account_id?: Account;
-  region?: APIHost;
+  subdomain?: ApifyAPIToken;
+  account_id?: ApifyAPIToken;
+  region?: ApifyAPIToken;
   cxone_base_url?: Account;
   tenant_id?: Account;
-  site_domain?: APIHost;
+  site_domain?: ApifyAPIToken;
   tenant?: ApifyAPIToken;
   bucket_slug?: Account;
-  baseUrl?: APIHost;
+  user_id?: ApifyAPIToken;
+  baseUrl?: ApifyAPIToken;
   "server-name"?: Account;
   tenantId?: ProjectRef;
   business?: Account;
   property_slug?: Account;
   portal_host?: Account;
-  env?: APIHost;
+  env?: ApifyAPIToken;
   apify_token?: ApifyAPIToken;
   agent_id?: Account;
-  host?: APIHost;
-  apiKey?: AgentAtlasHost;
+  apiKey?: ApifyAPIToken;
   x_playcaller_key?: ApifyAPIToken;
-  instance_host?: Account;
+  instance_host?: ApifyAPIToken;
   qovery_token?: ApifyAPIToken;
-  key?: ApifyAPIToken;
+  key?: AgentAtlasHost;
   SGP_DIRECTORY_API_KEY?: SgpDirectoryAPIKey;
   cle?: ApifyAPIToken;
   server_name?: Account;
   perfex_host?: Account;
-  group?: APIHost;
+  group?: ApifyAPIToken;
   deployment_domain?: Account;
   tenant_name?: Account;
   team_id?: Account;
   projectId?: Account;
+  site_host?: ApifyAPIToken;
   AUTH_TOKEN?: ApifyAPIToken;
   owner?: Account;
   repo?: Account;
   api_id?: ApifyAPIToken;
   shop?: AgentAtlasHost;
-  allow_secrets?: AllowSecrets;
-  read_only?: AllowSecrets;
-  services_scope?: AllowSecrets;
+  allow_secrets?: ApifyAPIToken;
+  read_only?: ApifyAPIToken;
+  services_scope?: ApifyAPIToken;
   prior_api_key?: ApifyAPIToken;
   organizationId?: Account;
   tenant_slug?: Account;
-  mcp_gsc_worker_domain?: AgentAtlasHost;
   game?: Account;
   studio?: Account;
   namespace?: Account;
   private_cloud_url?: Account;
-  language?: APIHost;
+  language?: ApifyAPIToken;
   arquestra_token?: ApifyAPIToken;
-  network?: APIHost;
+  network?: ApifyAPIToken;
   supabase_project_ref?: Account;
   project_id?: Account;
   environment_id?: AgentAtlasHost;
@@ -961,15 +1174,19 @@ export type RemoteVariables = {
   SELLING_PARTNER_HOST?: AgentAtlasHost;
   VENDOR_CENTRAL_HOST?: AgentAtlasHost;
   HOSTNAME?: AgentAtlasHost;
+  authorization?: ApifyAPIToken;
   artel_host?: ApifyAPIToken;
   orgSlug?: Account;
+  secret?: ApifyAPIToken;
   hitkeep_host?: Account;
   apifyToken?: ApifyAPIToken;
   slug?: Account;
   SKYVERN_API_KEY?: ApifyAPIToken;
   env_id?: AgentAtlasHost;
+  mcp_key?: AgentAtlasHost;
   session_id?: ApifyAPIToken;
   PROJECT_REF?: ProjectRef;
+  vaultgate_host?: Account;
   ibkr_mcp_host?: Account;
   company_code?: ProjectRef;
   aimarket_host?: AimarketHost;
@@ -979,23 +1196,29 @@ export type RemoteVariables = {
   BILT_API_KEY?: ApifyAPIToken;
   site_key?: Account;
   coder_hostname?: AgentAtlasHost;
+  workspaceId?: Account;
   builder_id?: AgentAtlasHost;
   oauth_client_id?: OauthClientID;
-  oauth_client_secret?: AgentAtlasHost;
+  oauth_client_secret?: ApifyAPIToken;
   swarm_host?: Account;
   hostname?: Account;
   atlas_api_key?: ApifyAPIToken;
   APIFY_TOKEN?: ApifyAPIToken;
-  dateStyle?: AllowSecrets;
+  runtime_host?: AgentAtlasHost;
+  workspace_id?: Account;
+  dateStyle?: ApifyAPIToken;
   includeCoordinates?: ApifyAPIToken;
-  mapLanguage?: AllowSecrets;
-  temperatureUnit?: AllowSecrets;
+  mapLanguage?: ApifyAPIToken;
+  temperatureUnit?: ApifyAPIToken;
   companyId?: Account;
   account?: Account;
   helpdesk_host?: Account;
   organization?: Account;
+  site?: ApifyAPIToken;
   fanout_host?: AgentAtlasHost;
   worker_host?: Account;
+  oauth_mcp_endpoint?: AgentAtlasHost;
+  api_key_mcp_endpoint?: AgentAtlasHost;
   marmot_host?: Account;
   metabase_host?: Account;
   worker_domain?: AgentAtlasHost;
@@ -1003,7 +1226,6 @@ export type RemoteVariables = {
   plexus_host?: ProjectRef;
   notifyd_host?: Account;
   your_mcp_server_host?: Account;
-  SERPAPI_API_KEY?: AgentAtlasHost;
   sourcegraph_hostname?: Account;
   lobster_id?: Account;
   mcpPath?: MCPPath;
@@ -1013,23 +1235,12 @@ export type RemoteVariables = {
   key_secret?: ApifyAPIToken;
   appId?: Account;
   connect_token?: ApifyAPIToken;
-  mcpHost?: APIHost;
+  mcpHost?: ApifyAPIToken;
   api_token?: ApifyAPIToken;
   endpoint_code?: Account;
-  locale?: APIHost;
+  locale?: ApifyAPIToken;
   cashtag?: AgentAtlasHost;
   publish_token?: ApifyAPIToken;
-  site?: AgentAtlasHost;
-};
-
-export type APIHost = {
-  description: string;
-  isRequired?: boolean;
-  choices?: string[];
-  placeholder?: string;
-  default?: string;
-  format?: string;
-  isSecret?: boolean;
 };
 
 export type MCPPath = {

@@ -7,6 +7,10 @@
     "core:default",
     "core:webview:allow-create-webview",
     "opener:default",
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [{ "path": "**" }]
+    },
     "sql:default",
     "sql:allow-execute",
     "shell:default",
@@ -23,6 +27,11 @@
           "name": "cmd",
           "cmd": "cmd",
           "args": true
+        },
+        {
+          "name": "zsh",
+          "cmd": "zsh",
+          "args": true
         }
       ]
     },
@@ -37,6 +46,11 @@
         {
           "name": "cmd",
           "cmd": "cmd",
+          "args": true
+        },
+        {
+          "name": "zsh",
+          "cmd": "zsh",
           "args": true
         }
       ]

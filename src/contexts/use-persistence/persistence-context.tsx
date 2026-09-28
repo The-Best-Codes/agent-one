@@ -1,10 +1,9 @@
 import type { UIMessage } from "ai";
 import { generateId } from "ai";
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import React, { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 import { DEFAULT_MODEL_CONFIG, type ModelConfig } from "@/hooks/ai/use-model-catalog";
-import i18n from "@/lib/i18n";
 import { chatIdsAtom, chatUpdateTriggerAtom, lastVacuumTimestampAtom } from "@/lib/jotai/atoms";
 import { chatSortAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
@@ -20,6 +19,8 @@ export interface ChatMetadata {
   modelId?: string;
   modelConfig?: ModelConfig;
   branchOf?: string;
+  scheduledAgentId?: string;
+  scheduledAgentTitle?: string;
   createdAt?: number;
   updatedAt?: number;
 }
@@ -34,7 +35,11 @@ export interface PersistenceContextType {
   saveNewChatModelId: (modelId: string) => void;
   getNewChatModelConfig: () => ModelConfig;
   saveNewChatModelConfig: (config: ModelConfig) => void;
-  createChat: (modelId: string, modelConfig?: ModelConfig) => string;
+  createChat: (
+    modelId: string,
+    modelConfig?: ModelConfig,
+    provenance?: { scheduledAgentId: string; scheduledAgentTitle: string },
+  ) => string;
   loadChatMessages: (id: string) => Promise<UIMessage[]>;
   loadChatMetadata: (id: string) => ChatMetadata;
   loadFullChatData: (id: string) => Promise<ChatData>;
@@ -63,11 +68,13 @@ const NEW_CHAT_MODEL_CONFIG_KEY = "new-chat-model-config";
 
 function getDefaultMetadata(): ChatMetadata {
   return {
-    title: i18n.t("chatsSettings.newChatPlaceholder"),
+    title: "New chat",
     titleState: undefined,
     modelId: undefined,
     modelConfig: undefined,
     branchOf: undefined,
+    scheduledAgentId: undefined,
+    scheduledAgentTitle: undefined,
     createdAt: undefined,
     updatedAt: undefined,
   };
@@ -92,7 +99,7 @@ function touchMetadata(metadata: ChatMetadata): ChatMetadata {
 }
 
 export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [, setChatIds] = useAtom(chatIdsAtom);
+  const setChatIds = useSetAtom(chatIdsAtom);
   const [chatUpdateTrigger, setChatUpdateTrigger] = useAtom(chatUpdateTriggerAtom);
   const [lastVacuumTimestamp, setLastVacuumTimestamp] = useAtom(lastVacuumTimestampAtom);
   const [chatSort] = useAtom(chatSortAtom);
@@ -212,14 +219,19 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
   }, []);
 
   const createChat = useCallback(
-    (modelId: string, modelConfig: ModelConfig = DEFAULT_MODEL_CONFIG) => {
+    (
+      modelId: string,
+      modelConfig: ModelConfig = DEFAULT_MODEL_CONFIG,
+      provenance?: { scheduledAgentId: string; scheduledAgentTitle: string },
+    ) => {
       const id = generateId();
       const metadata = createTimestampedMetadata({
-        title: i18n.t("chatsSettings.newChatPlaceholder"),
+        title: "New chat",
         titleState: undefined,
         modelId,
         modelConfig,
         branchOf: undefined,
+        ...provenance,
       });
       setMetadata(id, metadata);
       persistMetadata(id, metadata);

@@ -123,7 +123,6 @@ const vendorManualChunks = {
     "@tanstack/virtual-core",
     "@tanstack/react-virtual",
   ],
-  i18n: ["i18next", "react-i18next"],
 };
 
 export default defineConfig(() => ({
@@ -142,16 +141,6 @@ export default defineConfig(() => ({
         })
       : undefined,
   ],
-
-  test: {
-    globals: true,
-    environment: "jsdom",
-    include: [
-      "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-      "tests/unit-tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-    ],
-    exclude: ["tests/e2e/**"],
-  },
 
   resolve: {
     alias: {
@@ -172,7 +161,7 @@ export default defineConfig(() => ({
         }
       : undefined,
     watch: {
-      ignored: ["**/src-tauri/**", "**/tests/**"],
+      ignored: ["**/src-tauri/**"],
     },
   },
 
@@ -192,7 +181,6 @@ export default defineConfig(() => ({
           const mcpRegistryDir = path
             .resolve(import.meta.dirname, "src/assets/mcp-registry")
             .replace(/\\/g, "/");
-          const i18nDir = path.resolve(import.meta.dirname, "src/lib/i18n").replace(/\\/g, "/");
 
           if (normalizedId.includes(`${modelListsDir}/`)) {
             return "modelLists";
@@ -200,10 +188,6 @@ export default defineConfig(() => ({
 
           if (normalizedId.includes(`${mcpRegistryDir}/`)) {
             return "mcpRegistry";
-          }
-
-          if (normalizedId.includes(`${i18nDir}/`)) {
-            return "i18n";
           }
 
           if (normalizedId.includes("/node_modules/")) {

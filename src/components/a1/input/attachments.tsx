@@ -1,6 +1,5 @@
 import { IconFile, IconMessageCircle, IconX } from "@tabler/icons-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import formatBytes from "@/lib/format-bytes";
@@ -11,7 +10,6 @@ interface AttachmentsProps {
 }
 
 export const Attachments: React.FC<AttachmentsProps> = ({ files, onRemove }) => {
-  const { t } = useTranslation();
   const [previews, setPreviews] = useState<{ url: string; type: string }[]>([]);
   const previewUrls = useRef<string[]>([]);
 
@@ -45,15 +43,15 @@ export const Attachments: React.FC<AttachmentsProps> = ({ files, onRemove }) => 
   );
 
   return (
-    <div className="p-2 pt-0">
-      <div className="flex max-h-28 max-w-full flex-nowrap gap-2 overflow-x-auto overflow-y-hidden pb-2">
+    <div className="px-2 pb-1">
+      <div className="flex max-w-full gap-1.5 overflow-x-auto pb-1">
         {Array.from(files).map((file, index) => (
           <div
-            key={`${file.name}-${file.size}-${file.lastModified}`}
-            className="bg-background relative flex min-w-0 shrink-0 items-center gap-2 rounded-md border p-2"
+            key={`${file.name}-${file.size}-${file.lastModified}-${index}`}
+            className="bg-background flex min-w-0 shrink-0 items-center gap-1.5 rounded-md border p-1"
           >
             {previews[index]?.type === "image" ? (
-              <div className="relative size-12 overflow-hidden rounded-md border">
+              <div className="size-8 shrink-0 overflow-hidden rounded-sm">
                 <img
                   src={previews[index].url}
                   alt={file.name}
@@ -61,41 +59,31 @@ export const Attachments: React.FC<AttachmentsProps> = ({ files, onRemove }) => 
                 />
               </div>
             ) : file.name.includes("_agent-one_chat") ? (
-              <div className="bg-muted/70 relative flex size-12 items-center justify-center rounded-md border">
+              <div className="bg-muted/70 flex size-8 shrink-0 items-center justify-center rounded-sm">
                 <IconMessageCircle className="text-muted-foreground" />
               </div>
             ) : (
-              <div className="bg-muted/70 relative flex size-12 items-center justify-center rounded-md border">
+              <div className="bg-muted/70 flex size-8 shrink-0 items-center justify-center rounded-sm">
                 <IconFile className="text-muted-foreground" />
               </div>
             )}
-            <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-              <span className="max-w-36 truncate text-sm font-medium" title={file.name}>
+            <div className="flex max-w-32 min-w-0 flex-col">
+              <span className="truncate text-xs font-medium" title={file.name}>
                 {file.name}
               </span>
-              <div className="text-muted-foreground flex items-center gap-2 text-xs">
+              <div className="text-muted-foreground flex items-center gap-1 text-xs">
                 <span className="tabular-nums">{formatBytes(file.size)}</span>
-                {file.type && (
-                  <>
-                    <span>&middot;</span>
-                    <span className="truncate">
-                      {file.name.includes("_agent-one_chat")
-                        ? t("chat.attachmentTypeChat")
-                        : file.type}
-                    </span>
-                  </>
-                )}
               </div>
             </div>
             <Button
               type="button"
-              size="icon"
+              size="icon-xs"
               variant="ghost"
               onClick={() => handleRemove(index)}
-              className="size-6 shrink-0 opacity-60 transition-opacity hover:opacity-100"
-              title={t("common.removeFile")}
+              aria-label={`Remove ${file.name}`}
+              title={`Remove ${file.name}`}
             >
-              <IconX data-icon="inline-start" />
+              <IconX />
             </Button>
           </div>
         ))}

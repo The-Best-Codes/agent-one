@@ -5,7 +5,6 @@ import {
   convertToModelMessages,
   extractReasoningMiddleware,
   type LanguageModel,
-  smoothStream,
   isStepCount,
   type StopCondition,
   streamText,
@@ -30,7 +29,6 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   private model: LanguageModel | null;
   private modelId: string | null;
   private modelConfig: ModelConfig;
-  private smoothStreamEnabled: boolean;
   private extractReasoningEnabled: boolean;
   private mcpAppModelContexts = new Map<string, unknown>();
   private getTools: (options?: {
@@ -44,7 +42,6 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     model: LanguageModel | null,
     modelId: string | null,
     modelConfig: ModelConfig,
-    smoothStreamEnabled: boolean,
     extractReasoningEnabled: boolean,
     getTools: (options?: {
       subAgentContext?: SubAgentExecutionContext;
@@ -56,7 +53,6 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     this.model = model;
     this.modelId = modelId;
     this.modelConfig = modelConfig;
-    this.smoothStreamEnabled = smoothStreamEnabled;
     this.extractReasoningEnabled = extractReasoningEnabled;
     this.getTools = getTools;
     this.getSystemPrompt = getSystemPrompt;
@@ -79,11 +75,6 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   updateModelConfig(modelConfig: ModelConfig) {
     this.modelConfig = modelConfig;
     logger.verbose("CustomChatTransport config updated");
-  }
-
-  updateSmoothStreamEnabled(smoothStreamEnabled: boolean) {
-    this.smoothStreamEnabled = smoothStreamEnabled;
-    logger.verbose("CustomChatTransport smoothStreamEnabled updated to:", smoothStreamEnabled);
   }
 
   updateExtractReasoningEnabled(extractReasoningEnabled: boolean) {
@@ -132,7 +123,6 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     const baseModel = this.model;
     const modelId = this.modelId;
     const modelConfig = this.modelConfig;
-    const smoothStreamEnabled = this.smoothStreamEnabled;
     const extractReasoningEnabled = this.extractReasoningEnabled;
 
     if (!baseModel) {
@@ -183,9 +173,6 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       toolChoice: toolBehavior === "disable" ? "none" : "auto",
       stopWhen: stopWhenCondition,
       instructions,
-      ...(smoothStreamEnabled && {
-        experimental_transform: smoothStream(),
-      }),
       onError: (error) => {
         logger.error("Error occurred in CustomChatTransport streamText:", error);
       },

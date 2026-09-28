@@ -1,7 +1,12 @@
 use tauri::{Listener, Manager};
+use tauri_plugin_log::{FileOpenStrategy, RotationStrategy, Target, TargetKind};
+
+const LOG_FILE_NAME: &str = "agent-one-logs";
 
 mod keyring;
 mod mcp_auth;
+#[cfg(target_os = "linux")]
+mod notifications;
 mod tools;
 mod utils;
 
@@ -108,16 +113,40 @@ pub fn run() {
                             sql: include_str!("../migrations/0006_add_chat_timestamps.sql"),
                             kind: tauri_plugin_sql::MigrationKind::Up,
                         },
+                        tauri_plugin_sql::Migration {
+                            version: 7,
+                            description: "add_scheduled_agent_chat_metadata",
+                            sql: include_str!(
+                                "../migrations/0007_add_scheduled_agent_chat_metadata.sql"
+                            ),
+                            kind: tauri_plugin_sql::MigrationKind::Up,
+                        },
                     ],
                 )
                 .build(),
         )
         .plugin(tauri_plugin_opener::init())
-        // .plugin(tauri_plugin_log::Builder::new().build()) // Disabled for now
+        .plugin(
+            tauri_plugin_log::Builder::new()
+                .clear_targets()
+                .target(Target::new(TargetKind::LogDir {
+                    file_name: Some(LOG_FILE_NAME.to_string()),
+                }))
+                .max_file_size(1024 * 1024)
+                .rotation_strategy(RotationStrategy::KeepSome(100))
+                .file_open_strategy(FileOpenStrategy::Rotate)
+                .build(),
+        )
         .setup(|app| {
             use tauri_plugin_deep_link::DeepLinkExt;
 
             keyring::initialize_keyring_store()?;
+
+            #[cfg(target_os = "linux")]
+            app.manage(notifications::NotificationState {
+                appname: app.config().identifier.clone(),
+                handles: std::sync::Arc::new(std::sync::Mutex::new(Vec::new())),
+            });
 
             #[cfg(any(target_os = "linux", windows))]
             {
@@ -171,6 +200,11 @@ pub fn run() {
                     utils::set_cron_enabled,
                     utils::delete_cron,
                     utils::get_cron_invocation,
+                    utils::list_scheduled_agents,
+                    utils::create_scheduled_agent,
+                    utils::update_scheduled_agent,
+                    utils::set_scheduled_agent_enabled,
+                    utils::delete_scheduled_agent,
                     utils::list_webviews,
                     utils::force_close_webview,
                     keyring::storage_get_item,
@@ -182,6 +216,8 @@ pub fn run() {
                     mcp_auth::mcp_get_token,
                     mcp_auth::mcp_logout,
                     mcp_auth::mcp_check_oauth_support,
+                    #[cfg(target_os = "linux")]
+                    notifications::send_notification,
                 ]
             }
             #[cfg(any(target_os = "android", target_os = "ios"))]

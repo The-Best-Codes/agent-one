@@ -10,6 +10,8 @@ export type MarkdownRenderingOption = (typeof MARKDOWN_RENDERING_OPTIONS)[number
 
 export const SUBMIT_KEY_OPTIONS = ["enter", "ctrl-enter"] as const;
 export type SubmitKeyOption = (typeof SUBMIT_KEY_OPTIONS)[number];
+export const INTERRUPT_KEY_OPTIONS = ["enter", "ctrl-enter", "ctrl-shift-enter"] as const;
+export type InterruptKeyOption = (typeof INTERRUPT_KEY_OPTIONS)[number];
 
 export const THEME_OPTIONS = ["light", "dark", "system"] as const;
 export type ThemeOption = (typeof THEME_OPTIONS)[number];
@@ -73,12 +75,6 @@ export type TextScaleOption = (typeof TEXT_SCALE_OPTIONS)[number];
 export const NOTIFICATION_SETTING_OPTIONS = ["always", "when-unfocused", "never"] as const;
 export type NotificationOption = (typeof NOTIFICATION_SETTING_OPTIONS)[number];
 
-export const ANALYTICS_IDENTITY_OPTIONS = ["off", "anonymous", "user-id"] as const;
-export type AnalyticsIdentityOption = (typeof ANALYTICS_IDENTITY_OPTIONS)[number];
-
-export const STOP_BUTTON_BEHAVIOR_OPTIONS = ["at-stopping-point", "immediate"] as const;
-export type StopButtonBehaviorOption = (typeof STOP_BUTTON_BEHAVIOR_OPTIONS)[number];
-
 export const SHOW_MESSAGE_ACTION_ROW_OPTIONS = ["hover", "always", "never"] as const;
 export type MessageActionRowOption = (typeof SHOW_MESSAGE_ACTION_ROW_OPTIONS)[number];
 
@@ -88,14 +84,13 @@ export type InputStyleOption = (typeof INPUT_STYLE_OPTIONS)[number];
 export const COLLAPSED_SIDEBAR_LAYOUT_OPTIONS = ["row", "column"] as const;
 export type CollapsedSidebarLayoutOption = (typeof COLLAPSED_SIDEBAR_LAYOUT_OPTIONS)[number];
 
-export const LANGUAGE_OPTIONS = ["de", "en", "es", "fr", "it", "ru"] as const;
-export type LanguageOption = (typeof LANGUAGE_OPTIONS)[number];
-
 export const CHAT_VIRTUALIZATION_MODE_OPTIONS = ["off", "threshold"] as const;
 export type ChatVirtualizationModeOption = (typeof CHAT_VIRTUALIZATION_MODE_OPTIONS)[number];
 
 export const CHAT_SORT_OPTIONS = ["created-at", "updated-at"] as const;
 export type ChatSortOption = (typeof CHAT_SORT_OPTIONS)[number];
+
+export type SidebarChatTimeGroupingOption = boolean;
 
 export type ChatBackgroundPresetOption =
   | "none"
@@ -184,6 +179,7 @@ export type TitleGenerationMethodOption =
 
 export interface TitleGenerationSettings {
   method: TitleGenerationMethodOption;
+  fallbackMethod?: Exclude<TitleGenerationMethodOption, "ai">;
   characterLimit: number;
   maxOutputTokens: number | "none";
   customPhrase: string;
@@ -230,7 +226,11 @@ export type ToolId =
   | "subAgent"
   | "listSettings"
   | "getSetting"
-  | "updateSetting";
+  | "updateSetting"
+  | "listScheduledAgents"
+  | "createScheduledAgent"
+  | "updateScheduledAgent"
+  | "deleteScheduledAgent";
 
 export interface DateTimeToolConfig {
   requiresApproval: boolean;
@@ -305,6 +305,10 @@ export interface UpdateSettingToolConfig {
   requiresApproval: boolean;
 }
 
+export interface ScheduledAgentToolConfig {
+  requiresApproval: boolean;
+}
+
 export interface ToolConfigs {
   dateTime: DateTimeToolConfig;
   waitNumberMilliseconds: WaitToolConfig;
@@ -321,6 +325,10 @@ export interface ToolConfigs {
   listSettings: ListSettingsToolConfig;
   getSetting: GetSettingToolConfig;
   updateSetting: UpdateSettingToolConfig;
+  listScheduledAgents: ScheduledAgentToolConfig;
+  createScheduledAgent: ScheduledAgentToolConfig;
+  updateScheduledAgent: ScheduledAgentToolConfig;
+  deleteScheduledAgent: ScheduledAgentToolConfig;
 }
 
 type ApiKeySettings = Record<ProviderStorageKey, string>;
@@ -329,23 +337,21 @@ export interface DefaultSettings extends ApiKeySettings {
   MARKDOWN_HIGHLIGHTING: boolean;
   MARKDOWN_RENDERING: MarkdownRenderingOption;
   SUBMIT_KEY: SubmitKeyOption;
+  INTERRUPT_KEY: InterruptKeyOption;
   INPUT_STYLE: InputStyleOption;
-  LANGUAGE: LanguageOption;
   MAX_CODEBLOCK_CHARS: number;
   MAX_MESSAGE_LENGTH: number;
   MAX_TOOL_RESULT_CHARS: number;
   CHAT_VIRTUALIZATION_MODE: ChatVirtualizationModeOption;
   CHAT_VIRTUALIZATION_THRESHOLD: number;
-  EXPERIMENTAL_THROTTLE_ENABLED: boolean;
-  EXPERIMENTAL_THROTTLE_VALUE: number;
-  SMOOTH_STREAM_ENABLED: boolean;
+  THROTTLE_VALUE: number;
   EXTRACT_REASONING_ENABLED: boolean;
   REGENERATE_ON_SAVE: boolean;
-  STOP_BUTTON_BEHAVIOR: StopButtonBehaviorOption;
   SHOW_CHAT_STATUS_INDICATOR: boolean;
   SHOW_MESSAGE_PREVIEW_RAIL: boolean;
   SHOW_MESSAGE_ACTION_ROW: MessageActionRowOption;
   CHAT_SORT: ChatSortOption;
+  SIDEBAR_CHAT_TIME_GROUPING: SidebarChatTimeGroupingOption;
   CHAT_BACKGROUND: ChatBackgroundSettings;
   TTS: TtsSettings;
   TITLE_GENERATION: TitleGenerationSettings;
@@ -357,7 +363,6 @@ export interface DefaultSettings extends ApiKeySettings {
   FONT: FontOption;
   TEXT_SCALE: TextScaleOption;
   NOTIFICATION_SETTING: NotificationOption;
-  ANALYTICS_IDENTITY: AnalyticsIdentityOption;
   ENABLED_TOOLS: Record<ToolId, boolean>;
   TOOL_CONFIGS: ToolConfigs;
   MCP_SERVERS: McpServerConfig[];
@@ -376,23 +381,21 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   MARKDOWN_HIGHLIGHTING: true,
   MARKDOWN_RENDERING: "both",
   SUBMIT_KEY: "enter",
-  INPUT_STYLE: "docked",
-  LANGUAGE: "en",
+  INTERRUPT_KEY: "ctrl-enter",
+  INPUT_STYLE: "floating",
   MAX_CODEBLOCK_CHARS: 10000,
   MAX_MESSAGE_LENGTH: 50000,
   MAX_TOOL_RESULT_CHARS: 15000,
   CHAT_VIRTUALIZATION_MODE: "threshold",
   CHAT_VIRTUALIZATION_THRESHOLD: 20,
-  EXPERIMENTAL_THROTTLE_ENABLED: true,
-  EXPERIMENTAL_THROTTLE_VALUE: 250,
-  SMOOTH_STREAM_ENABLED: false,
+  THROTTLE_VALUE: 100,
   EXTRACT_REASONING_ENABLED: false,
   REGENERATE_ON_SAVE: true,
-  STOP_BUTTON_BEHAVIOR: "immediate",
   SHOW_CHAT_STATUS_INDICATOR: true,
   SHOW_MESSAGE_PREVIEW_RAIL: true,
   SHOW_MESSAGE_ACTION_ROW: "always",
   CHAT_SORT: "created-at",
+  SIDEBAR_CHAT_TIME_GROUPING: false,
   CHAT_BACKGROUND: {
     preset: "none",
     customUrl: "",
@@ -447,8 +450,9 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   },
   TITLE_GENERATION: {
     method: "ai",
+    fallbackMethod: "first-user-message",
     characterLimit: 50,
-    maxOutputTokens: 1024,
+    maxOutputTokens: 10240,
     customPhrase: "New chat",
     fallbackPhrase: "New chat",
   },
@@ -460,7 +464,6 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   FONT: "default",
   TEXT_SCALE: "md",
   NOTIFICATION_SETTING: "when-unfocused",
-  ANALYTICS_IDENTITY: "user-id",
   ENABLED_TOOLS: {
     dateTime: true,
     waitNumberMilliseconds: true,
@@ -477,6 +480,10 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     listSettings: true,
     getSetting: true,
     updateSetting: true,
+    listScheduledAgents: true,
+    createScheduledAgent: true,
+    updateScheduledAgent: true,
+    deleteScheduledAgent: true,
   },
   TOOL_CONFIGS: {
     dateTime: {
@@ -537,6 +544,10 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     updateSetting: {
       requiresApproval: true,
     },
+    listScheduledAgents: { requiresApproval: false },
+    createScheduledAgent: { requiresApproval: true },
+    updateScheduledAgent: { requiresApproval: true },
+    deleteScheduledAgent: { requiresApproval: true },
   },
   MCP_SERVERS: [],
   MCP_PARALLEL_LOAD_LIMIT: 8,

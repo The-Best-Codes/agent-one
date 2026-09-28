@@ -16,27 +16,34 @@ export const createUpdateSettingTool = (config: UpdateSettingToolConfig) =>
       value: z
         .any()
         .describe(
-          "The new value to write. Must be one of the possible options for enum or boolean settings.",
+          "The new value to write. Must match the setting's expected type or one of its possible options.",
+        ),
+      convertToNumber: z
+        .boolean()
+        .optional()
+        .describe(
+          "Set to true to convert a numeric string value to a number before writing it (for example, value='5' becomes 5). Use this for numeric settings.",
         ),
     }),
     execute: async (input) => {
-      const { key, value } = input;
+      const { key, value, convertToNumber } = input;
       if (!isInspectableKey(key)) {
         throw new Error(`Setting key "${key}" is not valid or inspectable.`);
       }
 
-      const validation = validateSettingValue(key, value);
+      const normalizedValue = convertToNumber && typeof value === "string" ? Number(value) : value;
+      const validation = validateSettingValue(key, normalizedValue);
       if (!validation.success) {
         throw new Error(validation.error);
       }
 
       const store = getDefaultStore();
       const atom = getSettingAtom(key) as WritableAtom<unknown, [unknown], void>;
-      store.set(atom, value);
+      store.set(atom, normalizedValue);
 
       return {
         key,
-        value,
+        value: normalizedValue,
         success: true,
       };
     },

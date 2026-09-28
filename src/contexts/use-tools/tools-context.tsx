@@ -20,6 +20,10 @@ import {
   createListSettingsTool,
   createGetSettingTool,
   createUpdateSettingTool,
+  createCreateScheduledAgentTool,
+  createDeleteScheduledAgentTool,
+  createListScheduledAgentsTool,
+  createUpdateScheduledAgentTool,
 } from "@/lib/ai/tools";
 import {
   abortMcpServerLoad,
@@ -506,6 +510,22 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
           ...DEFAULT_SETTINGS.TOOL_CONFIGS.updateSetting,
           ...toolConfigs.updateSetting,
         },
+        listScheduledAgents: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.listScheduledAgents,
+          ...toolConfigs.listScheduledAgents,
+        },
+        createScheduledAgent: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.createScheduledAgent,
+          ...toolConfigs.createScheduledAgent,
+        },
+        updateScheduledAgent: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.updateScheduledAgent,
+          ...toolConfigs.updateScheduledAgent,
+        },
+        deleteScheduledAgent: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.deleteScheduledAgent,
+          ...toolConfigs.deleteScheduledAgent,
+        },
       };
 
       if (mergedEnabledTools.dateTime) {
@@ -562,6 +582,26 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       if (mergedEnabledTools.updateSetting) {
         filteredStaticTools.updateSetting = createUpdateSettingTool(
           mergedToolConfigs.updateSetting,
+        );
+      }
+      if (mergedEnabledTools.listScheduledAgents) {
+        filteredStaticTools.listScheduledAgents = createListScheduledAgentsTool(
+          mergedToolConfigs.listScheduledAgents,
+        );
+      }
+      if (mergedEnabledTools.createScheduledAgent) {
+        filteredStaticTools.createScheduledAgent = createCreateScheduledAgentTool(
+          mergedToolConfigs.createScheduledAgent,
+        );
+      }
+      if (mergedEnabledTools.updateScheduledAgent) {
+        filteredStaticTools.updateScheduledAgent = createUpdateScheduledAgentTool(
+          mergedToolConfigs.updateScheduledAgent,
+        );
+      }
+      if (mergedEnabledTools.deleteScheduledAgent) {
+        filteredStaticTools.deleteScheduledAgent = createDeleteScheduledAgentTool(
+          mergedToolConfigs.deleteScheduledAgent,
         );
       }
 

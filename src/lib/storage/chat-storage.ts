@@ -118,11 +118,13 @@ export const chatStorage = {
         model_id: string | null;
         model_config: string | null;
         branch_of: string | null;
+        scheduled_agent_id: string | null;
+        scheduled_agent_title: string | null;
         created_at: number | null;
         updated_at: number | null;
       }[]
     >(
-      `SELECT title, title_state, model_id, model_config, branch_of, created_at, updated_at
+      `SELECT title, title_state, model_id, model_config, branch_of, scheduled_agent_id, scheduled_agent_title, created_at, updated_at
        FROM chat_metadata
        WHERE id = $1`,
       [id],
@@ -135,6 +137,8 @@ export const chatStorage = {
       modelId: row.model_id ?? undefined,
       modelConfig: row.model_config ? JSON.parse(row.model_config) : undefined,
       branchOf: row.branch_of ?? undefined,
+      scheduledAgentId: row.scheduled_agent_id ?? undefined,
+      scheduledAgentTitle: row.scheduled_agent_title ?? undefined,
       createdAt: row.created_at ?? undefined,
       updatedAt: row.updated_at ?? undefined,
     };
@@ -150,16 +154,20 @@ export const chatStorage = {
            model_id,
            model_config,
            branch_of,
+           scheduled_agent_id,
+           scheduled_agent_title,
            created_at,
            updated_at
          )
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
          ON CONFLICT(id) DO UPDATE SET
             title = $2,
             title_state = $3,
             model_id = $4,
             model_config = $5,
             branch_of = $6,
+            scheduled_agent_id = $7,
+            scheduled_agent_title = $8,
             created_at = COALESCE(chat_metadata.created_at, excluded.created_at),
             updated_at = COALESCE(excluded.updated_at, chat_metadata.updated_at)`,
         [
@@ -169,6 +177,8 @@ export const chatStorage = {
           metadata.modelId ?? null,
           metadata.modelConfig ? JSON.stringify(metadata.modelConfig) : null,
           metadata.branchOf ?? null,
+          metadata.scheduledAgentId ?? null,
+          metadata.scheduledAgentTitle ?? null,
           metadata.createdAt ?? null,
           metadata.updatedAt ?? null,
         ],
@@ -190,11 +200,13 @@ export const chatStorage = {
         model_id: string | null;
         model_config: string | null;
         branch_of: string | null;
+        scheduled_agent_id: string | null;
+        scheduled_agent_title: string | null;
         created_at: number | null;
         updated_at: number | null;
       }[]
     >(
-      `SELECT id, title, title_state, model_id, model_config, branch_of, created_at, updated_at
+      `SELECT id, title, title_state, model_id, model_config, branch_of, scheduled_agent_id, scheduled_agent_title, created_at, updated_at
        FROM chat_metadata
        ORDER BY ${sortColumn} DESC, id DESC`,
       [],
@@ -208,6 +220,8 @@ export const chatStorage = {
         modelId: row.model_id ?? undefined,
         modelConfig: row.model_config ? JSON.parse(row.model_config) : undefined,
         branchOf: row.branch_of ?? undefined,
+        scheduledAgentId: row.scheduled_agent_id ?? undefined,
+        scheduledAgentTitle: row.scheduled_agent_title ?? undefined,
         createdAt: row.created_at ?? undefined,
         updatedAt: row.updated_at ?? undefined,
       },

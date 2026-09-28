@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
 import { SecretInput } from "@/components/a1/input/secret-input";
@@ -15,7 +14,6 @@ import {
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import type { ProviderModelMetadata } from "@/lib/ai/providers/provider-models";
-import { trackSettingsInteraction } from "@/lib/google-analytics";
 import type { NewCustomProviderData } from "@/lib/jotai/custom-provider-atoms";
 
 import { ModelList } from "./model-list";
@@ -55,7 +53,6 @@ export function AddOpenAICompatibleDialog({
   onOpenChange,
   onAdd,
 }: AddOpenAICompatibleDialogProps) {
-  const { t } = useTranslation();
   const [draft, setDraft] = useState<ProviderDraftState>(EMPTY_PROVIDER_DRAFT);
 
   const isValid =
@@ -80,11 +77,6 @@ export function AddOpenAICompatibleDialog({
       draft.apiKey.trim(),
     );
 
-    trackSettingsInteraction("providers", "submit_add_provider_dialog", {
-      has_api_key: Boolean(draft.apiKey.trim()),
-      model_count: draft.models.length,
-    });
-
     resetForm();
     onOpenChange(false);
   };
@@ -101,18 +93,20 @@ export function AddOpenAICompatibleDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("providers.addOpenaiCompatible")}</DialogTitle>
-          <DialogDescription>{t("providers.addOpenaiCompatibleDescription")}</DialogDescription>
+          <DialogTitle>Add OpenAI Compatible Provider</DialogTitle>
+          <DialogDescription>
+            Add a custom provider that uses the OpenAI API format.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
           <div className="py-4">
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="provider-name">{t("common.name")}</FieldLabel>
+                <FieldLabel htmlFor="provider-name">Name</FieldLabel>
                 <Input
                   id="provider-name"
-                  placeholder={t("providers.nameExampleLocalLlm")}
+                  placeholder="e.g., My Local LLM"
                   value={draft.name}
                   onChange={(event) =>
                     setDraft((current) => ({
@@ -124,10 +118,10 @@ export function AddOpenAICompatibleDialog({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="provider-base-url">{t("providers.baseUrl")}</FieldLabel>
+                <FieldLabel htmlFor="provider-base-url">Base URL</FieldLabel>
                 <Input
                   id="provider-base-url"
-                  placeholder={t("providers.baseUrlPlaceholder")}
+                  placeholder="e.g., http://localhost:1234/v1"
                   value={draft.baseUrl}
                   onChange={(event) =>
                     setDraft((current) => ({
@@ -139,7 +133,7 @@ export function AddOpenAICompatibleDialog({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="provider-api-key">{t("providers.apiKey")}</FieldLabel>
+                <FieldLabel htmlFor="provider-api-key">API Key</FieldLabel>
                 <SecretInput
                   id="provider-api-key"
                   value={draft.apiKey}
@@ -149,7 +143,7 @@ export function AddOpenAICompatibleDialog({
                       apiKey,
                     }))
                   }
-                  placeholder={t("providers.enterApiKeyIfRequired")}
+                  placeholder="Enter API key if required"
                 />
               </Field>
 
@@ -169,8 +163,8 @@ export function AddOpenAICompatibleDialog({
                 baseUrl={draft.baseUrl.trim()}
                 apiKey={draft.apiKey.trim()}
                 headers={draft.headers}
-                emptyTitle={t("providers.noCustomModels")}
-                emptyDescription={t("providers.noCustomModelsDescription")}
+                emptyTitle="No custom models yet"
+                emptyDescription="Add a model or fetch the provider’s model list, then edit the metadata you want AgentOne to use."
                 onChange={(models) =>
                   setDraft((current) => ({
                     ...current,
@@ -184,10 +178,10 @@ export function AddOpenAICompatibleDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => handleOpenChange(false)}>
-            {t("common.cancel")}
+            Cancel
           </Button>
           <Button onClick={handleAdd} disabled={!isValid}>
-            {t("providers.addProvider")}
+            Add Provider
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -202,24 +196,22 @@ export function DeleteProviderDialog({
   onConfirm,
   onCancel,
 }: DeleteProviderDialogProps) {
-  const { t } = useTranslation();
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("providers.deleteProvider")}</DialogTitle>
+          <DialogTitle>Delete Provider</DialogTitle>
           <DialogDescription>
-            {t("providers.deleteProviderConfirm", { name: providerName })}
+            {`Are you sure you want to delete "${providerName}"? This action cannot be undone.`}
           </DialogDescription>
         </DialogHeader>
 
         <DialogFooter>
           <Button variant="outline" onClick={onCancel}>
-            {t("common.cancel")}
+            Cancel
           </Button>
           <Button variant="destructive" onClick={onConfirm}>
-            {t("common.delete")}
+            Delete
           </Button>
         </DialogFooter>
       </DialogContent>

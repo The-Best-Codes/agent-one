@@ -1,6 +1,5 @@
 import { IconEdit } from "@tabler/icons-react";
 import type { ComponentProps } from "react";
-import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { useChatStatus } from "@/contexts/use-chat/chat-hooks";
@@ -13,7 +12,6 @@ type EditButtonProps = {
 >;
 
 export const EditButton = ({ onEdit, className, ...props }: EditButtonProps) => {
-  const { t } = useTranslation();
   const { status } = useChatStatus();
   const isStreaming = status === "streaming" || status === "submitted";
 
@@ -23,8 +21,8 @@ export const EditButton = ({ onEdit, className, ...props }: EditButtonProps) => 
       disabled={isStreaming}
       className={className}
       size="icon-sm"
-      variant="secondary"
-      aria-label={t("messages.editMessage")}
+      variant="outline"
+      aria-label="Edit message"
       {...props}
     >
       <IconEdit data-icon="inline-start" />

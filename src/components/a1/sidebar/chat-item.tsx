@@ -4,12 +4,17 @@ import {
   IconDotsVertical,
   IconDownload,
   IconEdit,
+  IconClockPlay,
   IconTrash,
 } from "@tabler/icons-react";
 import { memo, useState, type ReactNode } from "react";
-import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -72,12 +77,74 @@ function renderSnippet(snippet: string): ReactNode[] {
   return parts;
 }
 
+function BranchIcon({
+  branchOf,
+  branchParentTitle,
+}: {
+  branchOf: string;
+  branchParentTitle?: string;
+}) {
+  return (
+    <AdaptiveTooltip>
+      <AdaptiveTooltipTrigger asChild>
+        <span
+          className="inline-flex shrink-0"
+          data-icon="inline-start"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
+          <IconArrowsSplit className="text-foreground" data-icon="inline-start" />
+        </span>
+      </AdaptiveTooltipTrigger>
+      <AdaptiveTooltipContent side="top" onClick={(e) => e.stopPropagation()}>
+        <span className="text-background">
+          Branched from{" "}
+          {branchParentTitle ? (
+            <Link
+              to={`/chat/${branchOf}`}
+              className="font-medium underline underline-offset-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {branchParentTitle}
+            </Link>
+          ) : (
+            "another chat"
+          )}
+        </span>
+      </AdaptiveTooltipContent>
+    </AdaptiveTooltip>
+  );
+}
+
+function ScheduledAgentIcon({ title }: { title: string }) {
+  return (
+    <AdaptiveTooltip>
+      <AdaptiveTooltipTrigger asChild>
+        <span
+          className="inline-flex shrink-0"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+          }}
+        >
+          <IconClockPlay className="text-foreground" />
+        </span>
+      </AdaptiveTooltipTrigger>
+      <AdaptiveTooltipContent side="top">Scheduled via "{title}"</AdaptiveTooltipContent>
+    </AdaptiveTooltip>
+  );
+}
+
 interface ChatItemProps {
   activeChatId?: string;
   additionalOnChatClickCallback?: (id: string) => void;
   id: string;
   title: string;
   branchOf?: string;
+  branchParentTitle?: string;
+  scheduledAgentTitle?: string;
   snippet?: string;
   selectionMode?: boolean;
   isSelected?: boolean;
@@ -92,13 +159,14 @@ export const ChatItem = memo(
     id,
     title,
     branchOf,
+    branchParentTitle,
+    scheduledAgentTitle,
     snippet,
     selectionMode,
     isSelected,
     onSelectionToggle,
     onEnterSelectionMode,
   }: ChatItemProps) => {
-    const { t } = useTranslation();
     const [showChangeTitleModal, setShowChangeTitleModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
@@ -118,7 +186,8 @@ export const ChatItem = memo(
         >
           <Checkbox checked={isSelected} className="pointer-events-none" />
           <span className="flex min-w-0 items-center gap-1.5 text-sm font-normal">
-            {branchOf && <IconArrowsSplit className="text-foreground" data-icon="inline-start" />}
+            {branchOf && <BranchIcon branchOf={branchOf} branchParentTitle={branchParentTitle} />}
+            {scheduledAgentTitle && <ScheduledAgentIcon title={scheduledAgentTitle} />}
             <span className="min-w-0 truncate">{title}</span>
           </span>
         </Button>
@@ -170,12 +239,13 @@ export const ChatItem = memo(
                   <span className="flex min-w-0 items-center gap-1.5 text-sm font-normal">
                     <ChatStatusIndicator chatId={id} />
                     {branchOf && (
-                      <IconArrowsSplit className="text-foreground" data-icon="inline-start" />
+                      <BranchIcon branchOf={branchOf} branchParentTitle={branchParentTitle} />
                     )}
+                    {scheduledAgentTitle && <ScheduledAgentIcon title={scheduledAgentTitle} />}
                     <span className="min-w-0 truncate">{title}</span>
                   </span>
                   {snippet && (
-                    <span className="text-muted-foreground [&_mark]:text-foreground mt-0.5 truncate text-xs [&_mark]:bg-yellow-500/30">
+                    <span className="text-muted-foreground [&_mark]:text-foreground mt-0.5 truncate text-xs italic [&_mark]:bg-yellow-500/30">
                       {renderSnippet(snippet)}
                     </span>
                   )}
@@ -204,8 +274,9 @@ export const ChatItem = memo(
                       <DropdownMenuGroup>
                         <DropdownMenuItem
                           onClick={(e) => {
-                            e.preventDefault();
                             e.stopPropagation();
+                          }}
+                          onSelect={() => {
                             logger.verbose("Opening change title modal", {
                               chatId: id,
                               title,
@@ -214,12 +285,13 @@ export const ChatItem = memo(
                           }}
                         >
                           <IconEdit />
-                          {t("sidebar.changeTitle")}
+                          Change Title
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={(e) => {
-                            e.preventDefault();
                             e.stopPropagation();
+                          }}
+                          onSelect={() => {
                             logger.verbose("Opening export chat modal", {
                               chatId: id,
                               title,
@@ -228,12 +300,13 @@ export const ChatItem = memo(
                           }}
                         >
                           <IconDownload />
-                          {t("sidebar.exportChat")}
+                          Export Chat
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={(e) => {
-                            e.preventDefault();
                             e.stopPropagation();
+                          }}
+                          onSelect={() => {
                             logger.verbose("Opening delete chat modal", {
                               chatId: id,
                               title,
@@ -243,20 +316,21 @@ export const ChatItem = memo(
                           variant="destructive"
                         >
                           <IconTrash />
-                          {t("sidebar.deleteChat")}
+                          Delete Chat
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
                       <DropdownMenuSeparator />
                       <DropdownMenuGroup>
                         <DropdownMenuItem
                           onClick={(e) => {
-                            e.preventDefault();
                             e.stopPropagation();
+                          }}
+                          onSelect={() => {
                             onEnterSelectionMode?.([id]);
                           }}
                         >
                           <IconCheckbox />
-                          {t("sidebar.selectChat")}
+                          Select Chat
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
                     </DropdownMenuContent>
@@ -277,7 +351,7 @@ export const ChatItem = memo(
                 }}
               >
                 <IconEdit />
-                {t("sidebar.changeTitle")}
+                Change Title
               </ContextMenuItem>
               <ContextMenuItem
                 onClick={() => {
@@ -289,7 +363,7 @@ export const ChatItem = memo(
                 }}
               >
                 <IconDownload />
-                {t("sidebar.exportChat")}
+                Export Chat
               </ContextMenuItem>
               <ContextMenuItem
                 variant="destructive"
@@ -302,7 +376,7 @@ export const ChatItem = memo(
                 }}
               >
                 <IconTrash />
-                {t("sidebar.deleteChat")}
+                Delete Chat
               </ContextMenuItem>
             </ContextMenuGroup>
             <ContextMenuSeparator />
@@ -313,7 +387,7 @@ export const ChatItem = memo(
                 }}
               >
                 <IconCheckbox />
-                {t("sidebar.selectChat")}
+                Select Chat
               </ContextMenuItem>
             </ContextMenuGroup>
           </ContextMenuContent>

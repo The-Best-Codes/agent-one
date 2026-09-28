@@ -1,7 +1,7 @@
 import { getDefaultStore } from "jotai";
 import debounce from "lodash.debounce";
 
-import { authClient, SERVER_URL } from "@/lib/auth/auth-client";
+import { authClient, getAuthToken, SERVER_URL } from "@/lib/auth/auth-client";
 import { syncEnabledAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
 import { DEFAULT_SETTINGS, type DefaultSettings } from "@/lib/settings/types";
@@ -125,6 +125,11 @@ class SettingsSyncManager {
     this.pushRetryMs = INITIAL_RETRY_MS;
   }
 
+  onSignedOut(): void {
+    this.debouncedPush.cancel();
+    this.clearRetry();
+  }
+
   private scheduleRetry(): void {
     if (!getDefaultStore().get(syncEnabledAtom) || this.retryTimeout) return;
 
@@ -146,7 +151,7 @@ class SettingsSyncManager {
   }
 
   private async push(): Promise<void> {
-    if (!getDefaultStore().get(syncEnabledAtom)) return;
+    if (!getDefaultStore().get(syncEnabledAtom) || !getAuthToken()) return;
 
     if (this.dirtyKeys.size === 0) {
       logger.verbose("Push called but no dirty keys, skipping");
@@ -188,6 +193,9 @@ class SettingsSyncManager {
       this.clearRetry();
     } catch (error) {
       logger.warn("Failed to push settings to server:", error);
+
+      if (!getAuthToken()) return;
+
       for (const key of keys) this.dirtyKeys.add(key);
       logger.verbose(`Re-queued ${keys.length} keys for retry`);
       this.scheduleRetry();
@@ -195,7 +203,7 @@ class SettingsSyncManager {
   }
 
   async pull(): Promise<void> {
-    if (!getDefaultStore().get(syncEnabledAtom)) return;
+    if (!getDefaultStore().get(syncEnabledAtom) || !getAuthToken()) return;
 
     if (this.pullPromise) {
       logger.verbose("Pull already in progress, deduplicating");
@@ -221,6 +229,7 @@ class SettingsSyncManager {
       }
 
       const body = response.data as { settings?: ServerSettings } | null;
+      if (!getAuthToken()) return;
       const serverSettings = body?.settings;
       if (!serverSettings || typeof serverSettings !== "object") {
         logger.verbose("Server returned no settings or empty response");

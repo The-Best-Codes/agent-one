@@ -7,15 +7,19 @@ import { getLogger } from "@/lib/logger";
 import { MessagePartFallback } from "./parts/fallback";
 import { MessagePartToolCall } from "./tools/tool-call";
 import { MessagePartToolCreateFile } from "./tools/tool-createFile";
+import { MessagePartToolCreateScheduledAgent } from "./tools/tool-createScheduledAgent";
 import { MessagePartToolDateTime } from "./tools/tool-dateTime";
 import { MessagePartToolDeleteFile } from "./tools/tool-deleteFile";
+import { MessagePartToolDeleteScheduledAgent } from "./tools/tool-deleteScheduledAgent";
 import { MessagePartToolEditFile } from "./tools/tool-editFile";
 import { MessagePartToolExecuteCommand } from "./tools/tool-executeCommand";
 import { MessagePartToolGetSetting } from "./tools/tool-getSetting";
 import { MessagePartToolGetUrlContent } from "./tools/tool-getUrlContent";
+import { MessagePartToolListScheduledAgents } from "./tools/tool-listScheduledAgents";
 import { MessagePartToolListSettings } from "./tools/tool-listSettings";
 import { MessagePartToolMemory } from "./tools/tool-memory";
 import { MessagePartToolSubAgent } from "./tools/tool-subAgent";
+import { MessagePartToolUpdateScheduledAgent } from "./tools/tool-updateScheduledAgent";
 import { MessagePartToolUpdateSetting } from "./tools/tool-updateSetting";
 import { MessagePartToolViewFile } from "./tools/tool-viewFile";
 import { MessagePartToolWaitNumberMilliseconds } from "./tools/tool-waitNumberMilliseconds";
@@ -68,6 +72,14 @@ export const MessageToolHandler = memo(
         return <MessagePartToolGetSetting part={part} />;
       case "tool-updateSetting":
         return <MessagePartToolUpdateSetting part={part} />;
+      case "tool-listScheduledAgents":
+        return <MessagePartToolListScheduledAgents part={part} />;
+      case "tool-createScheduledAgent":
+        return <MessagePartToolCreateScheduledAgent part={part} />;
+      case "tool-updateScheduledAgent":
+        return <MessagePartToolUpdateScheduledAgent part={part} />;
+      case "tool-deleteScheduledAgent":
+        return <MessagePartToolDeleteScheduledAgent part={part} />;
       default:
         return <MessagePartToolCall part={part as ToolUIPart} />;
     }

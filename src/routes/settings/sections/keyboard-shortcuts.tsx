@@ -1,9 +1,9 @@
 import { IconBulb, IconPencil, IconRestore } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
+import { useEffect, useMemo, useState } from "react";
+import { useRecordHotkeys } from "react-hotkeys-hook";
 
+import { SettingsLink } from "@/components/a1/settings-link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,30 +28,6 @@ import { DEFAULT_SETTINGS } from "@/lib/settings/types";
 
 import SettingsTarget from "../settings-target";
 
-function formatKey(key: string) {
-  if (key === " ") return "space";
-  if (key === "Escape") return "esc";
-  if (key === ",") return "comma";
-  if (key === ".") return "period";
-  return key.toLowerCase();
-}
-
-function eventToShortcut(event: KeyboardEvent) {
-  const key = formatKey(event.key);
-  const modifiers = [
-    event.ctrlKey && "ctrl",
-    event.metaKey && "meta",
-    event.altKey && "alt",
-    event.shiftKey && "shift",
-  ].filter(Boolean);
-
-  if (["ctrl", "meta", "alt", "shift"].includes(key)) {
-    return modifiers.join("+");
-  }
-
-  return [...modifiers, key].join("+");
-}
-
 function ShortcutEditor({
   id,
   label,
@@ -65,28 +41,34 @@ function ShortcutEditor({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { t } = useTranslation();
   const [shortcuts, setShortcuts] = useAtom(keyboardShortcutsAtom);
   const current = shortcuts[id] ?? DEFAULT_SETTINGS.KEYBOARD_SHORTCUTS[id];
-  const [shortcut, setShortcut] = useState(current.shortcut);
+  const [shortcut] = useState(current.shortcut);
   const [enabledInInputs, setEnabledInInputs] = useState<boolean | undefined>(
     current.enabledInInputs,
   );
   const [preventDefault, setPreventDefault] = useState(current.preventDefault);
+  const [keys, { start, stop, resetKeys, isRecording }] = useRecordHotkeys();
+
+  useEffect(() => () => stop(), [stop]);
+
+  const recordedShortcut = Array.from(keys).join("+");
+  const nextShortcut = recordedShortcut || shortcut;
 
   const conflict = useMemo(() => {
     return keyboardShortcutDefinitions.find((definition) => {
       if (definition.id === id) return false;
       const other = shortcuts[definition.id] ?? DEFAULT_SETTINGS.KEYBOARD_SHORTCUTS[definition.id];
-      return other.shortcut === shortcut;
+      return other.shortcut === nextShortcut;
     });
-  }, [id, shortcut, shortcuts]);
+  }, [id, nextShortcut, shortcuts]);
 
   const handleSave = () => {
+    stop();
     setShortcuts((currentShortcuts) => ({
       ...currentShortcuts,
       [id]: {
-        shortcut,
+        shortcut: nextShortcut,
         enabledInInputs,
         preventDefault,
       },
@@ -95,58 +77,67 @@ function ShortcutEditor({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        showCloseButton={false}
-        onEscapeKeyDown={(event) => event.preventDefault()}
-        onKeyDown={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          setShortcut(eventToShortcut(event.nativeEvent));
-        }}
-      >
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) stop();
+        onOpenChange(nextOpen);
+      }}
+    >
+      <DialogContent showCloseButton={false} onEscapeKeyDown={(event) => event.preventDefault()}>
         <DialogHeader>
-          <DialogTitle>{t("shortcuts.editShortcut")}</DialogTitle>
+          <DialogTitle>Edit shortcut</DialogTitle>
           <DialogDescription>{label}</DialogDescription>
         </DialogHeader>
 
-        <button
-          type="button"
-          className="bg-muted/40 flex min-h-24 items-center justify-center rounded-lg border border-dashed p-4"
-          autoFocus
-        >
-          <Kbd className="h-auto px-3 py-1 text-sm">{shortcut || t("shortcuts.pressKeys")}</Kbd>
-        </button>
+        <div className="bg-muted/40 flex min-h-24 flex-col items-center justify-center gap-3 rounded-lg border border-dashed p-4">
+          <Kbd className="h-auto px-3 py-1 text-sm wrap-anywhere">
+            {recordedShortcut || (!isRecording && shortcut) || "Press keys"}
+          </Kbd>
+          <Button
+            variant={isRecording ? "destructive" : "default"}
+            onClick={() => {
+              if (isRecording) {
+                stop();
+              } else {
+                resetKeys();
+                start();
+              }
+            }}
+          >
+            {isRecording ? "Stop" : "Record"}
+          </Button>
+        </div>
 
         {conflict && (
           <Alert variant="destructive">
-            <AlertTitle>{t("shortcuts.conflictTitle")}</AlertTitle>
+            <AlertTitle>Shortcut conflict</AlertTitle>
             <AlertDescription>
-              {t("shortcuts.conflictDescription", { label: t(conflict.labelKey) })}
+              {`This shortcut is also used by ${conflict.label}.`}
             </AlertDescription>
           </Alert>
         )}
 
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-4">
-            <Label>{t("shortcuts.activateInInputs")}</Label>
+            <Label>Activate in input fields</Label>
             <Switch
               checked={enabledInInputs ?? enabledInInputsDefault}
               onCheckedChange={setEnabledInInputs}
             />
           </div>
           <div className="flex items-center justify-between gap-4">
-            <Label>{t("shortcuts.preventDefault")}</Label>
+            <Label>Prevent default browser behavior</Label>
             <Switch checked={preventDefault} onCheckedChange={setPreventDefault} />
           </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t("common.cancel")}
+            Cancel
           </Button>
           <Button variant={conflict ? "destructive" : "default"} onClick={handleSave}>
-            {t("common.save")}
+            Save
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -155,7 +146,6 @@ function ShortcutEditor({
 }
 
 export default function KeyboardShortcutsSection() {
-  const { t } = useTranslation();
   const [shortcuts, setShortcuts] = useAtom(keyboardShortcutsAtom);
   const [enabledInInputsDefault, setEnabledInInputsDefault] = useAtom(
     keyboardShortcutsEnabledInInputsAtom,
@@ -166,25 +156,25 @@ export default function KeyboardShortcutsSection() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>{t("shortcuts.title")}</CardTitle>
+          <CardTitle>Keyboard Shortcuts</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <SettingsTarget id="setting-activate-shortcuts-in-input-fields">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-col items-start">
-                <Label className="text-sm font-medium">
-                  {t("shortcuts.activateInInputsLabel")}
-                </Label>
+                <Label className="text-sm font-medium">Activate shortcuts in input fields</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {t("shortcuts.activateInInputsDescription")}
+                  This is the default behavior. You can change it for individual shortcuts in the
+                  shortcut editor.
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <Switch
                   checked={enabledInInputsDefault}
                   onCheckedChange={setEnabledInInputsDefault}
-                  aria-label={t("shortcuts.activateInInputsLabel")}
+                  aria-label="Activate shortcuts in input fields"
                 />
+
                 <Button
                   variant="ghost"
                   size="icon"
@@ -192,7 +182,7 @@ export default function KeyboardShortcutsSection() {
                     enabledInInputsDefault === DEFAULT_SETTINGS.KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS
                   }
                   onClick={() => resetSetting("KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS")}
-                  aria-label={t("shortcuts.resetInputBehavior")}
+                  aria-label="Reset input field shortcut behavior"
                 >
                   <IconRestore />
                 </Button>
@@ -200,15 +190,16 @@ export default function KeyboardShortcutsSection() {
             </div>
           </SettingsTarget>
 
-          <div className="flex gap-1">
-            <IconBulb className="size-5 shrink-0" />
-            <span>
-              {t("shortcuts.sendKeyHint")} (<Kbd>Enter</Kbd> / <Kbd>Ctrl+Enter</Kbd>){" "}
-              <Link to="/settings?tab=chats#setting-submit-key" className="underline">
-                {t("shortcuts.chatSettings")}
-              </Link>
-            </span>
-          </div>
+          <Alert>
+            <IconBulb />
+            <AlertTitle>Other shortcuts</AlertTitle>
+            <AlertDescription>
+              The submit key and interrupt keyboard shortcuts are in{" "}
+              <SettingsLink tab="chats" id="setting-submit-key" className="underline">
+                chat settings.
+              </SettingsLink>
+            </AlertDescription>
+          </Alert>
 
           <div className="divide-y rounded-md border">
             {keyboardShortcutDefinitions.map((definition) => {
@@ -226,10 +217,8 @@ export default function KeyboardShortcutsSection() {
                   className="flex flex-col gap-3 p-3 md:flex-row md:items-center md:justify-between"
                 >
                   <div>
-                    <Label className="text-sm font-medium">{t(definition.labelKey)}</Label>
-                    <p className="text-muted-foreground mt-1 text-xs">
-                      {t(definition.descriptionKey)}
-                    </p>
+                    <Label className="text-sm font-medium">{definition.label}</Label>
+                    <p className="text-muted-foreground mt-1 text-xs">{definition.description}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Kbd>{config.shortcut}</Kbd>
@@ -238,7 +227,7 @@ export default function KeyboardShortcutsSection() {
                         variant="outline"
                         size="icon-sm"
                         onClick={() => setEditingId(definition.id)}
-                        aria-label={t("shortcuts.editAria", { label: t(definition.labelKey) })}
+                        aria-label={`Edit ${definition.label}`}
                       >
                         <IconPencil />
                       </Button>
@@ -252,7 +241,7 @@ export default function KeyboardShortcutsSection() {
                             [definition.id]: defaultConfig,
                           }));
                         }}
-                        aria-label={t("shortcuts.resetAria", { label: t(definition.labelKey) })}
+                        aria-label={`Reset ${definition.label}`}
                       >
                         <IconRestore />
                       </Button>
@@ -268,9 +257,7 @@ export default function KeyboardShortcutsSection() {
       {editingId && (
         <ShortcutEditor
           id={editingId}
-          label={t(
-            keyboardShortcutDefinitions.find((shortcut) => shortcut.id === editingId)!.labelKey,
-          )}
+          label={keyboardShortcutDefinitions.find((shortcut) => shortcut.id === editingId)!.label}
           enabledInInputsDefault={enabledInInputsDefault}
           open={Boolean(editingId)}
           onOpenChange={(open) => !open && setEditingId(null)}

@@ -1,20 +1,20 @@
 import { type UIMessage, useChat as useChatSDK, type UseChatOptions } from "@ai-sdk/react";
 import { type ChatInit, type LanguageModel } from "ai";
 import { useAtomValue } from "jotai";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useTools } from "@/contexts/use-tools/tools-hooks";
 import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { CustomChatTransport } from "@/lib/ai/custom-chat-transport";
 import { systemPromptAtom } from "@/lib/jotai/atoms";
-import { extractReasoningEnabledAtom, smoothStreamEnabledAtom } from "@/lib/jotai/settings-atoms";
+import { extractReasoningEnabledAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
 
 type CustomChatOptions = Omit<ChatInit<UIMessage>, "transport"> &
-  Pick<UseChatOptions<UIMessage>, "experimental_throttle" | "resume">;
+  Pick<UseChatOptions<UIMessage>, "resume" | "throttle">;
 
 function canResumeFromMessages(messages: UIMessage[]) {
   const lastMessage = messages.at(-1);
@@ -32,7 +32,6 @@ export function useChat(
   modelConfig: ModelConfig,
   options?: CustomChatOptions,
 ) {
-  const smoothStreamEnabled = useAtomValue(smoothStreamEnabledAtom);
   const extractReasoningEnabled = useAtomValue(extractReasoningEnabledAtom);
   const systemPrompt = useAtomValue(systemPromptAtom);
   const { getApiKeysLoadedPromise } = useApiKeys();
@@ -44,7 +43,6 @@ export function useChat(
         model,
         modelId,
         modelConfig,
-        smoothStreamEnabled,
         extractReasoningEnabled,
         getTools,
         getSystemPrompt,
@@ -71,11 +69,6 @@ export function useChat(
   }, [modelConfig, transport]);
 
   useEffect(() => {
-    transport.updateSmoothStreamEnabled(smoothStreamEnabled);
-    logger.verbose("Updated chat transport with new settings");
-  }, [smoothStreamEnabled, transport]);
-
-  useEffect(() => {
     transport.updateExtractReasoningEnabled(extractReasoningEnabled);
     logger.verbose(
       "Updated chat transport with extract reasoning setting:",
@@ -93,46 +86,62 @@ export function useChat(
     logger.verbose("Updated chat transport with new API keys loaded promise");
   }, [getApiKeysLoadedPromise, transport]);
 
-  const chatResult = useChatSDK({
+  const {
+    addToolApprovalResponse,
+    addToolOutput,
+    clearError,
+    error,
+    messages,
+    regenerate: regenerateSdk,
+    resumeStream: resumeStreamSdk,
+    sendMessage: sendMessageSdk,
+    setMessages,
+    status,
+    stop,
+  } = useChatSDK({
     transport,
     ...options,
   });
+  const messagesRef = useRef(messages);
+
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   const syncTransport = useCallback(() => {
     transport.updateModel(model);
     transport.updateModelId(modelId);
     transport.updateModelConfig(modelConfig);
-    transport.updateSmoothStreamEnabled(smoothStreamEnabled);
     transport.updateExtractReasoningEnabled(extractReasoningEnabled);
-  }, [model, modelId, modelConfig, smoothStreamEnabled, extractReasoningEnabled, transport]);
+  }, [model, modelId, modelConfig, extractReasoningEnabled, transport]);
 
-  const sendMessage = useCallback<typeof chatResult.sendMessage>(
+  const sendMessage = useCallback<typeof sendMessageSdk>(
     async (message, sendOptions) => {
       syncTransport();
-      return chatResult.sendMessage(message, sendOptions);
+      return sendMessageSdk(message, sendOptions);
     },
-    [chatResult, syncTransport],
+    [sendMessageSdk, syncTransport],
   );
 
-  const regenerate = useCallback<typeof chatResult.regenerate>(
+  const regenerate = useCallback<typeof regenerateSdk>(
     async (regenerateOptions) => {
       syncTransport();
-      return chatResult.regenerate(regenerateOptions);
+      return regenerateSdk(regenerateOptions);
     },
-    [chatResult, syncTransport],
+    [regenerateSdk, syncTransport],
   );
 
-  const resumeStream = useCallback<typeof chatResult.resumeStream>(
+  const resumeStream = useCallback<typeof resumeStreamSdk>(
     async (resumeOptions) => {
       syncTransport();
 
-      if (canResumeFromMessages(chatResult.messages)) {
-        return chatResult.sendMessage(undefined, resumeOptions);
+      if (canResumeFromMessages(messagesRef.current)) {
+        return sendMessageSdk(undefined, resumeOptions);
       }
 
-      return chatResult.resumeStream(resumeOptions);
+      return resumeStreamSdk(resumeOptions);
     },
-    [chatResult, syncTransport],
+    [resumeStreamSdk, sendMessageSdk, syncTransport],
   );
 
   const updateMcpAppModelContext = useCallback(
@@ -143,10 +152,17 @@ export function useChat(
   );
 
   return {
-    ...chatResult,
-    sendMessage,
+    addToolApprovalResponse,
+    addToolOutput,
+    clearError,
+    error,
+    messages,
     regenerate,
     resumeStream,
+    sendMessage,
+    setMessages,
+    status,
+    stop,
     updateMcpAppModelContext,
   };
 }

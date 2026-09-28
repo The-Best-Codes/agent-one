@@ -4,15 +4,16 @@ import {
   IconFilter,
   IconPaperclip,
   IconPhoto,
+  IconPlus,
   IconSelector,
   IconTool,
 } from "@tabler/icons-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import fuzzysort from "fuzzysort";
 import { type FC, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { ProviderLogo } from "@/components/a1/provider-logo";
+import { SettingsLink } from "@/components/a1/settings-link";
 import {
   AdaptivePopover,
   AdaptivePopoverContent,
@@ -37,9 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { InputGroupButton } from "@/components/ui/input-group";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
-import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { type ModelData, useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -60,25 +59,25 @@ type ModelCapability = "images" | "tools" | "attachments" | "reasoning";
 const MODEL_CAPABILITIES = [
   {
     id: "images",
-    labelKey: "chat.capabilityImages",
+    label: "Images",
     icon: IconPhoto,
     supports: (model: ModelData) => model.supportsImageInput,
   },
   {
     id: "tools",
-    labelKey: "chat.capabilityTools",
+    label: "Tools",
     icon: IconTool,
     supports: (model: ModelData) => model.supportsToolUse,
   },
   {
     id: "attachments",
-    labelKey: "chat.capabilityAttachments",
+    label: "Attachments",
     icon: IconPaperclip,
     supports: (model: ModelData) => model.supportsAttachments,
   },
   {
     id: "reasoning",
-    labelKey: "chat.capabilityReasoning",
+    label: "Reasoning",
     icon: IconBrain,
     supports: (model: ModelData) => model.supportsReasoning,
   },
@@ -87,8 +86,6 @@ const MODEL_CAPABILITIES = [
 interface ModelListProps {
   rows: VirtualRow[];
   currentModel: ModelData | undefined;
-  parentRef: React.RefObject<HTMLDivElement | null>;
-  virtualizer: ReturnType<typeof useVirtualizer<HTMLDivElement, Element>>;
   searchQuery: string;
   capabilityFilters: ModelCapability[];
   onSelect: (modelId: string) => void;
@@ -102,21 +99,53 @@ const ITEM_HEIGHT = 32;
 const ModelList: FC<ModelListProps> = ({
   rows,
   currentModel,
-  parentRef,
-  virtualizer,
   searchQuery,
   capabilityFilters,
   onSelect,
   setSearchQuery,
   setCapabilityFilters,
 }) => {
-  const { t } = useTranslation();
+  const parentRef = useRef<HTMLDivElement>(null);
   const [stickyState, setStickyState] = useState<{
     provider: string;
     providerId: string;
     translateY: number;
     scrollbarWidth: number;
   } | null>(null);
+
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: (index) => {
+      const row = rows[index];
+      if (row.type === "heading") return HEADING_HEIGHT;
+      return ITEM_HEIGHT;
+    },
+    overscan: 10,
+  });
+
+  const measureVirtualizer = useEffectEvent(() => {
+    virtualizer.measure();
+  });
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => measureVirtualizer());
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  const scrollToTop = useEffectEvent(() => {
+    const frame = requestAnimationFrame(() => {
+      parentRef.current?.scrollTo({ top: 0 });
+      virtualizer.scrollToOffset(0);
+    });
+
+    return () => cancelAnimationFrame(frame);
+  });
+
+  useEffect(() => {
+    return scrollToTop();
+  }, [searchQuery, capabilityFilters]);
 
   const headingOffsets = useMemo(() => {
     const offsets: { provider: string; providerId: string; offset: number }[] = [];
@@ -183,7 +212,7 @@ const ModelList: FC<ModelListProps> = ({
   return (
     <Command shouldFilter={false}>
       <CommandInput
-        placeholder={t("chat.searchModels")}
+        placeholder="Search models..."
         className="h-9"
         value={searchQuery}
         onValueChange={setSearchQuery}
@@ -195,8 +224,8 @@ const ModelList: FC<ModelListProps> = ({
                 size="icon-xs"
                 aria-label={
                   capabilityFilters.length > 0
-                    ? t("chat.filterModelsActive", { count: capabilityFilters.length })
-                    : t("chat.filterModels")
+                    ? `Filter models (${capabilityFilters.length} active)`
+                    : "Filter models"
                 }
               >
                 <IconFilter />
@@ -204,7 +233,7 @@ const ModelList: FC<ModelListProps> = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-fit max-w-full">
               <DropdownMenuGroup>
-                <DropdownMenuLabel>{t("chat.onlyShowModelsThatSupport")}</DropdownMenuLabel>
+                <DropdownMenuLabel>Only show models that support</DropdownMenuLabel>
                 {MODEL_CAPABILITIES.map((capability) => {
                   const CapabilityIcon = capability.icon;
                   const isChecked = capabilityFilters.includes(capability.id);
@@ -222,7 +251,7 @@ const ModelList: FC<ModelListProps> = ({
                       onSelect={(event) => event.preventDefault()}
                     >
                       <CapabilityIcon />
-                      {t(capability.labelKey)}
+                      {capability.label}
                     </DropdownMenuCheckboxItem>
                   );
                 })}
@@ -231,6 +260,7 @@ const ModelList: FC<ModelListProps> = ({
           </DropdownMenu>
         }
       />
+
       <div className="relative overflow-hidden">
         {stickyState && (
           <div
@@ -246,7 +276,7 @@ const ModelList: FC<ModelListProps> = ({
         )}
         <CommandList ref={parentRef}>
           {rows.length === 0 ? (
-            <CommandEmpty>{t("chat.noModelFound")}</CommandEmpty>
+            <CommandEmpty>No model found.</CommandEmpty>
           ) : (
             <CommandGroup>
               <div
@@ -298,28 +328,27 @@ const ModelList: FC<ModelListProps> = ({
                     >
                       <div className="flex w-full min-w-0 flex-1 items-center justify-center gap-1">
                         {isSelected && <IconCheck />}
-                        <ProviderLogo
-                          id={model.providerId}
-                          title={model.provider}
-                          className="size-4!"
-                          imageClassName="p-0"
-                        />
+                        {model.providerId !== "agent-one" && (
+                          <ProviderLogo
+                            id={model.providerId}
+                            title={model.provider}
+                            className="size-4!"
+                            imageClassName="p-0"
+                          />
+                        )}
+
                         <div className="scrollbar-size-xs w-full overflow-x-auto">
                           <span className="font-medium whitespace-nowrap">{model.name}</span>
                         </div>
                         {supportedCapabilities.length > 0 && (
                           <div
                             className="text-muted-foreground flex shrink-0 items-center gap-0"
-                            title={t("chat.supportsCapabilities", {
-                              list: supportedCapabilities
-                                .map((capability) => t(capability.labelKey).toLowerCase())
-                                .join(", "),
-                            })}
-                            aria-label={t("chat.supportsCapabilities", {
-                              list: supportedCapabilities
-                                .map((capability) => t(capability.labelKey).toLowerCase())
-                                .join(", "),
-                            })}
+                            title={`Supports ${supportedCapabilities
+                              .map((capability) => capability.label.toLowerCase())
+                              .join(", ")}`}
+                            aria-label={`Supports ${supportedCapabilities
+                              .map((capability) => capability.label.toLowerCase())
+                              .join(", ")}`}
                           >
                             {supportedCapabilities.map((capability) => {
                               const CapabilityIcon = capability.icon;
@@ -342,6 +371,14 @@ const ModelList: FC<ModelListProps> = ({
               </div>
             </CommandGroup>
           )}
+          <div className="p-1">
+            <Button asChild variant="outline" size="sm" className="w-full justify-start">
+              <SettingsLink tab="providers">
+                <IconPlus data-icon="inline-start" />
+                Add more models
+              </SettingsLink>
+            </Button>
+          </div>
         </CommandList>
       </div>
     </Command>
@@ -354,17 +391,13 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   disabled = false,
   loading = false,
 }) => {
-  const { t } = useTranslation();
   const { currentModel, setModel } = useModel();
   const [open, setOpen] = useState(false);
   const [loadingDelayPassed, setLoadingDelayPassed] = useState(false);
   const [staleModel, setStaleModel] = useState(currentModel);
   const [searchQuery, setSearchQuery] = useState("");
   const [capabilityFilters, setCapabilityFilters] = useState<ModelCapability[]>([]);
-  const parentRef = useRef<HTMLDivElement>(null);
-  const { AVAILABLE_ENABLED_CHAT_MODELS } = useModelCatalog();
-  const { isApiKeysLoading } = useApiKeys();
-  const { user, isLoading: isAuthLoading, customerState } = useWebAuth();
+  const { AVAILABLE_ENABLED_CHAT_MODELS, isModelCatalogLoading } = useModelCatalog();
 
   if (!loading && staleModel !== currentModel) {
     setStaleModel(currentModel);
@@ -433,54 +466,6 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     return result;
   }, [filteredModels]);
 
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const virtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: (index) => {
-      const row = rows[index];
-      if (row.type === "heading") return HEADING_HEIGHT;
-      return ITEM_HEIGHT;
-    },
-    overscan: 10,
-  });
-
-  // Read https://react.dev/learn/separating-events-from-effects#extracting-non-reactive-logic-out-of-effects for more info about useEffectEvent
-  const measureVirtualizer = useEffectEvent(() => {
-    if (effectiveOpen) {
-      const frame = requestAnimationFrame(() => {
-        virtualizer.measure();
-      });
-      return () => cancelAnimationFrame(frame);
-    }
-  });
-
-  useEffect(() => {
-    measureVirtualizer();
-  }, [effectiveOpen]);
-
-  const scrollToTop = useEffectEvent(() => {
-    if (!effectiveOpen) {
-      return;
-    }
-
-    const frame = requestAnimationFrame(() => {
-      parentRef.current?.scrollTo({ top: 0 });
-      virtualizer.scrollToOffset(0);
-    });
-
-    return () => cancelAnimationFrame(frame);
-  });
-
-  useEffect(() => {
-    scrollToTop();
-  }, [effectiveOpen, searchQuery, capabilityFilters]);
-
-  const handleSelect = (modelId: string) => {
-    setModel(modelId);
-    setOpen(false);
-  };
-
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
     if (!newOpen) {
@@ -489,12 +474,19 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     }
   };
 
+  const handleSelect = (modelId: string) => {
+    setModel(modelId);
+    handleOpenChange(false);
+  };
+
   const triggerContent = displayedModel ? (
     <>
       <div className="min-w-0 flex-1">
         <div className="scrollbar-size-xs scroll-fade-x w-full overflow-x-auto" tabIndex={0}>
           <div className="w-full text-left whitespace-nowrap">
-            <span className="text-muted-foreground text-xs">{displayedModel.provider}/</span>
+            {displayedModel.providerId !== "agent-one" && (
+              <span className="text-muted-foreground text-xs">{displayedModel.provider}/</span>
+            )}
             <span className="font-medium">{displayedModel.name}</span>
           </div>
         </div>
@@ -504,30 +496,16 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   ) : (
     <>
       <div className="min-w-0 flex-1 text-left">
-        <span className="text-muted-foreground">{t("chat.noModelSelected")}</span>
+        <span className="text-muted-foreground">No model selected</span>
       </div>
       <IconSelector className="size-4 shrink-0 opacity-50" />
     </>
   );
 
-  const modelLabel = displayedModel
-    ? t("chat.modelAria", { name: displayedModel.name })
-    : t("chat.noModel");
+  const modelLabel = displayedModel ? `Model: ${displayedModel.name}` : "No model";
 
-  if (
-    isApiKeysLoading ||
-    isAuthLoading ||
-    (Boolean(user) && !customerState) ||
-    shouldShowLoadingSkeleton
-  ) {
-    return (
-      <Skeleton
-        className={cn(
-          "h-8 w-full bg-muted-foreground dark:bg-accent border border-border",
-          className,
-        )}
-      />
-    );
+  if (isModelCatalogLoading || shouldShowLoadingSkeleton) {
+    return <Skeleton className={cn("h-8 w-full border border-border", className)} />;
   }
 
   return (
@@ -545,15 +523,13 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
         </Button>
       </AdaptivePopoverTrigger>
       <AdaptivePopoverContent
-        title={t("chat.selectModel")}
+        title="Select a model"
         className={cn("w-full p-0", popoverClassName)}
         mobileClassName="-mt-2 px-0"
       >
         <ModelList
           rows={rows}
           currentModel={currentModel}
-          parentRef={parentRef}
-          virtualizer={virtualizer}
           searchQuery={searchQuery}
           capabilityFilters={capabilityFilters}
           onSelect={handleSelect}

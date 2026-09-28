@@ -1,7 +1,5 @@
 import { IconArrowLeft, IconList } from "@tabler/icons-react";
-import { useAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -13,21 +11,15 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { useOverflow } from "@/hooks/use-overflow";
-import { trackSettingsInteraction } from "@/lib/google-analytics";
-import { activeSettingsSectionAtom } from "@/lib/jotai/unsynced-local-atoms";
-import { cn } from "@/lib/utils";
 
 import { isValidSection, sections } from "./sections-config";
 import SettingsContent from "./settings-content";
 import SettingsSidebar from "./settings-sidebar";
 
 export default function SettingsRoute() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [activeSection, setActiveSection] = useAtom(activeSettingsSectionAtom);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const rootRef = useRef<HTMLElement>(null);
 
@@ -37,20 +29,12 @@ export default function SettingsRoute() {
       if (tabParam && isValidSection(tabParam)) {
         return tabParam;
       }
-      if (isValidSection(activeSection)) {
-        return activeSection;
-      }
       return sections[0].id;
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_error) {
       return sections[0].id;
     }
-  }, [tabParam, activeSection]);
-
-  const fillHeight = useMemo(
-    () => sections.find((section) => section.id === displayedSection)?.fillHeight === true,
-    [displayedSection],
-  );
+  }, [tabParam]);
 
   const handleNavigateBack = () => {
     const chatId = searchParams.get("chatId");
@@ -61,8 +45,6 @@ export default function SettingsRoute() {
     }
   };
 
-  const sidebarRef = useRef<HTMLDivElement>(null);
-  const isSidebarOverflowing = useOverflow(sidebarRef);
   const previousSectionRef = useRef(displayedSection);
 
   useEffect(() => {
@@ -108,57 +90,32 @@ export default function SettingsRoute() {
   }, [displayedSection, location.hash]);
 
   const handleSectionChange = (section: string) => {
-    trackSettingsInteraction("navigation", "section_changed", { value: section });
-    setActiveSection(section);
-    if (tabParam) {
-      setSearchParams((prev) => {
-        prev.delete("tab");
-        return prev;
-      });
-    }
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("tab", section);
+      return next;
+    });
   };
 
   return (
-    <main
-      ref={rootRef}
-      role="main"
-      className={cn(
-        "bg-background min-h-svh pl-[calc(100vw-100%)]",
-        fillHeight && "flex h-svh min-h-0 flex-col overflow-hidden",
-      )}
-    >
-      <h1 className="sr-only">{t("settings.title")}</h1>
+    <main ref={rootRef} role="main" className="bg-background min-h-svh pl-[calc(100vw-100%)]">
+      <h1 className="sr-only">Settings</h1>
       <div className="bg-background sticky top-0 z-10 border-b p-4 md:hidden">
         <div className="flex items-center justify-between">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleNavigateBack}
-            analytics={{ event: "settings_back_clicked", params: { ui_location: "mobile_header" } }}
-          >
+          <Button variant="outline" size="sm" onClick={handleNavigateBack}>
             <IconArrowLeft data-icon="inline-start" />
-            {t("settings.back")}
+            Back
           </Button>
           <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
             <DrawerTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                aria-label={t("settings.openMenu")}
-                analytics={{
-                  event: "settings_menu_opened",
-                  params: { ui_location: "mobile_header" },
-                }}
-              >
+              <Button variant="outline" size="icon" aria-label="Open settings menu">
                 <IconList />
               </Button>
             </DrawerTrigger>
             <DrawerContent>
               <DrawerHeader>
-                <DrawerTitle className="mb-2">{t("settings.categories")}</DrawerTitle>
-                <DrawerDescription className="sr-only">
-                  {t("settings.categoriesDescription")}
-                </DrawerDescription>
+                <DrawerTitle className="mb-2">Setting Categories</DrawerTitle>
+                <DrawerDescription className="sr-only">List of setting sections</DrawerDescription>
                 <SettingsSidebar
                   activeSection={displayedSection}
                   onSectionChange={(section) => {
@@ -172,34 +129,14 @@ export default function SettingsRoute() {
         </div>
       </div>
 
-      <div
-        className={cn(
-          "mx-auto w-full max-w-5xl p-4 md:flex md:flex-col md:p-6",
-          fillHeight && "flex min-h-0 flex-1 flex-col md:h-full md:min-h-0",
-        )}
-      >
-        <div className={cn("flex flex-col gap-6 md:flex-row", fillHeight && "min-h-0 flex-1")}>
-          <div
-            ref={sidebarRef}
-            className={cn(
-              "hidden w-48 shrink-0 md:flex md:flex-col lg:w-64",
-              fillHeight ? "overflow-auto" : "md:sticky md:top-6 md:self-start",
-              fillHeight && isSidebarOverflowing && "pr-2",
-            )}
-          >
+      <div className="mx-auto w-full max-w-5xl p-4 md:flex md:flex-col md:p-6">
+        <div className="flex flex-col gap-6 md:flex-row">
+          <div className="hidden w-48 shrink-0 md:sticky md:top-6 md:flex md:flex-col md:self-start lg:w-64">
             <div className="flex flex-col gap-2 pl-0.5">
               <div className="mb-2">
-                <Button
-                  variant="outline"
-                  onClick={handleNavigateBack}
-                  className="w-full"
-                  analytics={{
-                    event: "settings_back_clicked",
-                    params: { ui_location: "desktop_sidebar" },
-                  }}
-                >
+                <Button variant="outline" onClick={handleNavigateBack} className="w-full">
                   <IconArrowLeft data-icon="inline-start" />
-                  {t("settings.backToChat")}
+                  Back to Chat
                 </Button>
               </div>
               <SettingsSidebar
@@ -209,30 +146,15 @@ export default function SettingsRoute() {
             </div>
           </div>
 
-          {fillHeight ? (
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-              <div
-                role="tabpanel"
-                tabIndex={0}
-                className={cn(
-                  "focus-visible:border-ring/50 focus-visible:border-[3px] focus-visible:outline-1",
-                  "flex min-h-0 min-w-0 flex-1 flex-col",
-                )}
-              >
-                <SettingsContent activeSection={displayedSection} fillHeight />
-              </div>
+          <div className="min-w-0 flex-1">
+            <div
+              role="tabpanel"
+              tabIndex={0}
+              className="focus-visible:border-ring/50 focus-visible:border-[3px] focus-visible:outline-1"
+            >
+              <SettingsContent activeSection={displayedSection} />
             </div>
-          ) : (
-            <div className="min-w-0 flex-1">
-              <div
-                role="tabpanel"
-                tabIndex={0}
-                className="focus-visible:border-ring/50 focus-visible:border-[3px] focus-visible:outline-1"
-              >
-                <SettingsContent activeSection={displayedSection} />
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </main>

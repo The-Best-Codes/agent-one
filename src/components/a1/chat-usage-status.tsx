@@ -1,9 +1,9 @@
 import NumberFlow from "@number-flow/react";
-import { IconChevronLeft } from "@tabler/icons-react";
+import { IconChevronLeft, IconCoins } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
 
+import { SettingsLink } from "@/components/a1/settings-link";
 import {
   AdaptiveTooltip,
   AdaptiveTooltipContent,
@@ -46,6 +46,7 @@ const CircularProgress = ({
           strokeWidth="2"
           className="text-muted"
         />
+
         <circle
           cx="12"
           cy="12"
@@ -68,7 +69,6 @@ const CircularProgress = ({
 };
 
 export const ChatUsageStatus = () => {
-  const { t } = useTranslation();
   const messages = useChatMessages();
   const isChatLoading = useChatLoading();
   const { currentModel } = useModel();
@@ -98,10 +98,6 @@ export const ChatUsageStatus = () => {
     };
   }, [isChatLoading]);
 
-  if (isAgentOneModel) {
-    return null;
-  }
-
   const showSkeleton = isChatLoading && delayPassed;
   const lastUsage = getLastAssistantUsage(messages);
 
@@ -112,6 +108,7 @@ export const ChatUsageStatus = () => {
   const totalTokens = contextInputTokens + contextOutputTokens;
   const maxTokens = currentModel?.contextWindow;
   const isExceeded = maxTokens !== undefined && totalTokens > maxTokens;
+  const contextUsagePercent = maxTokens ? Math.round((totalTokens / maxTokens) * 100) : null;
 
   return (
     <div
@@ -132,7 +129,7 @@ export const ChatUsageStatus = () => {
               {showSkeleton ? (
                 <>
                   <Skeleton className="size-5 rounded-full" />
-                  <Skeleton className="h-5 w-12" />
+                  <Skeleton className={isAgentOneModel ? "size-5 rounded-full" : "h-5 w-12"} />
                 </>
               ) : (
                 <>
@@ -157,45 +154,77 @@ export const ChatUsageStatus = () => {
                       </div>
                     </AdaptiveTooltipTrigger>
                     <AdaptiveTooltipContent className="max-w-xs">
-                      {maxTokens !== undefined
-                        ? t("chat.tokensKnown", {
-                            total: totalTokens,
-                            max: maxTokens.toLocaleString(),
-                          })
-                        : t("chat.tokensUnknown", { total: totalTokens })}
+                      {isAgentOneModel
+                        ? contextUsagePercent === null
+                          ? "The maximum conversation length for this model is unavailable."
+                          : `This chat is using ${contextUsagePercent}% of the model's conversation capacity.`
+                        : maxTokens !== undefined
+                          ? `This chat is currently ${totalTokens} tokens long. The model you're using supports up to ${maxTokens.toLocaleString()} tokens.`
+                          : `This chat is currently ${totalTokens} tokens long. The model you're using supports an unknown number of tokens.`}
                     </AdaptiveTooltipContent>
                   </AdaptiveTooltip>
 
-                  <AdaptiveTooltip>
-                    <AdaptiveTooltipTrigger
-                      className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-help rounded outline-none focus-visible:ring-[3px]"
-                      tabIndex={isCollapsed ? -1 : 0}
-                      asChild
-                    >
-                      <span>
-                        {hasUnknownCost && totalCostUsd <= 0 ? (
-                          <span className="text-foreground tabular-nums">$?</span>
-                        ) : (
-                          <NumberFlow
-                            value={totalCostUsd}
-                            format={{
-                              style: "currency",
-                              currency: "USD",
-                            }}
-                            prefix={hasUnknownCost ? "≥ " : undefined}
-                            className="text-foreground tabular-nums"
-                          />
-                        )}
-                      </span>
-                    </AdaptiveTooltipTrigger>
-                    <AdaptiveTooltipContent className="max-w-xs">
-                      {hasUnknownCost
-                        ? totalCostUsd > 0
-                          ? t("chat.costLowerBound")
-                          : t("chat.costUnavailable")
-                        : t("chat.costEstimate")}
-                    </AdaptiveTooltipContent>
-                  </AdaptiveTooltip>
+                  {isAgentOneModel ? (
+                    <AdaptiveTooltip>
+                      <AdaptiveTooltipTrigger
+                        className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-help rounded outline-none focus-visible:ring-[3px]"
+                        tabIndex={isCollapsed ? -1 : 0}
+                        asChild
+                      >
+                        <SettingsLink
+                          tab="account"
+                          id="setting-credits-used"
+                          aria-label="View AgentOne credit usage in Settings"
+                        >
+                          <IconCoins className="text--muted-foreground size-5" />
+                        </SettingsLink>
+                      </AdaptiveTooltipTrigger>
+                      <AdaptiveTooltipContent className="max-w-xs whitespace-normal">
+                        <span>
+                          AgentOne usage consumes credits.{" "}
+                          <SettingsLink
+                            tab="account"
+                            id="setting-credits-used"
+                            className="underline underline-offset-2"
+                          >
+                            View credit usage in Settings
+                          </SettingsLink>
+                          .
+                        </span>
+                      </AdaptiveTooltipContent>
+                    </AdaptiveTooltip>
+                  ) : (
+                    <AdaptiveTooltip>
+                      <AdaptiveTooltipTrigger
+                        className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-help rounded outline-none focus-visible:ring-[3px]"
+                        tabIndex={isCollapsed ? -1 : 0}
+                        asChild
+                      >
+                        <span>
+                          {hasUnknownCost && totalCostUsd <= 0 ? (
+                            <span className="text-foreground tabular-nums">$?</span>
+                          ) : (
+                            <NumberFlow
+                              value={totalCostUsd}
+                              format={{
+                                style: "currency",
+                                currency: "USD",
+                              }}
+                              prefix={hasUnknownCost ? "≥ " : undefined}
+                              className="text-foreground tabular-nums"
+                            />
+                          )}
+                        </span>
+                      </AdaptiveTooltipTrigger>
+                      <AdaptiveTooltipContent className="max-w-xs">
+                        {hasUnknownCost
+                          ? totalCostUsd > 0
+                            ? "Estimated cost is a lower bound, as pricing data is missing for one or more messages in this chat. Edits and deleted messages are not included in these stats."
+                            : "Pricing data is unavailable for the model(s) used in this chat, so the cost cannot be estimated."
+                          : "Estimated cost of this chat in USD. Edits and deleted messages are not included in these stats."}
+                      </AdaptiveTooltipContent>
+                    </AdaptiveTooltip>
+                  )}
                 </>
               )}
             </div>
@@ -203,7 +232,7 @@ export const ChatUsageStatus = () => {
         </div>
         <button
           onClick={() => setIsCollapsed((prev) => !prev)}
-          aria-label={isCollapsed ? t("chat.expandUsage") : t("chat.collapseUsage")}
+          aria-label={isCollapsed ? "Expand usage stats" : "Collapse usage stats"}
           data-is-collapsed={isCollapsed}
           className="hover:text-accent-foreground hover:bg-accent dark:hover:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex shrink-0 items-center justify-center gap-2 self-stretch rounded-br-md px-0.5 transition-all outline-none focus-visible:ring-[3px] disabled:pointer-events-none md:rounded-r-md md:data-[is-collapsed=true]:rounded-md"
         >

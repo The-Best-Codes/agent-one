@@ -8,7 +8,6 @@ import type { TtsProviderId } from "@/lib/settings/types";
 import { getApiKeyBaseAtom } from "../jotai/api-key-atoms";
 import { providerConfigAtoms } from "../jotai/provider-atoms";
 import {
-  analyticsIdentityAtom,
   chatBackgroundAtom,
   chatSortAtom,
   chatVirtualizationModeAtom,
@@ -16,14 +15,12 @@ import {
   collapsedSidebarLayoutAtom,
   colorThemeAtom,
   enabledToolsAtom,
-  experimentalThrottleEnabledAtom,
-  experimentalThrottleValueAtom,
   extractReasoningEnabledAtom,
   fontAtom,
   inputStyleAtom,
+  interruptKeyAtom,
   keyboardShortcutsAtom,
   keyboardShortcutsEnabledInInputsAtom,
-  languageAtom,
   markdownHighlightingAtom,
   markdownRenderingAtom,
   maxCodeblockCharsAtom,
@@ -38,14 +35,14 @@ import {
   roundnessAtom,
   showChatToBottomButtonAtom,
   showChatStatusIndicatorAtom,
+  sidebarChatTimeGroupingAtom,
   showMessageActionRowAtom,
   showMessagePreviewRailAtom,
-  smoothStreamEnabledAtom,
-  stopButtonBehaviorAtom,
   submitKeyAtom,
   systemPromptAppendixAtom,
   textScaleAtom,
   themeAtom,
+  throttleValueAtom,
   ttsSettingsAtom,
   titleGenerationAtom,
   uiTintAtom,
@@ -69,23 +66,22 @@ export function resetAllSettings(): void {
   store.set(markdownHighlightingAtom, RESET);
   store.set(markdownRenderingAtom, RESET);
   store.set(submitKeyAtom, RESET);
+  store.set(interruptKeyAtom, RESET);
   store.set(inputStyleAtom, RESET);
   store.set(maxCodeblockCharsAtom, RESET);
   store.set(maxMessageLengthAtom, RESET);
   store.set(maxToolResultCharsAtom, RESET);
   store.set(chatVirtualizationModeAtom, RESET);
   store.set(chatVirtualizationThresholdAtom, RESET);
-  store.set(experimentalThrottleEnabledAtom, RESET);
-  store.set(experimentalThrottleValueAtom, RESET);
-  store.set(smoothStreamEnabledAtom, RESET);
+  store.set(throttleValueAtom, RESET);
   store.set(extractReasoningEnabledAtom, RESET);
   store.set(regenerateOnSaveAtom, RESET);
   store.set(remendEnabledAtom, RESET);
-  store.set(stopButtonBehaviorAtom, RESET);
   store.set(showChatStatusIndicatorAtom, RESET);
   store.set(showMessagePreviewRailAtom, RESET);
   store.set(showMessageActionRowAtom, RESET);
   store.set(chatSortAtom, RESET);
+  store.set(sidebarChatTimeGroupingAtom, RESET);
   store.set(chatBackgroundAtom, RESET);
   store.set(ttsSettingsAtom, RESET);
   store.set(themeAtom, RESET);
@@ -95,7 +91,6 @@ export function resetAllSettings(): void {
   store.set(roundnessAtom, RESET);
   store.set(fontAtom, RESET);
   store.set(notificationSettingAtom, RESET);
-  store.set(analyticsIdentityAtom, RESET);
   store.set(userNameAtom, RESET);
   store.set(systemPromptAppendixAtom, RESET);
   store.set(memoryAtom, RESET);
@@ -107,7 +102,6 @@ export function resetAllSettings(): void {
   store.set(collapsedSidebarLayoutAtom, RESET);
   store.set(keyboardShortcutsEnabledInInputsAtom, RESET);
   store.set(keyboardShortcutsAtom, RESET);
-  store.set(languageAtom, RESET);
 
   for (const provider of PROVIDER_REGISTRY) {
     void store.set(getApiKeyBaseAtom(provider.id), RESET);
@@ -145,6 +139,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
     case "SUBMIT_KEY":
       store.set(submitKeyAtom, RESET);
       break;
+    case "INTERRUPT_KEY":
+      store.set(interruptKeyAtom, RESET);
+      break;
     case "INPUT_STYLE":
       store.set(inputStyleAtom, RESET);
       break;
@@ -163,14 +160,8 @@ export function resetSetting(key: keyof DefaultSettings): void {
     case "CHAT_VIRTUALIZATION_THRESHOLD":
       store.set(chatVirtualizationThresholdAtom, RESET);
       break;
-    case "EXPERIMENTAL_THROTTLE_ENABLED":
-      store.set(experimentalThrottleEnabledAtom, RESET);
-      break;
-    case "EXPERIMENTAL_THROTTLE_VALUE":
-      store.set(experimentalThrottleValueAtom, RESET);
-      break;
-    case "SMOOTH_STREAM_ENABLED":
-      store.set(smoothStreamEnabledAtom, RESET);
+    case "THROTTLE_VALUE":
+      store.set(throttleValueAtom, RESET);
       break;
     case "EXTRACT_REASONING_ENABLED":
       store.set(extractReasoningEnabledAtom, RESET);
@@ -184,9 +175,6 @@ export function resetSetting(key: keyof DefaultSettings): void {
     case "SHOW_CHAT_TO_BOTTOM_BUTTON":
       store.set(showChatToBottomButtonAtom, RESET);
       break;
-    case "STOP_BUTTON_BEHAVIOR":
-      store.set(stopButtonBehaviorAtom, RESET);
-      break;
     case "SHOW_CHAT_STATUS_INDICATOR":
       store.set(showChatStatusIndicatorAtom, RESET);
       break;
@@ -198,6 +186,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "CHAT_SORT":
       store.set(chatSortAtom, RESET);
+      break;
+    case "SIDEBAR_CHAT_TIME_GROUPING":
+      store.set(sidebarChatTimeGroupingAtom, RESET);
       break;
     case "CHAT_BACKGROUND":
       store.set(chatBackgroundAtom, RESET);
@@ -228,9 +219,6 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "NOTIFICATION_SETTING":
       store.set(notificationSettingAtom, RESET);
-      break;
-    case "ANALYTICS_IDENTITY":
-      store.set(analyticsIdentityAtom, RESET);
       break;
     case "ENABLED_TOOLS":
       store.set(enabledToolsAtom, RESET);
@@ -264,9 +252,6 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "KEYBOARD_SHORTCUTS":
       store.set(keyboardShortcutsAtom, RESET);
-      break;
-    case "LANGUAGE":
-      store.set(languageAtom, RESET);
       break;
   }
 }

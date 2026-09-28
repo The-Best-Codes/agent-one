@@ -1,6 +1,5 @@
 import { IconChevronDown, IconPlus } from "@tabler/icons-react";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { trackSettingsInteraction } from "@/lib/google-analytics";
 import type { NewCustomProviderData } from "@/lib/jotai/custom-provider-atoms";
 
 import { AddOpenAICompatibleDialog } from "./provider-dialogs";
@@ -20,21 +18,14 @@ interface AddProviderDropdownProps {
 }
 
 export function AddProviderDropdown({ onAddProvider }: AddProviderDropdownProps) {
-  const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            analytics={{
-              event: "settings_interaction",
-              params: { section: "providers", control: "add_provider_menu_opened" },
-            }}
-          >
-            {t("providers.addProvider")}
+          <Button variant="outline">
+            Add Provider
             <IconChevronDown data-icon="inline-end" />
           </Button>
         </DropdownMenuTrigger>
@@ -42,12 +33,11 @@ export function AddProviderDropdown({ onAddProvider }: AddProviderDropdownProps)
           <DropdownMenuGroup>
             <DropdownMenuItem
               onSelect={() => {
-                trackSettingsInteraction("providers", "open_openai_compatible_dialog");
                 setDialogOpen(true);
               }}
             >
               <IconPlus data-icon="inline-start" />
-              {t("providers.openaiCompatible")}
+              OpenAI Compatible
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>

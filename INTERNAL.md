@@ -87,16 +87,10 @@ When it says `export NDK_HOME="$ANDROID_HOME/ndk/$(ls -1 $ANDROID_HOME/ndk)"`, r
 
 Before running `bun run tauri android dev`, run `export BINDGEN_EXTRA_CLANG_ARGS="-target x86_64-linux-android21"` to set the target SDK version. (While we target 21 as the minimum SDK version currently, this may change in the future. If so, this should be updated.)
 
-You also need Java 21, since 25 is too new (`sudo pacman -S jdk21-openjdk`). So run this if JBR in Android Studio shipped with 25 or later:
-
-```bash
-export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
-```
-
 For my current Arch Linux setup, this amounts to:
 
 ```bash
-export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+export JAVA_HOME=/opt/android-studio/jbr
 export ANDROID_HOME="$HOME/Android/Sdk"
 export NDK_HOME="$ANDROID_HOME/ndk/$(ls -1 $ANDROID_HOME/ndk)"
 export ANDROID_NDK_HOME="$NDK_HOME"
@@ -123,16 +117,6 @@ snapcraft export-login --snaps=agent-one --channels=stable -
 - `bunx actions-up` to update actions in workflows (test manually in a PR)
 - `bunx --bun shadcn@latest diff` to check for updates to UI components
 
-## Testing
-
-### With Playwright
-
-- `bunx -y playwright install` to download browsers
-- `bunx -y playwright test` to run all tests in all projects
-- `bunx -y playwright test --project="chromium-desktop-light" --project="pixel-7-dark"` to run only fast Chromium tests
-- Always run `bun run build` before tests if you've made changes to the codebase
-
 ## PR Tests
 
-- To run E2E tests on a commit in your PR, add `[e2e]` to the commit message. E2E tests will only run if the _current_ commit message contains `[e2e]`, even previous commit messages also contain `[e2e]`.
 - Rust checks will only run if `src-tauri/` has changed.

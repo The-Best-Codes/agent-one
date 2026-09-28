@@ -1,6 +1,5 @@
-import { useAtomValue } from "jotai";
-import { lazy, Suspense, useEffect } from "react";
-import { BrowserRouter, Outlet, Route, Routes, useLocation } from "react-router";
+import { lazy, Suspense } from "react";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import { Toaster } from "sonner";
 
 import { LocalProviderStartupSync } from "@/components/a1/local-provider-startup-sync";
@@ -8,25 +7,18 @@ import { ModelDirectoryStartupSync } from "@/components/a1/model-directory-start
 import { ReactScan } from "@/components/a1/react-scan";
 import { Spinner } from "@/components/ui/spinner";
 import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
-import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
-import {
-  initializeGoogleAnalytics,
-  setGoogleAnalyticsEnabled,
-  setGoogleAnalyticsUserId,
-  trackGoogleAnalyticsPageView,
-} from "@/lib/google-analytics";
-import { analyticsIdentityAtom } from "@/lib/jotai/settings-atoms";
 import ChatRoute from "@/routes/chat";
+import ExtensionsRoute from "@/routes/extensions";
 import IndexRoute from "@/routes/index";
 import NotFoundRoute from "@/routes/not-found";
 import OnboardingRoute from "@/routes/onboarding";
+import ScheduledAgentsRoute from "@/routes/scheduled-agents";
 import SettingsRoute from "@/routes/settings";
 
 const TestsRoute = lazy(() => import("@/routes/tests"));
 const CronsTestRoute = lazy(() => import("@/routes/tests/crons"));
 const ChatStressTestRoute = lazy(() => import("@/routes/tests/chat-stress"));
 const LocalDatabaseTestRoute = lazy(() => import("@/routes/tests/local-database"));
-const LogsTestRoute = lazy(() => import("@/routes/tests/logs"));
 const NotificationsTestRoute = lazy(() => import("@/routes/tests/notifications"));
 
 import { ReleaseNotesDialog } from "./components/a1/release-notes-dialog";
@@ -37,44 +29,19 @@ import { KbdRegistry } from "./kbd-shortcuts";
 function AppLayout() {
   return (
     <MultiChatProvider>
+      <DeepLinkHandler />
       {/* This essentially lets MultiChatProvider wrap all the <Route> components while being a child of <Routes> */}
       <Outlet />
     </MultiChatProvider>
   );
 }
 
-function GoogleAnalyticsTracker() {
-  const location = useLocation();
-  const analyticsIdentity = useAtomValue(analyticsIdentityAtom);
-  const { user } = useWebAuth();
-
-  useEffect(() => {
-    setGoogleAnalyticsEnabled(analyticsIdentity !== "off");
-
-    if (analyticsIdentity !== "off") {
-      initializeGoogleAnalytics();
-    }
-  }, [analyticsIdentity]);
-
-  useEffect(() => {
-    setGoogleAnalyticsUserId(analyticsIdentity === "user-id" ? (user?.id ?? null) : null);
-  }, [analyticsIdentity, user?.id]);
-
-  useEffect(() => {
-    trackGoogleAnalyticsPageView(`${location.pathname}${location.search}`);
-  }, [location.pathname, location.search]);
-
-  return null;
-}
-
 function App() {
   return (
     <BrowserRouter>
-      <GoogleAnalyticsTracker />
       <ModelDirectoryStartupSync />
       <LocalProviderStartupSync />
       <KbdRegistry />
-      <DeepLinkHandler />
       <ReleaseNotesDialog />
       <UpdateAvailableDialog />
       <ReactScan />
@@ -85,7 +52,9 @@ function App() {
           <Route path="/chat" element={<ChatRoute />} />
           <Route path="/chat/:id" element={<ChatRoute />} />
           <Route path="/onboarding" element={<OnboardingRoute />} />
+          <Route path="/extensions" element={<ExtensionsRoute />} />
           <Route path="/settings" element={<SettingsRoute />} />
+          <Route path="/scheduled-agents" element={<ScheduledAgentsRoute />} />
           <Route
             element={
               <Suspense
@@ -103,7 +72,6 @@ function App() {
             <Route path="/tests/crons" element={<CronsTestRoute />} />
             <Route path="/tests/chat-stress" element={<ChatStressTestRoute />} />
             <Route path="/tests/local-database" element={<LocalDatabaseTestRoute />} />
-            <Route path="/tests/logs" element={<LogsTestRoute />} />
             <Route path="/tests/notifications" element={<NotificationsTestRoute />} />
           </Route>
           <Route path="*" element={<NotFoundRoute />} />

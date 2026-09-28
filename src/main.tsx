@@ -2,7 +2,7 @@ import "zod/compile";
 import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
 
-import "@/lib/i18n";
+import { DisableBrowserContextMenu } from "@/components/disable-browser-context-menu";
 import ErrorBoundary from "@/components/error-boundary";
 import { ThemeRegistry } from "@/components/theme/theme-registry";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +19,7 @@ import App from "./App";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <ErrorBoundary>
+      <DisableBrowserContextMenu />
       <ThemeRegistry />
       <WebAuthProvider>
         <PersistenceProvider>
@@ -27,7 +28,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
               <ModelProvider>
                 <UpdateProvider>
                   <Suspense fallback={<SuspenseFallback />}>
-                    <TooltipProvider>
+                    <TooltipProvider delayDuration={700}>
                       <App />
                     </TooltipProvider>
                   </Suspense>

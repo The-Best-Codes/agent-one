@@ -202,3 +202,5 @@ Italiano
 Русский
 rmcp
 RMCP
+sched
+cronstrue

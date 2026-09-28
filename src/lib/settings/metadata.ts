@@ -1,19 +1,17 @@
+// Some settings are intentionally omitted from the inspectable setting atoms list. You should still consider adding new settings here.
 import type { Atom } from "jotai";
 
 import {
-  analyticsIdentityAtom,
   chatSortAtom,
   chatVirtualizationModeAtom,
   chatVirtualizationThresholdAtom,
   collapsedSidebarLayoutAtom,
   colorThemeAtom,
-  experimentalThrottleEnabledAtom,
-  experimentalThrottleValueAtom,
   extractReasoningEnabledAtom,
   fontAtom,
   inputStyleAtom,
+  interruptKeyAtom,
   keyboardShortcutsEnabledInInputsAtom,
-  languageAtom,
   markdownHighlightingAtom,
   markdownRenderingAtom,
   maxCodeblockCharsAtom,
@@ -25,37 +23,31 @@ import {
   remendEnabledAtom,
   roundnessAtom,
   showChatStatusIndicatorAtom,
+  sidebarChatTimeGroupingAtom,
   showMessageActionRowAtom,
   showChatToBottomButtonAtom,
   showMessagePreviewRailAtom,
-  smoothStreamEnabledAtom,
-  stopButtonBehaviorAtom,
   submitKeyAtom,
-  systemPromptAppendixAtom,
   textScaleAtom,
   themeAtom,
   uiTintAtom,
   uiTintStrengthAtom,
-  userNameAtom,
 } from "@/lib/jotai/settings-atoms";
 
 import { DEFAULT_SETTINGS } from "./types";
 import * as types from "./types";
 
 const inspectableSettingAtoms = {
-  ANALYTICS_IDENTITY: analyticsIdentityAtom,
   CHAT_SORT: chatSortAtom,
+  SIDEBAR_CHAT_TIME_GROUPING: sidebarChatTimeGroupingAtom,
   CHAT_VIRTUALIZATION_MODE: chatVirtualizationModeAtom,
   CHAT_VIRTUALIZATION_THRESHOLD: chatVirtualizationThresholdAtom,
   COLLAPSED_SIDEBAR_LAYOUT: collapsedSidebarLayoutAtom,
   COLOR_THEME: colorThemeAtom,
-  EXPERIMENTAL_THROTTLE_ENABLED: experimentalThrottleEnabledAtom,
-  EXPERIMENTAL_THROTTLE_VALUE: experimentalThrottleValueAtom,
   EXTRACT_REASONING_ENABLED: extractReasoningEnabledAtom,
   FONT: fontAtom,
   INPUT_STYLE: inputStyleAtom,
   KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS: keyboardShortcutsEnabledInInputsAtom,
-  LANGUAGE: languageAtom,
   MARKDOWN_HIGHLIGHTING: markdownHighlightingAtom,
   MARKDOWN_RENDERING: markdownRenderingAtom,
   MAX_CODEBLOCK_CHARS: maxCodeblockCharsAtom,
@@ -70,15 +62,12 @@ const inspectableSettingAtoms = {
   SHOW_MESSAGE_ACTION_ROW: showMessageActionRowAtom,
   SHOW_CHAT_TO_BOTTOM_BUTTON: showChatToBottomButtonAtom,
   SHOW_MESSAGE_PREVIEW_RAIL: showMessagePreviewRailAtom,
-  SMOOTH_STREAM_ENABLED: smoothStreamEnabledAtom,
-  STOP_BUTTON_BEHAVIOR: stopButtonBehaviorAtom,
   SUBMIT_KEY: submitKeyAtom,
-  SYSTEM_PROMPT_APPENDIX: systemPromptAppendixAtom,
+  INTERRUPT_KEY: interruptKeyAtom,
   TEXT_SCALE: textScaleAtom,
   THEME: themeAtom,
   UI_TINT: uiTintAtom,
   UI_TINT_STRENGTH: uiTintStrengthAtom,
-  USER_NAME: userNameAtom,
 } satisfies Record<string, Atom<unknown>>;
 
 type InspectableSettingKey = keyof typeof inspectableSettingAtoms;

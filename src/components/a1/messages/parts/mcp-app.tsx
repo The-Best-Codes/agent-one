@@ -8,11 +8,10 @@ import { IconX } from "@tabler/icons-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import type { DynamicToolUIPart } from "ai";
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import packageJson from "@/../package.json";
 import { Button } from "@/components/ui/button";
-import { useChatFunctions, useChatStatus } from "@/contexts/use-chat/chat-hooks";
+import { useChatStatus, useGetChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { useTools } from "@/contexts/use-tools/tools-hooks";
 import { useTheme } from "@/hooks/use-theme";
 import {
@@ -102,10 +101,9 @@ function ConnectedMcpAppInternal({
   serverId: string;
   fallback: ReactNode;
 }) {
-  const { t } = useTranslation();
   const { mcpLoaded } = useTools();
   const { resolvedTheme } = useTheme();
-  const { sendMessage, updateMcpAppModelContext } = useChatFunctions();
+  const getChatFunctions = useGetChatFunctions();
   const { status } = useChatStatus();
   const containerRef = useRef<HTMLDivElement>(null);
   const [initialized, setInitialized] = useState(false);
@@ -218,11 +216,14 @@ function ConnectedMcpAppInternal({
           if (status !== "ready") {
             throw new Error("The chat is busy. Try sending the message again when it is ready.");
           }
-          await sendMessage({ text: getMessageText(params) });
+          await getChatFunctions().sendMessage({ text: getMessageText(params) });
           return {};
         },
         updateModelContext: (params) => {
-          updateMcpAppModelContext(part.toolCallId, validateModelContext(params));
+          getChatFunctions().updateMcpAppModelContext(
+            part.toolCallId,
+            validateModelContext(params),
+          );
           return {};
         },
         requestDisplayMode: ({ mode }) => {
@@ -250,12 +251,11 @@ function ConnectedMcpAppInternal({
     }
   }, [
     displayMode,
+    getChatFunctions,
     mcpLoaded,
     part.toolCallId,
-    sendMessage,
     serverId,
     status,
-    updateMcpAppModelContext,
     viewportSize.height,
   ]);
 
@@ -315,7 +315,7 @@ function ConnectedMcpAppInternal({
         >
           {displayMode === "pip" && (
             <Button variant="ghost" size="sm" onClick={() => setDisplayMode("inline")}>
-              {t("messages.extensionPip")}
+              Extension open in picture-in-picture
             </Button>
           )}
         </div>
@@ -354,17 +354,15 @@ function ConnectedMcpAppInternal({
         {displayMode === "fullscreen" && (
           <div className="bg-background border-border flex h-16 items-center justify-between gap-3 border-b px-4">
             <div className="min-w-0">
-              <div className="truncate text-base font-medium">
-                {t("messages.expandedExtension")}
-              </div>
+              <div className="truncate text-base font-medium">Expanded extension view</div>
               <div className="text-muted-foreground truncate text-sm">
-                {t("messages.expandedExtensionHint")}
+                Opened in expanded view. Press Escape or close it to return to the conversation.
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="icon-sm" onClick={() => setDisplayMode("inline")}>
                 <IconX />
-                <span className="sr-only">{t("messages.closeExpandedMcp")}</span>
+                <span className="sr-only">Close expanded MCP app</span>
               </Button>
             </div>
           </div>

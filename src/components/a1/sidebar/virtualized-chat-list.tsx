@@ -4,17 +4,16 @@ import {
   IconDownload,
   IconInbox,
   IconPlus,
-  IconSearch,
   IconSelectAll,
   IconTrash,
   IconX,
 } from "@tabler/icons-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValueRawSync } from "jotai";
 import debounce from "lodash.debounce";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 
+import { SearchInput } from "@/components/a1/search-input";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -25,15 +24,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import { useOverflow } from "@/hooks/use-overflow";
-import { trackGoogleAnalyticsEvent } from "@/lib/google-analytics";
+import { listScheduledAgents, SCHEDULED_AGENTS_CHANGED_EVENT } from "@/lib/cron";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
-import { chatSortAtom } from "@/lib/jotai/settings-atoms";
+import { chatSortAtom, sidebarChatTimeGroupingAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import type { ChatSearchResult } from "@/lib/storage/chat-storage";
 import { cn } from "@/lib/utils";
@@ -47,9 +45,50 @@ interface ChatListItem {
   id: string;
   title: string;
   branchOf?: string;
+  scheduledAgentId?: string;
+  scheduledAgentTitle?: string;
   snippet?: string;
   createdAt?: number;
   updatedAt?: number;
+}
+
+type ChatListRow =
+  | { type: "header"; id: string; label: string }
+  | { type: "chat"; chat: ChatListItem };
+
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
+function getChatTimeGroup(
+  chat: ChatListItem,
+  chatSort: "created-at" | "updated-at",
+): { id: string; label: string } {
+  const timestamp =
+    chatSort === "updated-at"
+      ? (chat.updatedAt ?? chat.createdAt)
+      : (chat.createdAt ?? chat.updatedAt);
+
+  if (!timestamp || Number.isNaN(new Date(timestamp).getTime())) {
+    return { id: "older", label: "Older" };
+  }
+
+  const age = Math.max(0, Date.now() - timestamp);
+  if (age < 7 * DAY_IN_MS) {
+    return { id: "recent", label: "Recent" };
+  }
+  if (age < 14 * DAY_IN_MS) {
+    return { id: "last-week", label: "Last Week" };
+  }
+  if (age < 31 * DAY_IN_MS) {
+    return { id: "last-month", label: "Last Month" };
+  }
+
+  const date = new Date(timestamp);
+  const currentYear = new Date().getFullYear();
+  const label = new Intl.DateTimeFormat("en", {
+    month: "long",
+    ...(date.getFullYear() !== currentYear && { year: "numeric" }),
+  }).format(date);
+  return { id: `month-${date.getFullYear()}-${date.getMonth()}`, label };
 }
 
 interface VirtualizedChatListProps {
@@ -69,7 +108,6 @@ export const VirtualizedChatList = ({
   additionalOnChatClickCallback,
   scrollToActiveChat = true,
 }: VirtualizedChatListProps) => {
-  const { t } = useTranslation();
   const [chats, setChats] = useState<ChatListItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<ChatSearchResult[] | null>(null);
@@ -84,14 +122,31 @@ export const VirtualizedChatList = ({
   const parentRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const latestSearchQueryRef = useRef("");
-  const [chatIds] = useAtom(chatIdsAtom);
+  const chatIds = useAtomValueRawSync(chatIdsAtom);
   const [chatSort] = useAtom(chatSortAtom);
+  const [sidebarChatTimeGrouping] = useAtom(sidebarChatTimeGroupingAtom);
 
   useKeyboardShortcut("focusChatSearch", () => {
     searchInputRef.current?.focus();
   });
   const [chatUpdateTrigger] = useAtom(chatUpdateTriggerAtom);
   const { loadChatMetadata, isMetadataLoaded, searchChats } = usePersistence();
+  const [scheduledAgentTitles, setScheduledAgentTitles] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const refresh = () => {
+      void listScheduledAgents()
+        .then((agents) =>
+          setScheduledAgentTitles(
+            Object.fromEntries(agents.map((agent) => [agent.id, agent.title])),
+          ),
+        )
+        .catch(() => {});
+    };
+    refresh();
+    window.addEventListener(SCHEDULED_AGENTS_CHANGED_EVENT, refresh);
+    return () => window.removeEventListener(SCHEDULED_AGENTS_CHANGED_EVENT, refresh);
+  }, []);
 
   const loadChats = useCallback(() => {
     if (!isMetadataLoaded) return;
@@ -104,6 +159,8 @@ export const VirtualizedChatList = ({
             id,
             title: chatMetadata?.title || `Chat ${id.slice(0, 8)}`,
             branchOf: chatMetadata?.branchOf,
+            scheduledAgentId: chatMetadata?.scheduledAgentId,
+            scheduledAgentTitle: chatMetadata?.scheduledAgentTitle,
             createdAt: chatMetadata?.createdAt,
             updatedAt: chatMetadata?.updatedAt,
           };
@@ -113,6 +170,8 @@ export const VirtualizedChatList = ({
             id,
             title: `Chat ${id.slice(0, 8)}`,
             branchOf: undefined,
+            scheduledAgentId: undefined,
+            scheduledAgentTitle: undefined,
             createdAt: undefined,
             updatedAt: undefined,
           };
@@ -153,12 +212,7 @@ export const VirtualizedChatList = ({
           return;
         }
         setIsSearching(true);
-        trackGoogleAnalyticsEvent("chat_search_used", {
-          ui_location: "sidebar",
-          query_length: query.trim().length,
-          search_content: searchContent,
-          raw_operators: useRawOperators,
-        });
+
         try {
           const results = await searchChats(query, useRawOperators);
           if (latestSearchQueryRef.current !== query) {
@@ -177,7 +231,7 @@ export const VirtualizedChatList = ({
           }
         }
       }, 300),
-    [searchChats, searchContent],
+    [searchChats],
   );
 
   useEffect(() => {
@@ -241,34 +295,74 @@ export const VirtualizedChatList = ({
           title: r.title,
           branchOf: metadataMap.get(r.chatId)?.branchOf,
           snippet: r.snippet,
+          createdAt: metadataMap.get(r.chatId)?.createdAt,
+          updatedAt: metadataMap.get(r.chatId)?.updatedAt,
         }));
     }
     return chats.filter((chat) => chat.title.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [chats, searchQuery, searchResults, chatIds, searchContent]);
 
+  const listRows = useMemo<ChatListRow[]>(() => {
+    const shouldGroup = sidebarChatTimeGrouping && !searchQuery.trim();
+    if (!shouldGroup) {
+      return filteredChats.map((chat) => ({ type: "chat", chat }));
+    }
+
+    const groupedChats = [...filteredChats].sort((a, b) => {
+      const recencyKey = (chat: ChatListItem) => {
+        const groupId = getChatTimeGroup(chat, chatSort).id;
+        if (groupId === "recent") return 0;
+        if (groupId === "last-week") return 1;
+        if (groupId === "last-month") return 2;
+        if (groupId.startsWith("month-")) {
+          const [, year, month] = groupId.split("-").map(Number);
+          return 3 + (new Date().getFullYear() - year) * 12 + new Date().getMonth() - month;
+        }
+        return Number.MAX_SAFE_INTEGER;
+      };
+      return recencyKey(a) - recencyKey(b);
+    });
+    let previousGroupId: string | undefined;
+    return groupedChats.flatMap((chat) => {
+      const group = getChatTimeGroup(chat, chatSort);
+      const rows: ChatListRow[] = [];
+      if (group.id !== previousGroupId) {
+        rows.push({ type: "header", ...group });
+        previousGroupId = group.id;
+      }
+      rows.push({ type: "chat", chat });
+      return rows;
+    });
+  }, [chatSort, filteredChats, searchQuery, sidebarChatTimeGrouping]);
+
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
-    count: filteredChats.length,
+    count: listRows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: (index) => (filteredChats[index]?.snippet ? 48 : 34),
+    estimateSize: (index) => {
+      const row = listRows[index];
+      return row?.type === "header" ? 28 : row?.chat.snippet ? 48 : 34;
+    },
     measureElement: (el) => el.getBoundingClientRect().height,
     overscan: 5,
   });
 
   const isOverflowing = useOverflow(parentRef, {
-    watch: `${filteredChats.length}:${chats.length}:${isMetadataLoaded}:${searchQuery}`,
+    watch: `${listRows.length}:${chats.length}:${isMetadataLoaded}:${searchQuery}`,
   });
 
   useEffect(() => {
     if (scrollToActiveChat && activeChatId && virtualizer && !searchQuery) {
-      const activeIndex = filteredChats.findIndex((chat) => chat.id === activeChatId);
+      const activeIndex = listRows.findIndex(
+        (row) => row.type === "chat" && row.chat.id === activeChatId,
+      );
       if (activeIndex !== -1) {
         virtualizer.scrollToIndex(activeIndex, {
           align: "center",
         });
       }
     }
-  }, [activeChatId, filteredChats, virtualizer, scrollToActiveChat, searchQuery]);
+  }, [activeChatId, listRows, virtualizer, scrollToActiveChat, searchQuery]);
 
   const toggleSelection = useCallback((id: string) => {
     setSelectedChatIds((prev) => {
@@ -301,7 +395,11 @@ export const VirtualizedChatList = ({
   }, []);
 
   const showNoChatsPlaceholder = isMetadataLoaded && chats.length === 0;
-  const showSearchLoading = isSearching && filteredChats.length === 0 && searchQuery.trim();
+  const showSearchLoading =
+    isSearching &&
+    searchContent &&
+    (searchResults === null || filteredChats.length === 0) &&
+    searchQuery.trim();
   const showNoSearchResults =
     !isSearching && chats.length > 0 && filteredChats.length === 0 && searchQuery.trim();
   const allSelected =
@@ -317,10 +415,9 @@ export const VirtualizedChatList = ({
             onClick={() => handleNewChat && handleNewChat()}
             className="w-full justify-start"
             variant="outline"
-            analytics={{ event: "new_chat_clicked", params: { ui_location: "chat_list" } }}
           >
             <IconPlus data-icon="inline-start" />
-            {t("sidebar.newChat")}
+            New Chat
           </Button>
         )}
         {selectionMode ? (
@@ -330,7 +427,7 @@ export const VirtualizedChatList = ({
                 <IconX />
               </Button>
               <span className="text-muted-foreground text-sm">
-                {t("sidebar.selectedCount", { count: selectedChatIds.size })}
+                {`${selectedChatIds.size} selected`}
               </span>
             </div>
             <div className="flex items-center gap-1">
@@ -339,17 +436,13 @@ export const VirtualizedChatList = ({
                 size="sm"
                 className="h-7 flex-1 justify-start"
                 onClick={toggleSelectAll}
-                analytics={{
-                  event: "chat_selection_toggled",
-                  params: { ui_location: "chat_list" },
-                }}
               >
                 {!allSelected ? (
                   <IconSelectAll data-icon="inline-start" />
                 ) : (
                   <IconDeselect data-icon="inline-start" />
                 )}
-                {allSelected ? t("sidebar.deselectAll") : t("sidebar.selectAll")}
+                {allSelected ? "Deselect All" : "Select All"}
               </Button>
               <Button
                 variant="outline"
@@ -357,10 +450,6 @@ export const VirtualizedChatList = ({
                 className="size-7"
                 disabled={selectedChatIds.size === 0}
                 onClick={() => setShowBulkExportModal(true)}
-                analytics={{
-                  event: "bulk_chat_export_opened",
-                  params: { ui_location: "chat_list" },
-                }}
               >
                 <IconDownload data-icon="inline-start" />
               </Button>
@@ -370,10 +459,6 @@ export const VirtualizedChatList = ({
                 className="size-7"
                 disabled={selectedChatIds.size === 0}
                 onClick={() => setShowBulkDeleteModal(true)}
-                analytics={{
-                  event: "bulk_chat_delete_opened",
-                  params: { ui_location: "chat_list" },
-                }}
               >
                 <IconTrash data-icon="inline-start" />
               </Button>
@@ -381,43 +466,37 @@ export const VirtualizedChatList = ({
           </div>
         ) : (
           <div className="flex flex-row">
-            <div className="group/sidebar-search-input relative min-w-0 flex-1">
-              <IconSearch className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/sidebar-search-input:left-0 group-focus-within/sidebar-search-input:opacity-0" />
-              <Input
-                ref={searchInputRef}
-                placeholder={
-                  searchContent
-                    ? t("sidebar.searchChatsPlaceholder")
-                    : t("sidebar.searchTitlesPlaceholder")
-                }
-                className="bg-background rounded-r-none pl-9 transition-[padding] duration-200 group-focus-within/sidebar-search-input:pl-3"
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-              />
-            </div>
+            <SearchInput
+              ref={searchInputRef}
+              containerClassName="min-w-0 flex-1"
+              className="rounded-r-none"
+              placeholder={searchContent ? "Search chats..." : "Search titles..."}
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
+            />
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
                   size="icon"
                   className="shrink-0 rounded-l-none border-l-0"
-                  aria-label={t("sidebar.searchOptions")}
-                  analytics={{
-                    event: "chat_search_options_opened",
-                    params: { ui_location: "sidebar" },
-                  }}
+                  aria-label="Search options"
                 >
                   <IconChevronDown />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-auto min-w-max">
                 <DropdownMenuGroup>
-                  <DropdownMenuLabel>{t("sidebar.searchMode")}</DropdownMenuLabel>
+                  <DropdownMenuLabel>Search mode</DropdownMenuLabel>
                   <DropdownMenuCheckboxItem
                     checked={searchContent}
                     onCheckedChange={(checked) => setSearchContent(checked as boolean)}
                   >
-                    {t("sidebar.searchContent")}
+                    Search content
                   </DropdownMenuCheckboxItem>
                 </DropdownMenuGroup>
                 {searchContent && (
@@ -428,7 +507,7 @@ export const VirtualizedChatList = ({
                         checked={rawOperators}
                         onCheckedChange={(checked) => setRawOperators(checked as boolean)}
                       >
-                        {t("sidebar.rawFts")}
+                        Allow search operators
                       </DropdownMenuCheckboxItem>
                     </DropdownMenuGroup>
                   </>
@@ -443,8 +522,8 @@ export const VirtualizedChatList = ({
         ref={parentRef}
         className={cn(
           "flex-1",
-          showList ? "overflow-y-auto scroll-fade" : "overflow-hidden",
-          isOverflowing && showList && "pr-2",
+          showList ? "overflow-y-auto" : "overflow-hidden",
+          isOverflowing && showList && "scroll-fade pr-2",
         )}
       >
         {!isMetadataLoaded ? (
@@ -457,19 +536,17 @@ export const VirtualizedChatList = ({
         ) : showNoChatsPlaceholder ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
             <IconInbox className="text-muted-foreground size-16" />
-            <p className="max-w-full min-w-0 truncate">{t("sidebar.noChatsYet")}</p>
+            <p className="max-w-full min-w-0 truncate">No chats yet</p>
           </div>
         ) : showSearchLoading ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
             <Spinner className="text-muted-foreground size-16" />
-            <p className="max-w-full min-w-0 truncate">{t("sidebar.searching")}</p>
+            <p className="max-w-full min-w-0 truncate">Searching...</p>
           </div>
         ) : showNoSearchResults ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
             <IconInbox className="text-muted-foreground size-16" />
-            <span className="max-w-full min-w-0 truncate">
-              {t("sidebar.noResults", { query: searchQuery })}
-            </span>
+            <span className="max-w-full min-w-0 truncate">{`No results for "${searchQuery}"`}</span>
           </div>
         ) : (
           <div
@@ -480,7 +557,7 @@ export const VirtualizedChatList = ({
             }}
           >
             {virtualizer.getVirtualItems().map((virtualItem) => {
-              const chat = filteredChats[virtualItem.index];
+              const row = listRows[virtualItem.index];
               return (
                 <div
                   key={virtualItem.key}
@@ -494,19 +571,35 @@ export const VirtualizedChatList = ({
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
                 >
-                  <ChatItem
-                    key={chat.id}
-                    activeChatId={activeChatId}
-                    id={chat.id}
-                    title={chat.title}
-                    branchOf={chat.branchOf}
-                    snippet={chat.snippet}
-                    additionalOnChatClickCallback={additionalOnChatClickCallback}
-                    selectionMode={selectionMode}
-                    isSelected={selectedChatIds.has(chat.id)}
-                    onSelectionToggle={toggleSelection}
-                    onEnterSelectionMode={enterSelectionMode}
-                  />
+                  {row.type === "header" ? (
+                    <div className="text-muted-foreground px-2 pt-2 pb-1 text-xs font-medium">
+                      {row.label}
+                    </div>
+                  ) : (
+                    <ChatItem
+                      activeChatId={activeChatId}
+                      id={row.chat.id}
+                      title={row.chat.title}
+                      branchOf={row.chat.branchOf}
+                      branchParentTitle={
+                        row.chat.branchOf
+                          ? chats.find((c) => c.id === row.chat.branchOf)?.title
+                          : undefined
+                      }
+                      scheduledAgentTitle={
+                        row.chat.scheduledAgentId
+                          ? (scheduledAgentTitles[row.chat.scheduledAgentId] ??
+                            row.chat.scheduledAgentTitle)
+                          : undefined
+                      }
+                      snippet={row.chat.snippet}
+                      additionalOnChatClickCallback={additionalOnChatClickCallback}
+                      selectionMode={selectionMode}
+                      isSelected={selectedChatIds.has(row.chat.id)}
+                      onSelectionToggle={toggleSelection}
+                      onEnterSelectionMode={enterSelectionMode}
+                    />
+                  )}
                 </div>
               );
             })}
@@ -520,6 +613,7 @@ export const VirtualizedChatList = ({
         chatIds={Array.from(selectedChatIds)}
         chatCount={selectedChatIds.size}
       />
+
       <BulkExportModal
         isOpen={showBulkExportModal}
         onClose={() => setShowBulkExportModal(false)}

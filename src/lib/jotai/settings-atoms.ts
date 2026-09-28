@@ -4,20 +4,19 @@ import { atomWithStorage, RESET } from "jotai/utils";
 import type { KeyboardShortcutSettings } from "@/lib/kbd-registry";
 import type { DefaultSettings } from "@/lib/settings/types";
 import {
-  type AnalyticsIdentityOption,
   type ChatBackgroundSettings,
   type ChatSortOption,
   type ColorThemeOption,
   DEFAULT_SETTINGS,
   type FontOption,
   type InputStyleOption,
-  type LanguageOption,
+  type InterruptKeyOption,
   type MarkdownRenderingOption,
   type McpServerConfig,
   type MessageActionRowOption,
   type NotificationOption,
   type RoundnessOption,
-  type StopButtonBehaviorOption,
+  type SidebarChatTimeGroupingOption,
   type SubmitKeyOption,
   type TtsSettings,
   type TextScaleOption,
@@ -77,14 +76,14 @@ export const submitKeyAtom = createSettingAtom<SubmitKeyOption>(
   DEFAULT_SETTINGS.SUBMIT_KEY,
 );
 
+export const interruptKeyAtom = createSettingAtom<InterruptKeyOption>(
+  "INTERRUPT_KEY",
+  DEFAULT_SETTINGS.INTERRUPT_KEY,
+);
+
 export const inputStyleAtom = createSettingAtom<InputStyleOption>(
   "INPUT_STYLE",
   DEFAULT_SETTINGS.INPUT_STYLE,
-);
-
-export const languageAtom = createSettingAtom<LanguageOption>(
-  "LANGUAGE",
-  DEFAULT_SETTINGS.LANGUAGE,
 );
 
 export const maxCodeblockCharsAtom = createSettingAtom(
@@ -112,19 +111,9 @@ export const chatVirtualizationThresholdAtom = createSettingAtom(
   DEFAULT_SETTINGS.CHAT_VIRTUALIZATION_THRESHOLD,
 );
 
-export const experimentalThrottleEnabledAtom = createSettingAtom(
-  "EXPERIMENTAL_THROTTLE_ENABLED",
-  DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_ENABLED,
-);
-
-export const experimentalThrottleValueAtom = createSettingAtom(
-  "EXPERIMENTAL_THROTTLE_VALUE",
-  DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_VALUE,
-);
-
-export const smoothStreamEnabledAtom = createSettingAtom(
-  "SMOOTH_STREAM_ENABLED",
-  DEFAULT_SETTINGS.SMOOTH_STREAM_ENABLED,
+export const throttleValueAtom = createSettingAtom(
+  "THROTTLE_VALUE",
+  DEFAULT_SETTINGS.THROTTLE_VALUE,
 );
 
 export const extractReasoningEnabledAtom = createSettingAtom(
@@ -135,11 +124,6 @@ export const extractReasoningEnabledAtom = createSettingAtom(
 export const regenerateOnSaveAtom = createSettingAtom(
   "REGENERATE_ON_SAVE",
   DEFAULT_SETTINGS.REGENERATE_ON_SAVE,
-);
-
-export const stopButtonBehaviorAtom = createSettingAtom<StopButtonBehaviorOption>(
-  "STOP_BUTTON_BEHAVIOR",
-  DEFAULT_SETTINGS.STOP_BUTTON_BEHAVIOR,
 );
 
 export const showChatStatusIndicatorAtom = createSettingAtom(
@@ -183,11 +167,6 @@ export const notificationSettingAtom = createSettingAtom<NotificationOption>(
   DEFAULT_SETTINGS.NOTIFICATION_SETTING,
 );
 
-export const analyticsIdentityAtom = createSettingAtom<AnalyticsIdentityOption>(
-  "ANALYTICS_IDENTITY",
-  DEFAULT_SETTINGS.ANALYTICS_IDENTITY,
-);
-
 export const enabledToolsAtom = createSettingAtom<Record<ToolId, boolean>>(
   "ENABLED_TOOLS",
   DEFAULT_SETTINGS.ENABLED_TOOLS,
@@ -225,6 +204,11 @@ export const showMessageActionRowAtom = createSettingAtom<MessageActionRowOption
 export const chatSortAtom = createSettingAtom<ChatSortOption>(
   "CHAT_SORT",
   DEFAULT_SETTINGS.CHAT_SORT,
+);
+
+export const sidebarChatTimeGroupingAtom = createSettingAtom<SidebarChatTimeGroupingOption>(
+  "SIDEBAR_CHAT_TIME_GROUPING",
+  DEFAULT_SETTINGS.SIDEBAR_CHAT_TIME_GROUPING,
 );
 
 export const chatBackgroundAtom = createSettingAtom<ChatBackgroundSettings>(

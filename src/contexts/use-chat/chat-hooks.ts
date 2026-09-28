@@ -2,10 +2,13 @@ import type { UIMessage, UseChatHelpers } from "@ai-sdk/react";
 import { useContext } from "react";
 
 import type { ChatMetadata } from "@/contexts/use-persistence/persistence-context";
+import type { ModelConfig } from "@/hooks/ai/use-model-catalog";
 
 import {
   ChatApprovalHandlerContext,
   ChatFunctionsContext,
+  ChatGetFunctionsContext,
+  ChatGetMessagesContext,
   ChatLoadingContext,
   ChatMessagesContext,
   ChatMetadataContext,
@@ -28,6 +31,12 @@ export type ChatFunctionsContextType = Pick<
   | "setMessages"
 > & {
   updateMcpAppModelContext: (viewId: string, context: unknown) => void;
+  programmaticNewChat: (params: {
+    message: string;
+    modelId?: string | null;
+    modelConfig?: ModelConfig | null;
+    scheduledAgent?: { id: string; title: string };
+  }) => Promise<string | null>;
 };
 
 export type ChatApprovalHandler = (args: {
@@ -35,6 +44,9 @@ export type ChatApprovalHandler = (args: {
   approved: boolean;
   reason?: string;
 }) => Promise<void>;
+
+export type ChatGetMessagesContextType = () => UIMessage[];
+export type ChatGetFunctionsContextType = () => ChatFunctionsContextType;
 
 export const useChatMessages = (): ChatMessagesContextType => {
   const context = useContext(ChatMessagesContext);
@@ -68,6 +80,22 @@ export const useChatFunctions = (): ChatFunctionsContextType => {
   const context = useContext(ChatFunctionsContext);
   if (context === undefined) {
     throw new Error("useChatFunctions must be used within a ChatProvider");
+  }
+  return context;
+};
+
+export const useGetChatMessages = (): ChatGetMessagesContextType => {
+  const context = useContext(ChatGetMessagesContext);
+  if (context === undefined) {
+    throw new Error("useGetChatMessages must be used within a ChatProvider");
+  }
+  return context;
+};
+
+export const useGetChatFunctions = (): ChatGetFunctionsContextType => {
+  const context = useContext(ChatGetFunctionsContext);
+  if (context === undefined) {
+    throw new Error("useGetChatFunctions must be used within a ChatProvider");
   }
   return context;
 };

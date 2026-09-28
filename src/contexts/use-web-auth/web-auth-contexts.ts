@@ -1,6 +1,5 @@
 import { createContext } from "react";
 
-import i18n from "@/lib/i18n";
 import { getPlanNameForProductId, polarProductIds } from "@/lib/polar-products";
 
 export interface WebAuthUser {
@@ -83,10 +82,10 @@ export function getActivePaidSubscription(
 
 export function getPlanNameForSubscription(subscription: Subscription | null | undefined): string {
   if (!subscription || subscription.productId === polarProductIds.free) {
-    return i18n.t("account.freePlan");
+    return "Free";
   }
 
-  return getPlanNameForProductId(subscription.productId) ?? i18n.t("account.unknownPlan");
+  return getPlanNameForProductId(subscription.productId) ?? "Unknown Plan";
 }
 
 export function hasAgentOneCreditsAvailable(
