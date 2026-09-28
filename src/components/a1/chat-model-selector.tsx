@@ -86,8 +86,6 @@ const MODEL_CAPABILITIES = [
 interface ModelListProps {
   rows: VirtualRow[];
   currentModel: ModelData | undefined;
-  parentRef: React.RefObject<HTMLDivElement | null>;
-  virtualizer: ReturnType<typeof useVirtualizer<HTMLDivElement, Element>>;
   searchQuery: string;
   capabilityFilters: ModelCapability[];
   onSelect: (modelId: string) => void;
@@ -101,20 +99,53 @@ const ITEM_HEIGHT = 32;
 const ModelList: FC<ModelListProps> = ({
   rows,
   currentModel,
-  parentRef,
-  virtualizer,
   searchQuery,
   capabilityFilters,
   onSelect,
   setSearchQuery,
   setCapabilityFilters,
 }) => {
+  const parentRef = useRef<HTMLDivElement>(null);
   const [stickyState, setStickyState] = useState<{
     provider: string;
     providerId: string;
     translateY: number;
     scrollbarWidth: number;
   } | null>(null);
+
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: (index) => {
+      const row = rows[index];
+      if (row.type === "heading") return HEADING_HEIGHT;
+      return ITEM_HEIGHT;
+    },
+    overscan: 10,
+  });
+
+  const measureVirtualizer = useEffectEvent(() => {
+    virtualizer.measure();
+  });
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => measureVirtualizer());
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  const scrollToTop = useEffectEvent(() => {
+    const frame = requestAnimationFrame(() => {
+      parentRef.current?.scrollTo({ top: 0 });
+      virtualizer.scrollToOffset(0);
+    });
+
+    return () => cancelAnimationFrame(frame);
+  });
+
+  useEffect(() => {
+    return scrollToTop();
+  }, [searchQuery, capabilityFilters]);
 
   const headingOffsets = useMemo(() => {
     const offsets: { provider: string; providerId: string; offset: number }[] = [];
@@ -366,7 +397,6 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const [staleModel, setStaleModel] = useState(currentModel);
   const [searchQuery, setSearchQuery] = useState("");
   const [capabilityFilters, setCapabilityFilters] = useState<ModelCapability[]>([]);
-  const parentRef = useRef<HTMLDivElement>(null);
   const { AVAILABLE_ENABLED_CHAT_MODELS, isModelCatalogLoading } = useModelCatalog();
 
   if (!loading && staleModel !== currentModel) {
@@ -436,56 +466,11 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     return result;
   }, [filteredModels]);
 
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const virtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: (index) => {
-      const row = rows[index];
-      if (row.type === "heading") return HEADING_HEIGHT;
-      return ITEM_HEIGHT;
-    },
-    overscan: 10,
-  });
-
-  // Read https://react.dev/learn/separating-events-from-effects#extracting-non-reactive-logic-out-of-effects for more info about useEffectEvent
-  const measureVirtualizer = useEffectEvent(() => {
-    if (effectiveOpen) {
-      const frame = requestAnimationFrame(() => {
-        virtualizer.measure();
-      });
-      return () => cancelAnimationFrame(frame);
-    }
-  });
-
-  useEffect(() => {
-    measureVirtualizer();
-  }, [effectiveOpen]);
-
-  const scrollToTop = useEffectEvent(() => {
-    if (!effectiveOpen) {
-      return;
-    }
-
-    const frame = requestAnimationFrame(() => {
-      parentRef.current?.scrollTo({ top: 0 });
-      virtualizer.scrollToOffset(0);
-    });
-
-    return () => cancelAnimationFrame(frame);
-  });
-
-  useEffect(() => {
-    scrollToTop();
-  }, [effectiveOpen, searchQuery, capabilityFilters]);
-
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
     if (!newOpen) {
       setSearchQuery("");
       setCapabilityFilters([]);
-      parentRef.current?.scrollTo({ top: 0 });
-      virtualizer.scrollToOffset(0);
     }
   };
 
@@ -545,8 +530,6 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
         <ModelList
           rows={rows}
           currentModel={currentModel}
-          parentRef={parentRef}
-          virtualizer={virtualizer}
           searchQuery={searchQuery}
           capabilityFilters={capabilityFilters}
           onSelect={handleSelect}
