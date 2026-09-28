@@ -190,15 +190,16 @@ export default function KeyboardShortcutsSection() {
             </div>
           </SettingsTarget>
 
-          <div className="flex gap-1">
-            <IconBulb className="size-5 shrink-0" />
-            <span>
-              You can change the send key in (<Kbd>Enter</Kbd> / <Kbd>Ctrl/CMD+Enter</Kbd>){" "}
+          <Alert>
+            <IconBulb />
+            <AlertTitle>Other shortcuts</AlertTitle>
+            <AlertDescription>
+              The submit key and interrupt keyboard shortcuts are in{" "}
               <SettingsLink tab="chats" id="setting-submit-key" className="underline">
                 chat settings.
               </SettingsLink>
-            </span>
-          </div>
+            </AlertDescription>
+          </Alert>
 
           <div className="divide-y rounded-md border">
             {keyboardShortcutDefinitions.map((definition) => {
