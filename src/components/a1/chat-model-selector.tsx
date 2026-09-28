@@ -479,17 +479,19 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     scrollToTop();
   }, [effectiveOpen, searchQuery, capabilityFilters]);
 
-  const handleSelect = (modelId: string) => {
-    setModel(modelId);
-    setOpen(false);
-  };
-
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
     if (!newOpen) {
       setSearchQuery("");
       setCapabilityFilters([]);
+      parentRef.current?.scrollTo({ top: 0 });
+      virtualizer.scrollToOffset(0);
     }
+  };
+
+  const handleSelect = (modelId: string) => {
+    setModel(modelId);
+    handleOpenChange(false);
   };
 
   const triggerContent = displayedModel ? (
