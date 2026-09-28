@@ -222,7 +222,7 @@ export function calculateChatUsageFromMessages(messages: UIMessage[]): ChatUsage
     }
 
     const usageMetadata = metadata as ChatMessageMetadata;
-    const usageSummary = summarizeUsage(usageMetadata.usage);
+    const usageSummary = summarizeUsage(usageMetadata.totalUsage ?? usageMetadata.usage);
 
     inputTokens += usageSummary.inputTokens;
     outputTokens += usageSummary.outputTokens;

@@ -326,6 +326,8 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     defaultModelForNewChats?.model ?? null,
     defaultModelForNewChats?.id ?? null,
     defaultModelConfigForNewChats,
+    undefined,
+    defaultModelForNewChats?.contextWindow,
   );
   const pendingProgrammaticMessagesRef = useRef(
     new Map<string, { message: Parameters<typeof defaultChat.sendMessage>[0] }>(),
@@ -494,13 +496,16 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     () => ({
       status: currentChatId ? (stableFocusedChatInstance?.status ?? "ready") : defaultChat.status,
       error: currentChatId ? stableFocusedChatInstance?.error : defaultChat.error,
+      compaction: currentChatId ? stableFocusedChatInstance?.compaction : defaultChat.compaction,
     }),
     [
       currentChatId,
       stableFocusedChatInstance?.status,
       stableFocusedChatInstance?.error,
+      stableFocusedChatInstance?.compaction,
       defaultChat.status,
       defaultChat.error,
+      defaultChat.compaction,
     ],
   );
 
@@ -651,6 +656,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
             model={chatModel.model}
             modelId={chatModel.id}
             modelConfig={chatConfig}
+            contextWindow={chatModel.contextWindow}
             initialMessages={initialMessages}
             onInstanceUpdate={handleInstanceUpdate}
             onStatusChange={handleStatusChange}

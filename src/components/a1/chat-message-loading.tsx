@@ -1,5 +1,6 @@
 import type { UIMessage } from "ai";
 
+import { MessagePartCompaction } from "@/components/a1/messages/parts/compaction";
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { useTools } from "@/contexts/use-tools/tools-hooks";
@@ -31,7 +32,7 @@ export const ChatMessageLoading = ({
   messageId?: string;
   messageRole?: UIMessage["role"];
 }) => {
-  const { status } = useChatStatus();
+  const { status, compaction } = useChatStatus();
   const messages = useChatMessages();
   const { isApiKeysLoading } = useApiKeys();
   const { isMcpLoading } = useTools();
@@ -42,6 +43,16 @@ export const ChatMessageLoading = ({
   if (mode === "inMessage") {
     if (!isLatestMessageOverall || messageRole !== "assistant") {
       return null;
+    }
+
+    if (compaction && (status === "streaming" || status === "submitted")) {
+      return (
+        <MessagePartCompaction
+          id={compaction.id}
+          summary={compaction.summary}
+          progress={compaction}
+        />
+      );
     }
 
     if (status === "streaming") {
@@ -64,7 +75,15 @@ export const ChatMessageLoading = ({
       if (!lastOverallMessage || lastOverallMessage.role === "user") {
         return (
           <div className="justify-end p-2">
-            <LoadingIndicator isApiKeysLoading={isApiKeysLoading} isMcpLoading={isMcpLoading} />
+            {compaction ? (
+              <MessagePartCompaction
+                id={compaction.id}
+                summary={compaction.summary}
+                progress={compaction}
+              />
+            ) : (
+              <LoadingIndicator isApiKeysLoading={isApiKeysLoading} isMcpLoading={isMcpLoading} />
+            )}
           </div>
         );
       }

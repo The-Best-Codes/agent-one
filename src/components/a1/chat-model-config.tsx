@@ -30,6 +30,12 @@ import {
   getToolBehavior,
   type ToolBehavior,
 } from "@/hooks/ai/use-model-catalog";
+import {
+  DEFAULT_COMPACTION_THRESHOLD,
+  MIN_COMPACTION_THRESHOLD,
+  MAX_COMPACTION_THRESHOLD,
+  getCompactionThreshold,
+} from "@/lib/ai/chat-compaction";
 import { cn } from "@/lib/utils";
 
 interface SliderConfigProps {
@@ -162,7 +168,7 @@ export const ChatModelConfig = ({
   disabled?: boolean;
   triggerClassName?: string;
 }) => {
-  const { currentModelConfig, setModelConfig } = useModel();
+  const { currentModel, currentModelConfig, setModelConfig } = useModel();
   const [open, setOpen] = useState(false);
   const effectiveOpen = disabled ? false : open;
   const toolBehavior = getToolBehavior(currentModelConfig);
@@ -174,6 +180,8 @@ export const ChatModelConfig = ({
     maxSteps: currentModelConfig.maxSteps,
     seed: currentModelConfig.seed,
   });
+
+  const compactionThreshold = getCompactionThreshold(currentModelConfig.compactionThreshold);
 
   const configRef = useRef(currentModelConfig);
   useEffect(() => {
@@ -245,10 +253,12 @@ export const ChatModelConfig = ({
       presencePenalty: DEFAULT_MODEL_CONFIG.presencePenalty,
       seed: DEFAULT_MODEL_CONFIG.seed,
       toolBehavior: DEFAULT_MODEL_CONFIG.toolBehavior,
+      compactionThreshold: undefined,
     });
   };
 
   const isAtDefaults =
+    compactionThreshold === DEFAULT_COMPACTION_THRESHOLD &&
     currentModelConfig.temperature === DEFAULT_MODEL_CONFIG.temperature &&
     currentModelConfig.maxTokens === DEFAULT_MODEL_CONFIG.maxTokens &&
     currentModelConfig.maxSteps === DEFAULT_MODEL_CONFIG.maxSteps &&
@@ -274,6 +284,22 @@ export const ChatModelConfig = ({
           <span className="sr-only">Reset all</span>
         </Button>
       </div>
+
+      <SliderConfig
+        id="compaction-threshold"
+        label="Compact conversation at (%)"
+        tooltip="Summarize the conversation when the model's reported context usage reaches this percentage. Defaults to 95%. Requires a known context limit and reported token usage."
+        value={compactionThreshold}
+        min={MIN_COMPACTION_THRESHOLD}
+        max={MAX_COMPACTION_THRESHOLD}
+        step={1}
+        onChange={(value) => setModelConfig({ ...configRef.current, compactionThreshold: value })}
+      />
+      {!currentModel?.contextWindow && (
+        <p className="text-muted-foreground text-sm">
+          Context limit unavailable. Automatic compaction is inactive for this model.
+        </p>
+      )}
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">

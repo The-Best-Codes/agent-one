@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useTools } from "@/contexts/use-tools/tools-hooks";
 import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
+import type { CompactionProgress } from "@/lib/ai/chat-compaction";
 import { CustomChatTransport } from "@/lib/ai/custom-chat-transport";
 import { systemPromptAtom } from "@/lib/jotai/atoms";
 import { extractReasoningEnabledAtom } from "@/lib/jotai/settings-atoms";
@@ -31,7 +32,9 @@ export function useChat(
   modelId: string | null,
   modelConfig: ModelConfig,
   options?: CustomChatOptions,
+  contextWindow?: number,
 ) {
+  const [compaction, setCompaction] = useState<CompactionProgress | null>(null);
   const extractReasoningEnabled = useAtomValue(extractReasoningEnabledAtom);
   const systemPrompt = useAtomValue(systemPromptAtom);
   const { getApiKeysLoadedPromise } = useApiKeys();
@@ -47,8 +50,13 @@ export function useChat(
         getTools,
         getSystemPrompt,
         getApiKeysLoadedPromise,
+        contextWindow,
       ),
   );
+
+  useEffect(() => {
+    transport.updateContextWindow(contextWindow);
+  }, [contextWindow, transport]);
 
   useEffect(() => {
     transport.updateModel(model);
@@ -101,6 +109,20 @@ export function useChat(
   } = useChatSDK({
     transport,
     ...options,
+    onData: (part) => {
+      if (part.type === "data-compaction-progress") {
+        setCompaction(part.data as CompactionProgress | null);
+      }
+      options?.onData?.(part);
+    },
+    onFinish: (event) => {
+      setCompaction(null);
+      options?.onFinish?.(event);
+    },
+    onError: (error) => {
+      setCompaction(null);
+      options?.onError?.(error);
+    },
   });
   const messagesRef = useRef(messages);
 
@@ -109,11 +131,12 @@ export function useChat(
   }, [messages]);
 
   const syncTransport = useCallback(() => {
+    transport.updateContextWindow(contextWindow);
     transport.updateModel(model);
     transport.updateModelId(modelId);
     transport.updateModelConfig(modelConfig);
     transport.updateExtractReasoningEnabled(extractReasoningEnabled);
-  }, [model, modelId, modelConfig, extractReasoningEnabled, transport]);
+  }, [model, modelId, modelConfig, contextWindow, extractReasoningEnabled, transport]);
 
   const sendMessage = useCallback<typeof sendMessageSdk>(
     async (message, sendOptions) => {
@@ -152,6 +175,7 @@ export function useChat(
   );
 
   return {
+    compaction,
     addToolApprovalResponse,
     addToolOutput,
     clearError,

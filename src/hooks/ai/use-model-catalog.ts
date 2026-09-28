@@ -53,6 +53,7 @@ export interface ModelData {
 export type ToolBehavior = "default" | "ask" | "yolo" | "disable";
 
 export interface ModelConfig {
+  compactionThreshold?: number;
   temperature?: number;
   maxTokens?: number;
   maxSteps?: number;

@@ -2,7 +2,8 @@ import { type UIMessage } from "@ai-sdk/react";
 import {
   type ChatRequestOptions,
   type ChatTransport,
-  convertToModelMessages,
+  createUIMessageStream,
+  generateId,
   extractReasoningMiddleware,
   type LanguageModel,
   isStepCount,
@@ -16,8 +17,16 @@ import {
 
 import { getToolBehavior, type ModelConfig, type ToolBehavior } from "@/hooks/ai/use-model-catalog";
 import {
+  compactConversation,
+  createCompactedMessages,
+  getCompactedModelMessages,
+  getCompactionThreshold,
+  hasUnresolvedToolCalls,
+} from "@/lib/ai/chat-compaction";
+import {
   addMessageTokenUsage,
   createEmptyMessageTokenUsage,
+  getLastAssistantUsage,
   type ChatMessageMetadata,
 } from "@/lib/ai/chat-usage";
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
@@ -29,6 +38,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   private model: LanguageModel | null;
   private modelId: string | null;
   private modelConfig: ModelConfig;
+  private contextWindow: number | undefined;
   private extractReasoningEnabled: boolean;
   private mcpAppModelContexts = new Map<string, unknown>();
   private getTools: (options?: {
@@ -49,7 +59,9 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     }) => Promise<ToolSet>,
     getSystemPrompt: () => string,
     getApiKeysLoadedPromise: () => Promise<void>,
+    contextWindow?: number,
   ) {
+    this.contextWindow = contextWindow;
     this.model = model;
     this.modelId = modelId;
     this.modelConfig = modelConfig;
@@ -65,6 +77,10 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       "CustomChatTransport model updated to:",
       typeof model === "string" ? model : model?.modelId,
     );
+  }
+
+  updateContextWindow(contextWindow: number | undefined) {
+    this.contextWindow = contextWindow;
   }
 
   updateModelId(modelId: string | null) {
@@ -123,6 +139,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     const baseModel = this.model;
     const modelId = this.modelId;
     const modelConfig = this.modelConfig;
+    const contextWindow = this.contextWindow;
     const extractReasoningEnabled = this.extractReasoningEnabled;
 
     if (!baseModel) {
@@ -156,67 +173,115 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
 
     const stopWhenCondition: StopCondition<ToolSet> =
       modelConfig.maxSteps === undefined ? () => false : isStepCount(modelConfig.maxSteps);
-    const messages = await convertToModelMessages(options.messages);
+    const messages = await getCompactedModelMessages(options.messages);
+    const previousAssistant = [...options.messages]
+      .reverse()
+      .find((message) => message.role === "assistant");
+    const previousMetadata = previousAssistant?.metadata as ChatMessageMetadata | undefined;
+    const latestUsage = getLastAssistantUsage(options.messages);
+    const continuing = options.messages.at(-1)?.role === "assistant";
+    let totalUsage = continuing
+      ? (previousMetadata?.totalUsage ?? createEmptyMessageTokenUsage())
+      : createEmptyMessageTokenUsage();
+    const errorMessage = (error: unknown) => {
+      logger.error("Error occurred in CustomChatTransport:", error);
+      if (error instanceof Error) return error.message;
+      if (typeof error === "string") return error;
+      return error == null ? "Unknown error" : JSON.stringify(error);
+    };
 
-    const result = streamText({
-      model,
-      temperature: modelConfig.temperature,
-      maxOutputTokens: modelConfig.maxTokens,
-      topP: modelConfig.topP,
-      topK: modelConfig.topK,
-      frequencyPenalty: modelConfig.frequencyPenalty,
-      presencePenalty: modelConfig.presencePenalty,
-      seed: modelConfig.seed,
-      messages,
-      abortSignal: options.abortSignal,
-      tools,
-      toolChoice: toolBehavior === "disable" ? "none" : "auto",
-      stopWhen: stopWhenCondition,
-      instructions,
-      onError: (error) => {
-        logger.error("Error occurred in CustomChatTransport streamText:", error);
-      },
-      onAbort: () => {
-        logger.verbose("Stream aborted");
-      },
-    });
+    return createUIMessageStream({
+      originalMessages: options.messages,
+      onError: errorMessage,
+      execute: ({ writer }) => {
+        writer.write({ type: "start" });
+        const result = streamText({
+          model,
+          temperature: modelConfig.temperature,
+          maxOutputTokens: modelConfig.maxTokens,
+          topP: modelConfig.topP,
+          topK: modelConfig.topK,
+          frequencyPenalty: modelConfig.frequencyPenalty,
+          presencePenalty: modelConfig.presencePenalty,
+          seed: modelConfig.seed,
+          messages,
+          abortSignal: options.abortSignal,
+          tools,
+          toolChoice: toolBehavior === "disable" ? "none" : "auto",
+          stopWhen: stopWhenCondition,
+          instructions,
+          prepareStep: async ({ messages: stepMessages, steps }) => {
+            const usage = steps.length > 0 ? steps.at(-1)?.usage : latestUsage;
+            const tokens =
+              usage?.totalTokens ??
+              (usage?.inputTokens !== undefined && usage.outputTokens !== undefined
+                ? usage.inputTokens + usage.outputTokens
+                : undefined);
+            if (
+              !contextWindow ||
+              !Number.isFinite(contextWindow) ||
+              contextWindow <= 0 ||
+              tokens === undefined ||
+              !Number.isFinite(tokens) ||
+              tokens <
+                (contextWindow * getCompactionThreshold(modelConfig.compactionThreshold)) / 100 ||
+              hasUnresolvedToolCalls(stepMessages)
+            )
+              return;
 
-    let totalUsage = createEmptyMessageTokenUsage();
-
-    return toUIMessageStream({
-      stream: result.stream,
-      tools,
-      messageMetadata: ({ part }) => {
-        if (part.type !== "finish-step") {
-          return undefined;
-        }
-
-        totalUsage = addMessageTokenUsage(totalUsage, part.usage);
-
-        const metadata: ChatMessageMetadata = {
-          modelId: modelId ?? undefined,
-          usage: part.usage,
-          totalUsage,
-        };
-
-        return metadata;
-      },
-      onError: (error) => {
-        logger.error("Error occurred in CustomChatTransport toUIMessageStream:", error);
-
-        if (error == null) {
-          return "Unknown error";
-        }
-
-        if (typeof error === "string") {
-          return error;
-        }
-
-        if (error instanceof Error) {
-          return error.message;
-        }
-
-        return JSON.stringify(error);
+            const id = generateId();
+            try {
+              const summary = await compactConversation({
+                model,
+                messages: stepMessages,
+                contextWindow,
+                abortSignal: options.abortSignal,
+                onProgress: (progress) =>
+                  writer.write({
+                    type: "data-compaction-progress",
+                    id,
+                    data: { ...progress, id },
+                    transient: true,
+                  }),
+                onUsage: (usage) => {
+                  totalUsage = addMessageTokenUsage(totalUsage, usage);
+                  writer.write({
+                    type: "message-metadata",
+                    messageMetadata: { modelId: modelId ?? undefined, totalUsage },
+                  });
+                },
+              });
+              options.abortSignal?.throwIfAborted();
+              writer.write({ type: "data-compaction", id, data: { summary } });
+              return { messages: createCompactedMessages(summary) };
+            } finally {
+              writer.write({ type: "data-compaction-progress", id, data: null, transient: true });
+            }
+          },
+          onError: ({ error }) => {
+            logger.error("Chat generation failed:", error);
+          },
+          onAbort: () => {
+            logger.verbose("Stream aborted");
+          },
+        });
+        writer.merge(
+          toUIMessageStream({
+            stream: result.stream,
+            tools,
+            sendStart: false,
+            messageMetadata: ({ part }) => {
+              if (part.type !== "finish-step") return undefined;
+              totalUsage = addMessageTokenUsage(totalUsage, part.usage);
+              return {
+                modelId: modelId ?? undefined,
+                usage: part.usage,
+                totalUsage,
+              } satisfies ChatMessageMetadata;
+            },
+            onError: errorMessage,
+          }),
+        );
       },
     });
   }

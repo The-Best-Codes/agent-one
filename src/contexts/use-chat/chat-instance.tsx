@@ -32,6 +32,7 @@ export const ChatInstance = memo(
     model,
     modelId,
     modelConfig,
+    contextWindow,
     initialMessages,
     onInstanceUpdate,
     onStatusChange,
@@ -40,6 +41,7 @@ export const ChatInstance = memo(
     model: LanguageModel;
     modelId: string;
     modelConfig: ModelConfig;
+    contextWindow?: number;
     initialMessages: UIMessage[];
     onInstanceUpdate: (id: string, instance: ChatInstanceHelpers) => void;
     onStatusChange: (
@@ -69,17 +71,23 @@ export const ChatInstance = memo(
       });
     }, []);
 
-    const chat = useChat(model, modelId, modelConfig, {
-      throttle: throttleValue,
-      sendAutomaticallyWhen,
-      onFinish: ({ isAbort }) => {
-        if (isAbort) {
-          suppressAutoSubmitAfterAbortRef.current = true;
-        }
+    const chat = useChat(
+      model,
+      modelId,
+      modelConfig,
+      {
+        throttle: throttleValue,
+        sendAutomaticallyWhen,
+        onFinish: ({ isAbort }) => {
+          if (isAbort) {
+            suppressAutoSubmitAfterAbortRef.current = true;
+          }
+        },
+        id: chatId,
+        messages: initialMessages,
       },
-      id: chatId,
-      messages: initialMessages,
-    });
+      contextWindow,
+    );
 
     useEffect(() => {
       const pendingApproval = chat.messages
@@ -209,7 +217,15 @@ export const ChatInstance = memo(
       onInstanceUpdate(chatId, chat);
       // TODO: Address this later?
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [chatId, chat.status, chat.messages, chat.sendMessage, chat.regenerate, onInstanceUpdate]);
+    }, [
+      chatId,
+      chat.status,
+      chat.messages,
+      chat.compaction,
+      chat.sendMessage,
+      chat.regenerate,
+      onInstanceUpdate,
+    ]);
 
     return null;
   },
@@ -218,6 +234,7 @@ export const ChatInstance = memo(
       prevProps.chatId === nextProps.chatId &&
       prevProps.model === nextProps.model &&
       prevProps.modelId === nextProps.modelId &&
+      prevProps.contextWindow === nextProps.contextWindow &&
       prevProps.initialMessages === nextProps.initialMessages &&
       prevProps.onInstanceUpdate === nextProps.onInstanceUpdate &&
       prevProps.onStatusChange === nextProps.onStatusChange &&

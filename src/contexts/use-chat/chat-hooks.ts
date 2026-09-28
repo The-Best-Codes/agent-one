@@ -3,6 +3,7 @@ import { useContext } from "react";
 
 import type { ChatMetadata } from "@/contexts/use-persistence/persistence-context";
 import type { ModelConfig } from "@/hooks/ai/use-model-catalog";
+import type { CompactionProgress } from "@/lib/ai/chat-compaction";
 
 import {
   ChatApprovalHandlerContext,
@@ -17,7 +18,9 @@ import {
 
 // Hook types
 export type ChatMessagesContextType = UIMessage[];
-export type ChatStatusContextType = Pick<UseChatHelpers<UIMessage>, "status" | "error">;
+export type ChatStatusContextType = Pick<UseChatHelpers<UIMessage>, "status" | "error"> & {
+  compaction?: CompactionProgress | null;
+};
 export type ChatMetadataContextType = ChatMetadata;
 export type ChatFunctionsContextType = Pick<
   UseChatHelpers<UIMessage>,

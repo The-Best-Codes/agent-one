@@ -1,5 +1,7 @@
 import type { UIMessage } from "ai";
 
+import { isCompactionPart } from "@/lib/ai/chat-compaction";
+
 import { MessagePartDynamicTool } from "../parts/dynamic-tool";
 import { MessagePartFallback } from "../parts/fallback";
 import { MessagePartFile } from "../parts/file";
@@ -7,6 +9,7 @@ import { MessagePartReasoning } from "../parts/reasoning";
 import { MessagePartStepStart } from "../parts/step-start";
 import { MessagePartText } from "../parts/text";
 import { MessageToolHandler } from "../tool-handler";
+import { MessagePartCompaction } from "./compaction";
 
 export function SubagentTranscript({ message }: { message: UIMessage }) {
   return (
@@ -34,6 +37,8 @@ export function SubagentTranscript({ message }: { message: UIMessage }) {
           case "dynamic-tool":
             return <MessagePartDynamicTool key={key} part={part} labels={null} />;
           default:
+            if (isCompactionPart(part))
+              return <MessagePartCompaction key={key} id={part.id} summary={part.data.summary} />;
             if (part.type.startsWith("tool-")) {
               return <MessageToolHandler key={key} part={{ ...part }} />;
             }

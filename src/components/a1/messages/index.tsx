@@ -4,6 +4,7 @@ import { useAtom } from "jotai";
 import { memo, useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
@@ -13,9 +14,10 @@ import {
   DropdownMenuGroup,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useGetChatMessages } from "@/contexts/use-chat/chat-hooks";
+import { useChatMessages, useGetChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useMessageEditing } from "@/hooks/use-message-editing";
+import { findLatestCompaction, isCompactionPart } from "@/lib/ai/chat-compaction";
 import type { ToolDisplayLabels } from "@/lib/ai/tools/describeNextTool";
 import { getToolDisplayName } from "@/lib/ai/tools/mcp";
 import { regenerateOnSaveAtom } from "@/lib/jotai/settings-atoms";
@@ -26,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { ChatMessageLoading } from "../chat-message-loading";
 import { MessageGroup } from "./group";
 import { InlineTextEditor } from "./inline-text-editor";
+import { MessagePartCompaction } from "./parts/compaction";
 import { MessagePartDynamicTool } from "./parts/dynamic-tool";
 import { MessagePartFallback } from "./parts/fallback";
 import { MessagePartFile } from "./parts/file";
@@ -103,6 +106,8 @@ const MessagePartsInternal = ({
           return `[Source Document: ${part?.title || "Unnamed document"}, ${
             part?.filename || "Unnamed file"
           }]`;
+        } else if (isCompactionPart(part)) {
+          return `[Conversation summary: ${part.data.summary}]`;
         } else if (part.type.startsWith("data-")) {
           return `[Data: ${JSON.stringify(part)}]`;
         } else if (part.type === "tool-describeNextTool") {
@@ -209,6 +214,9 @@ const MessagePartsInternal = ({
           return <MessagePartDynamicTool key={key} part={part} labels={toolLabels} />;
         }
         default:
+          if (isCompactionPart(part)) {
+            return <MessagePartCompaction key={key} id={part.id} summary={part.data.summary} />;
+          }
           if (part.type.startsWith("tool-")) {
             return <MessageToolHandler key={key} part={{ ...part }} />; // Using a spread operator to ensure React.memo will get a new instance of part
           }
@@ -246,6 +254,10 @@ const MessagePartsInternal = ({
           message.role === "assistant" ? "my-2" : "mt-2 max-w-3/4 self-end",
         )}
       >
+        <CompactedEditWarning
+          messageId={message.id}
+          regenerating={message.role === "user" && regenerateOnSave}
+        />
         <div className="flex flex-col">{renderedParts}</div>
 
         <div className="mt-2 flex items-center justify-end gap-1.5">
@@ -305,3 +317,30 @@ const MessagePartsInternal = ({
 
 export const MessageParts = memo(MessagePartsInternal);
 MessageParts.displayName = "MessageParts";
+
+function CompactedEditWarning({
+  messageId,
+  regenerating,
+}: {
+  messageId: string;
+  regenerating: boolean;
+}) {
+  const messages = useChatMessages();
+  const latest = findLatestCompaction(messages);
+  const messageIndex = messages.findIndex((message) => message.id === messageId);
+  if (!latest || messageIndex < 0 || messageIndex > latest.messageIndex) return null;
+  if (
+    messageIndex === latest.messageIndex &&
+    !messages[messageIndex].parts.slice(0, latest.partIndex).some((part) => part.type === "text")
+  )
+    return null;
+  return (
+    <Alert>
+      <AlertDescription>
+        {regenerating
+          ? "This message has already been summarized. Saving will regenerate from this message and replace the later conversation, including its summaries."
+          : "This message has already been summarized. Changes to text before the latest summary won't be visible to the AI unless you regenerate from this message."}
+      </AlertDescription>
+    </Alert>
+  );
+}
