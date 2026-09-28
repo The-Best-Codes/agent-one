@@ -97,7 +97,8 @@ export default function ChatsSection() {
     setTitleGeneration((prev) => ({ ...prev, ...updates }));
   };
 
-  const titleMaxOutputTokens = titleGeneration.maxOutputTokens ?? 1024;
+  const titleMaxOutputTokens = titleGeneration.maxOutputTokens ?? 10240;
+  const titleFallbackMethod = titleGeneration.fallbackMethod ?? "custom";
   const titleMaxOutputTokenValue = titleMaxOutputTokens === "none" ? 0 : titleMaxOutputTokens;
   const titleMaxOutputTokenLabel =
     titleMaxOutputTokens === "none" ? "No limit" : titleMaxOutputTokens.toLocaleString();
@@ -698,35 +699,6 @@ export default function ChatsSection() {
             </div>
           </SettingsTarget>
 
-          {(titleGeneration.method === "first-user-message" ||
-            titleGeneration.method === "first-assistant-message") && (
-            <SettingsTarget id="setting-character-limit">
-              <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-                <div className="flex flex-1 flex-col items-start">
-                  <Label htmlFor="character-limit" className="text-sm font-medium">
-                    Character Limit
-                  </Label>
-                  <p className="text-muted-foreground mt-1 text-sm">
-                    Maximum characters to use from the message.
-                  </p>
-                </div>
-                <Input
-                  id="character-limit"
-                  type="number"
-                  min="10"
-                  max="200"
-                  value={titleGeneration.characterLimit}
-                  onChange={(e) => {
-                    updateTitleGeneration({
-                      characterLimit: parseInt(e.target.value) || 50,
-                    });
-                  }}
-                  className="w-full md:w-32"
-                />
-              </div>
-            </SettingsTarget>
-          )}
-
           {titleGeneration.method === "ai" && (
             <SettingsTarget id="setting-title-max-output-tokens">
               <div className="flex flex-col gap-2">
@@ -757,7 +729,73 @@ export default function ChatsSection() {
             </SettingsTarget>
           )}
 
-          {titleGeneration.method === "custom" && (
+          {titleGeneration.method === "ai" && (
+            <SettingsTarget id="setting-title-fallback-method">
+              <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+                <div className="flex flex-1 flex-col items-start">
+                  <Label className="text-sm font-medium">Fallback Method</Label>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    How to name the chat if AI title generation fails.
+                  </p>
+                </div>
+                <Select
+                  value={titleFallbackMethod}
+                  onValueChange={(value) => {
+                    updateTitleGeneration({
+                      fallbackMethod: value as Exclude<TitleGenerationMethodOption, "ai">,
+                    });
+                  }}
+                >
+                  <SelectTrigger
+                    className="w-full md:w-fit md:max-w-96"
+                    aria-label="Select fallback method"
+                  >
+                    <SelectValue placeholder="Select fallback method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="first-user-message">First user message</SelectItem>
+                      <SelectItem value="first-assistant-message">
+                        First assistant message
+                      </SelectItem>
+                      <SelectItem value="custom">Custom phrase</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </SettingsTarget>
+          )}
+
+          {titleGeneration.method !== "custom" && (
+            <SettingsTarget id="setting-character-limit">
+              <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+                <div className="flex flex-1 flex-col items-start">
+                  <Label htmlFor="character-limit" className="text-sm font-medium">
+                    Character Limit
+                  </Label>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    Maximum characters in generated titles and titles taken from messages.
+                  </p>
+                </div>
+                <Input
+                  id="character-limit"
+                  type="number"
+                  min="10"
+                  max="200"
+                  value={titleGeneration.characterLimit}
+                  onChange={(e) => {
+                    updateTitleGeneration({
+                      characterLimit: parseInt(e.target.value) || 50,
+                    });
+                  }}
+                  className="w-full md:w-32"
+                />
+              </div>
+            </SettingsTarget>
+          )}
+
+          {(titleGeneration.method === "custom" ||
+            (titleGeneration.method === "ai" && titleFallbackMethod === "custom")) && (
             <SettingsTarget id="setting-custom-phrase">
               <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
                 <div className="flex flex-1 flex-col items-start">
@@ -765,16 +803,24 @@ export default function ChatsSection() {
                     Custom Phrase
                   </Label>
                   <p className="text-muted-foreground mt-1 text-sm">
-                    The phrase to use as the chat title.
+                    {titleGeneration.method === "custom"
+                      ? "The phrase to use as the chat title."
+                      : "Used if AI title generation fails."}
                   </p>
                 </div>
                 <Input
                   id="custom-phrase"
                   type="text"
-                  value={titleGeneration.customPhrase}
+                  value={
+                    titleGeneration.method === "ai" && !titleGeneration.fallbackMethod
+                      ? titleGeneration.fallbackPhrase
+                      : titleGeneration.customPhrase
+                  }
                   onChange={(e) => {
                     updateTitleGeneration({
-                      customPhrase: e.target.value,
+                      [titleGeneration.method === "ai" && !titleGeneration.fallbackMethod
+                        ? "fallbackPhrase"
+                        : "customPhrase"]: e.target.value,
                     });
                   }}
                   placeholder="New chat"
@@ -784,32 +830,33 @@ export default function ChatsSection() {
             </SettingsTarget>
           )}
 
-          {titleGeneration.method !== "custom" && (
-            <SettingsTarget id="setting-fallback-phrase">
-              <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-                <div className="flex flex-1 flex-col items-start">
-                  <Label htmlFor="fallback-phrase" className="text-sm font-medium">
-                    Fallback Phrase
-                  </Label>
-                  <p className="text-muted-foreground mt-1 text-sm">
-                    Used when title generation fails or no content is available.
-                  </p>
+          {titleGeneration.method !== "custom" &&
+            (titleGeneration.method !== "ai" || titleFallbackMethod !== "custom") && (
+              <SettingsTarget id="setting-fallback-phrase">
+                <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+                  <div className="flex flex-1 flex-col items-start">
+                    <Label htmlFor="fallback-phrase" className="text-sm font-medium">
+                      Fallback Phrase
+                    </Label>
+                    <p className="text-muted-foreground mt-1 text-sm">
+                      Used when the selected message has no text.
+                    </p>
+                  </div>
+                  <Input
+                    id="fallback-phrase"
+                    type="text"
+                    value={titleGeneration.fallbackPhrase}
+                    onChange={(e) => {
+                      updateTitleGeneration({
+                        fallbackPhrase: e.target.value,
+                      });
+                    }}
+                    placeholder="New chat"
+                    className="w-full md:w-64"
+                  />
                 </div>
-                <Input
-                  id="fallback-phrase"
-                  type="text"
-                  value={titleGeneration.fallbackPhrase}
-                  onChange={(e) => {
-                    updateTitleGeneration({
-                      fallbackPhrase: e.target.value,
-                    });
-                  }}
-                  placeholder="New chat"
-                  className="w-full md:w-64"
-                />
-              </div>
-            </SettingsTarget>
-          )}
+              </SettingsTarget>
+            )}
         </CardContent>
       </Card>
     </div>

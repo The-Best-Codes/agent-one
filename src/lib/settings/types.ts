@@ -179,6 +179,7 @@ export type TitleGenerationMethodOption =
 
 export interface TitleGenerationSettings {
   method: TitleGenerationMethodOption;
+  fallbackMethod?: Exclude<TitleGenerationMethodOption, "ai">;
   characterLimit: number;
   maxOutputTokens: number | "none";
   customPhrase: string;
@@ -449,8 +450,9 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   },
   TITLE_GENERATION: {
     method: "ai",
+    fallbackMethod: "first-user-message",
     characterLimit: 50,
-    maxOutputTokens: 1024,
+    maxOutputTokens: 10240,
     customPhrase: "New chat",
     fallbackPhrase: "New chat",
   },

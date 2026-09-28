@@ -5,7 +5,7 @@ import { getLogger } from "@/lib/logger";
 import type { TitleGenerationSettings } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
-const DEFAULT_TITLE_MAX_OUTPUT_TOKENS = 1024;
+const DEFAULT_TITLE_MAX_OUTPUT_TOKENS = 10240;
 
 function calculateMaxOutputTokens(maxTokens?: number | "none"): number | undefined {
   if (maxTokens === "none") {
@@ -46,6 +46,7 @@ export async function generateChatTitleAI(
   fallbackPhrase: string,
   maxTokens?: number | "none",
   extractReasoningEnabled = false,
+  characterLimit = 50,
 ): Promise<string> {
   logger.verbose(`Generating AI title for chat with ${messages.length} messages`);
   try {
@@ -87,7 +88,7 @@ ${conversationText}`,
     if (!title) {
       return fallbackPhrase;
     }
-    return title.length > 50 ? title.substring(0, 47) + "..." : title;
+    return truncateText(title, characterLimit);
   } catch (error) {
     logger.error("Failed to generate chat title:", error);
     return fallbackPhrase;
@@ -119,6 +120,21 @@ export function generateChatTitleFromSettings(
   }
 }
 
+export function getChatTitleFallback(
+  messages: UIMessage[],
+  settings: TitleGenerationSettings,
+): string {
+  if (!settings.fallbackMethod) return settings.fallbackPhrase;
+  if (settings.fallbackMethod === "custom") {
+    return settings.customPhrase || settings.fallbackPhrase;
+  }
+
+  return (
+    generateChatTitleFromSettings(messages, { ...settings, method: settings.fallbackMethod }) ||
+    settings.fallbackPhrase
+  );
+}
+
 export async function generateChatTitle(
   model: LanguageModel,
   messages: UIMessage[],
@@ -134,8 +150,9 @@ export async function generateChatTitle(
   return generateChatTitleAI(
     model,
     messages,
-    settings.fallbackPhrase,
+    getChatTitleFallback(messages, settings),
     maxTokens ?? settings.maxOutputTokens,
     extractReasoningEnabled,
+    settings.characterLimit,
   );
 }

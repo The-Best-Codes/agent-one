@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
-import { generateChatTitleAI } from "@/lib/ai/title-generator";
+import { generateChatTitleAI, getChatTitleFallback } from "@/lib/ai/title-generator";
 import { extractReasoningEnabledAtom, titleGenerationAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 
@@ -72,9 +72,10 @@ const ChangeTitleForm = ({
         const generatedTitle = await generateChatTitleAI(
           modelConfig.model,
           messages,
-          titleGenerationSettings.fallbackPhrase,
+          getChatTitleFallback(messages, titleGenerationSettings),
           "none",
           extractReasoningEnabled,
+          titleGenerationSettings.characterLimit,
         );
         setTitle(generatedTitle);
       }
