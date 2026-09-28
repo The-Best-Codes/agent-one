@@ -1,31 +1,18 @@
-import { IconCheck, IconChevronDown, IconX } from "@tabler/icons-react";
 import type { TextUIPart, ToolUIPart, UIMessage } from "ai";
-import { useAtom } from "jotai";
-import { memo, useCallback, useMemo } from "react";
+import { useSetAtom } from "jotai";
+import { memo, useCallback, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
-import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useGetChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
-import { useMessageEditing } from "@/hooks/use-message-editing";
 import type { ToolDisplayLabels } from "@/lib/ai/tools/describeNextTool";
 import { getToolDisplayName } from "@/lib/ai/tools/mcp";
-import { regenerateOnSaveAtom } from "@/lib/jotai/settings-atoms";
+import { setMessageEditingAtom } from "@/lib/jotai/chat-message-editing-atoms";
 import { getLogger } from "@/lib/logger";
-import { cn } from "@/lib/utils";
 
 // When these imports are updates, check if ./src/components/a1/messages/parts/subagent-transcript.tsx needs to be updated as well!
 import { ChatMessageLoading } from "../chat-message-loading";
 import { MessageGroup } from "./group";
-import { InlineTextEditor } from "./inline-text-editor";
 import { MessagePartDynamicTool } from "./parts/dynamic-tool";
 import { MessagePartFallback } from "./parts/fallback";
 import { MessagePartFile } from "./parts/file";
@@ -33,6 +20,7 @@ import { MessagePartReasoning } from "./parts/reasoning";
 import { MessagePartStepStart } from "./parts/step-start";
 import { MessagePartText } from "./parts/text";
 import { MessageToolHandler } from "./tool-handler";
+import { UserMessageEditor } from "./user-message-editor";
 
 const logger = getLogger(import.meta.url);
 
@@ -43,29 +31,23 @@ const MessagePartsInternal = ({
   message: UIMessage;
   isLastMessage?: boolean;
 }) => {
-  const {
-    isEditing,
-    canEdit,
-    isMobile,
-    textValuesRef,
-    editorRefs,
-    handleEdit,
-    handleCancel,
-    handleSave,
-    handleTextChange,
-    initialValues,
-  } = useMessageEditing({ message });
+  const [isEditing, setIsEditing] = useState(false);
+  const setMessageEditing = useSetAtom(setMessageEditingAtom);
 
   const navigate = useNavigate();
   const { id: activeChatId } = useParams<{ id: string }>();
   const { branchChat } = usePersistence();
   const getMessages = useGetChatMessages();
 
-  const [regenerateOnSave, setRegenerateOnSave] = useAtom(regenerateOnSaveAtom);
+  const handleEdit = useCallback(() => {
+    setMessageEditing({ isEditing: true, messageId: message.id });
+    setIsEditing(true);
+  }, [message.id, setMessageEditing]);
 
-  const handleEnterKey = useCallback(() => {
-    handleSave(regenerateOnSave);
-  }, [handleSave, regenerateOnSave]);
+  const handleCloseEditor = useCallback(() => {
+    setMessageEditing({ isEditing: false, messageId: message.id });
+    setIsEditing(false);
+  }, [message.id, setMessageEditing]);
 
   const handleBranch = useCallback(() => {
     if (!activeChatId) {
@@ -131,9 +113,6 @@ const MessagePartsInternal = ({
   }, [message.parts]);
 
   const renderedParts = useMemo(() => {
-    let textIndex = 0;
-
-    // eslint-disable-next-line react-hooks/refs
     return message.parts.map((part, i) => {
       const key =
         "toolCallId" in part && (part as ToolUIPart).toolCallId
@@ -141,29 +120,7 @@ const MessagePartsInternal = ({
           : `${message.id}-${i}`;
 
       switch (part.type) {
-        case "text": {
-          const thisIndex = textIndex++;
-          if (isEditing) {
-            const lastTextIndex = initialValues.length > 0 ? initialValues.length - 1 : -1;
-            return (
-              <div
-                key={key}
-                ref={(el) => {
-                  editorRefs.current[thisIndex] = el;
-                }}
-              >
-                <InlineTextEditor
-                  value={textValuesRef.current[thisIndex] ?? ""}
-                  onChange={(v) => handleTextChange(thisIndex, v)}
-                  autoFocus={thisIndex === lastTextIndex}
-                  disableEnter={isMobile}
-                  onEnter={!isMobile ? handleEnterKey : undefined}
-                  onCancel={handleCancel}
-                  className={cn(i > 1 || thisIndex > 0 ? "mt-1" : "")}
-                />
-              </div>
-            );
-          }
+        case "text":
           return (
             <MessagePartText
               key={key}
@@ -172,7 +129,6 @@ const MessagePartsInternal = ({
               messageRole={message.role}
             />
           );
-        }
         case "reasoning":
           return (
             <MessagePartReasoning
@@ -213,19 +169,7 @@ const MessagePartsInternal = ({
           return <MessagePartFallback key={key} {...part} />;
       }
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    handleCancel,
-    handleEnterKey,
-    handleTextChange,
-    initialValues.length,
-    isLastMessage,
-    isEditing,
-    isMobile,
-    message.id,
-    message.parts,
-    message.role,
-  ]);
+  }, [isLastMessage, message.id, message.parts, message.role]);
 
   const content = (
     <>
@@ -235,42 +179,7 @@ const MessagePartsInternal = ({
   );
 
   if (isEditing) {
-    return (
-      <div className="border-input focus-within:border-ring focus-within:ring-ring/50 bg-background mt-2 ml-2 flex w-full max-w-3/4 flex-col self-end rounded-md border p-2 focus-within:ring-[3px]">
-        <div className="flex flex-col">{renderedParts}</div>
-
-        <div className="mt-2 flex items-center justify-end gap-1.5">
-          <Button size="xs" variant="outline" onClick={handleCancel}>
-            <IconX data-icon="inline-start" />
-            Cancel
-          </Button>
-          <ButtonGroup>
-            <Button size="xs" variant="default" onClick={() => handleSave(regenerateOnSave)}>
-              <IconCheck data-icon="inline-start" />
-              Save
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="icon-xs" variant="default" aria-label="More options">
-                  <IconChevronDown />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-auto min-w-max">
-                <DropdownMenuGroup>
-                  <DropdownMenuCheckboxItem
-                    id="regenerate-on-save"
-                    checked={regenerateOnSave}
-                    onCheckedChange={(checked) => setRegenerateOnSave(checked as boolean)}
-                  >
-                    Regenerate when Saved
-                  </DropdownMenuCheckboxItem>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </ButtonGroup>
-        </div>
-      </div>
-    );
+    return <UserMessageEditor message={message} onClose={handleCloseEditor} />;
   }
 
   return (
@@ -279,7 +188,11 @@ const MessagePartsInternal = ({
       contentToSpeak={getTextToSpeechContent()}
       messageRole={message.role}
       messageId={message.id}
-      onEdit={canEdit ? handleEdit : undefined}
+      onEdit={
+        message.role === "user" && message.parts.some((part) => part.type === "text")
+          ? handleEdit
+          : undefined
+      }
       onBranch={activeChatId ? handleBranch : undefined}
     >
       {content}
