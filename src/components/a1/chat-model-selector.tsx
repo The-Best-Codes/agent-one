@@ -412,9 +412,9 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [capabilityFilters, setCapabilityFilters] = useState<ModelCapability[]>([]);
   const { AVAILABLE_ENABLED_CHAT_MODELS, isModelCatalogLoading } = useModelCatalog();
-  const { hasDownloadedList } = useAtomValue(modelDirectoryStatusAtom);
+  const { hasDownloadedList, isStartupComplete } = useAtomValue(modelDirectoryStatusAtom);
   const hasEnabledProvider = useAtomValue(hasEnabledProviderAtom);
-  const showDirectoryLink = !hasDownloadedList && hasEnabledProvider;
+  const showDirectoryLink = isStartupComplete && !hasDownloadedList && hasEnabledProvider;
 
   if (!loading && staleModel !== currentModel) {
     setStaleModel(currentModel);

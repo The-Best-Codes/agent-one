@@ -89,12 +89,14 @@ const DEFAULT_MODEL_DIRECTORY: ModelDirectoryData = {
 };
 
 export const downloadedModelDirectoryAtom = atom<ModelDirectoryData | null>(null);
+export const modelDirectoryStartupCompleteAtom = atom(false);
 export const modelDirectoryDataAtom = atom((get) => ({
   ...get(downloadedModelDirectoryAtom),
   ...DEFAULT_MODEL_DIRECTORY,
 }));
 export const modelDirectoryStatusAtom = atom((get) => ({
   hasDownloadedList: get(downloadedModelDirectoryAtom) !== null,
+  isStartupComplete: get(modelDirectoryStartupCompleteAtom),
   fetchedAt: get(lastModelDirectorySyncTimestampAtom),
 }));
 

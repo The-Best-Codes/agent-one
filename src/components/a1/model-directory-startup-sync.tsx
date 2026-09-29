@@ -5,6 +5,7 @@ import {
   downloadedModelDirectoryAtom,
   loadPersistedModelDirectory,
   MODEL_DIRECTORY_SYNC_INTERVAL_MS,
+  modelDirectoryStartupCompleteAtom,
   updateModelDirectory,
 } from "@/lib/ai/models/model-directory";
 import { lastModelDirectorySyncTimestampAtom } from "@/lib/jotai/atoms";
@@ -39,11 +40,17 @@ export function ModelDirectoryStartupSync() {
       if (!result.ok) {
         logger.warn("Failed to update model directory on startup", result.error);
       }
-    })().catch((error) => {
-      if (!cancelled) {
-        logger.warn("Failed to sync model directory on startup", error);
-      }
-    });
+    })()
+      .catch((error) => {
+        if (!cancelled) {
+          logger.warn("Failed to sync model directory on startup", error);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          store.set(modelDirectoryStartupCompleteAtom, true);
+        }
+      });
 
     return () => {
       cancelled = true;
