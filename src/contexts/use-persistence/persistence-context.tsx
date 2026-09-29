@@ -49,6 +49,7 @@ export interface PersistenceContextType {
   saveChatTitleState: (params: {
     chatId: string;
     titleState: "generating" | "generated" | "error";
+    title?: string;
   }) => void;
   saveChatTitle: (params: { chatId: string; title: string }) => void;
   deleteChat: (chatId: string) => void;
@@ -337,14 +338,25 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     ({
       chatId,
       titleState,
+      title,
     }: {
       chatId: string;
       titleState: "generating" | "generated" | "error";
+      title?: string;
     }) => {
       try {
-        const updated = touchMetadata({ ...getMetadata(chatId), titleState });
+        const updated = touchMetadata({
+          ...getMetadata(chatId),
+          titleState,
+          ...(title !== undefined && { title }),
+        });
         setMetadata(chatId, updated);
         persistMetadata(chatId, updated);
+        if (title !== undefined) {
+          void chatStorage.updateFtsTitle(chatId, title).catch((error) => {
+            logger.error(`Failed to update FTS title ${chatId}`, error);
+          });
+        }
         setChatUpdateTrigger((prev) => prev + 1);
       } catch (error) {
         logger.error(`Failed to save chat title state ${chatId}`, error);

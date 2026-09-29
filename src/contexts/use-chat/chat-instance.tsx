@@ -11,7 +11,11 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { getLastTextPart, truncateMessagePreview } from "@/lib/ai/message-preview";
-import { generateChatTitle, hasMessageTextContent } from "@/lib/ai/title-generator";
+import {
+  generateChatTitle,
+  getChatTitleFallback,
+  hasMessageTextContent,
+} from "@/lib/ai/title-generator";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
   extractReasoningEnabledAtom,
@@ -166,7 +170,14 @@ export const ChatInstance = memo(
           logger.verbose(
             `Triggering title generation for chat ${chatId} with ${chat.messages.length} messages`,
           );
-          saveChatTitleState({ chatId, titleState: "generating" });
+          saveChatTitleState({
+            chatId,
+            titleState: "generating",
+            title:
+              titleGenerationSettings.method === "ai"
+                ? getChatTitleFallback(titleMessages, titleGenerationSettings)
+                : undefined,
+          });
           generateChatTitle(
             model,
             titleMessages,

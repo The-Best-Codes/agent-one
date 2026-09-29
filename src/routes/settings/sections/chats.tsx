@@ -735,7 +735,7 @@ export default function ChatsSection() {
                 <div className="flex flex-1 flex-col items-start">
                   <Label className="text-sm font-medium">Fallback Method</Label>
                   <p className="text-muted-foreground mt-1 text-sm">
-                    How to name the chat if AI title generation fails.
+                    Shown while the AI title is generating and kept if generation fails.
                   </p>
                 </div>
                 <Select
@@ -805,7 +805,7 @@ export default function ChatsSection() {
                   <p className="text-muted-foreground mt-1 text-sm">
                     {titleGeneration.method === "custom"
                       ? "The phrase to use as the chat title."
-                      : "Used if AI title generation fails."}
+                      : "Shown while the AI title is generating and kept if generation fails."}
                   </p>
                 </div>
                 <Input
