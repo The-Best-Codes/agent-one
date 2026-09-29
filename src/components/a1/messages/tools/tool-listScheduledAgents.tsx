@@ -138,13 +138,13 @@ export const MessagePartToolListScheduledAgents = ({ part }: { part: ToolUIPart 
                 <div className="relative">
                   <IconClockSearch
                     className={cn(
-                      "absolute inset-0 size-4 shrink-0 transition-[opacity,scale] duration-200 group-hover/sched-list:scale-0 group-hover/sched-list:opacity-0",
+                      "text-foreground absolute inset-0 size-4 shrink-0 transition-[opacity,scale] duration-200 group-hover/sched-list:scale-0 group-hover/sched-list:opacity-0",
                       isMainOpen && "scale-0 opacity-0",
                     )}
                   />
                   <IconChevronDown
                     className={cn(
-                      "size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/sched-list:scale-100 group-hover/sched-list:opacity-100",
+                      "text-foreground size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/sched-list:scale-100 group-hover/sched-list:opacity-100",
                       isMainOpen && "scale-100 opacity-100",
                     )}
                   />
