@@ -29,6 +29,7 @@ function canResumeFromMessages(messages: UIMessage[]) {
 export function useChat(
   model: LanguageModel | null,
   modelId: string | null,
+  providerName: string | null,
   modelConfig: ModelConfig,
   options?: CustomChatOptions,
 ) {
@@ -42,6 +43,7 @@ export function useChat(
       new CustomChatTransport(
         model,
         modelId,
+        providerName,
         modelConfig,
         extractReasoningEnabled,
         getTools,
@@ -51,12 +53,12 @@ export function useChat(
   );
 
   useEffect(() => {
-    transport.updateModel(model);
+    transport.updateModel(model, providerName);
     logger.verbose(
       "Updated chat transport with new model:",
       typeof model === "string" ? model : model?.modelId,
     );
-  }, [model, transport]);
+  }, [model, providerName, transport]);
 
   useEffect(() => {
     transport.updateModelId(modelId);
@@ -109,11 +111,11 @@ export function useChat(
   }, [messages]);
 
   const syncTransport = useCallback(() => {
-    transport.updateModel(model);
+    transport.updateModel(model, providerName);
     transport.updateModelId(modelId);
     transport.updateModelConfig(modelConfig);
     transport.updateExtractReasoningEnabled(extractReasoningEnabled);
-  }, [model, modelId, modelConfig, extractReasoningEnabled, transport]);
+  }, [model, modelId, providerName, modelConfig, extractReasoningEnabled, transport]);
 
   const sendMessage = useCallback<typeof sendMessageSdk>(
     async (message, sendOptions) => {

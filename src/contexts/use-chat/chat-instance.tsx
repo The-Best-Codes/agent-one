@@ -35,6 +35,7 @@ export const ChatInstance = memo(
     chatId,
     model,
     modelId,
+    providerName,
     modelConfig,
     initialMessages,
     onInstanceUpdate,
@@ -43,6 +44,7 @@ export const ChatInstance = memo(
     chatId: string;
     model: LanguageModel;
     modelId: string;
+    providerName: string;
     modelConfig: ModelConfig;
     initialMessages: UIMessage[];
     onInstanceUpdate: (id: string, instance: ChatInstanceHelpers) => void;
@@ -73,7 +75,7 @@ export const ChatInstance = memo(
       });
     }, []);
 
-    const chat = useChat(model, modelId, modelConfig, {
+    const chat = useChat(model, modelId, providerName, modelConfig, {
       throttle: throttleValue,
       sendAutomaticallyWhen,
       onFinish: ({ isAbort }) => {
@@ -229,6 +231,7 @@ export const ChatInstance = memo(
       prevProps.chatId === nextProps.chatId &&
       prevProps.model === nextProps.model &&
       prevProps.modelId === nextProps.modelId &&
+      prevProps.providerName === nextProps.providerName &&
       prevProps.initialMessages === nextProps.initialMessages &&
       prevProps.onInstanceUpdate === nextProps.onInstanceUpdate &&
       prevProps.onStatusChange === nextProps.onStatusChange &&

@@ -325,6 +325,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const defaultChat = useChat(
     defaultModelForNewChats?.model ?? null,
     defaultModelForNewChats?.id ?? null,
+    defaultModelForNewChats?.provider ?? null,
     defaultModelConfigForNewChats,
   );
   const pendingProgrammaticMessagesRef = useRef(
@@ -650,6 +651,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
             chatId={id}
             model={chatModel.model}
             modelId={chatModel.id}
+            providerName={chatModel.provider}
             modelConfig={chatConfig}
             initialMessages={initialMessages}
             onInstanceUpdate={handleInstanceUpdate}
