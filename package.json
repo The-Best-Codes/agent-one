@@ -15,7 +15,6 @@
     "fmt": "oxfmt --write . && cd src-tauri && cargo fmt",
     "fmt:check": "oxfmt --check . && cd src-tauri && cargo fmt --check",
     "spellcheck": "cspell --gitignore .",
-    "update:model-list": "bun scripts/update-model-directory.js",
     "update:mcp-registry": "bun scripts/update-mcp-registry.js && bunx quicktype -l ts --just-types --prefer-types --prefer-unions --no-enums -t McpRegistryEntry -o src/assets/mcp-registry/types.ts src/assets/mcp-registry/mcp-registry.json && bun run fmt"
   },
   "dependencies": {

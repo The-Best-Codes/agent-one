@@ -1,6 +1,7 @@
 import {
   IconBrain,
   IconCheck,
+  IconDownload,
   IconFilter,
   IconPaperclip,
   IconPhoto,
@@ -10,6 +11,7 @@ import {
 } from "@tabler/icons-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import fuzzysort from "fuzzysort";
+import { useAtomValue } from "jotai";
 import { type FC, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 
 import { ProviderLogo } from "@/components/a1/provider-logo";
@@ -40,7 +42,9 @@ import { InputGroupButton } from "@/components/ui/input-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { type ModelData, useModelCatalog } from "@/hooks/ai/use-model-catalog";
+import { modelDirectoryStatusAtom } from "@/lib/ai/models/model-directory";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
+import { hasEnabledProviderAtom } from "@/lib/jotai/provider-atoms";
 import { cn } from "@/lib/utils";
 
 interface ModelSelectorProps {
@@ -91,6 +95,7 @@ interface ModelListProps {
   onSelect: (modelId: string) => void;
   setSearchQuery: (value: string) => void;
   setCapabilityFilters: (value: ModelCapability[]) => void;
+  showDirectoryLink: boolean;
 }
 
 const HEADING_HEIGHT = 24;
@@ -104,6 +109,7 @@ const ModelList: FC<ModelListProps> = ({
   onSelect,
   setSearchQuery,
   setCapabilityFilters,
+  showDirectoryLink,
 }) => {
   const parentRef = useRef<HTMLDivElement>(null);
   const [stickyState, setStickyState] = useState<{
@@ -372,6 +378,14 @@ const ModelList: FC<ModelListProps> = ({
             </CommandGroup>
           )}
           <div className="p-1">
+            {showDirectoryLink && (
+              <Button asChild variant="outline" size="sm" className="mb-1 w-full justify-start">
+                <SettingsLink tab="about" id="setting-model-directory">
+                  <IconDownload data-icon="inline-start" />
+                  Download model list
+                </SettingsLink>
+              </Button>
+            )}
             <Button asChild variant="outline" size="sm" className="w-full justify-start">
               <SettingsLink tab="providers">
                 <IconPlus data-icon="inline-start" />
@@ -398,6 +412,9 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [capabilityFilters, setCapabilityFilters] = useState<ModelCapability[]>([]);
   const { AVAILABLE_ENABLED_CHAT_MODELS, isModelCatalogLoading } = useModelCatalog();
+  const { hasDownloadedList } = useAtomValue(modelDirectoryStatusAtom);
+  const hasEnabledProvider = useAtomValue(hasEnabledProviderAtom);
+  const showDirectoryLink = !hasDownloadedList && hasEnabledProvider;
 
   if (!loading && staleModel !== currentModel) {
     setStaleModel(currentModel);
@@ -535,6 +552,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           onSelect={handleSelect}
           setSearchQuery={setSearchQuery}
           setCapabilityFilters={setCapabilityFilters}
+          showDirectoryLink={showDirectoryLink}
         />
       </AdaptivePopoverContent>
     </AdaptivePopover>

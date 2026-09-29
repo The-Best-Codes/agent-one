@@ -2,6 +2,7 @@ import { getDefaultStore } from "jotai";
 import { useEffect } from "react";
 
 import {
+  downloadedModelDirectoryAtom,
   loadPersistedModelDirectory,
   MODEL_DIRECTORY_SYNC_INTERVAL_MS,
   updateModelDirectory,
@@ -23,7 +24,10 @@ export function ModelDirectoryStartupSync() {
       }
 
       const lastSync = store.get(lastModelDirectorySyncTimestampAtom);
-      if (Date.now() - lastSync < MODEL_DIRECTORY_SYNC_INTERVAL_MS) {
+      if (
+        store.get(downloadedModelDirectoryAtom) !== null &&
+        Date.now() - lastSync < MODEL_DIRECTORY_SYNC_INTERVAL_MS
+      ) {
         return;
       }
 

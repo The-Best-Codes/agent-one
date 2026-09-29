@@ -5,7 +5,6 @@ import {
   IconDownload,
   IconExternalLink,
   IconRefresh,
-  IconRestore,
   IconRocket,
   IconShieldCheck,
 } from "@tabler/icons-react";
@@ -38,11 +37,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { useUpdate } from "@/contexts/use-update/update-hooks";
-import {
-  modelDirectoryStatusAtom,
-  resetModelDirectory,
-  updateModelDirectory,
-} from "@/lib/ai/models/model-directory";
+import { modelDirectoryStatusAtom, updateModelDirectory } from "@/lib/ai/models/model-directory";
 import { debugModeEnabledAtom } from "@/lib/jotai/unsynced-local-atoms";
 
 import SettingsTarget from "../settings-target";
@@ -202,11 +197,6 @@ export default function AboutSection() {
     });
   };
 
-  const handleResetModelDirectory = async () => {
-    await resetModelDirectory();
-    toast.success("Model list reset to bundled version");
-  };
-
   return (
     <div className="flex flex-col gap-6">
       <SettingsTarget id="setting-app-updates">
@@ -301,13 +291,13 @@ export default function AboutSection() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-medium">
-                  {modelDirectoryStatus.usingDownloadedList
-                    ? "Using downloaded model list"
-                    : "Using bundled model list"}
+                  {modelDirectoryStatus.hasDownloadedList
+                    ? "Model list loaded"
+                    : "Model list not loaded"}
                 </p>
                 <p className="text-muted-foreground text-sm tabular-nums">
                   {`Last updated: ${formatModelDirectoryTimestamp(
-                    modelDirectoryStatus.fetchedAt,
+                    modelDirectoryStatus.hasDownloadedList ? modelDirectoryStatus.fetchedAt : 0,
                     "Never",
                   )}`}
                 </p>
@@ -324,15 +314,6 @@ export default function AboutSection() {
                     <IconRefresh data-icon="inline-start" />
                   )}
                   Update now
-                </Button>
-                <Button
-                  onClick={handleResetModelDirectory}
-                  disabled={isUpdatingModelDirectory || !modelDirectoryStatus.usingDownloadedList}
-                  variant="outline"
-                  size="sm"
-                >
-                  <IconRestore data-icon="inline-start" />
-                  Reset
                 </Button>
               </div>
             </div>

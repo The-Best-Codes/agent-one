@@ -1,6 +1,7 @@
 import type { LanguageModelUsage, UIMessage } from "ai";
+import { getDefaultStore } from "jotai";
 
-import { modelDirectoryData, type ModelRecord } from "@/lib/ai/models/model-directory";
+import { modelDirectoryDataAtom, type ModelRecord } from "@/lib/ai/models/model-directory";
 import { PROVIDER_IDS } from "@/lib/ai/providers/registry";
 
 const TOKENS_PER_MILLION = 1_000_000;
@@ -88,7 +89,7 @@ export function getModelCostByChatModelId(
   if (!providerId) return undefined;
   const modelId = chatModelId.slice(providerId.length + 1);
 
-  return modelDirectoryData[providerId]?.models[modelId]?.pricing;
+  return getDefaultStore().get(modelDirectoryDataAtom)[providerId]?.models[modelId]?.pricing;
 }
 
 export function normalizeUsage(usage: MessageTokenUsage | LanguageModelUsage | undefined) {
