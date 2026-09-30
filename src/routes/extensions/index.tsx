@@ -1,16 +1,12 @@
-import { IconArrowLeft, IconFilter, IconFlask, IconPlus, IconTool } from "@tabler/icons-react";
-import { useAtom } from "jotai";
+import { IconArrowLeft, IconFilter, IconInfoCircle, IconPlus, IconTool } from "@tabler/icons-react";
+import { useAtom, useAtomValue } from "jotai";
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 
-import {
-  getMcpRegistryExtensions,
-  type McpRegistryExtension,
-  type McpRegistryInstallResult,
-} from "@/assets/mcp-registry/mcp-registry";
 import { SearchInput } from "@/components/a1/search-input";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { SettingsLink } from "@/components/a1/settings-link";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -23,8 +19,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTools } from "@/contexts/use-tools/tools-hooks";
+import { useExtensionList } from "@/hooks/use-extension-list";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
 import { mcpServersAtom } from "@/lib/jotai/settings-atoms";
+import {
+  type McpRegistryExtension,
+  type McpRegistryInstallResult,
+} from "@/lib/mcp-registry/install";
+import {
+  createInstalledRegistryMetadata,
+  getInstalledRegistryMetadata,
+} from "@/lib/mcp-registry/metadata";
+import { getRegistryExtension } from "@/lib/mcp-registry/storage";
+import { extensionListStatusAtom } from "@/lib/mcp-registry/sync";
 import { type McpServerConfig } from "@/lib/settings/types";
 
 import { AddServerDialog } from "./add-server-dialog";
@@ -33,31 +40,6 @@ import { ExtensionAdvancedDetails } from "./extension-advanced-details";
 import { ExtensionsBrowser, type ExtensionListItem } from "./extensions-browser";
 import { InstallExtensionDialog } from "./install-extension-dialog";
 import { UninstallExtensionDialog } from "./uninstall-extension-dialog";
-
-function toRegistryIdFragment(registryName: string): string {
-  return registryName.replace(/[^a-zA-Z0-9_-]/g, "-");
-}
-
-function getRegistryNameFromServerId(serverId: string): string | null {
-  const atIdx = serverId.lastIndexOf("@");
-  if (atIdx <= 0) return null;
-  return serverId.slice(0, atIdx);
-}
-
-function isServerInstalledFromExtension(
-  server: McpServerConfig,
-  extension: McpRegistryExtension,
-): boolean {
-  if (server.id === extension.id) return true;
-  const registryName = getRegistryNameFromServerId(server.id);
-  if (registryName && registryName === extension.registryName) return true;
-  const registryIdFragment = toRegistryIdFragment(extension.registryName);
-  return server.id.includes(`registry-${registryIdFragment}`);
-}
-
-function isServerFromRegistry(server: McpServerConfig): boolean {
-  return server.id.includes("@");
-}
 
 export default function ExtensionsRoute() {
   const navigate = useNavigate();
@@ -103,11 +85,43 @@ export default function ExtensionsRoute() {
   const [showDeviceExtensions, setShowDeviceExtensions] = useState(true);
   const [showOnlineExtensions, setShowOnlineExtensions] = useState(true);
 
-  const registryExtensions = useMemo(() => getMcpRegistryExtensions(), []);
+  const extensionListStatus = useAtomValue(extensionListStatusAtom);
+  const {
+    extensions: registryExtensions,
+    installedIds,
+    knownRegistryNames,
+    hasMore,
+    isSearching,
+    error: searchError,
+    resetKey,
+  } = useExtensionList(
+    mcpServers,
+    query,
+    onlyInstalled,
+    showDeviceExtensions,
+    showOnlineExtensions,
+  );
+  const [preparingExtensionId, setPreparingExtensionId] = useState<string | null>(null);
 
-  const knownRegistryNames = useMemo(
-    () => new Set(registryExtensions.map((extension) => extension.registryName)),
-    [registryExtensions],
+  const prepareInstall = useCallback(
+    async (name: string, version: string) => {
+      if (preparingExtensionId !== null) return;
+      setPreparingExtensionId(`${name}@${version}`);
+      try {
+        const extension = await getRegistryExtension(name, version);
+        if (!extension || !extension.installTemplates.length) {
+          toast.error("This extension is no longer available to install");
+          return;
+        }
+        setSelectedExtension(extension);
+        setShowInstallDialog(true);
+      } catch {
+        toast.error("Failed to load extension details");
+      } finally {
+        setPreparingExtensionId(null);
+      }
+    },
+    [preparingExtensionId],
   );
 
   const updateMcpServerById = useCallback(
@@ -179,6 +193,9 @@ export default function ExtensionsRoute() {
       timeoutMs: installed.timeoutSec * 1000,
       requiresApproval: installed.requiresApproval,
       toolApprovalOverrides: {},
+      registryMetadata: selectedExtension
+        ? createInstalledRegistryMetadata(selectedExtension)
+        : undefined,
     };
 
     const newServer: McpServerConfig =
@@ -223,12 +240,20 @@ export default function ExtensionsRoute() {
   const items: ExtensionListItem[] = useMemo(() => {
     const result: ExtensionListItem[] = [];
 
-    for (const server of mcpServers.filter((server) => !isServerFromRegistry(server))) {
+    for (const id of installedIds) {
+      const server = mcpServers.find((server) => server.id === id);
+      if (!server) continue;
+      const metadata = getInstalledRegistryMetadata(server);
       const isStdio = server.type === "stdio";
       result.push({
         id: `custom-${server.id}`,
-        title: server.name || "Custom Extension",
-        description: isStdio ? server.command : server.url,
+        title: server.name || metadata?.displayName || "Custom Extension",
+        description: metadata?.description ?? (isStdio ? server.command : server.url),
+        version: metadata?.version,
+        iconUrl: metadata?.iconUrl,
+        websiteUrl: metadata?.websiteUrl,
+        badges: metadata?.badges,
+        moreInfoJson: metadata?.registryEntry,
         searchText: [
           server.name || "Custom Extension",
           server.id,
@@ -260,9 +285,6 @@ export default function ExtensionsRoute() {
     }
 
     for (const extension of registryExtensions) {
-      const server = mcpServers.find((s) => isServerInstalledFromExtension(s, extension));
-      const installed = !!server;
-
       result.push({
         id: extension.id,
         title: extension.displayName,
@@ -271,43 +293,25 @@ export default function ExtensionsRoute() {
           .filter(Boolean)
           .join(" "),
         transportType: extension.installType ?? "stdio",
-        transportTypes:
-          extension.installTemplates.length > 0
-            ? Array.from(new Set(extension.installTemplates.map((template) => template.type)))
-            : undefined,
-        installed,
-        canUninstall: true,
-        installSupported: extension.installTemplates.length > 0,
+        transportTypes: extension.transportTypes.flatMap((type) =>
+          type === "stdio"
+            ? ["stdio" as const]
+            : type === "streamable-http"
+              ? ["http" as const]
+              : [],
+        ),
+        installed: false,
+        canUninstall: false,
+        installSupported: extension.installSupported,
+        installLoading: preparingExtensionId === extension.id,
+        installDisabled: preparingExtensionId !== null,
         version: extension.version,
         iconUrl: extension.iconUrl,
         websiteUrl: extension.websiteUrl,
         badges: extension.categories.length > 0 ? extension.categories : extension.tags,
-        enabled: server?.enabled,
-        loadState: server ? mcpServerLoadStates[server.id] : undefined,
-        authState: server ? mcpAuthStates[server.id] : undefined,
         onInstall: () => {
-          if (extension.installTemplates.length > 0) {
-            setSelectedExtension(extension);
-            setShowInstallDialog(true);
-          }
+          void prepareInstall(extension.registryName, extension.version);
         },
-        onUninstall: server
-          ? () => handleUninstallClick(server.id, server.name || extension.displayName)
-          : undefined,
-        onEnabledChange: server
-          ? (enabled) => updateMcpServerById(server.id, { enabled })
-          : undefined,
-        onRestart: server ? () => restartMcpServer(server.id) : undefined,
-        advancedContent:
-          installed && server ? (
-            <ExtensionAdvancedDetails
-              key={JSON.stringify(server)}
-              server={server}
-              onUpdate={(updates) => updateMcpServerById(server.id, updates)}
-            />
-          ) : undefined,
-        advancedContentKey: server,
-        moreInfoJson: installed ? extension.registryEntry : undefined,
       });
     }
 
@@ -317,6 +321,9 @@ export default function ExtensionsRoute() {
     mcpAuthStates,
     mcpServerLoadStates,
     registryExtensions,
+    installedIds,
+    prepareInstall,
+    preparingExtensionId,
     updateMcpServerById,
     handleUninstallClick,
     restartMcpServer,
@@ -333,13 +340,20 @@ export default function ExtensionsRoute() {
       </header>
 
       <div className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col gap-4 p-4 md:p-6">
-        <Alert>
-          <IconFlask />
-          <AlertTitle>Extensions are in beta</AlertTitle>
-          <AlertDescription>
-            Some features may be incomplete or change without notice.
-          </AlertDescription>
-        </Alert>
+        {extensionListStatus.isUpdating ||
+        (extensionListStatus.isStartupComplete && !extensionListStatus.hasDownloadedList) ? (
+          <Alert>
+            <IconInfoCircle />
+            <AlertDescription>
+              {extensionListStatus.isUpdating
+                ? "Extension updates are happening in the background."
+                : "The extension list is not available yet."}{" "}
+              <SettingsLink tab="about" id="setting-extension-list">
+                Check progress
+              </SettingsLink>
+            </AlertDescription>
+          </Alert>
+        ) : null}
 
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div className="flex w-full flex-row gap-0">
@@ -391,7 +405,15 @@ export default function ExtensionsRoute() {
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  <DropdownMenuItem onSelect={() => setShowDanglingDialog(true)}>
+                  <DropdownMenuItem
+                    disabled={
+                      !extensionListStatus.hasDownloadedList ||
+                      extensionListStatus.isUpdating ||
+                      isSearching ||
+                      Boolean(searchError)
+                    }
+                    onSelect={() => setShowDanglingDialog(true)}
+                  >
                     <IconTool data-icon="inline-start" />
                     Find dangling extensions
                   </DropdownMenuItem>
@@ -408,9 +430,9 @@ export default function ExtensionsRoute() {
         <ExtensionsBrowser
           items={items}
           query={query}
-          onlyInstalled={onlyInstalled}
-          showDeviceExtensions={showDeviceExtensions}
-          showOnlineExtensions={showOnlineExtensions}
+          hasMore={hasMore}
+          isSearching={isSearching}
+          resetKey={resetKey}
         />
       </div>
 
@@ -453,6 +475,12 @@ export default function ExtensionsRoute() {
         onOpenChange={setShowDanglingDialog}
         mcpServers={mcpServers}
         knownRegistryNames={knownRegistryNames}
+        registryReady={
+          extensionListStatus.hasDownloadedList &&
+          !extensionListStatus.isUpdating &&
+          !isSearching &&
+          !searchError
+        }
         onRemove={(serverId) => {
           const server = mcpServers.find((s) => s.id === serverId);
           setMcpServers((prev) => prev.filter((s) => s.id !== serverId));

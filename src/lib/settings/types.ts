@@ -188,6 +188,19 @@ export interface TitleGenerationSettings {
 
 export type McpServerType = "stdio" | "http";
 
+export interface McpRegistryMetadata {
+  registryName: string;
+  displayName: string;
+  description: string;
+  version: string;
+  websiteUrl?: string;
+  iconUrl?: string;
+  badges: string[];
+  searchText: string;
+  transportTypes: McpServerType[];
+  registryEntry?: unknown;
+}
+
 export interface McpServerConfigBase {
   id: string;
   name: string;
@@ -195,6 +208,7 @@ export interface McpServerConfigBase {
   timeoutMs: number;
   requiresApproval: boolean;
   toolApprovalOverrides?: Record<string, boolean>;
+  registryMetadata?: McpRegistryMetadata;
 }
 
 export interface McpStdioServerConfig extends McpServerConfigBase {

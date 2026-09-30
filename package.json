@@ -14,8 +14,7 @@
     "typecheck": "tsc --version && tsc -b --incremental --noEmit",
     "fmt": "oxfmt --write . && cd src-tauri && cargo fmt",
     "fmt:check": "oxfmt --check . && cd src-tauri && cargo fmt --check",
-    "spellcheck": "cspell --gitignore .",
-    "update:mcp-registry": "bun scripts/update-mcp-registry.js && bunx quicktype -l ts --just-types --prefer-types --prefer-unions --no-enums -t McpRegistryEntry -o src/assets/mcp-registry/types.ts src/assets/mcp-registry/mcp-registry.json && bun run fmt"
+    "spellcheck": "cspell --gitignore ."
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.65",
