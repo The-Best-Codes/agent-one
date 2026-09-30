@@ -9,6 +9,7 @@ const MODEL_DIRECTORY_SOURCE_URL =
   "https://raw.githubusercontent.com/The-Best-Codes/ai-model-directory/main/data/all.min.json";
 const MODEL_DIRECTORY_FILENAME = "model-directory.json";
 export const MODEL_DIRECTORY_SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000;
+export const MODEL_DIRECTORY_SYNC_CHECK_INTERVAL_MS = 60 * 60 * 1000;
 
 // eslint-disable-next-line no-control-regex
 const controlCharacterPattern = /[\u0000-\u001f\u007f]/;
@@ -132,7 +133,16 @@ export async function loadPersistedModelDirectory(): Promise<void> {
   }
 }
 
-export async function updateModelDirectory(): Promise<ModelDirectoryUpdateResult> {
+let updatePromise: Promise<ModelDirectoryUpdateResult> | null = null;
+
+export function updateModelDirectory(): Promise<ModelDirectoryUpdateResult> {
+  updatePromise ??= refreshModelDirectory().finally(() => {
+    updatePromise = null;
+  });
+  return updatePromise;
+}
+
+async function refreshModelDirectory(): Promise<ModelDirectoryUpdateResult> {
   let raw: string;
   let data: ModelDirectoryData;
 
