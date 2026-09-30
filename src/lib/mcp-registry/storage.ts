@@ -3,6 +3,7 @@ import Database from "@tauri-apps/plugin-sql";
 import {
   createMcpRegistryExtension,
   createMcpRegistrySummary,
+  createSearchText,
   type McpRegistrySummary,
 } from "./install";
 import { mcpRegistryEntrySchema, type MCPRegistryEntry } from "./types";
@@ -127,21 +128,28 @@ export const EXTENSION_LIST_LIMIT = 100;
 
 export async function searchRegistry(
   options: RegistrySearchOptions,
-): Promise<McpRegistrySummary[]> {
+): Promise<{ extensions: McpRegistrySummary[]; hasMore: boolean }> {
   const database = await getDatabase();
   const terms = options.query.match(/[\p{L}\p{N}_]+/gu) ?? [];
   const match = terms.map((term) => `"${term}"*`).join(" AND ");
-  if (options.query.trim() && !match) return [];
-  const rows = await database.select<{ summary_json: string }[]>(
-    `SELECT e.summary_json FROM registry_entries e
+  if (options.query.trim() && !match) return { extensions: [], hasMore: false };
+  const rows = await database.select<{ summary_json: string; has_more: number }[]>(
+    `WITH matches AS MATERIALIZED (
+     SELECT e.summary_json, e.title, e.name,
+       ${match ? "bm25(registry_fts, 8, 10, 1, 2)" : "0"} AS relevance
+     FROM registry_entries e
      ${match ? "JOIN registry_fts ON registry_fts.rowid = e.id" : ""}
      WHERE e.is_latest = 1 AND e.status != 'deleted'
        AND (($1 = 1 AND e.has_stdio = 1) OR ($2 = 1 AND e.has_http = 1))
        AND e.name NOT IN (SELECT value FROM json_each($3))
        ${match ? "AND registry_fts MATCH $4" : ""}
-     ORDER BY ${match ? "bm25(registry_fts, 8, 10, 1, 2)," : ""}
-       e.title COLLATE NOCASE, e.name
-     LIMIT ${EXTENSION_LIST_LIMIT + 1}`,
+     ORDER BY relevance, e.title COLLATE NOCASE, e.name
+     LIMIT ${EXTENSION_LIST_LIMIT + 1}
+     )
+     SELECT summary_json, (SELECT COUNT(*) FROM matches) > ${EXTENSION_LIST_LIMIT} AS has_more
+     FROM matches
+     ORDER BY relevance, title COLLATE NOCASE, name
+     LIMIT ${EXTENSION_LIST_LIMIT}`,
     [
       Number(options.showDeviceExtensions),
       Number(options.showOnlineExtensions),
@@ -149,7 +157,10 @@ export async function searchRegistry(
       ...(match ? [match] : []),
     ],
   );
-  return rows.map((row) => JSON.parse(row.summary_json) as McpRegistrySummary);
+  return {
+    extensions: rows.map((row) => JSON.parse(row.summary_json) as McpRegistrySummary),
+    hasMore: Boolean(rows[0]?.has_more),
+  };
 }
 
 export async function getRegistryExtension(name: string, version?: string) {
@@ -172,5 +183,8 @@ export async function getRegistrySummaries(names: string[]): Promise<McpRegistry
      AND name IN (SELECT value FROM json_each($1))`,
     [JSON.stringify(names)],
   );
-  return rows.map((row) => JSON.parse(row.summary_json) as McpRegistrySummary);
+  return rows.map((row) => {
+    const summary = JSON.parse(row.summary_json) as McpRegistrySummary;
+    return { ...summary, searchText: createSearchText(summary) };
+  });
 }

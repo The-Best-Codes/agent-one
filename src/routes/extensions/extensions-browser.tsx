@@ -137,8 +137,8 @@ export function ExtensionsBrowser({
           {hasMore ? (
             <p className="text-muted-foreground py-4 text-center text-sm">
               {query.trim()
-                ? "Showing the first 100 results. Refine your search to discover more."
-                : "Showing the first 100 extensions. Search to discover more."}
+                ? "Showing the first 100 catalog results alongside installed extensions. Refine your search to discover more."
+                : "Showing the first 100 catalog extensions alongside installed extensions. Search to discover more."}
             </p>
           ) : null}
         </div>

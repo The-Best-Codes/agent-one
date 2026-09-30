@@ -10,11 +10,7 @@ import {
   getInstalledRegistryMetadata,
   getInstalledRegistryName,
 } from "@/lib/mcp-registry/metadata";
-import {
-  EXTENSION_LIST_LIMIT,
-  getRegistrySummaries,
-  searchRegistry,
-} from "@/lib/mcp-registry/storage";
+import { getRegistrySummaries, searchRegistry } from "@/lib/mcp-registry/storage";
 import { extensionListRevisionAtom } from "@/lib/mcp-registry/sync";
 import type { McpServerConfig } from "@/lib/settings/types";
 
@@ -50,11 +46,12 @@ export function useExtensionList(
             .filter((name): name is string => name !== null);
           let extensions: McpRegistrySummary[] = [];
           let installedSummaries: McpRegistrySummary[] = [];
+          let hasMore = false;
           let queryError = "";
           try {
-            [extensions, installedSummaries] = await Promise.all([
+            const [catalog, summaries] = await Promise.all([
               onlyInstalled
-                ? Promise.resolve([])
+                ? Promise.resolve({ extensions: [], hasMore: false })
                 : searchRegistry({
                     query,
                     showDeviceExtensions,
@@ -63,6 +60,9 @@ export function useExtensionList(
                   }),
               getRegistrySummaries(installedNames),
             ]);
+            extensions = catalog.extensions;
+            hasMore = catalog.hasMore;
+            installedSummaries = summaries;
           } catch (error) {
             logger.warn("Failed to search extension list", error);
             queryError =
@@ -82,7 +82,7 @@ export function useExtensionList(
               const summary = name ? summaries.get(name) : undefined;
               const searchText = [
                 server.name,
-                server.id,
+                name ?? server.id,
                 metadata?.searchText,
                 summary?.searchText,
                 server.type === "stdio" ? server.command : server.url,
@@ -97,11 +97,8 @@ export function useExtensionList(
             .filter((item) => item.score > 0)
             .sort((a, b) => b.score - a.score);
           setResult((previous) => ({
-            extensions: (queryError && !onlyInstalled ? previous.extensions : extensions).slice(
-              0,
-              Math.max(0, EXTENSION_LIST_LIMIT - installed.length),
-            ),
-            installedIds: installed.slice(0, EXTENSION_LIST_LIMIT).map((item) => item.id),
+            extensions: queryError && !onlyInstalled ? previous.extensions : extensions,
+            installedIds: installed.map((item) => item.id),
             resetKey: JSON.stringify([
               query,
               onlyInstalled,
@@ -109,9 +106,7 @@ export function useExtensionList(
               showOnlineExtensions,
             ]),
             knownRegistryNames: new Set(installedSummaries.map((summary) => summary.registryName)),
-            hasMore: queryError
-              ? previous.hasMore
-              : installed.length + extensions.length > EXTENSION_LIST_LIMIT,
+            hasMore: queryError ? previous.hasMore : hasMore,
           }));
           setError(queryError);
           const missingMetadata = servers.some((server) => {

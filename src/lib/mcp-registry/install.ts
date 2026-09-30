@@ -471,12 +471,13 @@ function buildInstallTemplates(server: MCPRegistryEntry["server"]): McpRegistryI
   return templates;
 }
 
-function createSearchText(entry: McpRegistryExtension): string {
+export function createSearchText(
+  entry: Omit<McpRegistryExtension, "installTemplates" | "registryEntry">,
+): string {
   return [
     entry.registryName,
     entry.displayName,
     entry.description,
-    entry.version,
     entry.publisher,
     entry.license,
     ...entry.categories,
