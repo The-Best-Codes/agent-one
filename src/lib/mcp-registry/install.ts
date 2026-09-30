@@ -1,4 +1,4 @@
-import type { MCPRegistryEntry, Package, Remote, Transport } from "./types";
+import type { MCPRegistryEntry, Package, Transport } from "./types";
 
 type InstallFieldKind = "env" | "header" | "variable";
 
@@ -350,9 +350,7 @@ function buildStdioInstallTemplate(pkg: Package): McpRegistryInstallTemplate | u
   };
 }
 
-function buildHttpInstallTemplate(
-  source: Remote | Transport,
-): McpRegistryInstallTemplate | undefined {
+function buildHttpInstallTemplate(source: Transport): McpRegistryInstallTemplate | undefined {
   const urlTemplate = asString(source.url);
 
   if (!urlTemplate) {
