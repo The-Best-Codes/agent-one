@@ -1,2 +1,0 @@
-OpenAPI schema pulled from https://github.com/modelcontextprotocol/registry/blob/main/docs/reference/api/openapi.yaml (pinned: https://raw.githubusercontent.com/modelcontextprotocol/registry/bf4e88cbe8d1a635c06144ccea1d24cb52fa6186/docs/reference/api/openapi.yaml)
-Runtime validation schemas are maintained in src/lib/mcp-registry/types.ts.
