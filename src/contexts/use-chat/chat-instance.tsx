@@ -58,7 +58,8 @@ export const ChatInstance = memo(
     const titleGenerationSettings = useAtomValue(titleGenerationAtom);
     const extractReasoningEnabled = useAtomValue(extractReasoningEnabledAtom);
     const notificationSetting = useAtomValue(notificationSettingAtom);
-    const { loadChatMetadata, saveChat, saveChatTitleState, saveChatTitle } = usePersistence();
+    const { loadChatMetadata, saveChat, markChatMessageSent, saveChatTitleState, saveChatTitle } =
+      usePersistence();
     const chatIds = useAtomValueRawSync(chatIdsAtom);
     const suppressAutoSubmitAfterAbortRef = useRef(false);
     const wasBusyRef = useRef(false);
@@ -75,9 +76,14 @@ export const ChatInstance = memo(
       });
     }, []);
 
+    const onUserMessageSent = useCallback(() => {
+      markChatMessageSent(chatId);
+    }, [chatId, markChatMessageSent]);
+
     const chat = useChat(model, modelId, providerName, modelConfig, {
       throttle: throttleValue,
       sendAutomaticallyWhen,
+      onUserMessageSent,
       onFinish: ({ isAbort }) => {
         if (isAbort) {
           suppressAutoSubmitAfterAbortRef.current = true;

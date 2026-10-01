@@ -122,9 +122,10 @@ export const chatStorage = {
         scheduled_agent_title: string | null;
         created_at: number | null;
         updated_at: number | null;
+        last_message_at: number | null;
       }[]
     >(
-      `SELECT title, title_state, model_id, model_config, branch_of, scheduled_agent_id, scheduled_agent_title, created_at, updated_at
+      `SELECT title, title_state, model_id, model_config, branch_of, scheduled_agent_id, scheduled_agent_title, created_at, updated_at, last_message_at
        FROM chat_metadata
        WHERE id = $1`,
       [id],
@@ -141,6 +142,7 @@ export const chatStorage = {
       scheduledAgentTitle: row.scheduled_agent_title ?? undefined,
       createdAt: row.created_at ?? undefined,
       updatedAt: row.updated_at ?? undefined,
+      lastMessageAt: row.last_message_at ?? undefined,
     };
   },
 
@@ -157,9 +159,10 @@ export const chatStorage = {
            scheduled_agent_id,
            scheduled_agent_title,
            created_at,
-           updated_at
+           updated_at,
+           last_message_at
          )
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
          ON CONFLICT(id) DO UPDATE SET
             title = $2,
             title_state = $3,
@@ -169,7 +172,8 @@ export const chatStorage = {
             scheduled_agent_id = $7,
             scheduled_agent_title = $8,
             created_at = COALESCE(chat_metadata.created_at, excluded.created_at),
-            updated_at = COALESCE(excluded.updated_at, chat_metadata.updated_at)`,
+            updated_at = COALESCE(excluded.updated_at, chat_metadata.updated_at),
+            last_message_at = COALESCE(excluded.last_message_at, chat_metadata.last_message_at)`,
         [
           id,
           metadata.title,
@@ -181,6 +185,7 @@ export const chatStorage = {
           metadata.scheduledAgentTitle ?? null,
           metadata.createdAt ?? null,
           metadata.updatedAt ?? null,
+          metadata.lastMessageAt ?? null,
         ],
       ),
     );
@@ -190,8 +195,10 @@ export const chatStorage = {
     const d = await getDb();
     const sortColumn =
       sortBy === "updated-at"
-        ? "COALESCE(updated_at, created_at, 0)"
-        : "COALESCE(created_at, updated_at, 0)";
+        ? "COALESCE(last_message_at, created_at, 0)"
+        : sortBy === "active-at"
+          ? "COALESCE(updated_at, created_at, 0)"
+          : "COALESCE(created_at, updated_at, 0)";
     const rows = await d.select<
       {
         id: string;
@@ -204,9 +211,10 @@ export const chatStorage = {
         scheduled_agent_title: string | null;
         created_at: number | null;
         updated_at: number | null;
+        last_message_at: number | null;
       }[]
     >(
-      `SELECT id, title, title_state, model_id, model_config, branch_of, scheduled_agent_id, scheduled_agent_title, created_at, updated_at
+      `SELECT id, title, title_state, model_id, model_config, branch_of, scheduled_agent_id, scheduled_agent_title, created_at, updated_at, last_message_at
        FROM chat_metadata
        ORDER BY ${sortColumn} DESC, id DESC`,
       [],
@@ -224,6 +232,7 @@ export const chatStorage = {
         scheduledAgentTitle: row.scheduled_agent_title ?? undefined,
         createdAt: row.created_at ?? undefined,
         updatedAt: row.updated_at ?? undefined,
+        lastMessageAt: row.last_message_at ?? undefined,
       },
     }));
   },

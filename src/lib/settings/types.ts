@@ -87,7 +87,7 @@ export type CollapsedSidebarLayoutOption = (typeof COLLAPSED_SIDEBAR_LAYOUT_OPTI
 export const CHAT_VIRTUALIZATION_MODE_OPTIONS = ["off", "threshold"] as const;
 export type ChatVirtualizationModeOption = (typeof CHAT_VIRTUALIZATION_MODE_OPTIONS)[number];
 
-export const CHAT_SORT_OPTIONS = ["created-at", "updated-at"] as const;
+export const CHAT_SORT_OPTIONS = ["created-at", "updated-at", "active-at"] as const;
 export type ChatSortOption = (typeof CHAT_SORT_OPTIONS)[number];
 
 export type SidebarChatTimeGroupingOption = boolean;
@@ -407,7 +407,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   SHOW_CHAT_STATUS_INDICATOR: true,
   SHOW_MESSAGE_PREVIEW_RAIL: true,
   SHOW_MESSAGE_ACTION_ROW: "always",
-  CHAT_SORT: "created-at",
+  CHAT_SORT: "updated-at",
   SIDEBAR_CHAT_TIME_GROUPING: false,
   CHAT_BACKGROUND: {
     preset: "none",

@@ -121,6 +121,14 @@ pub fn run() {
                             ),
                             kind: tauri_plugin_sql::MigrationKind::Up,
                         },
+                        tauri_plugin_sql::Migration {
+                            version: 8,
+                            description: "add_chat_last_message_timestamp",
+                            sql: include_str!(
+                                "../migrations/0008_add_chat_last_message_timestamp.sql"
+                            ),
+                            kind: tauri_plugin_sql::MigrationKind::Up,
+                        },
                     ],
                 )
                 .add_migrations(
