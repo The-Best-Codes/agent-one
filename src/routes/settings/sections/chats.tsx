@@ -135,7 +135,7 @@ export default function ChatsSection() {
                   <SelectContent>
                     <SelectGroup>
                       <SelectItem value="created-at">Newest chats first</SelectItem>
-                      <SelectItem value="updated-at">Recently updated first</SelectItem>
+                      <SelectItem value="updated-at">Recently messaged first</SelectItem>
                       <SelectItem value="active-at">Recently active first</SelectItem>
                     </SelectGroup>
                   </SelectContent>
