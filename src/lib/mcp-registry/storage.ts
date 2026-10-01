@@ -20,7 +20,6 @@ async function getDatabase(): Promise<Database> {
 
 export interface RegistrySyncState {
   initial_complete: number;
-  last_success: number;
   checkpoint: string | null;
   pending_since: string | null;
   pending_cursor: string | null;
@@ -47,12 +46,12 @@ export async function setRegistrySyncProgress(
   );
 }
 
-export async function completeRegistrySync(checkpoint: string, lastSuccess: number): Promise<void> {
+export async function completeRegistrySync(checkpoint: string): Promise<void> {
   const database = await getDatabase();
   await database.execute(
-    `UPDATE registry_sync SET initial_complete = 1, checkpoint = $1, last_success = $2,
+    `UPDATE registry_sync SET initial_complete = 1, checkpoint = $1,
      pending_since = NULL, pending_cursor = NULL, pending_started = NULL WHERE id = 1`,
-    [checkpoint, lastSuccess],
+    [checkpoint],
   );
 }
 

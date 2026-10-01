@@ -2,6 +2,7 @@ import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { atom, getDefaultStore } from "jotai";
 
 import { MODEL_DIRECTORY_SYNC_INTERVAL_MS } from "@/lib/ai/models/model-directory";
+import { lastExtensionListSyncTimestampAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
 
 import {
@@ -18,16 +19,19 @@ const CHECKPOINT_OVERLAP_MS = 5 * 60 * 1000;
 const logger = getLogger(import.meta.url);
 const store = getDefaultStore();
 
-export const extensionListStatusAtom = atom({
+const extensionListSyncStatusAtom = atom({
   isStartupComplete: false,
   hasDownloadedList: false,
   isUpdating: false,
-  fetchedAt: 0,
   entryCount: 0,
   processedCount: 0,
   totalCount: null as number | null,
   error: "",
 });
+export const extensionListStatusAtom = atom((get) => ({
+  ...get(extensionListSyncStatusAtom),
+  fetchedAt: get(lastExtensionListSyncTimestampAtom),
+}));
 export const extensionListRevisionAtom = atom(0);
 
 let loadPromise: Promise<void> | null = null;
@@ -37,10 +41,9 @@ let startupPromise: Promise<void> | null = null;
 export function loadPersistedExtensionList(): Promise<void> {
   loadPromise ??= (async () => {
     const [state, count] = await Promise.all([getRegistrySyncState(), getRegistryCount()]);
-    store.set(extensionListStatusAtom, (status) => ({
+    store.set(extensionListSyncStatusAtom, (status) => ({
       ...status,
       hasDownloadedList: Boolean(state.initial_complete),
-      fetchedAt: state.last_success,
       entryCount: count,
     }));
   })().catch((error) => {
@@ -55,7 +58,7 @@ async function refreshExtensionList(): Promise<{
   error?: string;
   entryCount?: number;
 }> {
-  store.set(extensionListStatusAtom, (status) => ({
+  store.set(extensionListSyncStatusAtom, (status) => ({
     ...status,
     isUpdating: true,
     processedCount: 0,
@@ -103,7 +106,7 @@ async function refreshExtensionList(): Promise<{
             started = null;
             processedCount = 0;
             seenCursors.clear();
-            store.set(extensionListStatusAtom, (status) => ({ ...status, processedCount: 0 }));
+            store.set(extensionListSyncStatusAtom, (status) => ({ ...status, processedCount: 0 }));
             continue;
           }
         }
@@ -111,7 +114,7 @@ async function refreshExtensionList(): Promise<{
       }
       const page = mcpRegistryPageSchema.parse(await response.json());
       if (!page.metadata.nextCursor) {
-        store.set(extensionListStatusAtom, (status) => ({
+        store.set(extensionListSyncStatusAtom, (status) => ({
           ...status,
           totalCount: processedCount + page.servers.length,
         }));
@@ -125,7 +128,7 @@ async function refreshExtensionList(): Promise<{
       }
       await importRegistryPage(page.servers);
       processedCount += page.servers.length;
-      store.set(extensionListStatusAtom, (status) => ({ ...status, processedCount }));
+      store.set(extensionListSyncStatusAtom, (status) => ({ ...status, processedCount }));
       if (Date.now() - lastPublished >= 1000) {
         store.set(extensionListRevisionAtom, (revision) => revision + 1);
         lastPublished = Date.now();
@@ -137,22 +140,22 @@ async function refreshExtensionList(): Promise<{
 
     const fetchedAt = Date.now();
     const entryCount = await getRegistryCount();
-    await completeRegistrySync(started, fetchedAt);
-    store.set(extensionListStatusAtom, (status) => ({
+    await completeRegistrySync(started);
+    store.set(lastExtensionListSyncTimestampAtom, fetchedAt);
+    store.set(extensionListSyncStatusAtom, (status) => ({
       ...status,
       hasDownloadedList: true,
-      fetchedAt,
       entryCount,
     }));
     store.set(extensionListRevisionAtom, (revision) => revision + 1);
     return { ok: true, entryCount };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to update extension list";
-    store.set(extensionListStatusAtom, (status) => ({ ...status, error: message }));
+    store.set(extensionListSyncStatusAtom, (status) => ({ ...status, error: message }));
     logger.warn("Failed to update extension list", error);
     return { ok: false, error: message };
   } finally {
-    store.set(extensionListStatusAtom, (status) => ({ ...status, isUpdating: false }));
+    store.set(extensionListSyncStatusAtom, (status) => ({ ...status, isUpdating: false }));
   }
 }
 
@@ -176,11 +179,11 @@ export function syncExtensionListOnStartup(): Promise<void> {
   })()
     .catch((error) => {
       const message = error instanceof Error ? error.message : "Failed to load extension list";
-      store.set(extensionListStatusAtom, (status) => ({ ...status, error: message }));
+      store.set(extensionListSyncStatusAtom, (status) => ({ ...status, error: message }));
       logger.warn("Failed to load extension list", error);
     })
     .finally(() => {
-      store.set(extensionListStatusAtom, (status) => ({ ...status, isStartupComplete: true }));
+      store.set(extensionListSyncStatusAtom, (status) => ({ ...status, isStartupComplete: true }));
     });
   return startupPromise;
 }

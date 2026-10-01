@@ -47,7 +47,6 @@ END;
 CREATE TABLE registry_sync (
     id INTEGER PRIMARY KEY CHECK(id = 1),
     initial_complete INTEGER NOT NULL DEFAULT 0,
-    last_success INTEGER NOT NULL DEFAULT 0,
     checkpoint TEXT,
     pending_since TEXT,
     pending_cursor TEXT,
