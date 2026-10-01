@@ -21,7 +21,7 @@ export function useExtensionList(
   const revision = useAtomValue(extensionListRevisionAtom);
   const [result, setResult] = useState({
     extensions: [] as McpRegistrySummary[],
-    installedIds: [] as string[],
+    installedSummaries: [] as McpRegistrySummary[],
     knownRegistryNames: new Set<string>(),
     hasMore: false,
     resetKey: "",
@@ -50,7 +50,6 @@ export function useExtensionList(
                     query,
                     showDeviceExtensions,
                     showOnlineExtensions,
-                    installedNames,
                   }),
               getRegistrySummaries(installedNames),
             ]);
@@ -63,33 +62,9 @@ export function useExtensionList(
               "The extension list could not be loaded. Installed extensions are still available.";
           }
           if (cancelled) return;
-          const summaries = new Map(installedSummaries.map((summary) => [summary.id, summary]));
-          const installed = servers
-            .filter((server) =>
-              server.type === "stdio" ? showDeviceExtensions : showOnlineExtensions,
-            )
-            .map((server) => {
-              const metadata = getInstalledRegistryMetadata(server);
-              const summary = metadata ? summaries.get(server.id) : undefined;
-              const searchText = [
-                server.name,
-                server.id,
-                metadata?.searchText,
-                summary?.searchText,
-                server.type === "stdio" ? server.command : server.url,
-              ]
-                .filter(Boolean)
-                .join(" ");
-              return {
-                id: server.id,
-                score: query.trim() ? (fuzzysort.single(query.trim(), searchText)?.score ?? 0) : 1,
-              };
-            })
-            .filter((item) => item.score > 0)
-            .sort((a, b) => b.score - a.score);
           setResult((previous) => ({
             extensions: queryError && !onlyInstalled ? previous.extensions : extensions,
-            installedIds: installed.map((item) => item.id),
+            installedSummaries,
             resetKey: JSON.stringify([
               query,
               onlyInstalled,
@@ -119,5 +94,45 @@ export function useExtensionList(
     };
   }, [servers, query, onlyInstalled, showDeviceExtensions, showOnlineExtensions, revision]);
 
-  return { ...result, isSearching, error };
+  const summaries = new Map(result.installedSummaries.map((summary) => [summary.id, summary]));
+  const installed = servers
+    .filter((server) => (server.type === "stdio" ? showDeviceExtensions : showOnlineExtensions))
+    .map((server) => {
+      const metadata = getInstalledRegistryMetadata(server);
+      const summary = metadata ? summaries.get(server.id) : undefined;
+      const searchText = [
+        server.name,
+        server.id,
+        metadata?.searchText,
+        summary?.searchText,
+        server.type === "stdio" ? server.command : server.url,
+      ]
+        .filter(Boolean)
+        .join(" ");
+      return {
+        id: server.id,
+        score: query.trim() ? (fuzzysort.single(query.trim(), searchText)?.score ?? 0) : 1,
+      };
+    })
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score);
+
+  const installedNames = new Set(
+    servers
+      .filter((server) => getInstalledRegistryMetadata(server) !== undefined)
+      .map((server) => server.id),
+  );
+  const available = onlyInstalled
+    ? []
+    : result.extensions.filter((extension) => !installedNames.has(extension.id));
+
+  return {
+    extensions: available,
+    installedIds: installed.map((item) => item.id),
+    knownRegistryNames: result.knownRegistryNames,
+    resetKey: result.resetKey,
+    hasMore: result.hasMore,
+    isSearching,
+    error,
+  };
 }

@@ -121,7 +121,6 @@ export interface RegistrySearchOptions {
   query: string;
   showDeviceExtensions: boolean;
   showOnlineExtensions: boolean;
-  installedNames: string[];
 }
 
 export const EXTENSION_LIST_LIMIT = 100;
@@ -141,8 +140,7 @@ export async function searchRegistry(
      ${match ? "JOIN registry_fts ON registry_fts.rowid = e.id" : ""}
      WHERE e.is_latest = 1 AND e.status != 'deleted'
        AND (($1 = 1 AND e.has_stdio = 1) OR ($2 = 1 AND e.has_http = 1))
-       AND e.name NOT IN (SELECT value FROM json_each($3))
-       ${match ? "AND registry_fts MATCH $4" : ""}
+       ${match ? "AND registry_fts MATCH $3" : ""}
      ORDER BY relevance, e.title COLLATE NOCASE, e.name
      LIMIT ${EXTENSION_LIST_LIMIT + 1}
      )
@@ -153,7 +151,6 @@ export async function searchRegistry(
     [
       Number(options.showDeviceExtensions),
       Number(options.showOnlineExtensions),
-      JSON.stringify(options.installedNames),
       ...(match ? [match] : []),
     ],
   );
