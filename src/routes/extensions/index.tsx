@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { SearchInput } from "@/components/a1/search-input";
 import { SettingsLink } from "@/components/a1/settings-link";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -344,12 +344,15 @@ export default function ExtensionsRoute() {
         (extensionListStatus.isStartupComplete && !extensionListStatus.hasDownloadedList) ? (
           <Alert>
             <IconInfoCircle />
-            <AlertDescription>
+            <AlertTitle>
               {extensionListStatus.isUpdating
                 ? "Extension updates are happening in the background."
-                : "The extension list is not available yet."}{" "}
+                : "The extension list is not available yet."}
+            </AlertTitle>
+            <AlertDescription>
+              If you're connected to the internet, the latest list of extensions{" "}
               <SettingsLink tab="about" id="setting-extension-list">
-                Check progress
+                should be downloading now.
               </SettingsLink>
             </AlertDescription>
           </Alert>
