@@ -33,6 +33,7 @@ import { listScheduledAgents, SCHEDULED_AGENTS_CHANGED_EVENT } from "@/lib/cron"
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { chatSortAtom, sidebarChatTimeGroupingAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
+import type { ChatSortOption } from "@/lib/settings/types";
 import type { ChatSearchResult } from "@/lib/storage/chat-storage";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +51,7 @@ interface ChatListItem {
   snippet?: string;
   createdAt?: number;
   updatedAt?: number;
+  lastMessageAt?: number;
 }
 
 type ChatListRow =
@@ -58,14 +60,21 @@ type ChatListRow =
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
+function getChatSortTimestamp(chat: ChatListItem, chatSort: ChatSortOption): number {
+  if (chatSort === "updated-at") {
+    return chat.lastMessageAt ?? chat.createdAt ?? 0;
+  }
+  if (chatSort === "active-at") {
+    return chat.updatedAt ?? chat.createdAt ?? 0;
+  }
+  return chat.createdAt ?? chat.updatedAt ?? 0;
+}
+
 function getChatTimeGroup(
   chat: ChatListItem,
-  chatSort: "created-at" | "updated-at",
+  chatSort: ChatSortOption,
 ): { id: string; label: string } {
-  const timestamp =
-    chatSort === "updated-at"
-      ? (chat.updatedAt ?? chat.createdAt)
-      : (chat.createdAt ?? chat.updatedAt);
+  const timestamp = getChatSortTimestamp(chat, chatSort);
 
   if (!timestamp || Number.isNaN(new Date(timestamp).getTime())) {
     return { id: "older", label: "Older" };
@@ -163,6 +172,7 @@ export const VirtualizedChatList = ({
             scheduledAgentTitle: chatMetadata?.scheduledAgentTitle,
             createdAt: chatMetadata?.createdAt,
             updatedAt: chatMetadata?.updatedAt,
+            lastMessageAt: chatMetadata?.lastMessageAt,
           };
         } catch (error) {
           logger.error(`Error loading chat ${id}:`, error);
@@ -174,19 +184,14 @@ export const VirtualizedChatList = ({
             scheduledAgentTitle: undefined,
             createdAt: undefined,
             updatedAt: undefined,
+            lastMessageAt: undefined,
           };
         }
       });
 
       loadedChats.sort((a, b) => {
-        const left =
-          chatSort === "updated-at"
-            ? (a.updatedAt ?? a.createdAt ?? 0)
-            : (a.createdAt ?? a.updatedAt ?? 0);
-        const right =
-          chatSort === "updated-at"
-            ? (b.updatedAt ?? b.createdAt ?? 0)
-            : (b.createdAt ?? b.updatedAt ?? 0);
+        const left = getChatSortTimestamp(a, chatSort);
+        const right = getChatSortTimestamp(b, chatSort);
         if (right !== left) {
           return right - left;
         }
@@ -297,6 +302,7 @@ export const VirtualizedChatList = ({
           snippet: r.snippet,
           createdAt: metadataMap.get(r.chatId)?.createdAt,
           updatedAt: metadataMap.get(r.chatId)?.updatedAt,
+          lastMessageAt: metadataMap.get(r.chatId)?.lastMessageAt,
         }));
     }
     return chats.filter((chat) => chat.title.toLowerCase().includes(searchQuery.toLowerCase()));

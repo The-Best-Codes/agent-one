@@ -23,6 +23,7 @@ export interface ChatMetadata {
   scheduledAgentTitle?: string;
   createdAt?: number;
   updatedAt?: number;
+  lastMessageAt?: number;
 }
 
 export interface ChatData extends ChatMetadata {
@@ -44,6 +45,7 @@ export interface PersistenceContextType {
   loadChatMetadata: (id: string) => ChatMetadata;
   loadFullChatData: (id: string) => Promise<ChatData>;
   saveChat: (params: { chatId: string; messages: UIMessage[] }) => void;
+  markChatMessageSent: (chatId: string) => void;
   saveChatModel: (params: { chatId: string; modelId: string }) => void;
   saveChatModelConfig: (params: { chatId: string; modelConfig: ModelConfig }) => void;
   saveChatTitleState: (params: {
@@ -306,6 +308,16 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     [getMetadata, setMetadata, persistMetadata, persistMessages, setChatUpdateTrigger],
   );
 
+  const markChatMessageSent = useCallback(
+    (chatId: string) => {
+      const metadata = touchMetadata({ ...getMetadata(chatId), lastMessageAt: Date.now() });
+      setMetadata(chatId, metadata);
+      persistMetadata(chatId, metadata);
+      setChatUpdateTrigger((prev) => prev + 1);
+    },
+    [getMetadata, setMetadata, persistMetadata, setChatUpdateTrigger],
+  );
+
   const saveChatModel = useCallback(
     ({ chatId, modelId }: { chatId: string; modelId: string }) => {
       try {
@@ -505,6 +517,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     loadChatMetadata,
     loadFullChatData,
     saveChat,
+    markChatMessageSent,
     saveChatModel,
     saveChatModelConfig,
     saveChatTitleState,

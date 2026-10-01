@@ -115,8 +115,8 @@ export default function ChatsSection() {
               <div className="flex flex-1 flex-col items-start">
                 <Label className="text-sm font-medium">Chat Sort Order</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  Choose whether the sidebar keeps newer chats first or brings recently updated
-                  chats to the top.
+                  Sort by creation date, your latest sent message, or recent activity such as
+                  opening a chat or changing its settings.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -136,6 +136,7 @@ export default function ChatsSection() {
                     <SelectGroup>
                       <SelectItem value="created-at">Newest chats first</SelectItem>
                       <SelectItem value="updated-at">Recently updated first</SelectItem>
+                      <SelectItem value="active-at">Recently active first</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
