@@ -32,7 +32,7 @@ export function useExtensionList(
     hasMore: false,
     resetKey: "",
   });
-  const [isSearching, setIsSearching] = useState(false);
+  const [isSearching, setIsSearching] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {

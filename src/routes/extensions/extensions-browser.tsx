@@ -1,7 +1,9 @@
+import { IconInbox } from "@tabler/icons-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
 
+import { Spinner } from "@/components/ui/spinner";
 import { useOverflow } from "@/hooks/use-overflow";
 import { type McpAuthState, type McpServerLoadState } from "@/lib/jotai/mcp-atoms";
 import { cn } from "@/lib/utils";
@@ -43,6 +45,7 @@ interface ExtensionsBrowserProps {
   query: string;
   hasMore: boolean;
   isSearching: boolean;
+  isLoading: boolean;
   resetKey: string;
 }
 
@@ -51,6 +54,7 @@ export function ExtensionsBrowser({
   query,
   hasMore,
   isSearching,
+  isLoading,
   resetKey,
 }: ExtensionsBrowserProps) {
   const parentRef = useRef<HTMLDivElement>(null);
@@ -79,10 +83,16 @@ export function ExtensionsBrowser({
       ref={parentRef}
       className="max-h-none min-h-0 flex-1 scroll-py-1 overflow-x-hidden overflow-y-auto"
       aria-label="Extensions"
-      aria-busy={isSearching}
+      aria-busy={isSearching || isLoading}
     >
-      {items.length === 0 ? (
-        <div className="text-muted-foreground rounded-md p-8 text-center text-sm">
+      {items.length === 0 && (isLoading || isSearching) ? (
+        <div className="text-muted-foreground flex h-full flex-col items-center justify-center gap-2 text-center text-sm">
+          <Spinner className="size-16" />
+          <p>{isLoading ? "Loading extensions..." : "Searching..."}</p>
+        </div>
+      ) : items.length === 0 ? (
+        <div className="text-muted-foreground flex h-full flex-col items-center justify-center gap-2 text-center text-sm">
+          <IconInbox className="size-16" />
           No extensions match your search.
         </div>
       ) : (
@@ -137,8 +147,8 @@ export function ExtensionsBrowser({
           {hasMore ? (
             <p className="text-muted-foreground py-4 text-center text-sm">
               {query.trim()
-                ? "Showing the first 100 catalog results alongside installed extensions. Refine your search to discover more."
-                : "Showing the first 100 catalog extensions alongside installed extensions. Search to discover more."}
+                ? "Showing the first 100 results. Refine your search to discover more!"
+                : "Showing the first 100 results. Search to discover more!"}
             </p>
           ) : null}
         </div>

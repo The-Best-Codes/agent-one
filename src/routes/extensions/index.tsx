@@ -435,6 +435,10 @@ export default function ExtensionsRoute() {
           query={query}
           hasMore={hasMore}
           isSearching={isSearching}
+          isLoading={
+            !onlyInstalled &&
+            (!extensionListStatus.isStartupComplete || extensionListStatus.isUpdating)
+          }
           resetKey={resetKey}
         />
       </div>
