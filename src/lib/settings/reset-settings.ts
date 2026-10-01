@@ -27,7 +27,6 @@ import {
   maxToolResultCharsAtom,
   memoryAtom,
   mcpParallelLoadLimitAtom,
-  mcpServersAtom,
   notificationSettingAtom,
   regenerateOnSaveAtom,
   remendEnabledAtom,
@@ -49,6 +48,7 @@ import {
   toolConfigsAtom,
   userNameAtom,
 } from "../jotai/settings-atoms";
+import { mcpServersAtom } from "../jotai/unsynced-local-atoms";
 import { type DefaultSettings } from "./types";
 
 const TTS_PROVIDER_IDS: readonly TtsProviderId[] = [

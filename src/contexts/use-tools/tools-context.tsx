@@ -42,9 +42,9 @@ import type { McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
 import {
   enabledToolsAtom,
   mcpParallelLoadLimitAtom,
-  mcpServersAtom,
   toolConfigsAtom,
 } from "@/lib/jotai/settings-atoms";
+import { mcpServersAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
 import { DEFAULT_SETTINGS, type McpServerConfig } from "@/lib/settings/types";
 
