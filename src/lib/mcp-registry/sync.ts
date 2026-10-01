@@ -66,7 +66,7 @@ async function refreshExtensionList(): Promise<{
     await loadPersistedExtensionList();
     const state = await getRegistrySyncState();
     let cursor = state.pending_cursor;
-    const since = state.pending_started
+    let since = state.pending_started
       ? state.pending_since
       : state.initial_complete
         ? state.checkpoint
@@ -74,6 +74,7 @@ async function refreshExtensionList(): Promise<{
     let started = state.pending_started;
     let processedCount = 0;
     let lastPublished = 0;
+    let hasRestarted = false;
     const seenCursors = new Set<string>();
 
     while (true) {
@@ -93,7 +94,19 @@ async function refreshExtensionList(): Promise<{
         signal: AbortSignal.timeout(60_000),
       });
       if (!response.ok) {
-        if (cursor && response.status === 400) await setRegistrySyncProgress(null, null, null);
+        if (cursor && response.status === 400) {
+          await setRegistrySyncProgress(null, null, null);
+          if (!hasRestarted) {
+            hasRestarted = true;
+            cursor = null;
+            since = state.initial_complete ? state.checkpoint : null;
+            started = null;
+            processedCount = 0;
+            seenCursors.clear();
+            store.set(extensionListStatusAtom, (status) => ({ ...status, processedCount: 0 }));
+            continue;
+          }
+        }
         throw new Error(`Request failed with status ${response.status}`);
       }
       const page = mcpRegistryPageSchema.parse(await response.json());
