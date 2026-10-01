@@ -1,15 +1,10 @@
 import fuzzysort from "fuzzysort";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 
-import { mcpServersAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import type { McpRegistrySummary } from "@/lib/mcp-registry/install";
-import {
-  createInstalledRegistryMetadata,
-  getInstalledRegistryMetadata,
-  getInstalledRegistryName,
-} from "@/lib/mcp-registry/metadata";
+import { getInstalledRegistryMetadata } from "@/lib/mcp-registry/metadata";
 import { getRegistrySummaries, searchRegistry } from "@/lib/mcp-registry/storage";
 import { extensionListRevisionAtom } from "@/lib/mcp-registry/sync";
 import type { McpServerConfig } from "@/lib/settings/types";
@@ -24,7 +19,6 @@ export function useExtensionList(
   showOnlineExtensions: boolean,
 ) {
   const revision = useAtomValue(extensionListRevisionAtom);
-  const setServers = useSetAtom(mcpServersAtom);
   const [result, setResult] = useState({
     extensions: [] as McpRegistrySummary[],
     installedIds: [] as string[],
@@ -42,8 +36,8 @@ export function useExtensionList(
         setIsSearching(true);
         void (async () => {
           const installedNames = servers
-            .map(getInstalledRegistryName)
-            .filter((name): name is string => name !== null);
+            .filter((server) => getInstalledRegistryMetadata(server) !== undefined)
+            .map((server) => server.id);
           let extensions: McpRegistrySummary[] = [];
           let installedSummaries: McpRegistrySummary[] = [];
           let hasMore = false;
@@ -69,20 +63,17 @@ export function useExtensionList(
               "The extension list could not be loaded. Installed extensions are still available.";
           }
           if (cancelled) return;
-          const summaries = new Map(
-            installedSummaries.map((summary) => [summary.registryName, summary]),
-          );
+          const summaries = new Map(installedSummaries.map((summary) => [summary.id, summary]));
           const installed = servers
             .filter((server) =>
               server.type === "stdio" ? showDeviceExtensions : showOnlineExtensions,
             )
             .map((server) => {
-              const name = getInstalledRegistryName(server);
               const metadata = getInstalledRegistryMetadata(server);
-              const summary = name ? summaries.get(name) : undefined;
+              const summary = metadata ? summaries.get(server.id) : undefined;
               const searchText = [
                 server.name,
-                name ?? server.id,
+                server.id,
                 metadata?.searchText,
                 summary?.searchText,
                 server.type === "stdio" ? server.command : server.url,
@@ -105,33 +96,10 @@ export function useExtensionList(
               showDeviceExtensions,
               showOnlineExtensions,
             ]),
-            knownRegistryNames: new Set(installedSummaries.map((summary) => summary.registryName)),
+            knownRegistryNames: new Set(installedSummaries.map((summary) => summary.id)),
             hasMore: queryError ? previous.hasMore : hasMore,
           }));
           setError(queryError);
-          const missingMetadata = servers.some((server) => {
-            const name = getInstalledRegistryName(server);
-            return !getInstalledRegistryMetadata(server) && name !== null && summaries.has(name);
-          });
-          if (missingMetadata) {
-            setServers((current) =>
-              current.map((server) => {
-                const name = getInstalledRegistryName(server);
-                const summary = name ? summaries.get(name) : undefined;
-                return summary && !getInstalledRegistryMetadata(server)
-                  ? {
-                      ...server,
-                      registryMetadata: {
-                        ...createInstalledRegistryMetadata(summary),
-                        version: server.id.includes("@")
-                          ? server.id.slice(server.id.lastIndexOf("@") + 1)
-                          : summary.version,
-                      },
-                    }
-                  : server;
-              }),
-            );
-          }
         })()
           .catch((error) => {
             if (!cancelled) {
@@ -149,15 +117,7 @@ export function useExtensionList(
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [
-    servers,
-    query,
-    onlyInstalled,
-    showDeviceExtensions,
-    showOnlineExtensions,
-    revision,
-    setServers,
-  ]);
+  }, [servers, query, onlyInstalled, showDeviceExtensions, showOnlineExtensions, revision]);
 
   return { ...result, isSearching, error };
 }

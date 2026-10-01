@@ -189,7 +189,6 @@ export interface TitleGenerationSettings {
 export type McpServerType = "stdio" | "http";
 
 export interface McpRegistryMetadata {
-  registryName: string;
   displayName: string;
   description: string;
   version: string;

@@ -5,7 +5,6 @@ import type { McpRegistryMetadata, McpServerConfig } from "@/lib/settings/types"
 import type { McpRegistryExtension, McpRegistrySummary } from "./install";
 
 const metadataSchema = z.object({
-  registryName: z.string(),
   displayName: z.string(),
   description: z.string(),
   version: z.string(),
@@ -24,18 +23,10 @@ export function getInstalledRegistryMetadata(
   return result.success ? result.data : undefined;
 }
 
-export function getInstalledRegistryName(server: McpServerConfig): string | null {
-  const metadata = getInstalledRegistryMetadata(server);
-  if (metadata) return metadata.registryName;
-  const index = server.id.lastIndexOf("@");
-  return index > 0 ? server.id.slice(0, index) : null;
-}
-
 export function createInstalledRegistryMetadata(
   extension: McpRegistrySummary | McpRegistryExtension,
 ): McpRegistryMetadata {
   return {
-    registryName: extension.registryName,
     displayName: extension.displayName,
     description: extension.description,
     version: extension.version,

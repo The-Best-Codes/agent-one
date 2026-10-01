@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getInstalledRegistryName } from "@/lib/mcp-registry/metadata";
+import { getInstalledRegistryMetadata } from "@/lib/mcp-registry/metadata";
 import { type McpServerConfig } from "@/lib/settings/types";
 
 interface DanglingExtensionsDialogProps {
@@ -34,11 +34,10 @@ export function DanglingExtensionsDialog({
 }: DanglingExtensionsDialogProps) {
   const danglingServers = useMemo(() => {
     if (!registryReady) return [];
-    return mcpServers.filter((server) => {
-      const registryName = getInstalledRegistryName(server);
-      if (!registryName) return false;
-      return !knownRegistryNames.has(registryName);
-    });
+    return mcpServers.filter(
+      (server) =>
+        getInstalledRegistryMetadata(server) !== undefined && !knownRegistryNames.has(server.id),
+    );
   }, [mcpServers, knownRegistryNames, registryReady]);
 
   return (

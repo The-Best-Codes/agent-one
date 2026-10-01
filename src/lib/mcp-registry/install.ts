@@ -51,7 +51,6 @@ export interface McpRegistryInstallTemplate {
 
 export interface McpRegistryExtension {
   id: string;
-  registryName: string;
   displayName: string;
   description: string;
   version: string;
@@ -473,7 +472,7 @@ export function createSearchText(
   entry: Omit<McpRegistryExtension, "installTemplates" | "registryEntry">,
 ): string {
   return [
-    entry.registryName,
+    entry.id,
     entry.displayName,
     entry.description,
     entry.publisher,
@@ -529,8 +528,7 @@ export function createMcpRegistryExtension(
   const installTemplates = includeTemplates ? buildInstallTemplates(server) : [];
 
   const extension: McpRegistryExtension = {
-    id: `${server.name}@${server.version}`,
-    registryName: server.name,
+    id: server.name,
     displayName,
     description,
     version: server.version,
@@ -663,7 +661,6 @@ export function createMcpRegistrySummary(entry: MCPRegistryEntry): McpRegistrySu
   const extension = createMcpRegistryExtension(entry, false);
   const summary = {
     id: extension.id,
-    registryName: extension.registryName,
     displayName: extension.displayName,
     description: extension.description,
     version: extension.version,

@@ -106,7 +106,7 @@ export default function ExtensionsRoute() {
   const prepareInstall = useCallback(
     async (name: string, version: string) => {
       if (preparingExtensionId !== null) return;
-      setPreparingExtensionId(`${name}@${version}`);
+      setPreparingExtensionId(name);
       try {
         const extension = await getRegistryExtension(name, version);
         if (!extension || !extension.installTemplates.length) {
@@ -289,7 +289,7 @@ export default function ExtensionsRoute() {
         id: extension.id,
         title: extension.displayName,
         description: extension.description,
-        searchText: [extension.displayName, extension.registryName, extension.searchText]
+        searchText: [extension.displayName, extension.id, extension.searchText]
           .filter(Boolean)
           .join(" "),
         transportType: extension.installType ?? "stdio",
@@ -310,7 +310,7 @@ export default function ExtensionsRoute() {
         websiteUrl: extension.websiteUrl,
         badges: extension.categories.length > 0 ? extension.categories : extension.tags,
         onInstall: () => {
-          void prepareInstall(extension.registryName, extension.version);
+          void prepareInstall(extension.id, extension.version);
         },
       });
     }
