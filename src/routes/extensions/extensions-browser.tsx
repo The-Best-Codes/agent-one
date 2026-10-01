@@ -88,7 +88,7 @@ export function ExtensionsBrowser({
       {items.length === 0 && (isLoading || isSearching) ? (
         <div className="text-muted-foreground flex h-full flex-col items-center justify-center gap-2 text-center text-sm">
           <Spinner className="size-16" />
-          <p>{isLoading ? "Loading extensions..." : "Searching..."}</p>
+          <p>Loading...</p>
         </div>
       ) : items.length === 0 ? (
         <div className="text-muted-foreground flex h-full flex-col items-center justify-center gap-2 text-center text-sm">
