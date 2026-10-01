@@ -21,7 +21,7 @@ import {
 import { useTools } from "@/contexts/use-tools/tools-hooks";
 import { useExtensionList } from "@/hooks/use-extension-list";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
-import { mcpServersAtom } from "@/lib/jotai/unsynced-local-atoms";
+import { mcpServersAtom } from "@/lib/jotai/mcp-atoms";
 import {
   type McpRegistryExtension,
   type McpRegistryInstallResult,

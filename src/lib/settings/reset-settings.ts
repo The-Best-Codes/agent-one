@@ -5,6 +5,7 @@ import { PROVIDER_REGISTRY, type ProviderStorageKey } from "@/lib/ai/providers/r
 import type { TtsProviderId } from "@/lib/settings/types";
 
 import { getApiKeyBaseAtom } from "../jotai/api-key-atoms";
+import { mcpServersAtom } from "../jotai/mcp-atoms";
 import { providerConfigAtoms } from "../jotai/provider-atoms";
 import {
   chatBackgroundAtom,
@@ -48,7 +49,6 @@ import {
   toolConfigsAtom,
   userNameAtom,
 } from "../jotai/settings-atoms";
-import { mcpServersAtom } from "../jotai/unsynced-local-atoms";
 import { type DefaultSettings } from "./types";
 
 const TTS_PROVIDER_IDS: readonly TtsProviderId[] = [
