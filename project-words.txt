@@ -204,3 +204,9 @@ rmcp
 RMCP
 sched
 cronstrue
+pipx
+pypi
+mcpb
+streamable
+julianday
+NOCASE
