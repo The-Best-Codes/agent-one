@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { getInstalledRegistryMetadata } from "@/lib/mcp-registry/metadata";
 import { type McpServerConfig } from "@/lib/settings/types";
 
 interface DanglingExtensionsDialogProps {
@@ -17,14 +18,9 @@ interface DanglingExtensionsDialogProps {
   onOpenChange: (open: boolean) => void;
   mcpServers: McpServerConfig[];
   knownRegistryNames: Set<string>;
+  registryReady: boolean;
   onRemove: (serverId: string) => void;
   onRemoveAll: (serverIds: string[]) => void;
-}
-
-function getRegistryNameFromServerId(serverId: string): string | null {
-  const atIdx = serverId.lastIndexOf("@");
-  if (atIdx <= 0) return null;
-  return serverId.slice(0, atIdx);
 }
 
 export function DanglingExtensionsDialog({
@@ -32,16 +28,17 @@ export function DanglingExtensionsDialog({
   onOpenChange,
   mcpServers,
   knownRegistryNames,
+  registryReady,
   onRemove,
   onRemoveAll,
 }: DanglingExtensionsDialogProps) {
   const danglingServers = useMemo(() => {
-    return mcpServers.filter((server) => {
-      const registryName = getRegistryNameFromServerId(server.id);
-      if (!registryName) return false;
-      return !knownRegistryNames.has(registryName);
-    });
-  }, [mcpServers, knownRegistryNames]);
+    if (!registryReady) return [];
+    return mcpServers.filter(
+      (server) =>
+        getInstalledRegistryMetadata(server) !== undefined && !knownRegistryNames.has(server.id),
+    );
+  }, [mcpServers, knownRegistryNames, registryReady]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -57,7 +54,9 @@ export function DanglingExtensionsDialog({
 
         {danglingServers.length === 0 ? (
           <div className="text-muted-foreground rounded-md border p-6 text-center text-sm">
-            No dangling extensions found.
+            {registryReady
+              ? "No dangling extensions found."
+              : "Wait for the extension list to finish loading before checking for dangling extensions."}
           </div>
         ) : (
           <ul className="flex max-h-80 flex-col gap-2 overflow-y-auto">

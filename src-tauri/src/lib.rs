@@ -123,6 +123,15 @@ pub fn run() {
                         },
                     ],
                 )
+                .add_migrations(
+                    "sqlite:mcp-registry.db",
+                    vec![tauri_plugin_sql::Migration {
+                        version: 1,
+                        description: "create_mcp_registry",
+                        sql: include_str!("../migrations/0001_create_mcp_registry.sql"),
+                        kind: tauri_plugin_sql::MigrationKind::Up,
+                    }],
+                )
                 .build(),
         )
         .plugin(tauri_plugin_opener::init())

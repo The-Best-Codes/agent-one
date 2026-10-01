@@ -2,13 +2,6 @@ import { IconAlertTriangle, IconEye, IconEyeClosed } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
 
 import {
-  createMcpServerFromRegistryInstall,
-  getStdioRuntimeCommand,
-  type McpRegistryExtension,
-  type McpRegistryInstallResult,
-  type RegistryInstallField,
-} from "@/assets/mcp-registry/mcp-registry";
-import {
   AdaptiveTooltip,
   AdaptiveTooltipContent,
   AdaptiveTooltipTrigger,
@@ -32,6 +25,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  createMcpServerFromRegistryInstall,
+  getStdioRuntimeCommand,
+  type McpRegistryExtension,
+  type McpRegistryInstallResult,
+  type RegistryInstallField,
+} from "@/lib/mcp-registry/install";
 import { isCommandAvailable } from "@/lib/run-command";
 
 import { McpServerConfigForm, type McpServerConfigFormValues } from "./mcp-server-config-form";

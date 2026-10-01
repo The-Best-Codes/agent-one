@@ -175,14 +175,6 @@ export default defineConfig(() => ({
         manualChunks(id: string) {
           // Normalize to POSIX-style paths so checks work on Windows too
           const normalizedId = id.replace(/\\/g, "/");
-          const mcpRegistryDir = path
-            .resolve(import.meta.dirname, "src/assets/mcp-registry")
-            .replace(/\\/g, "/");
-
-          if (normalizedId.includes(`${mcpRegistryDir}/`)) {
-            return "mcpRegistry";
-          }
-
           if (normalizedId.includes("/node_modules/")) {
             for (const [chunkName, packages] of Object.entries(vendorManualChunks)) {
               if (packages.some((pkg) => normalizedId.includes(`/node_modules/${pkg}/`))) {
