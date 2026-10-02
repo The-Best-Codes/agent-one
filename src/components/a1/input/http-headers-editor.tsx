@@ -104,7 +104,7 @@ export function HttpHeadersEditor({
             <>
               <Button
                 type="button"
-                variant="outline"
+                variant="default"
                 size="sm"
                 onClick={handleSave}
                 disabled={!canSave}
@@ -115,7 +115,7 @@ export function HttpHeadersEditor({
               </Button>
               <Button
                 type="button"
-                variant="outline"
+                variant="destructive"
                 size="sm"
                 onClick={handleRevert}
                 title="Revert changes"
