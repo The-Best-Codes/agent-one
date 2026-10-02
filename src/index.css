@@ -831,6 +831,20 @@
   .prose-quoteless blockquote p:first-of-type::after {
     content: none !important;
   }
+
+  input::-ms-reveal {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  input::-webkit-contacts-auto-fill-button,
+  input::-webkit-credentials-auto-fill-button {
+    visibility: hidden;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+  }
 }
 
 :root [data-sonner-toaster] {
