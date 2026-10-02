@@ -2,6 +2,7 @@ import { IconDeviceFloppy, IconEye, IconEyeClosed, IconRestore } from "@tabler/i
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   InputGroup,
   InputGroupAddon,
@@ -54,7 +55,7 @@ export function SecretInput({
   };
 
   return (
-    <div className={cn("flex items-center gap-1", className)}>
+    <div className={cn("flex items-center gap-2", className)}>
       <InputGroup className="flex-1">
         <InputGroupInput
           id={id}
@@ -78,7 +79,7 @@ export function SecretInput({
         </InputGroupAddon>
       </InputGroup>
       {showSaveCancel && hasChanges && (
-        <>
+        <ButtonGroup aria-label="Secret value actions">
           <Button type="button" onClick={handleSave} variant="default" title="Save">
             <IconDeviceFloppy data-icon="inline-start" />
             Save
@@ -87,7 +88,7 @@ export function SecretInput({
             <IconRestore data-icon="inline-start" />
             Revert
           </Button>
-        </>
+        </ButtonGroup>
       )}
     </div>
   );
