@@ -87,8 +87,8 @@ export default function AccountSection() {
     ? getPlanNameForSubscription(activeSubscription)
     : "Free";
 
-  const renewalDate = activeSubscription?.currentPeriodEnd
-    ? new Date(activeSubscription.currentPeriodEnd).toLocaleDateString()
+  const renewalDate = activeSubscription?.current_period_end
+    ? new Date(activeSubscription.current_period_end).toLocaleDateString()
     : null;
 
   const usageSummary = useMemo(() => {

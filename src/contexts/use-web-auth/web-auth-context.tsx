@@ -12,7 +12,6 @@ import { settingsSyncManager } from "@/lib/sync/settings-sync-manager";
 import {
   type CustomerState,
   type DeviceFlowState,
-  normalizeCustomerState,
   WebAuthContext,
   type WebAuthUser,
 } from "./web-auth-contexts";
@@ -119,7 +118,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
           return;
         }
 
-        setCustomerState(normalizeCustomerState(data));
+        setCustomerState(data ?? null);
       } catch {
         if (!cancelled) {
           setBillingError("Unable to load billing information.");
