@@ -27,7 +27,6 @@
     "@ai-sdk/google": "^4.0.87",
     "@ai-sdk/groq": "^4.0.54",
     "@ai-sdk/hume": "^3.0.53",
-    "@ai-sdk/lmnt": "^3.0.36",
     "@ai-sdk/mcp": "^2.0.66",
     "@ai-sdk/mistral": "^4.0.56",
     "@ai-sdk/openai": "^4.0.83",

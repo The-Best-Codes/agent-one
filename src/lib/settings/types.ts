@@ -105,7 +105,7 @@ export type ChatBackgroundPresetOption =
   | "sunset"
   | "night"
   | "island";
-export type TtsProviderId = "openai" | "elevenlabs" | "lmnt" | "hume" | "google";
+export type TtsProviderId = "openai" | "elevenlabs" | "hume" | "google";
 
 export interface ChatBackgroundSettings {
   preset: ChatBackgroundPresetOption;
@@ -140,14 +140,6 @@ export interface TtsElevenLabsSettings {
   applyTextNormalization: "auto" | "on" | "off";
 }
 
-export interface TtsLmntSettings {
-  model: string;
-  voice: string;
-  language: string;
-  speed: number;
-  conversational: boolean;
-}
-
 export interface TtsHumeSettings {
   model: string;
   voice: string;
@@ -166,7 +158,6 @@ export interface TtsSettings {
   provider: TtsProviderId | "";
   openai: TtsOpenAISettings;
   elevenlabs: TtsElevenLabsSettings;
-  lmnt: TtsLmntSettings;
   hume: TtsHumeSettings;
   google: TtsGoogleSettings;
 }
@@ -425,7 +416,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   TTS: {
     provider: "",
     openai: {
-      model: "tts-1",
+      model: "gpt-4o-mini-tts",
       voice: "alloy",
       speed: 1,
       instructions: "",
@@ -441,13 +432,6 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
       useSpeakerBoost: false,
       applyTextNormalization: "auto",
     },
-    lmnt: {
-      model: "aurora",
-      voice: "ava",
-      language: "en",
-      speed: 1,
-      conversational: false,
-    },
     hume: {
       model: "default",
       voice: "d8ab67c6-953d-4bd8-9370-8fa53a0f1453",
@@ -455,7 +439,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
       instructions: "",
     },
     google: {
-      model: "gemini-3.1-flash-tts-preview",
+      model: "gemini-3.8-flash-tts",
       voice: "Kore",
       speed: 1,
       instructions: "",

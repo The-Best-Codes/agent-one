@@ -70,7 +70,6 @@ export function ProvidersList() {
   const setTtsSettings = useSetAtom(ttsSettingsAtom);
   const setOpenAiTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-openai"));
   const setElevenLabsTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-elevenlabs"));
-  const setLmntTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-lmnt"));
   const setHumeTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-hume"));
   const setGoogleTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-google"));
   const ttsSettings = normalizeTtsSettings(rawTtsSettings);
@@ -80,7 +79,6 @@ export function ProvidersList() {
   const selectedTtsModel = getSelectedTtsModel(ttsSettings);
   const openAiTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-openai"));
   const elevenLabsTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-elevenlabs"));
-  const lmntTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-lmnt"));
   const humeTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-hume"));
   const googleTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-google"));
 
@@ -327,10 +325,6 @@ export function ProvidersList() {
                       updateTtsSettings({
                         elevenlabs: { ...ttsSettings.elevenlabs, model },
                       });
-                    } else if (ttsSettings.provider === "lmnt") {
-                      updateTtsSettings({
-                        lmnt: { ...ttsSettings.lmnt, model },
-                      });
                     } else if (ttsSettings.provider === "hume") {
                       updateTtsSettings({
                         hume: { ...ttsSettings.hume, model },
@@ -379,19 +373,6 @@ export function ProvidersList() {
                     value={elevenLabsTtsApiKey}
                     onChange={setElevenLabsTtsApiKey}
                     placeholder="Enter your ElevenLabs API key"
-                    showSaveCancel
-                  />
-                </Field>
-              ) : null}
-
-              {ttsSettings.provider === "lmnt" ? (
-                <Field>
-                  <FieldLabel htmlFor="tts-lmnt-api-key">API Key</FieldLabel>
-                  <SecretInput
-                    id="tts-lmnt-api-key"
-                    value={lmntTtsApiKey}
-                    onChange={setLmntTtsApiKey}
-                    placeholder="Enter your LMNT API key"
                     showSaveCancel
                   />
                 </Field>
@@ -630,70 +611,6 @@ export function ProvidersList() {
                       onCheckedChange={(useSpeakerBoost) =>
                         updateTtsSettings({
                           elevenlabs: { ...ttsSettings.elevenlabs, useSpeakerBoost },
-                        })
-                      }
-                    />
-                  </Field>
-                </>
-              ) : null}
-
-              {ttsSettings.provider === "lmnt" ? (
-                <>
-                  <Field>
-                    <FieldLabel htmlFor="tts-lmnt-voice">Voice</FieldLabel>
-                    <Input
-                      id="tts-lmnt-voice"
-                      value={ttsSettings.lmnt.voice}
-                      onChange={(event) =>
-                        updateTtsSettings({
-                          lmnt: { ...ttsSettings.lmnt, voice: event.target.value },
-                        })
-                      }
-                      placeholder="e.g. ava"
-                    />
-                  </Field>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <Field>
-                      <FieldLabel htmlFor="tts-lmnt-language">Language Code</FieldLabel>
-                      <Input
-                        id="tts-lmnt-language"
-                        value={ttsSettings.lmnt.language}
-                        onChange={(event) =>
-                          updateTtsSettings({
-                            lmnt: { ...ttsSettings.lmnt, language: event.target.value },
-                          })
-                        }
-                        placeholder="e.g. en"
-                      />
-                    </Field>
-                    <Field>
-                      <FieldLabel htmlFor="tts-lmnt-speed">Speech Rate</FieldLabel>
-                      <Input
-                        id="tts-lmnt-speed"
-                        type="number"
-                        min="0.25"
-                        max="2"
-                        step="0.05"
-                        value={ttsSettings.lmnt.speed}
-                        onChange={(event) =>
-                          updateTtsSettings({
-                            lmnt: {
-                              ...ttsSettings.lmnt,
-                              speed: Number(event.target.value) || 1,
-                            },
-                          })
-                        }
-                      />
-                    </Field>
-                  </div>
-                  <Field orientation="horizontal">
-                    <FieldLabel htmlFor="tts-lmnt-conversational">Conversational Voice</FieldLabel>
-                    <Switch
-                      id="tts-lmnt-conversational"
-                      checked={ttsSettings.lmnt.conversational}
-                      onCheckedChange={(conversational) =>
-                        updateTtsSettings({
-                          lmnt: { ...ttsSettings.lmnt, conversational },
                         })
                       }
                     />

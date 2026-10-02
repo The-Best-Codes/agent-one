@@ -1,7 +1,6 @@
 import { createElevenLabs, type ElevenLabsSpeechModelOptions } from "@ai-sdk/elevenlabs";
 import { createGoogle } from "@ai-sdk/google";
 import { createHume, type HumeSpeechModelOptions } from "@ai-sdk/hume";
-import { createLMNT, type LMNTSpeechModelOptions } from "@ai-sdk/lmnt";
 import { createOpenAI, type OpenAISpeechModelOptions } from "@ai-sdk/openai";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { generateSpeech } from "ai";
@@ -16,7 +15,13 @@ export const TTS_PROVIDER_OPTIONS = [
   {
     id: "openai",
     label: "OpenAI",
-    models: ["tts-1", "tts-1-hd", "gpt-4o-mini-tts"],
+    models: [
+      "gpt-4o-mini-tts",
+      "gpt-4o-mini-tts-2025-12-15",
+      "gpt-4o-mini-tts-2025-03-20",
+      "tts-1",
+      "tts-1-hd",
+    ],
     voices: [
       "alloy",
       "ash",
@@ -47,12 +52,6 @@ export const TTS_PROVIDER_OPTIONS = [
     voices: [],
   },
   {
-    id: "lmnt",
-    label: "LMNT",
-    models: ["aurora", "blizzard"],
-    voices: [],
-  },
-  {
     id: "hume",
     label: "Hume",
     models: ["default"],
@@ -62,10 +61,11 @@ export const TTS_PROVIDER_OPTIONS = [
     id: "google",
     label: "Google Gemini",
     models: [
-      "gemini-2.5-flash-tts",
-      "gemini-2.5-pro-tts",
-      "gemini-2.5-flash-lite-preview-tts",
+      "gemini-3.8-flash-tts",
+      "gemini-3.8-flash-lite-tts",
       "gemini-3.1-flash-tts-preview",
+      "gemini-2.5-flash-preview-tts",
+      "gemini-2.5-pro-preview-tts",
     ],
     voices: [
       "Achernar",
@@ -117,8 +117,6 @@ export function getSelectedTtsModel(settings: TtsSettings): string {
       return settings.openai.model;
     case "elevenlabs":
       return settings.elevenlabs.model;
-    case "lmnt":
-      return settings.lmnt.model;
     case "hume":
       return settings.hume.model;
     case "google":
@@ -156,13 +154,6 @@ export function normalizeTtsSettings(settings: LegacyTtsSettings | undefined): T
       style: settings?.elevenlabs?.style ?? 0,
       useSpeakerBoost: settings?.elevenlabs?.useSpeakerBoost ?? false,
       applyTextNormalization: settings?.elevenlabs?.applyTextNormalization ?? "auto",
-    },
-    lmnt: {
-      model: settings?.lmnt?.model?.trim() || settings?.model?.trim() || getDefaultTtsModel("lmnt"),
-      voice: settings?.lmnt?.voice?.trim() || "ava",
-      language: settings?.lmnt?.language?.trim() || "en",
-      speed: settings?.lmnt?.speed ?? 1,
-      conversational: settings?.lmnt?.conversational ?? false,
     },
     hume: {
       model: settings?.hume?.model?.trim() || settings?.model?.trim() || getDefaultTtsModel("hume"),
@@ -262,38 +253,6 @@ export async function generateTtsAudio(
             },
             applyTextNormalization: settings.elevenlabs.applyTextNormalization,
           } satisfies ElevenLabsSpeechModelOptions,
-        },
-        abortSignal,
-      });
-
-      return {
-        uint8Array: result.audio.uint8Array,
-        mediaType: result.audio.mediaType,
-      };
-    }
-
-    case "lmnt": {
-      const provider = createLMNT({
-        apiKey: apiKeys.lmnt || "unset",
-        fetch: tauriFetch,
-      });
-
-      const result = await generateSpeech({
-        model: provider.speech(model),
-        text,
-        voice: settings.lmnt.voice,
-        language: settings.lmnt.language,
-        speed: settings.lmnt.speed,
-        providerOptions: {
-          lmnt: {
-            model,
-            format: "mp3",
-            sampleRate: 24000,
-            speed: settings.lmnt.speed,
-            conversational: settings.lmnt.conversational,
-            topP: 1,
-            temperature: 1,
-          } satisfies LMNTSpeechModelOptions,
         },
         abortSignal,
       });

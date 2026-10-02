@@ -51,13 +51,7 @@ import {
 } from "../jotai/settings-atoms";
 import { type DefaultSettings } from "./types";
 
-const TTS_PROVIDER_IDS: readonly TtsProviderId[] = [
-  "openai",
-  "elevenlabs",
-  "lmnt",
-  "hume",
-  "google",
-];
+const TTS_PROVIDER_IDS: readonly TtsProviderId[] = ["openai", "elevenlabs", "hume", "google"];
 
 export function resetAllSettings(): void {
   const store = getDefaultStore();

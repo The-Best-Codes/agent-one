@@ -23,7 +23,6 @@ const vendorManualChunks = {
     "@ai-sdk/google",
     "@ai-sdk/groq",
     "@ai-sdk/hume",
-    "@ai-sdk/lmnt",
     "@ai-sdk/mistral",
     "@ai-sdk/openai",
     "@ai-sdk/openai-compatible",

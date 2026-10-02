@@ -115,10 +115,7 @@ duplicative
 contenteditable
 entr
 elevenlabs
-lmnt
-LMNT
 ELEVENLABS
-Lmnt
 quicktype
 Ambient
 ambient

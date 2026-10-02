@@ -27,7 +27,6 @@ export function TtsButton({
   const apiKeys = {
     openai: useAtomValue(apiKeyAtomFamily("tts-openai")),
     elevenlabs: useAtomValue(apiKeyAtomFamily("tts-elevenlabs")),
-    lmnt: useAtomValue(apiKeyAtomFamily("tts-lmnt")),
     hume: useAtomValue(apiKeyAtomFamily("tts-hume")),
     google: useAtomValue(apiKeyAtomFamily("tts-google")),
   };
@@ -83,7 +82,6 @@ export function TtsButton({
         {
           openai: apiKeys.openai,
           elevenlabs: apiKeys.elevenlabs,
-          lmnt: apiKeys.lmnt,
           hume: apiKeys.hume,
           google: apiKeys.google,
         },
