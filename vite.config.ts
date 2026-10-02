@@ -91,8 +91,6 @@ const vendorManualChunks = {
     "fuzzysort",
     "@number-flow/react",
     "number-flow",
-    "react-scan",
-    "react-grab",
   ],
   tauri: [
     "@tauri-apps/api",
