@@ -31,8 +31,6 @@ const vendorManualChunks = {
     "@ai-sdk/togetherai",
     "@ai-sdk/xai",
     "@openrouter/ai-sdk-provider",
-    "@aihubmix/ai-sdk-provider",
-    "venice-ai-sdk-provider",
   ],
   codemirrorCore: [
     "codemirror",
