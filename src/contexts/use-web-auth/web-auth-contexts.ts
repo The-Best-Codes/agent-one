@@ -37,6 +37,46 @@ export interface CustomerState {
   activeMeters?: CustomerMeter[];
 }
 
+interface CustomerStateResponse extends CustomerState {
+  active_subscriptions?: {
+    id: string;
+    status: string;
+    current_period_end?: string | Date;
+    product_id: string;
+  }[];
+  active_meters?: {
+    id: string;
+    meter_id: string;
+    consumed_units: number;
+    credited_units: number;
+    balance: number;
+  }[];
+}
+
+export function normalizeCustomerState(
+  data: CustomerStateResponse | null | undefined,
+): CustomerState | null {
+  if (!data) return null;
+
+  return {
+    activeSubscriptions:
+      data.active_subscriptions?.map((subscription) => ({
+        id: subscription.id,
+        status: subscription.status,
+        currentPeriodEnd: subscription.current_period_end,
+        productId: subscription.product_id,
+      })) ?? data.activeSubscriptions,
+    activeMeters:
+      data.active_meters?.map((meter) => ({
+        id: meter.id,
+        meterId: meter.meter_id,
+        consumedUnits: meter.consumed_units,
+        creditedUnits: meter.credited_units,
+        balance: meter.balance,
+      })) ?? data.activeMeters,
+  };
+}
+
 export interface BillingUsageSummary {
   credited: number;
   consumed: number;
