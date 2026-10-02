@@ -1,6 +1,6 @@
 import { IconPlugConnected } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { SecretInput } from "@/components/a1/input/secret-input";
 import { SearchInput } from "@/components/a1/search-input";
@@ -58,20 +58,6 @@ export function ProvidersList() {
   const [builtInSearchQuery, setBuiltInSearchQuery] = useState("");
   const [localSearchQuery, setLocalSearchQuery] = useState("");
   const [customSearchQuery, setCustomSearchQuery] = useState("");
-  const [openBuiltInItem, setOpenBuiltInItem] = useState("");
-  const [openLocalItem, setOpenLocalItem] = useState("");
-  const [openCustomItem, setOpenCustomItem] = useState("");
-
-  const handleBuiltInOpenChange = useCallback((value: string | string[]) => {
-    setOpenBuiltInItem(typeof value === "string" ? value : (value[0] ?? ""));
-  }, []);
-  const handleLocalOpenChange = useCallback((value: string | string[]) => {
-    setOpenLocalItem(typeof value === "string" ? value : (value[0] ?? ""));
-  }, []);
-  const handleCustomOpenChange = useCallback((value: string | string[]) => {
-    setOpenCustomItem(typeof value === "string" ? value : (value[0] ?? ""));
-  }, []);
-
   const localProviderIds = useAtomValue(localProviderIdsAtom);
   const rawTtsSettings = useAtomValue(ttsSettingsAtom);
   const localProviderSearchItems = useAtomValue(localProviderSearchItemsAtom);
@@ -178,14 +164,11 @@ export function ProvidersList() {
                 getKey={(provider) => provider.id}
                 label="Built-in providers"
                 searchQuery={normalizedBuiltInQuery}
-                value={openBuiltInItem}
-                onValueChange={handleBuiltInOpenChange}
                 renderItem={(provider) => (
                   <BuiltInProviderListItem
                     providerId={provider.id}
                     label={provider.label}
                     hasEnvKey={hasEnvKey(provider.id)}
-                    onOpenChange={setOpenBuiltInItem}
                   />
                 )}
               />
@@ -221,11 +204,7 @@ export function ProvidersList() {
                 getKey={(providerId) => providerId}
                 label="Local providers"
                 searchQuery={normalizedLocalQuery}
-                value={openLocalItem}
-                onValueChange={handleLocalOpenChange}
-                renderItem={(providerId) => (
-                  <LocalProviderListItem providerId={providerId} onOpenChange={setOpenLocalItem} />
-                )}
+                renderItem={(providerId) => <LocalProviderListItem providerId={providerId} />}
               />
             ) : (
               <p className="text-muted-foreground py-4 text-center text-sm">
@@ -279,13 +258,10 @@ export function ProvidersList() {
                 getKey={(providerId) => providerId}
                 label="Custom providers"
                 searchQuery={normalizedCustomQuery}
-                value={openCustomItem}
-                onValueChange={handleCustomOpenChange}
                 renderItem={(providerId) => (
                   <CustomProviderListItem
                     providerId={providerId}
                     onDelete={() => handleDeleteProvider(providerId)}
-                    onOpenChange={setOpenCustomItem}
                   />
                 )}
               />

@@ -1,4 +1,4 @@
-import { IconAlertTriangle, IconTrash } from "@tabler/icons-react";
+import { IconAlertTriangle, IconSettings, IconTrash } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { memo, useMemo, useRef, useState, type ReactNode } from "react";
 
@@ -11,14 +11,18 @@ import {
   AdaptiveTooltipTrigger,
 } from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/native/accordion";
 import { Switch } from "@/components/ui/switch";
 import { modelDirectoryDataAtom } from "@/lib/ai/models/model-directory";
 import {
@@ -72,7 +76,6 @@ interface SharedProviderEditorProps {
   showSetupButton?: boolean;
   showMissingKeyWarning?: boolean;
   onSetupDismiss?: () => void;
-  onOpenChange?: (id: string) => void;
   onEnabledChange: (enabled: boolean) => void;
 }
 
@@ -80,21 +83,18 @@ interface BuiltInProviderListItemProps {
   providerId: ProviderId;
   label: string;
   hasEnvKey: boolean;
-  onOpenChange?: (id: string) => void;
 }
 
 interface CustomProviderListItemProps {
   providerId: string;
   onDelete: () => void;
-  onOpenChange?: (id: string) => void;
 }
 
 interface LocalProviderListItemProps {
   providerId: string;
-  onOpenChange?: (id: string) => void;
 }
 
-const ProviderAccordionItem = memo(function ProviderAccordionItem({
+const ProviderEditorItem = memo(function ProviderEditorItem({
   id,
   title,
   enabled,
@@ -120,14 +120,17 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
   showSetupButton = false,
   showMissingKeyWarning = false,
   onSetupDismiss,
-  onOpenChange,
   onEnabledChange,
 }: SharedProviderEditorProps) {
   return (
-    <AccordionItem value={id}>
-      <AccordionTrigger className="px-1 py-2 hover:no-underline">
-        <div className="flex flex-1 items-center justify-between gap-2 pr-2">
-          <span className="flex items-center gap-2">
+    <Dialog>
+      <div className="flex items-center gap-2 px-1 py-2">
+        <DialogTrigger asChild>
+          <button
+            type="button"
+            className="focus-visible:border-ring focus-visible:ring-ring/50 flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md text-left text-sm font-medium outline-none focus-visible:ring-[3px]"
+            aria-label={`Configure ${title} provider`}
+          >
             <ProviderLogo id={id} title={title} />
             <span>{title}</span>
             {showMissingKeyWarning && (
@@ -140,78 +143,77 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
                 <AdaptiveTooltipContent>No API key set</AdaptiveTooltipContent>
               </AdaptiveTooltip>
             )}
-          </span>
-          <span className="flex items-center gap-2">
-            {showSetupButton && onSetupDismiss && (
-              <Button
-                size="xs"
-                variant="default"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSetupDismiss();
-                  onOpenChange?.(id);
-                }}
-              >
-                <IconAlertTriangle data-icon="inline-start" />
-                Set Up Provider
-              </Button>
-            )}
-            <Switch
-              id={`enabled-${id}`}
-              checked={enabled}
-              onCheckedChange={(checked) => {
-                onEnabledChange(checked);
-              }}
-              onClick={(event) => event.stopPropagation()}
-              aria-label={`Enable ${title}`}
+          </button>
+        </DialogTrigger>
+        {showSetupButton && onSetupDismiss && (
+          <DialogTrigger asChild>
+            <Button size="xs" variant="default" onClick={onSetupDismiss}>
+              <IconAlertTriangle data-icon="inline-start" />
+              Set Up Provider
+            </Button>
+          </DialogTrigger>
+        )}
+        <DialogTrigger asChild>
+          <Button variant="outline" size="icon-xs" aria-label={`Configure ${title} provider`}>
+            <IconSettings />
+          </Button>
+        </DialogTrigger>
+        <Switch
+          id={`enabled-${id}`}
+          checked={enabled}
+          onCheckedChange={onEnabledChange}
+          aria-label={`Enable ${title}`}
+        />
+      </div>
+      <DialogContent className="sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Configure {title} provider</DialogTitle>
+          <DialogDescription>Customize the settings and models for {title}.</DialogDescription>
+        </DialogHeader>
+        <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
+          <div className="flex flex-col gap-4">
+            {details}
+
+            {showApiKey ? (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor={`api-key-${id}`} className="text-xs">
+                  API Key
+                </Label>
+                {apiKeyHint ? <p className="text-muted-foreground text-sm">{apiKeyHint}</p> : null}
+                <SecretInput
+                  id={`api-key-${id}`}
+                  value={apiKey}
+                  onChange={onApiKeyChange}
+                  placeholder={apiKeyPlaceholder}
+                  showSaveCancel
+                />
+              </div>
+            ) : null}
+
+            <HttpHeadersEditor
+              id={id}
+              headers={headers}
+              onChange={onHeadersChange}
+              labelClassName="text-xs"
             />
-          </span>
+
+            <ModelList
+              models={models}
+              builtInModels={builtInModels}
+              baseUrl={modelListBaseUrl}
+              apiKey={modelListApiKey}
+              headers={modelListHeaders}
+              autoFetchOnMount={autoFetchOnMount}
+              addButtonLabel={addButtonLabel}
+              emptyTitle={emptyTitle}
+              emptyDescription={emptyDescription}
+              onChange={onModelsChange}
+            />
+          </div>
         </div>
-      </AccordionTrigger>
-      <AccordionContent className="overflow-auto px-1 pb-3">
-        <div className="flex flex-col gap-4">
-          {details}
-
-          {showApiKey ? (
-            <div className="flex flex-col gap-2">
-              <Label htmlFor={`api-key-${id}`} className="text-xs">
-                API Key
-              </Label>
-              {apiKeyHint ? <p className="text-muted-foreground text-sm">{apiKeyHint}</p> : null}
-              <SecretInput
-                id={`api-key-${id}`}
-                value={apiKey}
-                onChange={onApiKeyChange}
-                placeholder={apiKeyPlaceholder}
-                showSaveCancel
-              />
-            </div>
-          ) : null}
-
-          <HttpHeadersEditor
-            id={id}
-            headers={headers}
-            onChange={onHeadersChange}
-            labelClassName="text-xs"
-          />
-
-          <ModelList
-            models={models}
-            builtInModels={builtInModels}
-            baseUrl={modelListBaseUrl}
-            apiKey={modelListApiKey}
-            headers={modelListHeaders}
-            autoFetchOnMount={autoFetchOnMount}
-            addButtonLabel={addButtonLabel}
-            emptyTitle={emptyTitle}
-            emptyDescription={emptyDescription}
-            onChange={onModelsChange}
-          />
-
-          {footer}
-        </div>
-      </AccordionContent>
-    </AccordionItem>
+        <DialogFooter showCloseButton={!footer}>{footer}</DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 });
 
@@ -219,7 +221,6 @@ export const BuiltInProviderListItem = memo(function BuiltInProviderListItem({
   providerId,
   label,
   hasEnvKey,
-  onOpenChange,
 }: BuiltInProviderListItemProps) {
   const storedConfig = useAtomValue(getProviderConfigAtom(providerId));
   const storedApiKey = useAtomValue(getApiKeyAtom(providerId));
@@ -249,7 +250,7 @@ export const BuiltInProviderListItem = memo(function BuiltInProviderListItem({
   };
 
   return (
-    <ProviderAccordionItem
+    <ProviderEditorItem
       id={providerId}
       title={label}
       enabled={storedConfig.enabled}
@@ -269,7 +270,6 @@ export const BuiltInProviderListItem = memo(function BuiltInProviderListItem({
       showSetupButton={showSetupButton}
       showMissingKeyWarning={showMissingKeyWarning}
       onSetupDismiss={handleSetupDismiss}
-      onOpenChange={onOpenChange}
     />
   );
 });
@@ -277,7 +277,6 @@ export const BuiltInProviderListItem = memo(function BuiltInProviderListItem({
 export const CustomProviderListItem = memo(function CustomProviderListItem({
   providerId,
   onDelete,
-  onOpenChange,
 }: CustomProviderListItemProps) {
   const provider = useAtomValue(getCustomProviderAtom(providerId));
   const apiKey = useAtomValue(getCustomProviderApiKeyAtom(providerId));
@@ -305,7 +304,7 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
 
   return (
     <>
-      <ProviderAccordionItem
+      <ProviderEditorItem
         id={provider.id}
         title={provider.name}
         enabled={provider.enabled}
@@ -350,18 +349,15 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
         footer={
           <Button
             variant="destructive"
-            size="sm"
             onClick={() => {
               setDeleteDialogOpen(true);
             }}
-            className="w-fit"
           >
             <IconTrash data-icon="inline-start" />
             Delete Provider
           </Button>
         }
         onEnabledChange={(enabled) => update({ enabled })}
-        onOpenChange={onOpenChange}
       />
 
       <DeleteProviderDialog
@@ -380,7 +376,6 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
 
 export const LocalProviderListItem = memo(function LocalProviderListItem({
   providerId,
-  onOpenChange,
 }: LocalProviderListItemProps) {
   const provider = useAtomValue(getLocalProviderAtom(providerId));
   const updateProvider = useSetAtom(updateLocalProviderAtom);
@@ -399,7 +394,7 @@ export const LocalProviderListItem = memo(function LocalProviderListItem({
   };
 
   return (
-    <ProviderAccordionItem
+    <ProviderEditorItem
       id={provider.id}
       title={provider.name}
       enabled={provider.enabled}
@@ -432,7 +427,6 @@ export const LocalProviderListItem = memo(function LocalProviderListItem({
         </FieldGroup>
       }
       onEnabledChange={(enabled) => updateProvider(provider.id, { enabled })}
-      onOpenChange={onOpenChange}
     />
   );
 });
