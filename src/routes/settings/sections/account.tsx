@@ -53,7 +53,7 @@ const BILLING_URL = `${DASHBOARD_URL}/billing`;
 const UPGRADE_URL = `${BILLING_URL}?hint=upgrade`;
 
 function formatNumber(value: number) {
-  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 }).format(value);
+  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(value);
 }
 
 export default function AccountSection() {
