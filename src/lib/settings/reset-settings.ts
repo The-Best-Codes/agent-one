@@ -1,11 +1,11 @@
 import { getDefaultStore } from "jotai";
 import { RESET } from "jotai/utils";
 
-import { resetModelDirectory } from "@/lib/ai/models/model-directory";
 import { PROVIDER_REGISTRY, type ProviderStorageKey } from "@/lib/ai/providers/registry";
 import type { TtsProviderId } from "@/lib/settings/types";
 
 import { getApiKeyBaseAtom } from "../jotai/api-key-atoms";
+import { mcpServersAtom } from "../jotai/mcp-atoms";
 import { providerConfigAtoms } from "../jotai/provider-atoms";
 import {
   chatBackgroundAtom,
@@ -28,7 +28,6 @@ import {
   maxToolResultCharsAtom,
   memoryAtom,
   mcpParallelLoadLimitAtom,
-  mcpServersAtom,
   notificationSettingAtom,
   regenerateOnSaveAtom,
   remendEnabledAtom,
@@ -52,13 +51,7 @@ import {
 } from "../jotai/settings-atoms";
 import { type DefaultSettings } from "./types";
 
-const TTS_PROVIDER_IDS: readonly TtsProviderId[] = [
-  "openai",
-  "elevenlabs",
-  "lmnt",
-  "hume",
-  "google",
-];
+const TTS_PROVIDER_IDS: readonly TtsProviderId[] = ["openai", "elevenlabs", "hume", "google"];
 
 export function resetAllSettings(): void {
   const store = getDefaultStore();
@@ -111,8 +104,6 @@ export function resetAllSettings(): void {
   for (const providerId of TTS_PROVIDER_IDS) {
     void store.set(getApiKeyBaseAtom(`tts-${providerId}`), RESET);
   }
-
-  void resetModelDirectory();
 }
 
 function isProviderStorageKey(key: string): key is ProviderStorageKey {

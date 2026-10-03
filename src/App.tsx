@@ -2,9 +2,9 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import { Toaster } from "sonner";
 
+import { ExtensionListStartupSync } from "@/components/a1/extension-list-startup-sync";
 import { LocalProviderStartupSync } from "@/components/a1/local-provider-startup-sync";
 import { ModelDirectoryStartupSync } from "@/components/a1/model-directory-startup-sync";
-import { ReactScan } from "@/components/a1/react-scan";
 import { Spinner } from "@/components/ui/spinner";
 import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
 import ChatRoute from "@/routes/chat";
@@ -40,11 +40,11 @@ function App() {
   return (
     <BrowserRouter>
       <ModelDirectoryStartupSync />
+      <ExtensionListStartupSync />
       <LocalProviderStartupSync />
       <KbdRegistry />
       <ReleaseNotesDialog />
       <UpdateAvailableDialog />
-      <ReactScan />
       <Toaster className="pointer-events-auto!" position="top-right" richColors closeButton />
       <Routes>
         <Route element={<AppLayout />}>

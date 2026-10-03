@@ -33,6 +33,7 @@ import { listScheduledAgents, SCHEDULED_AGENTS_CHANGED_EVENT } from "@/lib/cron"
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { chatSortAtom, sidebarChatTimeGroupingAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
+import type { ChatSortOption } from "@/lib/settings/types";
 import type { ChatSearchResult } from "@/lib/storage/chat-storage";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +51,7 @@ interface ChatListItem {
   snippet?: string;
   createdAt?: number;
   updatedAt?: number;
+  lastMessageAt?: number;
 }
 
 type ChatListRow =
@@ -58,20 +60,22 @@ type ChatListRow =
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-function getChatTimeGroup(
-  chat: ChatListItem,
-  chatSort: "created-at" | "updated-at",
-): { id: string; label: string } {
-  const timestamp =
-    chatSort === "updated-at"
-      ? (chat.updatedAt ?? chat.createdAt)
-      : (chat.createdAt ?? chat.updatedAt);
+function getChatSortTimestamp(chat: ChatListItem, chatSort: ChatSortOption): number {
+  if (chatSort === "updated-at") {
+    return chat.lastMessageAt ?? chat.createdAt ?? 0;
+  }
+  if (chatSort === "active-at") {
+    return chat.updatedAt ?? chat.createdAt ?? 0;
+  }
+  return chat.createdAt ?? chat.updatedAt ?? 0;
+}
 
+function getChatTimeGroup(timestamp: number, now: number): { id: string; label: string } {
   if (!timestamp || Number.isNaN(new Date(timestamp).getTime())) {
     return { id: "older", label: "Older" };
   }
 
-  const age = Math.max(0, Date.now() - timestamp);
+  const age = Math.max(0, now - timestamp);
   if (age < 7 * DAY_IN_MS) {
     return { id: "recent", label: "Recent" };
   }
@@ -83,7 +87,7 @@ function getChatTimeGroup(
   }
 
   const date = new Date(timestamp);
-  const currentYear = new Date().getFullYear();
+  const currentYear = new Date(now).getFullYear();
   const label = new Intl.DateTimeFormat("en", {
     month: "long",
     ...(date.getFullYear() !== currentYear && { year: "numeric" }),
@@ -163,6 +167,7 @@ export const VirtualizedChatList = ({
             scheduledAgentTitle: chatMetadata?.scheduledAgentTitle,
             createdAt: chatMetadata?.createdAt,
             updatedAt: chatMetadata?.updatedAt,
+            lastMessageAt: chatMetadata?.lastMessageAt,
           };
         } catch (error) {
           logger.error(`Error loading chat ${id}:`, error);
@@ -174,30 +179,16 @@ export const VirtualizedChatList = ({
             scheduledAgentTitle: undefined,
             createdAt: undefined,
             updatedAt: undefined,
+            lastMessageAt: undefined,
           };
         }
-      });
-
-      loadedChats.sort((a, b) => {
-        const left =
-          chatSort === "updated-at"
-            ? (a.updatedAt ?? a.createdAt ?? 0)
-            : (a.createdAt ?? a.updatedAt ?? 0);
-        const right =
-          chatSort === "updated-at"
-            ? (b.updatedAt ?? b.createdAt ?? 0)
-            : (b.createdAt ?? b.updatedAt ?? 0);
-        if (right !== left) {
-          return right - left;
-        }
-        return b.id.localeCompare(a.id);
       });
 
       setChats(loadedChats);
     } catch (error) {
       logger.error("Error loading chats:", error);
     }
-  }, [chatIds, chatSort, loadChatMetadata, isMetadataLoaded]);
+  }, [chatIds, loadChatMetadata, isMetadataLoaded]);
 
   useEffect(() => {
     loadChats();
@@ -281,9 +272,16 @@ export const VirtualizedChatList = ({
   }, [chatIds]);
 
   const filteredChats = useMemo(() => {
-    if (!searchQuery.trim()) return chats;
+    const sortedChats = [...chats].sort((a, b) => {
+      const left = getChatSortTimestamp(a, chatSort);
+      const right = getChatSortTimestamp(b, chatSort);
+      return right - left || b.id.localeCompare(a.id);
+    });
+    if (!searchQuery.trim()) return sortedChats;
     if (!searchContent) {
-      return chats.filter((chat) => chat.title.toLowerCase().includes(searchQuery.toLowerCase()));
+      return sortedChats.filter((chat) =>
+        chat.title.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
     }
     if (searchResults) {
       const validIds = new Set(chatIds);
@@ -297,10 +295,13 @@ export const VirtualizedChatList = ({
           snippet: r.snippet,
           createdAt: metadataMap.get(r.chatId)?.createdAt,
           updatedAt: metadataMap.get(r.chatId)?.updatedAt,
+          lastMessageAt: metadataMap.get(r.chatId)?.lastMessageAt,
         }));
     }
-    return chats.filter((chat) => chat.title.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [chats, searchQuery, searchResults, chatIds, searchContent]);
+    return sortedChats.filter((chat) =>
+      chat.title.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }, [chats, chatSort, searchQuery, searchResults, chatIds, searchContent]);
 
   const listRows = useMemo<ChatListRow[]>(() => {
     const shouldGroup = sidebarChatTimeGrouping && !searchQuery.trim();
@@ -308,23 +309,10 @@ export const VirtualizedChatList = ({
       return filteredChats.map((chat) => ({ type: "chat", chat }));
     }
 
-    const groupedChats = [...filteredChats].sort((a, b) => {
-      const recencyKey = (chat: ChatListItem) => {
-        const groupId = getChatTimeGroup(chat, chatSort).id;
-        if (groupId === "recent") return 0;
-        if (groupId === "last-week") return 1;
-        if (groupId === "last-month") return 2;
-        if (groupId.startsWith("month-")) {
-          const [, year, month] = groupId.split("-").map(Number);
-          return 3 + (new Date().getFullYear() - year) * 12 + new Date().getMonth() - month;
-        }
-        return Number.MAX_SAFE_INTEGER;
-      };
-      return recencyKey(a) - recencyKey(b);
-    });
+    const now = Date.now();
     let previousGroupId: string | undefined;
-    return groupedChats.flatMap((chat) => {
-      const group = getChatTimeGroup(chat, chatSort);
+    return filteredChats.flatMap((chat) => {
+      const group = getChatTimeGroup(getChatSortTimestamp(chat, chatSort), now);
       const rows: ChatListRow[] = [];
       if (group.id !== previousGroupId) {
         rows.push({ type: "header", ...group });
@@ -335,9 +323,18 @@ export const VirtualizedChatList = ({
     });
   }, [chatSort, filteredChats, searchQuery, sidebarChatTimeGrouping]);
 
+  const getItemKey = useCallback(
+    (index: number) => {
+      const row = listRows[index];
+      return row.type === "header" ? `header-${row.id}` : `chat-${row.chat.id}`;
+    },
+    [listRows],
+  );
+
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: listRows.length,
+    getItemKey,
     getScrollElement: () => parentRef.current,
     estimateSize: (index) => {
       const row = listRows[index];

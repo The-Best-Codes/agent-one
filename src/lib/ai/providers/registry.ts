@@ -1,6 +1,5 @@
 import type { LanguageModel } from "ai";
 
-import { getAihubmix } from "./factories/aihubmix";
 import { getAnthropic } from "./factories/anthropic";
 import { getCohere } from "./factories/cohere";
 import { getDeepInfra } from "./factories/deepinfra";
@@ -14,7 +13,6 @@ import { createOpenAICompatibleFactory } from "./factories/openai-compatible";
 import { getOpenRouter } from "./factories/openrouter";
 import { getPerplexity } from "./factories/perplexity";
 import { getTogetherAI } from "./factories/togetherai";
-import { getVenice } from "./factories/venice";
 import { getVercel } from "./factories/vercel";
 import { getXai } from "./factories/xai";
 
@@ -32,6 +30,7 @@ const getAbliterationAI = createOpenAICompatibleFactory(
   "abliteration-ai",
   "https://api.abliteration.ai/v1",
 );
+const getAihubmix = createOpenAICompatibleFactory("aihubmix", "https://aihubmix.com/v1");
 const getAlibabaCn = createOpenAICompatibleFactory(
   "alibaba-cn",
   "https://dashscope.aliyuncs.com/compatible-mode/v1",
@@ -114,6 +113,7 @@ const getTokenRouter = createOpenAICompatibleFactory(
   "tokenrouter",
   "https://api.tokenrouter.com/v1",
 );
+const getVenice = createOpenAICompatibleFactory("venice", "https://api.venice.ai/api/v1");
 const getWaferAI = createOpenAICompatibleFactory("wafer-ai", "https://pass.wafer.ai/v1");
 const getWandb = createOpenAICompatibleFactory("wandb", "https://api.inference.wandb.ai/v1");
 const getXpersona = createOpenAICompatibleFactory("xpersona", "https://www.xpersona.co/v1");

@@ -31,6 +31,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { type McpAuthState, type McpServerLoadState } from "@/lib/jotai/mcp-atoms";
 
@@ -83,6 +84,8 @@ interface ExtensionListRowProps {
   badges?: string[];
   installed: boolean;
   installSupported?: boolean;
+  installLoading?: boolean;
+  installDisabled?: boolean;
   canUninstall?: boolean;
   onInstall?: () => void;
   onUninstall?: () => void;
@@ -105,6 +108,8 @@ function ExtensionListRowComponent({
   badges = [],
   installed,
   installSupported = true,
+  installLoading = false,
+  installDisabled = false,
   canUninstall = true,
   onInstall,
   onUninstall,
@@ -181,7 +186,14 @@ function ExtensionListRowComponent({
               <span className="sr-only sm:not-sr-only">Uninstall</span>
             </Button>
           ) : !installed ? (
-            <Button size="sm" variant="default" onClick={onInstall} disabled={!installSupported}>
+            <Button
+              size="sm"
+              variant="default"
+              onClick={onInstall}
+              disabled={!installSupported || installDisabled || installLoading}
+              aria-busy={installLoading}
+            >
+              {installLoading ? <Spinner data-icon="inline-start" /> : null}
               {installSupported ? "Install" : "Unsupported"}
             </Button>
           ) : null}
@@ -300,6 +312,9 @@ export const ExtensionListRow = memo(ExtensionListRowComponent, (previous, next)
     previous.badges === next.badges &&
     previous.installed === next.installed &&
     previous.installSupported === next.installSupported &&
+    previous.installLoading === next.installLoading &&
+    previous.installDisabled === next.installDisabled &&
+    previous.onInstall === next.onInstall &&
     previous.canUninstall === next.canUninstall &&
     previous.enabled === next.enabled &&
     previous.loadState === next.loadState &&

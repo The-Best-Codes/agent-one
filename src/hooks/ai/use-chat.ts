@@ -14,7 +14,9 @@ import { getLogger } from "@/lib/logger";
 const logger = getLogger(import.meta.url);
 
 type CustomChatOptions = Omit<ChatInit<UIMessage>, "transport"> &
-  Pick<UseChatOptions<UIMessage>, "resume" | "throttle">;
+  Pick<UseChatOptions<UIMessage>, "resume" | "throttle"> & {
+    onUserMessageSent?: () => void;
+  };
 
 function canResumeFromMessages(messages: UIMessage[]) {
   const lastMessage = messages.at(-1);
@@ -29,6 +31,7 @@ function canResumeFromMessages(messages: UIMessage[]) {
 export function useChat(
   model: LanguageModel | null,
   modelId: string | null,
+  providerName: string | null,
   modelConfig: ModelConfig,
   options?: CustomChatOptions,
 ) {
@@ -42,6 +45,7 @@ export function useChat(
       new CustomChatTransport(
         model,
         modelId,
+        providerName,
         modelConfig,
         extractReasoningEnabled,
         getTools,
@@ -51,12 +55,12 @@ export function useChat(
   );
 
   useEffect(() => {
-    transport.updateModel(model);
+    transport.updateModel(model, providerName);
     logger.verbose(
       "Updated chat transport with new model:",
       typeof model === "string" ? model : model?.modelId,
     );
-  }, [model, transport]);
+  }, [model, providerName, transport]);
 
   useEffect(() => {
     transport.updateModelId(modelId);
@@ -86,6 +90,8 @@ export function useChat(
     logger.verbose("Updated chat transport with new API keys loaded promise");
   }, [getApiKeysLoadedPromise, transport]);
 
+  const { onUserMessageSent, ...sdkOptions } = options ?? {};
+
   const {
     addToolApprovalResponse,
     addToolOutput,
@@ -100,7 +106,7 @@ export function useChat(
     stop,
   } = useChatSDK({
     transport,
-    ...options,
+    ...sdkOptions,
   });
   const messagesRef = useRef(messages);
 
@@ -109,18 +115,22 @@ export function useChat(
   }, [messages]);
 
   const syncTransport = useCallback(() => {
-    transport.updateModel(model);
+    transport.updateModel(model, providerName);
     transport.updateModelId(modelId);
     transport.updateModelConfig(modelConfig);
     transport.updateExtractReasoningEnabled(extractReasoningEnabled);
-  }, [model, modelId, modelConfig, extractReasoningEnabled, transport]);
+  }, [model, modelId, providerName, modelConfig, extractReasoningEnabled, transport]);
 
   const sendMessage = useCallback<typeof sendMessageSdk>(
     async (message, sendOptions) => {
       syncTransport();
-      return sendMessageSdk(message, sendOptions);
+      const result = sendMessageSdk(message, sendOptions);
+      if (message !== undefined) {
+        onUserMessageSent?.();
+      }
+      return result;
     },
-    [sendMessageSdk, syncTransport],
+    [sendMessageSdk, syncTransport, onUserMessageSent],
   );
 
   const regenerate = useCallback<typeof regenerateSdk>(

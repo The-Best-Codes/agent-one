@@ -2,7 +2,12 @@ import { IconDeviceFloppy, IconEye, IconEyeClosed, IconRestore } from "@tabler/i
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { cn } from "@/lib/utils";
 
 interface SecretInputProps {
@@ -49,54 +54,40 @@ export function SecretInput({
   };
 
   return (
-    <div className={cn("flex gap-2", className)}>
-      <Input
-        id={id}
-        type={showValue ? "text" : "password"}
-        autoSave="off"
-        autoComplete="off"
-        value={inputValue}
-        onChange={(e) => handleChange(e.target.value)}
-        placeholder={resolvedPlaceholder}
-        className="flex-1"
-      />
-
-      <Button
-        type="button"
-        onClick={() => setShowValue(!showValue)}
-        variant="outline"
-        size="icon"
-        title={showValue ? "Hide value" : "Show value"}
-      >
-        {showValue ? (
-          <IconEyeClosed data-icon="inline-start" />
-        ) : (
-          <IconEye data-icon="inline-start" />
-        )}
-      </Button>
-      {showSaveCancel && (
-        <>
-          <Button
-            type="button"
-            onClick={handleSave}
-            disabled={!hasChanges}
-            variant="outline"
-            size="icon"
-            title="Save"
+    <div className={cn("flex items-center gap-2", className)}>
+      <InputGroup className="flex-1">
+        <InputGroupInput
+          id={id}
+          type={showValue ? "text" : "password"}
+          autoSave="off"
+          autoComplete="off"
+          value={inputValue}
+          onChange={(e) => handleChange(e.target.value)}
+          placeholder={resolvedPlaceholder}
+        />
+        <InputGroupAddon align="inline-end">
+          <InputGroupButton
+            onClick={() => setShowValue((previous) => !previous)}
+            size="icon-xs"
+            title={showValue ? "Hide value" : "Show value"}
+            aria-label={showValue ? "Hide value" : "Show value"}
+            aria-pressed={showValue}
           >
+            {showValue ? <IconEyeClosed /> : <IconEye />}
+          </InputGroupButton>
+        </InputGroupAddon>
+      </InputGroup>
+      {showSaveCancel && hasChanges && (
+        <div role="group" aria-label="Secret value actions" className="flex items-center gap-1">
+          <Button type="button" onClick={handleSave} variant="default" title="Save">
             <IconDeviceFloppy data-icon="inline-start" />
+            Save
           </Button>
-          <Button
-            type="button"
-            onClick={handleCancel}
-            disabled={!hasChanges}
-            variant="outline"
-            size="icon"
-            title="Cancel changes"
-          >
+          <Button type="button" onClick={handleCancel} variant="destructive" title="Revert changes">
             <IconRestore data-icon="inline-start" />
+            Revert
           </Button>
-        </>
+        </div>
       )}
     </div>
   );

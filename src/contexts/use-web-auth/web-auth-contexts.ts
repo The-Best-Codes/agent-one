@@ -1,3 +1,4 @@
+import type { models } from "@polar-sh/sdk/2026-10";
 import { createContext } from "react";
 
 import { getPlanNameForProductId, polarProductIds } from "@/lib/polar-products";
@@ -17,25 +18,8 @@ export interface DeviceFlowState {
   interval: number;
 }
 
-export interface Subscription {
-  id: string;
-  status: string;
-  currentPeriodEnd?: string | Date;
-  productId: string;
-}
-
-export interface CustomerMeter {
-  id: string;
-  meterId: string;
-  consumedUnits: number;
-  creditedUnits: number;
-  balance: number;
-}
-
-export interface CustomerState {
-  activeSubscriptions?: Subscription[];
-  activeMeters?: CustomerMeter[];
-}
+export type Subscription = models.CustomerStateSubscription;
+export type CustomerState = models.CustomerState;
 
 export interface BillingUsageSummary {
   credited: number;
@@ -46,15 +30,15 @@ export interface BillingUsageSummary {
 export function getBillingUsageSummary(
   customerState: CustomerState | null | undefined,
 ): BillingUsageSummary | null {
-  const meters = customerState?.activeMeters;
+  const meters = customerState?.active_meters;
   if (!meters?.length) {
     return null;
   }
 
-  const credited = meters.reduce((sum, meter) => sum + meter.creditedUnits, 0);
+  const credited = meters.reduce((sum, meter) => sum + meter.credited_units, 0);
   const balance = meters.reduce((sum, meter) => sum + meter.balance, 0);
 
-  // Grants are issued via negative event ingestion, which makes net consumedUnits lower than actual usage.
+  // Grants are issued via negative event ingestion, which makes net consumed_units lower than actual usage.
   // Use the larger of credited or balance as the effective pool so grants don't produce negatives.
   const effectivePool = Math.max(credited, balance);
   const effectiveConsumed = Math.max(effectivePool - balance, 0);
@@ -72,20 +56,20 @@ export function getActivePaidSubscription(
   customerState: CustomerState | null | undefined,
 ): Subscription | null {
   return (
-    customerState?.activeSubscriptions?.find(
+    customerState?.active_subscriptions?.find(
       (subscription) =>
         ACTIVE_SUBSCRIPTION_STATUSES.has(subscription.status) &&
-        subscription.productId !== polarProductIds.free,
+        subscription.product_id !== polarProductIds.free,
     ) ?? null
   );
 }
 
 export function getPlanNameForSubscription(subscription: Subscription | null | undefined): string {
-  if (!subscription || subscription.productId === polarProductIds.free) {
+  if (!subscription || subscription.product_id === polarProductIds.free) {
     return "Free";
   }
 
-  return getPlanNameForProductId(subscription.productId) ?? "Unknown Plan";
+  return getPlanNameForProductId(subscription.product_id) ?? "Unknown Plan";
 }
 
 export function hasAgentOneCreditsAvailable(

@@ -28,6 +28,7 @@ const logger = getLogger(import.meta.url);
 export class CustomChatTransport implements ChatTransport<UIMessage> {
   private model: LanguageModel | null;
   private modelId: string | null;
+  private providerName: string | null;
   private modelConfig: ModelConfig;
   private extractReasoningEnabled: boolean;
   private mcpAppModelContexts = new Map<string, unknown>();
@@ -41,6 +42,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   constructor(
     model: LanguageModel | null,
     modelId: string | null,
+    providerName: string | null,
     modelConfig: ModelConfig,
     extractReasoningEnabled: boolean,
     getTools: (options?: {
@@ -52,6 +54,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   ) {
     this.model = model;
     this.modelId = modelId;
+    this.providerName = providerName;
     this.modelConfig = modelConfig;
     this.extractReasoningEnabled = extractReasoningEnabled;
     this.getTools = getTools;
@@ -59,8 +62,9 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     this.getApiKeysLoadedPromise = getApiKeysLoadedPromise;
   }
 
-  updateModel(model: LanguageModel | null) {
+  updateModel(model: LanguageModel | null, providerName: string | null) {
     this.model = model;
+    this.providerName = providerName;
     logger.verbose(
       "CustomChatTransport model updated to:",
       typeof model === "string" ? model : model?.modelId,
@@ -122,6 +126,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   ): Promise<ReadableStream<UIMessageChunk>> {
     const baseModel = this.model;
     const modelId = this.modelId;
+    const providerName = this.providerName;
     const modelConfig = this.modelConfig;
     const extractReasoningEnabled = this.extractReasoningEnabled;
 
@@ -204,19 +209,21 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       onError: (error) => {
         logger.error("Error occurred in CustomChatTransport toUIMessageStream:", error);
 
-        if (error == null) {
-          return "Unknown error";
-        }
+        let message = "Unknown error";
 
         if (typeof error === "string") {
-          return error;
+          message = error;
+        } else if (error instanceof Error) {
+          message = error.message;
+        } else if (error != null) {
+          message = JSON.stringify(error);
         }
 
-        if (error instanceof Error) {
-          return error.message;
+        if (providerName && providerName !== "AgentOne") {
+          return `Error from ${providerName}:\n${message}`;
         }
 
-        return JSON.stringify(error);
+        return message;
       },
     });
   }

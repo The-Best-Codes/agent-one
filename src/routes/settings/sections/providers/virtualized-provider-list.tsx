@@ -1,7 +1,6 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useRef, type ReactNode } from "react";
 
-import { Accordion } from "@/components/ui/native/accordion";
 import { cn } from "@/lib/utils";
 
 interface VirtualizedProviderListProps<T> {
@@ -10,8 +9,6 @@ interface VirtualizedProviderListProps<T> {
   renderItem: (item: T) => ReactNode;
   label: string;
   searchQuery: string;
-  value: string;
-  onValueChange: (value: string | string[]) => void;
 }
 
 export function VirtualizedProviderList<T>({
@@ -20,8 +17,6 @@ export function VirtualizedProviderList<T>({
   renderItem,
   label,
   searchQuery,
-  value,
-  onValueChange,
 }: VirtualizedProviderListProps<T>) {
   const parentRef = useRef<HTMLDivElement | null>(null);
 
@@ -46,14 +41,7 @@ export function VirtualizedProviderList<T>({
       aria-label={label}
       tabIndex={0}
     >
-      <Accordion
-        type="single"
-        collapsible
-        className="relative w-full"
-        style={{ height: virtualizer.getTotalSize() }}
-        value={value}
-        onValueChange={onValueChange}
-      >
+      <div className="relative w-full" style={{ height: virtualizer.getTotalSize() }}>
         {virtualizer.getVirtualItems().map((virtualItem) => (
           <div
             key={virtualItem.key}
@@ -68,7 +56,7 @@ export function VirtualizedProviderList<T>({
             {renderItem(items[virtualItem.index])}
           </div>
         ))}
-      </Accordion>
+      </div>
     </div>
   );
 }

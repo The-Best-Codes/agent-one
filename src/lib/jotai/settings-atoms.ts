@@ -12,7 +12,6 @@ import {
   type InputStyleOption,
   type InterruptKeyOption,
   type MarkdownRenderingOption,
-  type McpServerConfig,
   type MessageActionRowOption,
   type NotificationOption,
   type RoundnessOption,
@@ -175,11 +174,6 @@ export const enabledToolsAtom = createSettingAtom<Record<ToolId, boolean>>(
 export const toolConfigsAtom = createSettingAtom<ToolConfigs>(
   "TOOL_CONFIGS",
   DEFAULT_SETTINGS.TOOL_CONFIGS,
-);
-
-export const mcpServersAtom = createSettingAtom<McpServerConfig[]>(
-  "MCP_SERVERS",
-  DEFAULT_SETTINGS.MCP_SERVERS,
 );
 
 export const mcpParallelLoadLimitAtom = createSettingAtom(

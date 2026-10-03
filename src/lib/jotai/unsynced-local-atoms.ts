@@ -19,10 +19,3 @@ export const debugModeEnabledAtom = atomWithStorage<boolean>(
   createJSONStorage(() => sessionStorage),
   { getOnInit: true },
 );
-
-export const reactScanEnabledAtom = atomWithStorage<boolean>(
-  "agent-one-react-scan-enabled",
-  false,
-  createJSONStorage(() => sessionStorage),
-  { getOnInit: true },
-);

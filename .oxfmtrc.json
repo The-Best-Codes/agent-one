@@ -6,7 +6,6 @@
   "ignorePatterns": [
     "src/assets/fonts/**/*.ttf",
     "src/assets/fonts/**/static/*",
-    "src/assets/mcp-registry/**/*.json",
     "src/assets/model-lists/**/*.json",
     "src-tauri/gen/android/",
     "src-tauri/target/",

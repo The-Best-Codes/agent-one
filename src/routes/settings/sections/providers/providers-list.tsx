@@ -1,6 +1,6 @@
 import { IconPlugConnected } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { SecretInput } from "@/components/a1/input/secret-input";
 import { SearchInput } from "@/components/a1/search-input";
@@ -58,20 +58,6 @@ export function ProvidersList() {
   const [builtInSearchQuery, setBuiltInSearchQuery] = useState("");
   const [localSearchQuery, setLocalSearchQuery] = useState("");
   const [customSearchQuery, setCustomSearchQuery] = useState("");
-  const [openBuiltInItem, setOpenBuiltInItem] = useState("");
-  const [openLocalItem, setOpenLocalItem] = useState("");
-  const [openCustomItem, setOpenCustomItem] = useState("");
-
-  const handleBuiltInOpenChange = useCallback((value: string | string[]) => {
-    setOpenBuiltInItem(typeof value === "string" ? value : (value[0] ?? ""));
-  }, []);
-  const handleLocalOpenChange = useCallback((value: string | string[]) => {
-    setOpenLocalItem(typeof value === "string" ? value : (value[0] ?? ""));
-  }, []);
-  const handleCustomOpenChange = useCallback((value: string | string[]) => {
-    setOpenCustomItem(typeof value === "string" ? value : (value[0] ?? ""));
-  }, []);
-
   const localProviderIds = useAtomValue(localProviderIdsAtom);
   const rawTtsSettings = useAtomValue(ttsSettingsAtom);
   const localProviderSearchItems = useAtomValue(localProviderSearchItemsAtom);
@@ -84,7 +70,6 @@ export function ProvidersList() {
   const setTtsSettings = useSetAtom(ttsSettingsAtom);
   const setOpenAiTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-openai"));
   const setElevenLabsTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-elevenlabs"));
-  const setLmntTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-lmnt"));
   const setHumeTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-hume"));
   const setGoogleTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-google"));
   const ttsSettings = normalizeTtsSettings(rawTtsSettings);
@@ -94,7 +79,6 @@ export function ProvidersList() {
   const selectedTtsModel = getSelectedTtsModel(ttsSettings);
   const openAiTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-openai"));
   const elevenLabsTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-elevenlabs"));
-  const lmntTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-lmnt"));
   const humeTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-hume"));
   const googleTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-google"));
 
@@ -178,14 +162,11 @@ export function ProvidersList() {
                 getKey={(provider) => provider.id}
                 label="Built-in providers"
                 searchQuery={normalizedBuiltInQuery}
-                value={openBuiltInItem}
-                onValueChange={handleBuiltInOpenChange}
                 renderItem={(provider) => (
                   <BuiltInProviderListItem
                     providerId={provider.id}
                     label={provider.label}
                     hasEnvKey={hasEnvKey(provider.id)}
-                    onOpenChange={setOpenBuiltInItem}
                   />
                 )}
               />
@@ -221,11 +202,7 @@ export function ProvidersList() {
                 getKey={(providerId) => providerId}
                 label="Local providers"
                 searchQuery={normalizedLocalQuery}
-                value={openLocalItem}
-                onValueChange={handleLocalOpenChange}
-                renderItem={(providerId) => (
-                  <LocalProviderListItem providerId={providerId} onOpenChange={setOpenLocalItem} />
-                )}
+                renderItem={(providerId) => <LocalProviderListItem providerId={providerId} />}
               />
             ) : (
               <p className="text-muted-foreground py-4 text-center text-sm">
@@ -279,13 +256,10 @@ export function ProvidersList() {
                 getKey={(providerId) => providerId}
                 label="Custom providers"
                 searchQuery={normalizedCustomQuery}
-                value={openCustomItem}
-                onValueChange={handleCustomOpenChange}
                 renderItem={(providerId) => (
                   <CustomProviderListItem
                     providerId={providerId}
                     onDelete={() => handleDeleteProvider(providerId)}
-                    onOpenChange={setOpenCustomItem}
                   />
                 )}
               />
@@ -351,10 +325,6 @@ export function ProvidersList() {
                       updateTtsSettings({
                         elevenlabs: { ...ttsSettings.elevenlabs, model },
                       });
-                    } else if (ttsSettings.provider === "lmnt") {
-                      updateTtsSettings({
-                        lmnt: { ...ttsSettings.lmnt, model },
-                      });
                     } else if (ttsSettings.provider === "hume") {
                       updateTtsSettings({
                         hume: { ...ttsSettings.hume, model },
@@ -403,19 +373,6 @@ export function ProvidersList() {
                     value={elevenLabsTtsApiKey}
                     onChange={setElevenLabsTtsApiKey}
                     placeholder="Enter your ElevenLabs API key"
-                    showSaveCancel
-                  />
-                </Field>
-              ) : null}
-
-              {ttsSettings.provider === "lmnt" ? (
-                <Field>
-                  <FieldLabel htmlFor="tts-lmnt-api-key">API Key</FieldLabel>
-                  <SecretInput
-                    id="tts-lmnt-api-key"
-                    value={lmntTtsApiKey}
-                    onChange={setLmntTtsApiKey}
-                    placeholder="Enter your LMNT API key"
                     showSaveCancel
                   />
                 </Field>
@@ -654,70 +611,6 @@ export function ProvidersList() {
                       onCheckedChange={(useSpeakerBoost) =>
                         updateTtsSettings({
                           elevenlabs: { ...ttsSettings.elevenlabs, useSpeakerBoost },
-                        })
-                      }
-                    />
-                  </Field>
-                </>
-              ) : null}
-
-              {ttsSettings.provider === "lmnt" ? (
-                <>
-                  <Field>
-                    <FieldLabel htmlFor="tts-lmnt-voice">Voice</FieldLabel>
-                    <Input
-                      id="tts-lmnt-voice"
-                      value={ttsSettings.lmnt.voice}
-                      onChange={(event) =>
-                        updateTtsSettings({
-                          lmnt: { ...ttsSettings.lmnt, voice: event.target.value },
-                        })
-                      }
-                      placeholder="e.g. ava"
-                    />
-                  </Field>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <Field>
-                      <FieldLabel htmlFor="tts-lmnt-language">Language Code</FieldLabel>
-                      <Input
-                        id="tts-lmnt-language"
-                        value={ttsSettings.lmnt.language}
-                        onChange={(event) =>
-                          updateTtsSettings({
-                            lmnt: { ...ttsSettings.lmnt, language: event.target.value },
-                          })
-                        }
-                        placeholder="e.g. en"
-                      />
-                    </Field>
-                    <Field>
-                      <FieldLabel htmlFor="tts-lmnt-speed">Speech Rate</FieldLabel>
-                      <Input
-                        id="tts-lmnt-speed"
-                        type="number"
-                        min="0.25"
-                        max="2"
-                        step="0.05"
-                        value={ttsSettings.lmnt.speed}
-                        onChange={(event) =>
-                          updateTtsSettings({
-                            lmnt: {
-                              ...ttsSettings.lmnt,
-                              speed: Number(event.target.value) || 1,
-                            },
-                          })
-                        }
-                      />
-                    </Field>
-                  </div>
-                  <Field orientation="horizontal">
-                    <FieldLabel htmlFor="tts-lmnt-conversational">Conversational Voice</FieldLabel>
-                    <Switch
-                      id="tts-lmnt-conversational"
-                      checked={ttsSettings.lmnt.conversational}
-                      onCheckedChange={(conversational) =>
-                        updateTtsSettings({
-                          lmnt: { ...ttsSettings.lmnt, conversational },
                         })
                       }
                     />

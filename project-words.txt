@@ -115,10 +115,7 @@ duplicative
 contenteditable
 entr
 elevenlabs
-lmnt
-LMNT
 ELEVENLABS
-Lmnt
 quicktype
 Ambient
 ambient
@@ -204,3 +201,9 @@ rmcp
 RMCP
 sched
 cronstrue
+pipx
+pypi
+mcpb
+streamable
+julianday
+NOCASE

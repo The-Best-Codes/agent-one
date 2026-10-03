@@ -23,6 +23,7 @@ export interface ChatMetadata {
   scheduledAgentTitle?: string;
   createdAt?: number;
   updatedAt?: number;
+  lastMessageAt?: number;
 }
 
 export interface ChatData extends ChatMetadata {
@@ -44,11 +45,13 @@ export interface PersistenceContextType {
   loadChatMetadata: (id: string) => ChatMetadata;
   loadFullChatData: (id: string) => Promise<ChatData>;
   saveChat: (params: { chatId: string; messages: UIMessage[] }) => void;
+  markChatMessageSent: (chatId: string) => void;
   saveChatModel: (params: { chatId: string; modelId: string }) => void;
   saveChatModelConfig: (params: { chatId: string; modelConfig: ModelConfig }) => void;
   saveChatTitleState: (params: {
     chatId: string;
     titleState: "generating" | "generated" | "error";
+    title?: string;
   }) => void;
   saveChatTitle: (params: { chatId: string; title: string }) => void;
   deleteChat: (chatId: string) => void;
@@ -305,6 +308,16 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     [getMetadata, setMetadata, persistMetadata, persistMessages, setChatUpdateTrigger],
   );
 
+  const markChatMessageSent = useCallback(
+    (chatId: string) => {
+      const metadata = touchMetadata({ ...getMetadata(chatId), lastMessageAt: Date.now() });
+      setMetadata(chatId, metadata);
+      persistMetadata(chatId, metadata);
+      setChatUpdateTrigger((prev) => prev + 1);
+    },
+    [getMetadata, setMetadata, persistMetadata, setChatUpdateTrigger],
+  );
+
   const saveChatModel = useCallback(
     ({ chatId, modelId }: { chatId: string; modelId: string }) => {
       try {
@@ -337,14 +350,25 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     ({
       chatId,
       titleState,
+      title,
     }: {
       chatId: string;
       titleState: "generating" | "generated" | "error";
+      title?: string;
     }) => {
       try {
-        const updated = touchMetadata({ ...getMetadata(chatId), titleState });
+        const updated = touchMetadata({
+          ...getMetadata(chatId),
+          titleState,
+          ...(title !== undefined && { title }),
+        });
         setMetadata(chatId, updated);
         persistMetadata(chatId, updated);
+        if (title !== undefined) {
+          void chatStorage.updateFtsTitle(chatId, title).catch((error) => {
+            logger.error(`Failed to update FTS title ${chatId}`, error);
+          });
+        }
         setChatUpdateTrigger((prev) => prev + 1);
       } catch (error) {
         logger.error(`Failed to save chat title state ${chatId}`, error);
@@ -493,6 +517,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     loadChatMetadata,
     loadFullChatData,
     saveChat,
+    markChatMessageSent,
     saveChatModel,
     saveChatModelConfig,
     saveChatTitleState,

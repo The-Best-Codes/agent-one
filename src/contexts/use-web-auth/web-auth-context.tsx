@@ -118,7 +118,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
           return;
         }
 
-        setCustomerState((data as CustomerState | null) ?? null);
+        setCustomerState(data ?? null);
       } catch {
         if (!cancelled) {
           setBillingError("Unable to load billing information.");

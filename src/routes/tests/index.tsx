@@ -1,7 +1,7 @@
 import { IconAlertTriangle, IconArrowLeft } from "@tabler/icons-react";
 import { appLogDir } from "@tauri-apps/api/path";
 import { openPath } from "@tauri-apps/plugin-opener";
-import { useAtom, useSetAtom } from "jotai";
+import { useSetAtom } from "jotai";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
@@ -9,14 +9,11 @@ import { SettingsLink } from "@/components/a1/settings-link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import { onboardingCompletedAtom } from "@/lib/jotai/atoms";
-import { reactScanEnabledAtom } from "@/lib/jotai/unsynced-local-atoms";
 
 export default function TestsRoute() {
   const navigate = useNavigate();
   const setOnboardingCompleted = useSetAtom(onboardingCompletedAtom);
-  const [reactScanEnabled, setReactScanEnabled] = useAtom(reactScanEnabledAtom);
 
   async function openLogs() {
     try {
@@ -125,15 +122,6 @@ export default function TestsRoute() {
                 <Button onClick={() => void openLogs()} variant="outline">
                   View Logs
                 </Button>
-              </div>
-              <div className="flex items-center justify-between rounded-md border p-4">
-                <div>
-                  <h3 className="font-medium">React Scan</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Enable react-scan to visualize component renders for the rest of this session
-                  </p>
-                </div>
-                <Switch checked={reactScanEnabled} onCheckedChange={setReactScanEnabled} />
               </div>
             </CardContent>
           </Card>

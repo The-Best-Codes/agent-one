@@ -37,12 +37,11 @@ import {
 } from "@/lib/ai/tools/mcp";
 import { clearMcpOAuthCredentials, dismissMcpLoginToasts } from "@/lib/ai/tools/mcp/oauth";
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
-import { mcpAuthStatesAtom, mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
+import { mcpAuthStatesAtom, mcpServerLoadStatesAtom, mcpServersAtom } from "@/lib/jotai/mcp-atoms";
 import type { McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
 import {
   enabledToolsAtom,
   mcpParallelLoadLimitAtom,
-  mcpServersAtom,
   toolConfigsAtom,
 } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";

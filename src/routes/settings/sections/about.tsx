@@ -5,13 +5,12 @@ import {
   IconDownload,
   IconExternalLink,
   IconRefresh,
-  IconRestore,
   IconRocket,
   IconShieldCheck,
 } from "@tabler/icons-react";
 import { useAtom, useAtomValue } from "jotai";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import packageJson from "@/../package.json";
@@ -38,12 +37,9 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { useUpdate } from "@/contexts/use-update/update-hooks";
-import {
-  modelDirectoryStatusAtom,
-  resetModelDirectory,
-  updateModelDirectory,
-} from "@/lib/ai/models/model-directory";
+import { modelDirectoryStatusAtom, updateModelDirectory } from "@/lib/ai/models/model-directory";
 import { debugModeEnabledAtom } from "@/lib/jotai/unsynced-local-atoms";
+import { extensionListStatusAtom, updateExtensionList } from "@/lib/mcp-registry/sync";
 
 import SettingsTarget from "../settings-target";
 
@@ -56,6 +52,16 @@ export default function AboutSection() {
   const { updateStatus, updateProgress, updateVersion, checkForUpdates, downloadAndInstallUpdate } =
     useUpdate();
   const [debugMode] = useAtom(debugModeEnabledAtom);
+  const extensionListStatus = useAtomValue(extensionListStatusAtom);
+  const extensionListProgress =
+    extensionListStatus.totalCount === null
+      ? undefined
+      : extensionListStatus.totalCount === 0
+        ? 100
+        : Math.min(
+            100,
+            (extensionListStatus.processedCount / extensionListStatus.totalCount) * 100,
+          );
   const modelDirectoryStatus = useAtomValue(modelDirectoryStatusAtom);
   const [isUpdatingModelDirectory, setIsUpdatingModelDirectory] = useState(false);
 
@@ -184,6 +190,17 @@ export default function AboutSection() {
 
   const stateDisplay = getStateDisplay();
 
+  const handleUpdateExtensionList = async () => {
+    const result = await updateExtensionList();
+    if (!result.ok) {
+      toast.error("Failed to update extension list", { description: result.error });
+      return;
+    }
+    toast.success("Extension list updated", {
+      description: `${(result.entryCount ?? 0).toLocaleString()} extensions loaded.`,
+    });
+  };
+
   const handleUpdateModelDirectory = async () => {
     setIsUpdatingModelDirectory(true);
 
@@ -200,11 +217,6 @@ export default function AboutSection() {
         result.modelCount ?? 0
       } models loaded.`,
     });
-  };
-
-  const handleResetModelDirectory = async () => {
-    await resetModelDirectory();
-    toast.success("Model list reset to bundled version");
   };
 
   return (
@@ -301,13 +313,13 @@ export default function AboutSection() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-medium">
-                  {modelDirectoryStatus.usingDownloadedList
-                    ? "Using downloaded model list"
-                    : "Using bundled model list"}
+                  {modelDirectoryStatus.hasDownloadedList
+                    ? "Model list loaded"
+                    : "Model list not loaded"}
                 </p>
                 <p className="text-muted-foreground text-sm tabular-nums">
                   {`Last updated: ${formatModelDirectoryTimestamp(
-                    modelDirectoryStatus.fetchedAt,
+                    modelDirectoryStatus.hasDownloadedList ? modelDirectoryStatus.fetchedAt : 0,
                     "Never",
                   )}`}
                 </p>
@@ -325,17 +337,66 @@ export default function AboutSection() {
                   )}
                   Update now
                 </Button>
-                <Button
-                  onClick={handleResetModelDirectory}
-                  disabled={isUpdatingModelDirectory || !modelDirectoryStatus.usingDownloadedList}
-                  variant="outline"
-                  size="sm"
-                >
-                  <IconRestore data-icon="inline-start" />
-                  Reset
-                </Button>
               </div>
             </div>
+          </CardContent>
+        </Card>
+      </SettingsTarget>
+      <SettingsTarget id="setting-extension-list">
+        <Card>
+          <CardHeader>
+            <CardTitle>Extension List Updates</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <p className="text-muted-foreground text-sm">
+              Download the latest extension metadata. This will update the{" "}
+              <Link className="underline" to="/extensions">
+                extension list
+              </Link>{" "}
+              available in the UI.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-medium">
+                  {extensionListStatus.hasDownloadedList
+                    ? "Extension list loaded"
+                    : "Extension list not loaded"}
+                </p>
+                <p className="text-muted-foreground text-sm tabular-nums">
+                  Last updated:{" "}
+                  {formatModelDirectoryTimestamp(extensionListStatus.fetchedAt, "Never")}
+                </p>
+                {extensionListStatus.isUpdating ? (
+                  <p className="text-muted-foreground text-sm tabular-nums">
+                    {extensionListStatus.totalCount === null
+                      ? `${extensionListStatus.processedCount.toLocaleString()} entries processed`
+                      : `${extensionListStatus.processedCount.toLocaleString()} of ${extensionListStatus.totalCount.toLocaleString()} entries processed`}
+                  </p>
+                ) : null}
+                {extensionListStatus.error ? (
+                  <p className="text-destructive text-sm">{extensionListStatus.error}</p>
+                ) : null}
+              </div>
+              <Button
+                onClick={handleUpdateExtensionList}
+                disabled={extensionListStatus.isUpdating}
+                size="sm"
+              >
+                {extensionListStatus.isUpdating ? (
+                  <Spinner data-icon="inline-start" />
+                ) : (
+                  <IconRefresh data-icon="inline-start" />
+                )}
+                Update now
+              </Button>
+            </div>
+            {extensionListStatus.isUpdating ? (
+              <Progress
+                value={extensionListProgress}
+                indeterminate={extensionListStatus.totalCount === null}
+                aria-label="Extension list update progress"
+              />
+            ) : null}
           </CardContent>
         </Card>
       </SettingsTarget>

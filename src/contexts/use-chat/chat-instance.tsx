@@ -11,7 +11,11 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { getLastTextPart, truncateMessagePreview } from "@/lib/ai/message-preview";
-import { generateChatTitle, hasMessageTextContent } from "@/lib/ai/title-generator";
+import {
+  generateChatTitle,
+  getChatTitleFallback,
+  hasMessageTextContent,
+} from "@/lib/ai/title-generator";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
   extractReasoningEnabledAtom,
@@ -31,6 +35,7 @@ export const ChatInstance = memo(
     chatId,
     model,
     modelId,
+    providerName,
     modelConfig,
     initialMessages,
     onInstanceUpdate,
@@ -39,6 +44,7 @@ export const ChatInstance = memo(
     chatId: string;
     model: LanguageModel;
     modelId: string;
+    providerName: string;
     modelConfig: ModelConfig;
     initialMessages: UIMessage[];
     onInstanceUpdate: (id: string, instance: ChatInstanceHelpers) => void;
@@ -52,7 +58,8 @@ export const ChatInstance = memo(
     const titleGenerationSettings = useAtomValue(titleGenerationAtom);
     const extractReasoningEnabled = useAtomValue(extractReasoningEnabledAtom);
     const notificationSetting = useAtomValue(notificationSettingAtom);
-    const { loadChatMetadata, saveChat, saveChatTitleState, saveChatTitle } = usePersistence();
+    const { loadChatMetadata, saveChat, markChatMessageSent, saveChatTitleState, saveChatTitle } =
+      usePersistence();
     const chatIds = useAtomValueRawSync(chatIdsAtom);
     const suppressAutoSubmitAfterAbortRef = useRef(false);
     const wasBusyRef = useRef(false);
@@ -69,9 +76,14 @@ export const ChatInstance = memo(
       });
     }, []);
 
-    const chat = useChat(model, modelId, modelConfig, {
+    const onUserMessageSent = useCallback(() => {
+      markChatMessageSent(chatId);
+    }, [chatId, markChatMessageSent]);
+
+    const chat = useChat(model, modelId, providerName, modelConfig, {
       throttle: throttleValue,
       sendAutomaticallyWhen,
+      onUserMessageSent,
       onFinish: ({ isAbort }) => {
         if (isAbort) {
           suppressAutoSubmitAfterAbortRef.current = true;
@@ -166,7 +178,14 @@ export const ChatInstance = memo(
           logger.verbose(
             `Triggering title generation for chat ${chatId} with ${chat.messages.length} messages`,
           );
-          saveChatTitleState({ chatId, titleState: "generating" });
+          saveChatTitleState({
+            chatId,
+            titleState: "generating",
+            title:
+              titleGenerationSettings.method === "ai"
+                ? getChatTitleFallback(titleMessages, titleGenerationSettings)
+                : undefined,
+          });
           generateChatTitle(
             model,
             titleMessages,
@@ -218,6 +237,7 @@ export const ChatInstance = memo(
       prevProps.chatId === nextProps.chatId &&
       prevProps.model === nextProps.model &&
       prevProps.modelId === nextProps.modelId &&
+      prevProps.providerName === nextProps.providerName &&
       prevProps.initialMessages === nextProps.initialMessages &&
       prevProps.onInstanceUpdate === nextProps.onInstanceUpdate &&
       prevProps.onStatusChange === nextProps.onStatusChange &&

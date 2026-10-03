@@ -1,8 +1,7 @@
 import path from "path";
 
-import babel from "@rolldown/plugin-babel";
 import tailwindcss from "@tailwindcss/vite";
-import react, { reactCompilerPreset } from "@vitejs/plugin-react";
+import react from "@vitejs/plugin-react";
 import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig } from "vite";
 
@@ -23,7 +22,6 @@ const vendorManualChunks = {
     "@ai-sdk/google",
     "@ai-sdk/groq",
     "@ai-sdk/hume",
-    "@ai-sdk/lmnt",
     "@ai-sdk/mistral",
     "@ai-sdk/openai",
     "@ai-sdk/openai-compatible",
@@ -31,8 +29,6 @@ const vendorManualChunks = {
     "@ai-sdk/togetherai",
     "@ai-sdk/xai",
     "@openrouter/ai-sdk-provider",
-    "@aihubmix/ai-sdk-provider",
-    "venice-ai-sdk-provider",
   ],
   codemirrorCore: [
     "codemirror",
@@ -94,8 +90,6 @@ const vendorManualChunks = {
     "fuzzysort",
     "@number-flow/react",
     "number-flow",
-    "react-scan",
-    "react-grab",
   ],
   tauri: [
     "@tauri-apps/api",
@@ -127,10 +121,8 @@ const vendorManualChunks = {
 
 export default defineConfig(() => ({
   plugins: [
-    react(),
-    babel({
-      presets: !process.env.DISABLE_REACT_COMPILER ? [reactCompilerPreset({ target: "19" })] : [],
-      exclude: [/[/\\]node_modules[/\\]/, /[/\\]src[/\\]workers[/\\]/],
+    react({
+      compiler: true,
     }),
     tailwindcss(),
     process.env.VISUALIZE
@@ -175,21 +167,6 @@ export default defineConfig(() => ({
         manualChunks(id: string) {
           // Normalize to POSIX-style paths so checks work on Windows too
           const normalizedId = id.replace(/\\/g, "/");
-          const modelListsDir = path
-            .resolve(import.meta.dirname, "src/assets/model-lists")
-            .replace(/\\/g, "/");
-          const mcpRegistryDir = path
-            .resolve(import.meta.dirname, "src/assets/mcp-registry")
-            .replace(/\\/g, "/");
-
-          if (normalizedId.includes(`${modelListsDir}/`)) {
-            return "modelLists";
-          }
-
-          if (normalizedId.includes(`${mcpRegistryDir}/`)) {
-            return "mcpRegistry";
-          }
-
           if (normalizedId.includes("/node_modules/")) {
             for (const [chunkName, packages] of Object.entries(vendorManualChunks)) {
               if (packages.some((pkg) => normalizedId.includes(`/node_modules/${pkg}/`))) {

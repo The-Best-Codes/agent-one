@@ -87,7 +87,7 @@ export type CollapsedSidebarLayoutOption = (typeof COLLAPSED_SIDEBAR_LAYOUT_OPTI
 export const CHAT_VIRTUALIZATION_MODE_OPTIONS = ["off", "threshold"] as const;
 export type ChatVirtualizationModeOption = (typeof CHAT_VIRTUALIZATION_MODE_OPTIONS)[number];
 
-export const CHAT_SORT_OPTIONS = ["created-at", "updated-at"] as const;
+export const CHAT_SORT_OPTIONS = ["created-at", "updated-at", "active-at"] as const;
 export type ChatSortOption = (typeof CHAT_SORT_OPTIONS)[number];
 
 export type SidebarChatTimeGroupingOption = boolean;
@@ -105,7 +105,7 @@ export type ChatBackgroundPresetOption =
   | "sunset"
   | "night"
   | "island";
-export type TtsProviderId = "openai" | "elevenlabs" | "lmnt" | "hume" | "google";
+export type TtsProviderId = "openai" | "elevenlabs" | "hume" | "google";
 
 export interface ChatBackgroundSettings {
   preset: ChatBackgroundPresetOption;
@@ -140,14 +140,6 @@ export interface TtsElevenLabsSettings {
   applyTextNormalization: "auto" | "on" | "off";
 }
 
-export interface TtsLmntSettings {
-  model: string;
-  voice: string;
-  language: string;
-  speed: number;
-  conversational: boolean;
-}
-
 export interface TtsHumeSettings {
   model: string;
   voice: string;
@@ -166,7 +158,6 @@ export interface TtsSettings {
   provider: TtsProviderId | "";
   openai: TtsOpenAISettings;
   elevenlabs: TtsElevenLabsSettings;
-  lmnt: TtsLmntSettings;
   hume: TtsHumeSettings;
   google: TtsGoogleSettings;
 }
@@ -188,6 +179,18 @@ export interface TitleGenerationSettings {
 
 export type McpServerType = "stdio" | "http";
 
+export interface McpRegistryMetadata {
+  displayName: string;
+  description: string;
+  version: string;
+  websiteUrl?: string;
+  iconUrl?: string;
+  badges: string[];
+  searchText: string;
+  transportTypes: McpServerType[];
+  registryEntry?: unknown;
+}
+
 export interface McpServerConfigBase {
   id: string;
   name: string;
@@ -195,6 +198,7 @@ export interface McpServerConfigBase {
   timeoutMs: number;
   requiresApproval: boolean;
   toolApprovalOverrides?: Record<string, boolean>;
+  registryMetadata?: McpRegistryMetadata;
 }
 
 export interface McpStdioServerConfig extends McpServerConfigBase {
@@ -394,7 +398,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   SHOW_CHAT_STATUS_INDICATOR: true,
   SHOW_MESSAGE_PREVIEW_RAIL: true,
   SHOW_MESSAGE_ACTION_ROW: "always",
-  CHAT_SORT: "created-at",
+  CHAT_SORT: "updated-at",
   SIDEBAR_CHAT_TIME_GROUPING: false,
   CHAT_BACKGROUND: {
     preset: "none",
@@ -412,7 +416,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   TTS: {
     provider: "",
     openai: {
-      model: "tts-1",
+      model: "gpt-4o-mini-tts",
       voice: "alloy",
       speed: 1,
       instructions: "",
@@ -428,13 +432,6 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
       useSpeakerBoost: false,
       applyTextNormalization: "auto",
     },
-    lmnt: {
-      model: "aurora",
-      voice: "ava",
-      language: "en",
-      speed: 1,
-      conversational: false,
-    },
     hume: {
       model: "default",
       voice: "d8ab67c6-953d-4bd8-9370-8fa53a0f1453",
@@ -442,7 +439,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
       instructions: "",
     },
     google: {
-      model: "gemini-3.1-flash-tts-preview",
+      model: "gemini-3.8-flash-tts",
       voice: "Kore",
       speed: 1,
       instructions: "",
