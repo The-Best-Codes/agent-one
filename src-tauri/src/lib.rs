@@ -12,6 +12,11 @@ mod utils;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    if let Err(error) = fix_path_env::fix() {
+        eprintln!("Failed to initialize executable PATH: {error}");
+    }
+
     let mut builder = tauri::Builder::default();
 
     // Single instance plugin should be the first plugin registered
