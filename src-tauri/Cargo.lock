@@ -3492,9 +3492,9 @@ checksum = "743fb55ba31b18fb1ecef6bdc9aa2743314978ac084044301a7eee33fb99a20d"
 
 [[package]]
 name = "native-cron"
-version = "0.1.4"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22244ec1d0161ba261fbfa532a14149a9cff3f73df59d71e71736f3934395c82"
+checksum = "74e4db7a44ff00a6e8653633cd672b5dcf6dfff3da33da43b5910ab795cc9ccb"
 dependencies = [
  "chrono",
  "libc",
