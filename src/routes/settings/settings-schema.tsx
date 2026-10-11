@@ -117,6 +117,7 @@ export interface SettingsCard {
 export interface SettingsSection {
   id: string;
   label: string;
+  searchPriority?: number;
   intro?: ComponentType;
   cards: SettingsCard[];
 }
@@ -321,6 +322,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
   {
     id: "keyboard-shortcuts",
     label: "Keyboard Shortcuts",
+    searchPriority: 0.9,
     cards: [
       {
         items: [
@@ -436,6 +438,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
   {
     id: "tools",
     label: "Tools",
+    searchPriority: 0.8,
     intro: ToolsIntro,
     cards: TOOL_GROUPS.map((group) => ({
       title: group.title,

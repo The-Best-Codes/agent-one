@@ -23,19 +23,26 @@ interface SearchTarget {
   description: string;
   terms: string;
   location: string;
+  context: string;
   section: string;
+  priority: number;
+  order: number;
 }
 
 const SEARCH_TARGETS: SearchTarget[] = SETTINGS_SECTIONS.flatMap((section) =>
   section.cards.flatMap((card) => {
     const location = card.title ?? section.label;
+    const context = card.title ? `${section.label} ${card.title}` : section.label;
     const toTarget = (entry: SettingsSearchEntry, extraTerms: string[] = []) => ({
       id: `setting-${entry.id}`,
       label: entry.label,
       description: entry.description ?? "",
       terms: [...(entry.keywords ?? []), ...extraTerms].join(" "),
       location,
+      context,
       section: section.label,
+      priority: section.searchPriority ?? 1,
+      order: 0,
     });
 
     const cardTargets = [
@@ -61,19 +68,21 @@ const SEARCH_TARGETS: SearchTarget[] = SETTINGS_SECTIONS.flatMap((section) =>
 
     return [...cardTargets, ...itemTargets];
   }),
-);
+).map((target, order) => ({ ...target, order }));
 
 function searchSettings(query: string) {
   const results = fuzzysort
     .go(query, SEARCH_TARGETS, {
-      keys: ["label", "terms", "description", "location"],
+      keys: ["label", "terms", "description", "context"],
       threshold: 0.45,
-      limit: 30,
-      scoreFn: ([label, terms, description, location]) =>
-        Math.max(label.score, terms.score * 0.9, description.score * 0.75, location.score * 0.6),
+      scoreFn: ([label, terms, description, context]) =>
+        Math.max(label.score, terms.score * 0.9, description.score * 0.75, context.score * 0.6),
     })
-    .map((result) => result.obj)
-    .filter((target) => document.getElementById(target.id));
+    .map((result) => ({ target: result.obj, score: result.score * result.obj.priority }))
+    .sort((a, b) => b.score - a.score || a.target.order - b.target.order)
+    .map(({ target }) => target)
+    .filter((target) => document.getElementById(target.id))
+    .slice(0, 30);
 
   const groups = new Map<string, SearchTarget[]>();
   for (const target of results) {
