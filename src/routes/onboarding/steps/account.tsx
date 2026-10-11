@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { hasEnabledProviderAtom } from "@/lib/jotai/provider-atoms";
 import { cn } from "@/lib/utils";
-import { SettingsSectionCards } from "@/routes/settings/settings-sections";
+import { SettingsSectionCards } from "@/routes/settings/settings-renderer";
 
 interface AccountStepProps {
   onSubmit: () => void;

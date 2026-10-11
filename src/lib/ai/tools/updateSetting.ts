@@ -1,8 +1,9 @@
 import { tool } from "ai";
-import { getDefaultStore, type WritableAtom } from "jotai";
+import { getDefaultStore } from "jotai";
 import { z } from "zod";
 
-import { getSettingAtom, isInspectableKey, validateSettingValue } from "@/lib/settings/metadata";
+import { type SettingAtom, settingAtoms } from "@/lib/jotai/settings-atoms";
+import { SETTINGS, type SettingKey } from "@/lib/settings/definitions";
 import type { UpdateSettingToolConfig } from "@/lib/settings/types";
 
 export const createUpdateSettingTool = (config: UpdateSettingToolConfig) =>
@@ -25,26 +26,33 @@ export const createUpdateSettingTool = (config: UpdateSettingToolConfig) =>
           "Set to true to convert a numeric string value to a number before writing it (for example, value='5' becomes 5). Use this for numeric settings.",
         ),
     }),
-    execute: async (input) => {
-      const { key, value, convertToNumber } = input;
-      if (!isInspectableKey(key)) {
-        throw new Error(`Setting key "${key}" is not valid or inspectable.`);
+    execute: async ({ key, value: rawValue, convertToNumber }) => {
+      const definition = SETTINGS[key as SettingKey];
+      if (definition?.ai !== "write") {
+        throw new Error(`Setting key "${key}" can't be updated by AgentOne.`);
       }
 
-      const normalizedValue = convertToNumber && typeof value === "string" ? Number(value) : value;
-      const validation = validateSettingValue(key, normalizedValue);
-      if (!validation.success) {
-        throw new Error(validation.error);
+      const value = convertToNumber && typeof rawValue === "string" ? Number(rawValue) : rawValue;
+
+      if ("options" in definition && !Object.hasOwn(definition.options, value)) {
+        throw new Error(
+          `Value ${JSON.stringify(value)} is not a valid option. Valid options are: ${Object.keys(definition.options).join(", ")}`,
+        );
       }
 
-      const store = getDefaultStore();
-      const atom = getSettingAtom(key) as WritableAtom<unknown, [unknown], void>;
-      store.set(atom, normalizedValue);
+      if (typeof value !== typeof definition.default) {
+        throw new Error(`Expected a ${typeof definition.default}, but received ${typeof value}`);
+      }
 
-      return {
-        key,
-        value: normalizedValue,
-        success: true,
-      };
+      if (
+        "min" in definition &&
+        (!Number.isInteger(value) || value < definition.min || value > definition.max)
+      ) {
+        throw new Error(`Expected a whole number between ${definition.min} and ${definition.max}`);
+      }
+
+      getDefaultStore().set(settingAtoms[key as SettingKey] as SettingAtom<unknown>, value);
+
+      return { key, value, success: true };
     },
   });

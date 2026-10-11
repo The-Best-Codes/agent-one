@@ -42,7 +42,7 @@ import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { MAX_MEMORY_ENTRIES, MAX_MEMORY_ENTRY_CHARS } from "@/lib/memory";
 
-import { SettingsTarget } from "../settings-target";
+import { SettingsTarget } from "./settings-target";
 
 const DASHBOARD_URL = "https://www.agent-one.dev/dashboard";
 const BILLING_URL = `${DASHBOARD_URL}/billing`;

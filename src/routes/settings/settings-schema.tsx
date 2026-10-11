@@ -1,34 +1,24 @@
 import { atom, type Atom } from "jotai";
 import type { ComponentType } from "react";
 
-import { settingAtoms } from "@/lib/jotai/settings-atoms";
-import { debugModeEnabledAtom } from "@/lib/jotai/unsynced-local-atoms";
-import { keyboardShortcutDefinitions } from "@/lib/kbd-registry";
-import type { SettingKey } from "@/lib/settings/definitions";
-
-import {
-  AppUpdates,
-  DebugTools,
-  ExtensionListUpdates,
-  HelpLinks,
-  ModelDirectoryUpdates,
-} from "./sections/about";
 import {
   AccountStatus,
   HideAgentOneModelsControl,
   MemoryControl,
   SyncControl,
-} from "./sections/account";
+} from "@/components/settings-components/account";
 import {
-  ChatBackgroundEffects,
-  ChatBackgroundPicker,
-  ChatBackgroundShade,
   ColorThemeControl,
   FontControl,
   RoundnessControl,
   ThemeControl,
   TintControl,
-} from "./sections/appearance";
+} from "@/components/settings-components/appearance";
+import {
+  ChatBackgroundEffects,
+  ChatBackgroundPicker,
+  ChatBackgroundShade,
+} from "@/components/settings-components/chat-background";
 import {
   TitleCharacterLimitControl,
   TitleCustomPhrase,
@@ -36,19 +26,34 @@ import {
   TitleFallbackPhraseControl,
   TitleMaxOutputTokens,
   TitleMethodControl,
-} from "./sections/chats";
-import { OtherShortcutsAlert, ShortcutList } from "./sections/keyboard-shortcuts";
-import { VirtualizationControl } from "./sections/performance";
-import { ProvidersIntro } from "./sections/providers";
+} from "@/components/settings-components/chat-titles";
+import { VirtualizationControl } from "@/components/settings-components/chat-virtualization";
+import {
+  AppUpdates,
+  DebugTools,
+  ExtensionListUpdates,
+  HelpLinks,
+  ModelDirectoryUpdates,
+} from "@/components/settings-components/help-and-updates";
+import {
+  OtherShortcutsAlert,
+  ShortcutList,
+} from "@/components/settings-components/keyboard-shortcuts";
 import {
   BuiltInProviders,
   CustomProviders,
   LocalProviders,
+  ProvidersIntro,
   TtsProviders,
-} from "./sections/providers/provider-cards";
-import { ToolsIntro } from "./sections/tools";
-import { ToolRow } from "./sections/tools/tool-row";
-import { TOOL_GROUPS, TOOL_INFO } from "./sections/tools/tools-metadata";
+} from "@/components/settings-components/providers/provider-cards";
+import type { SettingsLayout } from "@/components/settings-components/setting-controls";
+import { ToolRow } from "@/components/settings-components/tools/tool-row";
+import { ToolsIntro } from "@/components/settings-components/tools/tools-intro";
+import { TOOL_GROUPS, TOOL_INFO } from "@/components/settings-components/tools/tools-metadata";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
+import { debugModeEnabledAtom } from "@/lib/jotai/unsynced-local-atoms";
+import { keyboardShortcutDefinitions } from "@/lib/kbd-registry";
+import type { SettingKey } from "@/lib/settings/definitions";
 
 const isVirtualizationEnabledAtom = atom(
   (get) => get(settingAtoms.CHAT_VIRTUALIZATION_MODE) !== "off",
@@ -73,8 +78,6 @@ const usesFallbackPhraseAtom = atom((get) => {
   return method !== "custom" && (method !== "ai" || fallbackMethod !== "custom");
 });
 
-export type SettingsLayout = "row" | "responsive" | "slider" | "stacked";
-
 export interface SettingsSearchEntry {
   id: string;
   label: string;
@@ -97,7 +100,7 @@ export interface SettingsItem {
 }
 
 export interface SettingsCard {
-  title: string;
+  title?: string;
   description?: string;
   id?: string;
   keywords?: string[];
@@ -321,7 +324,6 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     label: "Keyboard Shortcuts",
     cards: [
       {
-        title: "Keyboard Shortcuts",
         items: [
           {
             id: "activate-shortcuts-in-input-fields",

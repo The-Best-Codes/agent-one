@@ -3,17 +3,17 @@ import { cn } from "@/lib/utils";
 
 import { SETTINGS_SECTIONS } from "./settings-schema";
 
-interface SettingsSidebarProps {
+interface SettingsNavProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
   className?: string;
 }
 
-export default function SettingsSidebar({
+export default function SettingsNav({
   activeSection,
   onSectionChange,
   className,
-}: SettingsSidebarProps) {
+}: SettingsNavProps) {
   return (
     <ToggleGroup
       type="single"

@@ -29,9 +29,9 @@ function toTarget(entry: SettingsSearchEntry, location: string, extraTerms: stri
 
 const SEARCH_TARGETS: SearchTarget[] = SETTINGS_SECTIONS.flatMap((section) =>
   section.cards.flatMap((card) => {
-    const location = `${section.label} › ${card.title}`;
+    const location = card.title ? `${section.label} › ${card.title}` : section.label;
     const cardTarget = card.id
-      ? [toTarget({ ...card, id: card.id, label: card.title }, section.label)]
+      ? [toTarget({ ...card, id: card.id, label: card.title ?? section.label }, section.label)]
       : [];
 
     const itemTargets = (card.items ?? []).flatMap((item) => {

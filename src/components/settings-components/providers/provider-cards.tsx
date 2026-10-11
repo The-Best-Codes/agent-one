@@ -1,9 +1,11 @@
-import { IconPlugConnected } from "@tabler/icons-react";
+import { IconInfoCircle, IconPlugConnected } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useMemo, useState } from "react";
 
 import { SecretInput } from "@/components/a1/input/secret-input";
 import { SearchInput } from "@/components/a1/search-input";
+import { SettingsLink } from "@/components/a1/settings-link";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Empty,
   EmptyContent,
@@ -24,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { modelDirectoryStatusAtom } from "@/lib/ai/models/model-directory";
 import { hasEnvKey, PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
 import { TTS_PROVIDER_OPTIONS, getSelectedTtsModel, normalizeTtsSettings } from "@/lib/ai/tts";
 import { apiKeyAtomFamily } from "@/lib/jotai/api-key-atoms";
@@ -51,6 +54,24 @@ import {
   LocalProviderListItem,
 } from "./provider-list-item";
 import { VirtualizedProviderList } from "./virtualized-provider-list";
+export function ProvidersIntro() {
+  const { hasDownloadedList, isStartupComplete } = useAtomValue(modelDirectoryStatusAtom);
+
+  if (!isStartupComplete || hasDownloadedList) return null;
+
+  return (
+    <Alert>
+      <IconInfoCircle />
+      <AlertTitle>Model list missing</AlertTitle>
+      <AlertDescription>
+        Built-in provider models won&apos;t appear in the model selector until the model list is
+        downloaded.{" "}
+        <SettingsLink id="setting-model-directory">Download the model list</SettingsLink>.
+      </AlertDescription>
+    </Alert>
+  );
+}
+
 export function BuiltInProviders() {
   const [searchQuery, setSearchQuery] = useState("");
   const normalizedBuiltInQuery = searchQuery.trim().toLowerCase();

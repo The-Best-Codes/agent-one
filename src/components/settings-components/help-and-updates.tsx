@@ -39,7 +39,7 @@ import { useUpdate } from "@/contexts/use-update/update-hooks";
 import { modelDirectoryStatusAtom, updateModelDirectory } from "@/lib/ai/models/model-directory";
 import { extensionListStatusAtom, updateExtensionList } from "@/lib/mcp-registry/sync";
 
-import { SettingsTarget } from "../settings-target";
+import { SettingsTarget } from "./settings-target";
 
 function formatModelDirectoryTimestamp(value: number, neverLabel: string): string {
   return value ? new Date(value).toLocaleString() : neverLabel;

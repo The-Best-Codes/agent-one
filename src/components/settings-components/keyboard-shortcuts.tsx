@@ -21,7 +21,7 @@ import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { type KeyboardShortcutId, keyboardShortcutDefinitions } from "@/lib/kbd-registry";
 import { DEFAULT_SETTINGS } from "@/lib/settings/definitions";
 
-import { SettingsTarget } from "../settings-target";
+import { SettingsTarget } from "./settings-target";
 
 function ShortcutEditor({
   id,
@@ -173,7 +173,11 @@ export function ShortcutList() {
             config.enabledInInputs === defaultConfig.enabledInInputs;
 
           return (
-            <SettingsTarget key={definition.id} id={`setting-shortcut-${definition.id}`}>
+            <SettingsTarget
+              key={definition.id}
+              id={`setting-shortcut-${definition.id}`}
+              className="rounded-none"
+            >
               <div className="flex flex-col gap-3 p-3 md:flex-row md:items-center md:justify-between">
                 <div>
                   <Label className="text-sm font-medium">{definition.label}</Label>

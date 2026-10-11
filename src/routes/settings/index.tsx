@@ -12,10 +12,10 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 
+import SettingsNav from "./settings-nav";
+import { SettingsSections } from "./settings-renderer";
 import { SETTINGS_SECTIONS } from "./settings-schema";
 import { SettingsSearch } from "./settings-search";
-import { SettingsSections } from "./settings-sections";
-import SettingsSidebar from "./settings-sidebar";
 
 function scrollToElement(id: string, behavior: ScrollBehavior = "smooth") {
   const target = document.getElementById(id);
@@ -112,7 +112,7 @@ export default function SettingsRoute() {
               <DrawerHeader>
                 <DrawerTitle className="mb-2">Setting Categories</DrawerTitle>
                 <DrawerDescription className="sr-only">List of setting sections</DrawerDescription>
-                <SettingsSidebar
+                <SettingsNav
                   activeSection={activeSection}
                   onSectionChange={(section) => {
                     setIsDrawerOpen(false);
@@ -133,7 +133,7 @@ export default function SettingsRoute() {
               Back to Chat
             </Button>
             <SettingsSearch onSelect={handleSearchSelect} />
-            <SettingsSidebar activeSection={activeSection} onSectionChange={handleSectionChange} />
+            <SettingsNav activeSection={activeSection} onSectionChange={handleSectionChange} />
           </div>
 
           <div className="flex min-w-0 flex-1 flex-col gap-12">

@@ -13,7 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import type { TitleGenerationMethodOption, TitleGenerationSettings } from "@/lib/settings/types";
 
-import { SettingsRow } from "../settings-sections";
+import { SettingsRow } from "./setting-controls";
 
 const TITLE_METHODS: Record<TitleGenerationMethodOption, string> = {
   ai: "AI generated",

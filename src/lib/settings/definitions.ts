@@ -11,27 +11,28 @@ import type {
   TtsSettings,
 } from "./types";
 
-interface SettingText {
+interface SettingMeta {
   label?: string;
   description?: string;
+  ai?: "read" | "write";
 }
 
 const select = <const O extends Record<string, string>>(
-  definition: SettingText & { default: NoInfer<Extract<keyof O, string>>; options: O },
+  definition: SettingMeta & { default: NoInfer<Extract<keyof O, string>>; options: O },
 ) => ({ control: "select" as const, ...definition });
 
-const toggle = (definition: SettingText & { default: boolean }) => ({
+const toggle = (definition: SettingMeta & { default: boolean }) => ({
   control: "switch" as const,
   ...definition,
 });
 
-const number = (definition: SettingText & { default: number; min: number; max: number }) => ({
+const number = (definition: SettingMeta & { default: number; min: number; max: number }) => ({
   control: "number" as const,
   ...definition,
 });
 
 const slider = (
-  definition: SettingText & {
+  definition: SettingMeta & {
     default: number;
     min: number;
     max: number;
@@ -41,7 +42,7 @@ const slider = (
 ) => ({ control: "slider" as const, ...definition });
 
 const text = (
-  definition: SettingText & {
+  definition: SettingMeta & {
     default: string;
     placeholder: string;
     maxLength?: number;
@@ -49,7 +50,7 @@ const text = (
   },
 ) => ({ control: "text" as const, ...definition });
 
-const data = <T>(definition: SettingText & { default: T }) => ({
+const data = <T>(definition: SettingMeta & { default: T }) => ({
   control: "data" as const,
   ...definition,
 });
@@ -104,11 +105,13 @@ const DEFAULT_TOOL_CONFIGS: ToolConfigs = {
 
 export const SETTINGS = {
   THEME: select({
+    ai: "write",
     label: "Theme",
     default: "system",
     options: { system: "System", light: "Light", dark: "Dark" },
   }),
   COLOR_THEME: select({
+    ai: "write",
     label: "Primary Color",
     description:
       "Controls the accent color used for switches, badges, highlights, and primary actions.",
@@ -116,6 +119,7 @@ export const SETTINGS = {
     options: COLOR_OPTIONS,
   }),
   UI_TINT: select({
+    ai: "write",
     label: "Tint",
     description:
       "Adds a subtle color wash to surfaces like backgrounds, panels, sidebars, and muted buttons.",
@@ -123,6 +127,7 @@ export const SETTINGS = {
     options: COLOR_OPTIONS,
   }),
   UI_TINT_STRENGTH: slider({
+    ai: "write",
     label: "Tint Strength",
     description: "Choose how light or strong the tint should feel.",
     default: 3,
@@ -132,18 +137,21 @@ export const SETTINGS = {
     unit: "/10",
   }),
   FONT: select({
+    ai: "write",
     label: "Font",
     description: "Choose the font for the application.",
     default: "default",
     options: { default: "Default", system: "System", mono: "Mono", roboto: "Roboto" },
   }),
   ROUNDNESS: select({
+    ai: "write",
     label: "Roundness",
     description: "Adjust the corner radius of UI elements.",
     default: "md",
     options: { none: "Not Round", sm: "Slightly Round", md: "Round", lg: "Very Round" },
   }),
   TEXT_SCALE: select({
+    ai: "write",
     label: "Text Scale",
     description: "Adjust the text size throughout the application.",
     default: "md",
@@ -172,23 +180,27 @@ export const SETTINGS = {
     },
   }),
   MARKDOWN_HIGHLIGHTING: toggle({
+    ai: "write",
     label: "Markdown Highlighting",
     description: "Show markdown formatting styles while typing in the chat input.",
     default: true,
   }),
   INPUT_STYLE: select({
+    ai: "write",
     label: "Input Style",
     description: "Choose how the chat input box is displayed.",
     default: "floating",
     options: { docked: "Docked", floating: "Floating" },
   }),
   COLLAPSED_SIDEBAR_LAYOUT: select({
+    ai: "write",
     label: "Collapsed Sidebar Layout",
     description: "Choose whether collapsed sidebar buttons are laid out in a row or column.",
     default: "row",
     options: { row: "Row", column: "Column" },
   }),
   CHAT_SORT: select({
+    ai: "write",
     label: "Chat Sort Order",
     description:
       "Sort by creation date, your latest sent message, or recent activity such as opening a chat or changing its settings.",
@@ -200,11 +212,13 @@ export const SETTINGS = {
     },
   }),
   SIDEBAR_CHAT_TIME_GROUPING: toggle({
+    ai: "write",
     label: "Group sidebar chats by time",
     description: "Organize chats into time sections such as Recent, Last Week, and monthly groups.",
     default: false,
   }),
   MARKDOWN_RENDERING: select({
+    ai: "write",
     label: "Markdown Rendering",
     description: "Choose which messages should render markdown formatting.",
     default: "both",
@@ -216,29 +230,34 @@ export const SETTINGS = {
     },
   }),
   REMEND_ENABLED: toggle({
+    ai: "write",
     label: "Fix Streaming Markdown",
     description: "Automatically fix incomplete formatting in streamed responses.",
     default: true,
   }),
   NOTIFICATION_SETTING: select({
+    ai: "write",
     label: "Agent Notifications",
     description: "Show a notification when AgentOne responds or needs your attention.",
     default: "when-unfocused",
     options: { always: "Always", "when-unfocused": "When window unfocused", never: "Never" },
   }),
   SHOW_MESSAGE_ACTION_ROW: select({
+    ai: "write",
     label: "Message Action Row",
     description: "Control when message actions (copy, edit, etc.) are visible.",
     default: "always",
     options: { hover: "Show on hover", always: "Always show", never: "Never show" },
   }),
   SUBMIT_KEY: select({
+    ai: "write",
     label: "Submit Key",
     description: "Choose which key combination submits your message.",
     default: "enter",
     options: { enter: "Enter", "ctrl-enter": "Ctrl/CMD + Enter" },
   }),
   INTERRUPT_KEY: select({
+    ai: "write",
     label: "Interrupt Key",
     description: "Choose which key combination stops the response and sends your message.",
     default: "ctrl-enter",
@@ -249,27 +268,32 @@ export const SETTINGS = {
     },
   }),
   REGENERATE_ON_SAVE: toggle({
+    ai: "write",
     label: "Regenerate on Save",
     description: "Automatically regenerate the AI response when you save an edited message.",
     default: true,
   }),
   SHOW_CHAT_TO_BOTTOM_BUTTON: toggle({
+    ai: "write",
     label: "Chat Scroll to Bottom Button",
     description: "Show a button to quickly scroll to the bottom of the chat.",
     default: true,
   }),
   SHOW_MESSAGE_PREVIEW_RAIL: toggle({
+    ai: "write",
     label: "Message Navigation Rail",
     description:
       "Show message previews and navigation on the right side of chats. Hidden in the compact layout.",
     default: true,
   }),
   SHOW_CHAT_STATUS_INDICATOR: toggle({
+    ai: "write",
     label: "Chat Status Indicators",
     description: "Show status icons in the sidebar for loading, error, and unread chats.",
     default: true,
   }),
   EXTRACT_REASONING_ENABLED: toggle({
+    ai: "write",
     label: "Extract Reasoning from Think Tags",
     description:
       "Automatically extract <think> tag content from model responses and display it as a collapsible reasoning section. Does not apply to past messages or non-reasoning models.",
@@ -319,6 +343,7 @@ export const SETTINGS = {
     },
   }),
   MAX_MESSAGE_LENGTH: number({
+    ai: "write",
     label: "Max Message Length",
     description: "Maximum characters before activating performance mode for that message.",
     default: 50000,
@@ -326,6 +351,7 @@ export const SETTINGS = {
     max: 1000000,
   }),
   MAX_CODEBLOCK_CHARS: number({
+    ai: "write",
     label: "Max Codeblock Characters",
     description: "Maximum characters in code blocks before switching to plain text rendering.",
     default: 10000,
@@ -333,6 +359,7 @@ export const SETTINGS = {
     max: 1000000,
   }),
   MAX_TOOL_RESULT_CHARS: number({
+    ai: "write",
     label: "Max Tool Result Characters",
     description: "Maximum characters in tool results before switching to performant rendering.",
     default: 15000,
@@ -340,6 +367,7 @@ export const SETTINGS = {
     max: 1000000,
   }),
   CHAT_VIRTUALIZATION_MODE: select({
+    ai: "write",
     label: "Virtualize Chat Messages",
     description:
       "Reduce rendering work for large chats while preserving the same chat UI behavior.",
@@ -347,6 +375,7 @@ export const SETTINGS = {
     options: { off: "Off", threshold: "On" },
   }),
   CHAT_VIRTUALIZATION_THRESHOLD: number({
+    ai: "write",
     label: "Message Count Threshold",
     description:
       "Only enable chat virtualization when a conversation reaches at least this many messages.",
@@ -355,6 +384,7 @@ export const SETTINGS = {
     max: 100000,
   }),
   MCP_PARALLEL_LOAD_LIMIT: number({
+    ai: "write",
     label: "MCP Parallel Load Limit",
     description: "Maximum number of MCP servers loaded concurrently.",
     default: 8,
@@ -383,6 +413,7 @@ export const SETTINGS = {
     default: [],
   }),
   KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS: toggle({
+    ai: "write",
     label: "Activate shortcuts in input fields",
     description:
       "This is the default behavior. You can change it for individual shortcuts in the shortcut editor.",
