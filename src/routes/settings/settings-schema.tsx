@@ -487,3 +487,30 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     ],
   },
 ];
+
+export function getCardAnchorId(sectionId: string, card: SettingsCard, index: number) {
+  return card.id ? `setting-${card.id}` : `section-${sectionId}-card-${index}`;
+}
+
+export interface SettingsTocItem {
+  id: string;
+  title: string;
+  depth: number;
+  visible?: Atom<boolean>;
+}
+
+export const SETTINGS_TOC: SettingsTocItem[] = SETTINGS_SECTIONS.flatMap((section) => [
+  { id: `section-${section.id}`, title: section.label, depth: 2 },
+  ...section.cards.flatMap((card, index) =>
+    card.title
+      ? [
+          {
+            id: getCardAnchorId(section.id, card, index),
+            title: card.title,
+            depth: 3,
+            visible: card.visible,
+          },
+        ]
+      : [],
+  ),
+]);

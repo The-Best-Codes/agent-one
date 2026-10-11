@@ -19,7 +19,12 @@ import {
 import { SETTINGS, type SettingDefinition } from "@/lib/settings/definitions";
 import { cn } from "@/lib/utils";
 
-import { type SettingsCard, type SettingsItem, SETTINGS_SECTIONS } from "./settings-schema";
+import {
+  getCardAnchorId,
+  type SettingsCard,
+  type SettingsItem,
+  SETTINGS_SECTIONS,
+} from "./settings-schema";
 
 const alwaysAtom = atom(true);
 
@@ -76,7 +81,7 @@ function SettingsItemView({ item }: { item: SettingsItem }) {
   );
 }
 
-function SettingsCardView({ card }: { card: SettingsCard }) {
+function SettingsCardView({ card, anchorId }: { card: SettingsCard; anchorId: string }) {
   const visible = useAtomValue(card.visible ?? alwaysAtom);
 
   if (!visible) return null;
@@ -104,12 +109,12 @@ function SettingsCardView({ card }: { card: SettingsCard }) {
     </Card>
   );
 
-  return card.id ? <SettingsTarget id={`setting-${card.id}`}>{content}</SettingsTarget> : content;
+  return card.id || card.title ? <SettingsTarget id={anchorId}>{content}</SettingsTarget> : content;
 }
 
 export function SettingsSectionCards({ sectionId }: { sectionId: string }) {
   return SETTINGS_SECTIONS.find((section) => section.id === sectionId)?.cards.map((card, index) => (
-    <SettingsCardView key={index} card={card} />
+    <SettingsCardView key={index} card={card} anchorId={getCardAnchorId(sectionId, card, index)} />
   ));
 }
 
@@ -126,7 +131,11 @@ export function SettingsSections() {
       </h2>
       {section.intro && <section.intro />}
       {section.cards.map((card, index) => (
-        <SettingsCardView key={index} card={card} />
+        <SettingsCardView
+          key={index}
+          card={card}
+          anchorId={getCardAnchorId(section.id, card, index)}
+        />
       ))}
     </section>
   ));
