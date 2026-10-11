@@ -207,3 +207,4 @@ mcpb
 streamable
 julianday
 NOCASE
+colour
