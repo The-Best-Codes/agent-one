@@ -17,18 +17,17 @@ export function SettingsTarget({ id, children, className }: SettingsTargetProps)
   const [phase, setPhase] = useState<"idle" | "active" | "fading">("idle");
 
   useEffect(() => {
-    const timeouts: number[] = [];
+    if (location.hash !== `#${id}`) return;
 
-    if (location.hash === `#${id}`) {
-      timeouts.push(window.setTimeout(() => setPhase("active"), 1000));
-      timeouts.push(window.setTimeout(() => setPhase("fading"), HIGHLIGHT_ACTIVE_MS));
-      timeouts.push(
-        window.setTimeout(() => setPhase("idle"), HIGHLIGHT_ACTIVE_MS + HIGHLIGHT_FADE_MS),
-      );
-    }
+    const timeouts = [
+      window.setTimeout(() => setPhase("active"), 1000),
+      window.setTimeout(() => setPhase("fading"), HIGHLIGHT_ACTIVE_MS),
+      window.setTimeout(() => setPhase("idle"), HIGHLIGHT_ACTIVE_MS + HIGHLIGHT_FADE_MS),
+    ];
 
     return () => {
       timeouts.forEach(window.clearTimeout);
+      setPhase("idle");
     };
   }, [id, location.hash, location.key]);
 
