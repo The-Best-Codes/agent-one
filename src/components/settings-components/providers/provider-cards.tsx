@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { SecretInput } from "@/components/a1/input/secret-input";
 import { SearchInput } from "@/components/a1/search-input";
 import { SettingsLink } from "@/components/a1/settings-link";
+import { NumberInput } from "@/components/settings-components/setting-controls";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Empty,
@@ -422,20 +423,14 @@ export function TtsProviders() {
             </Field>
             <Field>
               <FieldLabel htmlFor="tts-openai-speed">Speech Rate</FieldLabel>
-              <Input
+              <NumberInput
                 id="tts-openai-speed"
-                type="number"
-                min="0.25"
-                max="4"
+                min={0.25}
+                max={4}
                 step="0.05"
                 value={ttsSettings.openai.speed}
-                onChange={(event) =>
-                  updateTtsSettings({
-                    openai: {
-                      ...ttsSettings.openai,
-                      speed: Number(event.target.value) || 1,
-                    },
-                  })
+                onValueChange={(speed) =>
+                  updateTtsSettings({ openai: { ...ttsSettings.openai, speed } })
                 }
               />
             </Field>
@@ -473,20 +468,14 @@ export function TtsProviders() {
             <div className="grid gap-4 md:grid-cols-2">
               <Field>
                 <FieldLabel htmlFor="tts-elevenlabs-speed">Speech Rate</FieldLabel>
-                <Input
+                <NumberInput
                   id="tts-elevenlabs-speed"
-                  type="number"
-                  min="0.7"
-                  max="1.2"
+                  min={0.7}
+                  max={1.2}
                   step="0.05"
                   value={ttsSettings.elevenlabs.speed}
-                  onChange={(event) =>
-                    updateTtsSettings({
-                      elevenlabs: {
-                        ...ttsSettings.elevenlabs,
-                        speed: Number(event.target.value) || 1,
-                      },
-                    })
+                  onValueChange={(speed) =>
+                    updateTtsSettings({ elevenlabs: { ...ttsSettings.elevenlabs, speed } })
                   }
                 />
               </Field>
@@ -508,58 +497,42 @@ export function TtsProviders() {
               </Field>
               <Field>
                 <FieldLabel htmlFor="tts-elevenlabs-stability">Stability</FieldLabel>
-                <Input
+                <NumberInput
                   id="tts-elevenlabs-stability"
-                  type="number"
-                  min="0"
-                  max="1"
+                  min={0}
+                  max={1}
                   step="0.05"
                   value={ttsSettings.elevenlabs.stability}
-                  onChange={(event) =>
-                    updateTtsSettings({
-                      elevenlabs: {
-                        ...ttsSettings.elevenlabs,
-                        stability: Number(event.target.value) || 0,
-                      },
-                    })
+                  onValueChange={(stability) =>
+                    updateTtsSettings({ elevenlabs: { ...ttsSettings.elevenlabs, stability } })
                   }
                 />
               </Field>
               <Field>
                 <FieldLabel htmlFor="tts-elevenlabs-similarity">Voice Match</FieldLabel>
-                <Input
+                <NumberInput
                   id="tts-elevenlabs-similarity"
-                  type="number"
-                  min="0"
-                  max="1"
+                  min={0}
+                  max={1}
                   step="0.05"
                   value={ttsSettings.elevenlabs.similarityBoost}
-                  onChange={(event) =>
+                  onValueChange={(similarityBoost) =>
                     updateTtsSettings({
-                      elevenlabs: {
-                        ...ttsSettings.elevenlabs,
-                        similarityBoost: Number(event.target.value) || 0,
-                      },
+                      elevenlabs: { ...ttsSettings.elevenlabs, similarityBoost },
                     })
                   }
                 />
               </Field>
               <Field>
                 <FieldLabel htmlFor="tts-elevenlabs-style">Style Strength</FieldLabel>
-                <Input
+                <NumberInput
                   id="tts-elevenlabs-style"
-                  type="number"
-                  min="0"
-                  max="1"
+                  min={0}
+                  max={1}
                   step="0.05"
                   value={ttsSettings.elevenlabs.style}
-                  onChange={(event) =>
-                    updateTtsSettings({
-                      elevenlabs: {
-                        ...ttsSettings.elevenlabs,
-                        style: Number(event.target.value) || 0,
-                      },
-                    })
+                  onValueChange={(style) =>
+                    updateTtsSettings({ elevenlabs: { ...ttsSettings.elevenlabs, style } })
                   }
                 />
               </Field>
@@ -620,18 +593,12 @@ export function TtsProviders() {
             </Field>
             <Field>
               <FieldLabel htmlFor="tts-hume-speed">Speech Rate</FieldLabel>
-              <Input
+              <NumberInput
                 id="tts-hume-speed"
-                type="number"
                 step="0.05"
                 value={ttsSettings.hume.speed}
-                onChange={(event) =>
-                  updateTtsSettings({
-                    hume: {
-                      ...ttsSettings.hume,
-                      speed: Number(event.target.value) || 1,
-                    },
-                  })
+                onValueChange={(speed) =>
+                  updateTtsSettings({ hume: { ...ttsSettings.hume, speed } })
                 }
               />
             </Field>
@@ -681,20 +648,14 @@ export function TtsProviders() {
             </Field>
             <Field>
               <FieldLabel htmlFor="tts-google-speed">Speech Rate</FieldLabel>
-              <Input
+              <NumberInput
                 id="tts-google-speed"
-                type="number"
-                min="0.25"
-                max="4"
+                min={0.25}
+                max={4}
                 step="0.05"
                 value={ttsSettings.google.speed}
-                onChange={(event) =>
-                  updateTtsSettings({
-                    google: {
-                      ...ttsSettings.google,
-                      speed: Number(event.target.value) || 1,
-                    },
-                  })
+                onValueChange={(speed) =>
+                  updateTtsSettings({ google: { ...ttsSettings.google, speed } })
                 }
               />
             </Field>

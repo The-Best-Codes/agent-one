@@ -13,7 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import type { TitleGenerationMethodOption, TitleGenerationSettings } from "@/lib/settings/types";
 
-import { SettingsRow } from "./setting-controls";
+import { NumberInput, SettingsRow } from "./setting-controls";
 
 const TITLE_METHODS: Record<TitleGenerationMethodOption, string> = {
   ai: "AI generated",
@@ -123,14 +123,12 @@ export function TitleCharacterLimitControl() {
   const [titleGeneration, updateTitleGeneration] = useTitleGeneration();
 
   return (
-    <Input
-      type="number"
-      min="10"
-      max="200"
+    <NumberInput
+      min={10}
+      max={200}
+      integer
       value={titleGeneration.characterLimit}
-      onChange={(event) =>
-        updateTitleGeneration({ characterLimit: parseInt(event.target.value) || 50 })
-      }
+      onValueChange={(characterLimit) => updateTitleGeneration({ characterLimit })}
       aria-label="Character limit"
       className="w-full md:w-32"
     />

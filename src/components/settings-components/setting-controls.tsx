@@ -2,7 +2,7 @@ import { IconRestore } from "@tabler/icons-react";
 import { deepEqual } from "fast-equals";
 import { type Atom, atom, useAtom, useAtomValue } from "jotai";
 import { RESET } from "jotai/utils";
-import { type ReactNode, useState } from "react";
+import { type ComponentProps, type ReactNode, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -118,41 +118,53 @@ export function SliderLabel({ settingKey }: { settingKey: SettingKey }) {
   return `${definition.label}: ${String(value)}${"unit" in definition ? definition.unit : ""}`;
 }
 
-interface NumberControlProps {
-  id: string;
+type NumberInputProps = Omit<
+  ComponentProps<typeof Input>,
+  "type" | "value" | "onChange" | "onBlur" | "min" | "max"
+> & {
   value: number;
-  onChange: (value: number) => void;
-  min: number;
-  max: number;
-  disabled: boolean;
-}
+  onValueChange: (value: number) => void;
+  min?: number;
+  max?: number;
+  integer?: boolean;
+};
 
-function NumberControl({ id, value, onChange, min, max, disabled }: NumberControlProps) {
+export function NumberInput({
+  value,
+  onValueChange,
+  min = -Infinity,
+  max = Infinity,
+  integer = false,
+  ...props
+}: NumberInputProps) {
   const [draft, setDraft] = useState<string | null>(null);
 
+  const parse = (text: string) => {
+    const parsed = text.trim() === "" ? NaN : Number(text);
+    return Number.isFinite(parsed) ? (integer ? Math.trunc(parsed) : parsed) : null;
+  };
+
   const commit = (nextValue: number) => {
-    if (nextValue !== value) onChange(nextValue);
+    if (nextValue !== value) onValueChange(nextValue);
   };
 
   return (
     <Input
-      id={id}
+      {...props}
       type="number"
-      min={min}
-      max={max}
+      min={Number.isFinite(min) ? min : undefined}
+      max={Number.isFinite(max) ? max : undefined}
       value={draft ?? value}
       onChange={(event) => {
         setDraft(event.target.value);
-        const parsed = Number.parseInt(event.target.value, 10);
-        if (parsed >= min && parsed <= max) commit(parsed);
+        const parsed = parse(event.target.value);
+        if (parsed !== null && parsed >= min && parsed <= max) commit(parsed);
       }}
       onBlur={() => {
-        const parsed = Number.parseInt(draft ?? "", 10);
-        if (!Number.isNaN(parsed)) commit(Math.min(max, Math.max(min, parsed)));
+        const parsed = draft === null ? null : parse(draft);
+        if (parsed !== null) commit(Math.min(max, Math.max(min, parsed)));
         setDraft(null);
       }}
-      disabled={disabled}
-      className="w-full md:w-32"
     />
   );
 }
@@ -192,13 +204,15 @@ export function SettingControl({ settingKey, id, disabledAtom = neverAtom }: Set
       );
     case "number":
       return (
-        <NumberControl
+        <NumberInput
           id={id}
           value={value as number}
-          onChange={setValue}
+          onValueChange={setValue}
           min={definition.min}
           max={definition.max}
+          integer
           disabled={disabled}
+          className="w-full md:w-32"
         />
       );
     case "slider":
