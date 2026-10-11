@@ -5,10 +5,10 @@ import { memo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { enabledToolsAtom, toolConfigsAtom } from "@/lib/jotai/settings-atoms";
-import { DEFAULT_SETTINGS, type ToolConfigs, type ToolId } from "@/lib/settings/types";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
+import { DEFAULT_SETTINGS } from "@/lib/settings/definitions";
+import type { ToolConfigs, ToolId } from "@/lib/settings/types";
 
-import SettingsTarget from "../../settings-target";
 import { ToolSettingsDialog } from "./tool-settings-dialog";
 import { TOOL_INFO, getMergedToolConfigs } from "./tools-metadata";
 
@@ -17,8 +17,8 @@ interface ToolRowProps {
 }
 
 export const ToolRow = memo(function ToolRow({ toolId }: ToolRowProps) {
-  const [enabledTools, setEnabledTools] = useAtom(enabledToolsAtom);
-  const [toolConfigs, setToolConfigs] = useAtom(toolConfigsAtom);
+  const [enabledTools, setEnabledTools] = useAtom(settingAtoms.ENABLED_TOOLS);
+  const [toolConfigs, setToolConfigs] = useAtom(settingAtoms.TOOL_CONFIGS);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const tool = TOOL_INFO[toolId];
@@ -47,7 +47,7 @@ export const ToolRow = memo(function ToolRow({ toolId }: ToolRowProps) {
       JSON.stringify(DEFAULT_SETTINGS.TOOL_CONFIGS[toolId]);
 
   return (
-    <SettingsTarget id={`setting-tool-${tool.anchor}`}>
+    <>
       <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
         <div className="flex flex-1 flex-col items-start">
           <Label htmlFor={`enabled-${toolId}`} className="text-sm font-medium">
@@ -96,6 +96,6 @@ export const ToolRow = memo(function ToolRow({ toolId }: ToolRowProps) {
         open={isSettingsOpen}
         onOpenChange={setIsSettingsOpen}
       />
-    </SettingsTarget>
+    </>
   );
 });

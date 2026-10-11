@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
 import { useChatStatus } from "@/contexts/use-chat/chat-hooks";
-import { markdownRenderingAtom, maxMessageLengthAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 export const MessagePartReasoning = ({
@@ -28,8 +28,8 @@ export const MessagePartReasoning = ({
   const { status } = useChatStatus();
   const isLoading = isBusy && status === "streaming";
 
-  const maxMessageLength = useAtomValue(maxMessageLengthAtom);
-  const markdownRendering = useAtomValue(markdownRenderingAtom);
+  const maxMessageLength = useAtomValue(settingAtoms.MAX_MESSAGE_LENGTH);
+  const markdownRendering = useAtomValue(settingAtoms.MARKDOWN_RENDERING);
   const shouldUsePerformantRenderer = text.length > maxMessageLength;
 
   const shouldRenderMarkdown = (() => {

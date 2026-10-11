@@ -2,7 +2,7 @@ import { tool } from "ai";
 import { getDefaultStore } from "jotai";
 import { z } from "zod";
 
-import { memoryAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import {
   hasMemoryEntry,
@@ -37,7 +37,7 @@ export const createMemoryTool = (config: MemoryToolConfig) =>
       logger.verbose("Executing memory tool with input:", input);
 
       const store = getDefaultStore();
-      let entries = sanitizeMemoryEntries(store.get(memoryAtom));
+      let entries = sanitizeMemoryEntries(store.get(settingAtoms.MEMORY));
 
       if (input.operation === "add") {
         const added: string[] = [];
@@ -50,7 +50,7 @@ export const createMemoryTool = (config: MemoryToolConfig) =>
         }
 
         const nextMemory = entries;
-        store.set(memoryAtom, nextMemory);
+        store.set(settingAtoms.MEMORY, nextMemory);
 
         return {
           action: "add",
@@ -65,7 +65,7 @@ export const createMemoryTool = (config: MemoryToolConfig) =>
         const nextEntries = sanitizeMemoryEntries(removeMemoryEntries(entries, normalizedEntries));
         const removed = entries.filter((entry) => !hasMemoryEntry(nextEntries, entry));
         const nextMemory = nextEntries;
-        store.set(memoryAtom, nextMemory);
+        store.set(settingAtoms.MEMORY, nextMemory);
 
         return {
           action: "remove",
@@ -83,7 +83,7 @@ export const createMemoryTool = (config: MemoryToolConfig) =>
         newEntry && !hasMemoryEntry(withoutOld, newEntry) ? [...withoutOld, newEntry] : withoutOld,
       );
       const nextMemory = nextEntries;
-      store.set(memoryAtom, nextMemory);
+      store.set(settingAtoms.MEMORY, nextMemory);
 
       return {
         action: "replace",

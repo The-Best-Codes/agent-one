@@ -2,20 +2,14 @@ import { useAtom } from "jotai";
 import { useEffect } from "react";
 
 import { getResolvedTheme } from "@/lib/get-resolved-theme";
-import {
-  colorThemeAtom,
-  fontAtom,
-  roundnessAtom,
-  textScaleAtom,
-  themeAtom,
-  uiTintAtom,
-  uiTintStrengthAtom,
-} from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { jsonParseCatch } from "@/lib/json-parse-catch";
-import { COLOR_THEME_OPTIONS, UI_TINT_OPTIONS } from "@/lib/settings/types";
+import { SETTINGS } from "@/lib/settings/definitions";
 
-const PRIMARY_COLOR_THEMES = COLOR_THEME_OPTIONS.filter((option) => option !== "default");
-const UI_TINTS = UI_TINT_OPTIONS.filter((option) => option !== "default");
+const PRIMARY_COLOR_THEMES = Object.keys(SETTINGS.COLOR_THEME.options).filter(
+  (option) => option !== "default",
+);
+const UI_TINTS = Object.keys(SETTINGS.UI_TINT.options).filter((option) => option !== "default");
 
 const UI_TINT_STRENGTHS: Record<number, string> = {
   1: "2%",
@@ -31,13 +25,13 @@ const UI_TINT_STRENGTHS: Record<number, string> = {
 };
 
 export function ThemeRegistry() {
-  const [rawTheme] = useAtom(themeAtom);
-  const [rawColorTheme] = useAtom(colorThemeAtom);
-  const [rawUiTint] = useAtom(uiTintAtom);
-  const [rawUiTintStrength] = useAtom(uiTintStrengthAtom);
-  const [rawRoundness] = useAtom(roundnessAtom);
-  const [rawFont] = useAtom(fontAtom);
-  const [rawTextScale] = useAtom(textScaleAtom);
+  const [rawTheme] = useAtom(settingAtoms.THEME);
+  const [rawColorTheme] = useAtom(settingAtoms.COLOR_THEME);
+  const [rawUiTint] = useAtom(settingAtoms.UI_TINT);
+  const [rawUiTintStrength] = useAtom(settingAtoms.UI_TINT_STRENGTH);
+  const [rawRoundness] = useAtom(settingAtoms.ROUNDNESS);
+  const [rawFont] = useAtom(settingAtoms.FONT);
+  const [rawTextScale] = useAtom(settingAtoms.TEXT_SCALE);
 
   const theme = jsonParseCatch(rawTheme);
   const colorTheme = jsonParseCatch(rawColorTheme);

@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { remendEnabledAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 
 import { CodeBlock } from "./codeblock";
 
@@ -147,7 +147,7 @@ export const MemoizedMarkdown = memo(
     messageRole: UIMessage["role"];
     simpleCodeBlocks?: boolean;
   }) => {
-    const remendEnabled = useAtomValue(remendEnabledAtom);
+    const remendEnabled = useAtomValue(settingAtoms.REMEND_ENABLED);
     const blocks = useMemo(
       () => parseMarkdownIntoBlocks(content, remendEnabled),
       [content, remendEnabled],

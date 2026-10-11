@@ -1,0 +1,390 @@
+import {
+  IconCreditCard,
+  IconExternalLink,
+  IconInfoCircle,
+  IconLogout,
+  IconPlus,
+  IconRocket,
+  IconX,
+} from "@tabler/icons-react";
+import { useAtom } from "jotai";
+import { useEffect, useMemo, useState } from "react";
+
+import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import {
+  getActivePaidSubscription,
+  getBillingUsageSummary,
+  getPlanNameForSubscription,
+  isAgentOneAccountProvisioning,
+} from "@/contexts/use-web-auth/web-auth-contexts";
+import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
+import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
+import { MAX_MEMORY_ENTRIES, MAX_MEMORY_ENTRY_CHARS } from "@/lib/memory";
+
+import { SettingsTarget } from "./settings-target";
+
+const DASHBOARD_URL = "https://www.agent-one.dev/dashboard";
+const BILLING_URL = `${DASHBOARD_URL}/billing`;
+const UPGRADE_URL = `${BILLING_URL}?hint=upgrade`;
+
+function formatNumber(value: number) {
+  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(value);
+}
+
+export function AccountStatus() {
+  const {
+    user,
+    isLoading: isAuthLoading,
+    isSigningOut,
+    signOut,
+    customerState,
+    billingLoading,
+    billingError,
+    refreshBilling,
+  } = useWebAuth();
+
+  useEffect(() => {
+    refreshBilling();
+  }, [refreshBilling]);
+
+  const activeSubscription = useMemo(
+    () => getActivePaidSubscription(customerState),
+    [customerState],
+  );
+
+  const currentPlanName = activeSubscription
+    ? getPlanNameForSubscription(activeSubscription)
+    : "Free";
+
+  const renewalDate = activeSubscription?.current_period_end
+    ? new Date(activeSubscription.current_period_end).toLocaleDateString()
+    : null;
+
+  const usageSummary = useMemo(() => {
+    return getBillingUsageSummary(customerState);
+  }, [customerState]);
+
+  const isAccountProvisioning =
+    Boolean(user) &&
+    !billingLoading &&
+    !billingError &&
+    isAgentOneAccountProvisioning(usageSummary);
+
+  return (
+    <div className="flex flex-col gap-6">
+      {isAuthLoading ? (
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Skeleton className="size-10 rounded-lg" />
+            <div className="flex flex-col gap-1.5">
+              <Skeleton className="h-4 w-36" />
+              <Skeleton className="h-3 w-52" />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-8 w-24" />
+            <Skeleton className="h-8 w-20" />
+          </div>
+        </div>
+      ) : (
+        <AuthStatusDisplay
+          signedInAction={
+            user ? (
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" asChild>
+                  <a href={DASHBOARD_URL} target="_blank" rel="noopener noreferrer">
+                    <IconExternalLink data-icon="inline-start" />
+                    <span>Account</span>
+                    <span className="sr-only lg:not-sr-only">{" Dashboard"}</span>
+                  </a>
+                </Button>
+                <Button variant="destructive" size="sm" onClick={signOut} disabled={isSigningOut}>
+                  <IconLogout data-icon="inline-start" />
+                  <span>Sign out</span>
+                </Button>
+              </div>
+            ) : undefined
+          }
+        />
+      )}
+      {(user || isAuthLoading) && (
+        <SettingsTarget id="setting-credits-used" className="flex flex-col gap-4">
+          {isAuthLoading || billingLoading || (user && !customerState) ? (
+            <div className="flex flex-col gap-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col gap-1">
+                  <Skeleton className="h-6 w-44" />
+                  <Skeleton className="h-5 w-36" />
+                </div>
+                <Skeleton className="h-8 w-28 shrink-0" />
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-5 w-20" />
+                  <Skeleton className="h-5 w-8" />
+                </div>
+                <Skeleton className="h-1 w-full" />
+                <Skeleton className="h-4 w-40" />
+              </div>
+            </div>
+          ) : billingError ? (
+            <p className="text-muted-foreground text-sm">{billingError}</p>
+          ) : (
+            <>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col gap-1">
+                  <p className="font-medium">{`You're on the ${currentPlanName} Plan`}</p>
+                  <p className="text-muted-foreground text-sm">
+                    {activeSubscription
+                      ? renewalDate
+                        ? `Renews ${renewalDate}.`
+                        : "Your subscription is active."
+                      : "Upgrade to Pro for higher limits and premium features."}
+                  </p>
+                </div>
+                <Button size="sm" asChild>
+                  <a
+                    href={activeSubscription ? BILLING_URL : UPGRADE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {activeSubscription ? (
+                      <IconCreditCard data-icon="inline-start" />
+                    ) : (
+                      <IconRocket data-icon="inline-start" />
+                    )}
+                    <span>{activeSubscription ? "Manage Billing" : "Upgrade"}</span>
+                  </a>
+                </Button>
+              </div>
+              {isAccountProvisioning ? (
+                <Alert>
+                  <IconInfoCircle />
+                  <AlertTitle>Account setup in progress</AlertTitle>
+                  <AlertDescription>
+                    Your account will be ready in a few minutes. AgentOne billing is still finishing
+                    setup, so your credits have not appeared yet.
+                  </AlertDescription>
+                </Alert>
+              ) : usageSummary ? (
+                <Field>
+                  <FieldLabel htmlFor="credits-used">
+                    <span>Credits used</span>
+                    <span className="text-muted-foreground ml-auto">
+                      {usageSummary.credited > 0
+                        ? `${formatNumber((usageSummary.consumed / usageSummary.credited) * 100)}%`
+                        : "0%"}
+                    </span>
+                  </FieldLabel>
+                  <Progress
+                    id="credits-used"
+                    value={
+                      usageSummary.credited > 0
+                        ? Math.min((usageSummary.consumed / usageSummary.credited) * 100, 100)
+                        : 0
+                    }
+                  />
+
+                  <FieldDescription>
+                    {`${formatNumber(usageSummary.remaining)} credits remaining this period.`}
+                  </FieldDescription>
+                </Field>
+              ) : (
+                <p className="text-muted-foreground text-sm">No active usage meters.</p>
+              )}
+            </>
+          )}
+        </SettingsTarget>
+      )}
+    </div>
+  );
+}
+
+function AccountSwitch({
+  checked,
+  onCheckedChange,
+  signedOutHint,
+  label,
+}: {
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+  signedOutHint: string;
+  label: string;
+}) {
+  const { user } = useWebAuth();
+
+  return (
+    <AdaptiveTooltip>
+      <AdaptiveTooltipTrigger asChild>
+        <span>
+          <Switch
+            checked={checked}
+            onCheckedChange={onCheckedChange}
+            disabled={!user}
+            aria-label={label}
+          />
+        </span>
+      </AdaptiveTooltipTrigger>
+      {!user && <AdaptiveTooltipContent>{signedOutHint}</AdaptiveTooltipContent>}
+    </AdaptiveTooltip>
+  );
+}
+
+export function SyncControl() {
+  const [syncEnabled, setSyncEnabled] = useAtom(syncEnabledAtom);
+
+  return (
+    <AccountSwitch
+      label="Synchronize my settings"
+      checked={syncEnabled}
+      onCheckedChange={setSyncEnabled}
+      signedOutHint="Sign in to enable sync"
+    />
+  );
+}
+
+export function HideAgentOneModelsControl() {
+  const [hideAgentOneModels, setHideAgentOneModels] = useAtom(hideAgentOneModelsAtom);
+
+  return (
+    <AccountSwitch
+      label="Hide AgentOne models"
+      checked={hideAgentOneModels}
+      onCheckedChange={setHideAgentOneModels}
+      signedOutHint="You won't see AgentOne models unless signed-in"
+    />
+  );
+}
+
+export function MemoryControl() {
+  const [memory, setMemory] = useAtom(settingAtoms.MEMORY);
+  const [removingIndex, setRemovingIndex] = useState<number | null>(null);
+
+  const addMemoryEntry = () => {
+    if (memory.length >= MAX_MEMORY_ENTRIES) return;
+    if (memory.length > 0 && memory[memory.length - 1] === "") return;
+
+    setMemory((prev) => [...prev, ""]);
+  };
+
+  const updateMemoryEntry = (index: number, value: string) => {
+    setMemory((prev) => prev.map((entry, entryIndex) => (entryIndex === index ? value : entry)));
+  };
+
+  const removeMemoryEntry = (index: number) => {
+    setMemory((prev) => prev.filter((_, entryIndex) => entryIndex !== index));
+  };
+
+  return (
+    <div className="rounded-md border p-3">
+      <div className="mb-3 flex items-start justify-between gap-2">
+        <p className="text-muted-foreground text-xs">
+          Keep each item short and specific so AgentOne can reuse it well.
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={addMemoryEntry}
+          disabled={
+            memory.length >= MAX_MEMORY_ENTRIES ||
+            (memory.length > 0 && memory[memory.length - 1] === "")
+          }
+        >
+          <IconPlus data-icon="inline-start" />
+          Add
+        </Button>
+      </div>
+      {memory.length > 0 ? (
+        <div className="flex flex-col gap-2">
+          {memory.map((entry, index) => (
+            <div key={`memory-entry-${index}`} className="flex items-center gap-2">
+              <Input
+                id={index === 0 ? "memory-control" : undefined}
+                value={entry}
+                onChange={(e) => updateMemoryEntry(index, e.target.value)}
+                placeholder="e.g. I prefer concise technical answers"
+                maxLength={MAX_MEMORY_ENTRY_CHARS}
+                className="flex-1"
+              />
+
+              {entry ? (
+                <Popover
+                  open={removingIndex === index}
+                  onOpenChange={(open) => setRemovingIndex(open ? index : null)}
+                >
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      aria-label="Remove memory entry"
+                    >
+                      <IconX />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end">
+                    <PopoverHeader>
+                      <PopoverTitle>Delete this memory?</PopoverTitle>
+                      <PopoverDescription>This cannot be undone.</PopoverDescription>
+                    </PopoverHeader>
+                    <div className="flex justify-end gap-2">
+                      <Button size="sm" variant="outline" onClick={() => setRemovingIndex(null)}>
+                        Cancel
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => {
+                          removeMemoryEntry(index);
+                          setRemovingIndex(null);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              ) : (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => removeMemoryEntry(index)}
+                  aria-label="Remove memory entry"
+                >
+                  <IconX />
+                </Button>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-muted-foreground flex h-20 items-center justify-center rounded-md border border-dashed p-2 text-sm">
+          Nothing saved yet.
+        </p>
+      )}
+    </div>
+  );
+}

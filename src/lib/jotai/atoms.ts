@@ -4,7 +4,7 @@ import { atomWithStorage } from "jotai/utils";
 
 import { sanitizeMemoryEntries } from "@/lib/memory";
 
-import { memoryAtom, systemPromptAppendixAtom, userNameAtom } from "./settings-atoms";
+import { settingAtoms } from "./settings-atoms";
 
 export type ChatStatusIndicator = "loading" | "error" | "unread" | null;
 
@@ -68,9 +68,9 @@ export const lastModelDirectorySyncTimestampAtom = atomWithStorage<number>(
 );
 
 export const systemPromptAtom = atom((get) => {
-  const userName = get(userNameAtom);
-  const appendix = get(systemPromptAppendixAtom);
-  const memory = get(memoryAtom);
+  const userName = get(settingAtoms.USER_NAME);
+  const appendix = get(settingAtoms.SYSTEM_PROMPT_APPENDIX);
+  const memory = get(settingAtoms.MEMORY);
   const memoryEntries = sanitizeMemoryEntries(memory);
 
   const settings = [

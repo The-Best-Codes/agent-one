@@ -24,10 +24,7 @@ import { useSettingsPath } from "@/hooks/use-settings-path";
 export function UpdateAvailableDialog() {
   const { dialogOpen, updateVersion, handleRemind, dismissDialog } = useUpdate();
   const navigate = useNavigate();
-  const updateSettingsPath = useSettingsPath({
-    tab: "about",
-    id: "setting-download-and-install-update",
-  });
+  const updateSettingsPath = useSettingsPath({ id: "setting-download-and-install-update" });
 
   return (
     <Dialog open={dialogOpen}>

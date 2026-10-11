@@ -1,8 +1,9 @@
 import { tool } from "ai";
-import { getDefaultStore, type Atom } from "jotai";
+import { getDefaultStore } from "jotai";
 import { z } from "zod";
 
-import { getSettingAtom, getSettingMetadata, isInspectableKey } from "@/lib/settings/metadata";
+import { type SettingAtom, settingAtoms } from "@/lib/jotai/settings-atoms";
+import { SETTINGS, type SettingKey } from "@/lib/settings/definitions";
 import type { GetSettingToolConfig } from "@/lib/settings/types";
 
 export const createGetSettingTool = (config: GetSettingToolConfig) =>
@@ -15,20 +16,16 @@ export const createGetSettingTool = (config: GetSettingToolConfig) =>
         .string()
         .describe("The setting key to retrieve. Must be one of the listed setting keys."),
     }),
-    execute: async (input) => {
-      const { key } = input;
-      if (!isInspectableKey(key)) {
-        throw new Error(`Setting key "${key}" is not valid or inspectable.`);
+    execute: async ({ key }) => {
+      const definition = SETTINGS[key as SettingKey];
+      if (!definition?.ai) {
+        throw new Error(`Setting key "${key}" is not available to AgentOne.`);
       }
 
-      const metadata = getSettingMetadata(key);
-      const store = getDefaultStore();
-      const atom = getSettingAtom(key);
-      const value = store.get(atom as Atom<unknown>);
-
       return {
-        ...metadata,
-        value,
+        key,
+        ...definition,
+        value: getDefaultStore().get(settingAtoms[key as SettingKey] as SettingAtom<unknown>),
       };
     },
   });

@@ -4,6 +4,6 @@ import { type SettingsDestination, useSettingsPath } from "@/hooks/use-settings-
 
 type SettingsLinkProps = Omit<LinkProps, "to"> & SettingsDestination;
 
-export function SettingsLink({ tab, id, ...props }: SettingsLinkProps) {
-  return <Link {...props} to={useSettingsPath({ tab, id })} />;
+export function SettingsLink({ id, ...props }: SettingsLinkProps) {
+  return <Link {...props} to={useSettingsPath({ id })} />;
 }

@@ -30,6 +30,12 @@ export const keyboardShortcutDefinitions = [
     defaultShortcut: "mod+k",
   },
   {
+    id: "searchSettings",
+    label: "Search settings",
+    description: "Search settings from the settings screen.",
+    defaultShortcut: "mod+k",
+  },
+  {
     id: "toggleSidebar",
     label: "Toggle sidebar",
     description: "Show or hide the chat sidebar.",

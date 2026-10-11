@@ -380,14 +380,14 @@ const ModelList: FC<ModelListProps> = ({
           <div className="p-1">
             {showDirectoryLink && (
               <Button asChild variant="outline" size="sm" className="mb-1 w-full justify-start">
-                <SettingsLink tab="about" id="setting-model-directory">
+                <SettingsLink id="setting-model-directory">
                   <IconDownload data-icon="inline-start" />
                   Download model list
                 </SettingsLink>
               </Button>
             )}
             <Button asChild variant="outline" size="sm" className="w-full justify-start">
-              <SettingsLink tab="providers">
+              <SettingsLink id="section-providers">
                 <IconPlus data-icon="inline-start" />
                 Add more models
               </SettingsLink>

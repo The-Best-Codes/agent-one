@@ -19,11 +19,7 @@ import {
 import { useGetChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import useMobileDetection from "@/hooks/use-mobile-detection";
 import { useTheme } from "@/hooks/use-theme";
-import {
-  markdownHighlightingAtom,
-  regenerateOnSaveAtom,
-  submitKeyAtom,
-} from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 
 import { MessagePartFile } from "./parts/file";
@@ -53,9 +49,9 @@ export function UserMessageEditor({
   const [text, setText] = useState(
     () => message.parts.find((part) => part.type === "text")?.text ?? "",
   );
-  const [regenerateOnSave, setRegenerateOnSave] = useAtom(regenerateOnSaveAtom);
-  const markdownHighlighting = useAtomValue(markdownHighlightingAtom);
-  const submitKey = useAtomValue(submitKeyAtom);
+  const [regenerateOnSave, setRegenerateOnSave] = useAtom(settingAtoms.REGENERATE_ON_SAVE);
+  const markdownHighlighting = useAtomValue(settingAtoms.MARKDOWN_HIGHLIGHTING);
+  const submitKey = useAtomValue(settingAtoms.SUBMIT_KEY);
   const { resolvedTheme } = useTheme();
   const isMobile = useMobileDetection({ anyHover: true, pointerCoarse: true, match: "all" });
   const getChatFunctions = useGetChatFunctions();

@@ -5,12 +5,12 @@ import { useAtomValue } from "jotai";
 import { memo } from "react";
 
 import { useTheme } from "@/hooks/use-theme";
-import { markdownHighlightingAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 
 export const PerformantMarkdown = memo(
   ({ content, maxHeight }: { content: string; maxHeight?: string }) => {
     const { resolvedTheme } = useTheme();
-    const markdownHighlighting = useAtomValue(markdownHighlightingAtom);
+    const markdownHighlighting = useAtomValue(settingAtoms.MARKDOWN_HIGHLIGHTING);
     const editorTheme = EditorView.theme({
       "&": {
         border: "none",

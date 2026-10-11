@@ -1,12 +1,9 @@
 import { useAtomValue } from "jotai";
 import { useHotkeys } from "react-hotkeys-hook";
 
-import {
-  keyboardShortcutsAtom,
-  keyboardShortcutsEnabledInInputsAtom,
-} from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import type { KeyboardShortcutId } from "@/lib/kbd-registry";
-import { DEFAULT_SETTINGS } from "@/lib/settings/types";
+import { DEFAULT_SETTINGS } from "@/lib/settings/definitions";
 
 function isTypingTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false;
@@ -14,8 +11,8 @@ function isTypingTarget(target: EventTarget | null) {
 }
 
 export function useKeyboardShortcut(id: KeyboardShortcutId, callback: () => void) {
-  const shortcuts = useAtomValue(keyboardShortcutsAtom);
-  const enabledInInputsDefault = useAtomValue(keyboardShortcutsEnabledInInputsAtom);
+  const shortcuts = useAtomValue(settingAtoms.KEYBOARD_SHORTCUTS);
+  const enabledInInputsDefault = useAtomValue(settingAtoms.KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS);
   const config = shortcuts[id] ?? DEFAULT_SETTINGS.KEYBOARD_SHORTCUTS[id];
   const enableOnFormTags = config.enabledInInputs ?? enabledInInputsDefault;
 

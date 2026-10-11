@@ -3,7 +3,7 @@ import type { UIMessage } from "ai";
 
 import type { ChatMetadata } from "@/contexts/use-persistence/persistence-context";
 import { getLogger } from "@/lib/logger";
-import type { ChatSortOption } from "@/lib/settings/types";
+import type { SettingValue } from "@/lib/settings/definitions";
 
 export interface ChatSearchResult {
   chatId: string;
@@ -191,7 +191,7 @@ export const chatStorage = {
     );
   },
 
-  async listChats(sortBy: ChatSortOption): Promise<StoredChat[]> {
+  async listChats(sortBy: SettingValue<"CHAT_SORT">): Promise<StoredChat[]> {
     const d = await getDb();
     const sortColumn =
       sortBy === "updated-at"

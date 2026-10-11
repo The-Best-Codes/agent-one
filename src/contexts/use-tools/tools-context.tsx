@@ -39,13 +39,10 @@ import { clearMcpOAuthCredentials, dismissMcpLoginToasts } from "@/lib/ai/tools/
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom, mcpServersAtom } from "@/lib/jotai/mcp-atoms";
 import type { McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
-import {
-  enabledToolsAtom,
-  mcpParallelLoadLimitAtom,
-  toolConfigsAtom,
-} from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
-import { DEFAULT_SETTINGS, type McpServerConfig } from "@/lib/settings/types";
+import { DEFAULT_SETTINGS } from "@/lib/settings/definitions";
+import type { McpServerConfig } from "@/lib/settings/types";
 
 import { ToolsContext } from "./tools-contexts";
 
@@ -101,10 +98,10 @@ function applyApprovalConfigToTools(
 }
 
 export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
-  const [enabledTools] = useAtom(enabledToolsAtom);
+  const [enabledTools] = useAtom(settingAtoms.ENABLED_TOOLS);
   const [mcpServers] = useAtom(mcpServersAtom);
-  const [parallelLoadLimit] = useAtom(mcpParallelLoadLimitAtom);
-  const [toolConfigs] = useAtom(toolConfigsAtom);
+  const [parallelLoadLimit] = useAtom(settingAtoms.MCP_PARALLEL_LOAD_LIMIT);
+  const [toolConfigs] = useAtom(settingAtoms.TOOL_CONFIGS);
   const [mcpAuthStates, setMcpAuthStates] = useAtom(mcpAuthStatesAtom);
   const [, setMcpServerLoadStates] = useAtom(mcpServerLoadStatesAtom);
 
@@ -332,9 +329,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       });
 
       try {
+        const chunkSize = Math.max(1, Math.floor(parallelLoadLimit) || 1);
         const chunks: McpServerConfig[][] = [];
-        for (let i = 0; i < serversToLoad.length; i += parallelLoadLimit) {
-          chunks.push(serversToLoad.slice(i, i + parallelLoadLimit));
+        for (let i = 0; i < serversToLoad.length; i += chunkSize) {
+          chunks.push(serversToLoad.slice(i, i + chunkSize));
         }
 
         for (const chunk of chunks) {

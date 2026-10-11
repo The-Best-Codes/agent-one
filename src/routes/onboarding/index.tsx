@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 import { onboardingCompletedAtom } from "@/lib/jotai/atoms";
-import { userNameAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 
 import { AccountStep } from "./steps/account";
 import { NameStep } from "./steps/name";
@@ -16,7 +16,7 @@ export default function OnboardingRoute() {
   const navigate = useNavigate();
   const [onboardingCompleted, setOnboardingCompleted] = useAtom(onboardingCompletedAtom);
   const [currentStep, setCurrentStep] = useState<OnboardingStep>("splash");
-  const [userName, setUserName] = useAtom(userNameAtom);
+  const [userName, setUserName] = useAtom(settingAtoms.USER_NAME);
 
   useEffect(() => {
     if (onboardingCompleted) {

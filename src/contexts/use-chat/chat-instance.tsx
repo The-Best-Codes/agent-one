@@ -17,12 +17,7 @@ import {
   hasMessageTextContent,
 } from "@/lib/ai/title-generator";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
-import {
-  extractReasoningEnabledAtom,
-  notificationSettingAtom,
-  throttleValueAtom,
-  titleGenerationAtom,
-} from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { sendNotificationIfAllowed } from "@/lib/notifications";
 
@@ -54,10 +49,10 @@ export const ChatInstance = memo(
       hasError?: boolean,
     ) => void;
   }) => {
-    const throttleValue = useAtomValue(throttleValueAtom);
-    const titleGenerationSettings = useAtomValue(titleGenerationAtom);
-    const extractReasoningEnabled = useAtomValue(extractReasoningEnabledAtom);
-    const notificationSetting = useAtomValue(notificationSettingAtom);
+    const throttleValue = useAtomValue(settingAtoms.THROTTLE_VALUE);
+    const titleGenerationSettings = useAtomValue(settingAtoms.TITLE_GENERATION);
+    const extractReasoningEnabled = useAtomValue(settingAtoms.EXTRACT_REASONING_ENABLED);
+    const notificationSetting = useAtomValue(settingAtoms.NOTIFICATION_SETTING);
     const { loadChatMetadata, saveChat, markChatMessageSent, saveChatTitleState, saveChatTitle } =
       usePersistence();
     const chatIds = useAtomValueRawSync(chatIdsAtom);

@@ -25,14 +25,9 @@ import { usePendingToolApproval } from "@/hooks/use-pending-tool-approval";
 import { useTheme } from "@/hooks/use-theme";
 import { loadChatInputDraft, saveChatInputDraft } from "@/lib/chat-input-drafts";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
-import {
-  inputStyleAtom,
-  interruptKeyAtom,
-  markdownHighlightingAtom,
-  submitKeyAtom,
-} from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
-import type { InterruptKeyOption, SubmitKeyOption } from "@/lib/settings/types";
+import type { SettingValue } from "@/lib/settings/definitions";
 import { cn } from "@/lib/utils";
 
 import { ChatModelConfig } from "../chat-model-config";
@@ -45,7 +40,7 @@ import { MainInputProvisioningSection } from "./provisioning-section";
 
 const logger = getLogger(import.meta.url);
 
-function getChatShortcut(key: SubmitKeyOption | InterruptKeyOption) {
+function getChatShortcut(key: SettingValue<"SUBMIT_KEY" | "INTERRUPT_KEY">) {
   switch (key) {
     case "enter":
       return "Enter";
@@ -104,10 +99,10 @@ export const MainChatInput = ({
   const { currentModel } = useModel();
   const { hasAvailableModels, isModelCatalogLoading } = useModelCatalog();
   const hasPendingApproval = usePendingToolApproval();
-  const markdownHighlighting = useAtomValue(markdownHighlightingAtom);
-  const submitKey = useAtomValue(submitKeyAtom);
-  const interruptKey = useAtomValue(interruptKeyAtom);
-  const inputStyle = useAtomValue(inputStyleAtom);
+  const markdownHighlighting = useAtomValue(settingAtoms.MARKDOWN_HIGHLIGHTING);
+  const submitKey = useAtomValue(settingAtoms.SUBMIT_KEY);
+  const interruptKey = useAtomValue(settingAtoms.INTERRUPT_KEY);
+  const inputStyle = useAtomValue(settingAtoms.INPUT_STYLE);
   const { loadChatMessages } = usePersistence();
   const chatIds = useAtomValueRawSync(chatIdsAtom);
   const isMobile = useMobileDetection({

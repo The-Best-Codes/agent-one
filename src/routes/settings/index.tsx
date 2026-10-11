@@ -1,5 +1,5 @@
 import { IconArrowLeft, IconList } from "@tabler/icons-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -12,100 +12,121 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 
-import { isValidSection, sections } from "./sections-config";
-import SettingsContent from "./settings-content";
-import SettingsSidebar from "./settings-sidebar";
+import SettingsNav from "./settings-nav";
+import { SettingsSections } from "./settings-renderer";
+import { SETTINGS_TOC } from "./settings-schema";
+import { SettingsSearch, SettingsSearchTrigger } from "./settings-search";
+
+function scrollToElement(id: string, behavior: ScrollBehavior = "smooth") {
+  const target = document.getElementById(id);
+
+  target?.scrollIntoView({
+    behavior,
+    block: target.getBoundingClientRect().height > window.innerHeight ? "start" : "center",
+  });
+
+  return Boolean(target);
+}
+
+function useActiveItems() {
+  const [activeIds, setActiveIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const updateActiveItems = () => {
+      const rects = SETTINGS_TOC.map((item) => {
+        const rect = document.getElementById(item.id)?.getBoundingClientRect();
+        return rect && rect.height > 0 ? rect : null;
+      });
+
+      const ids = SETTINGS_TOC.filter((item, index) => {
+        const rect = rects[index];
+        if (!rect) return false;
+
+        const nextIndex = rects.findIndex((other, otherIndex) => otherIndex > index && other);
+        const nextItem = SETTINGS_TOC[nextIndex];
+        const bottom =
+          nextItem && nextItem.depth > item.depth
+            ? Math.min(rect.bottom, rects[nextIndex]?.top ?? rect.bottom)
+            : rect.bottom;
+
+        return bottom > 0 && rect.top < window.innerHeight;
+      }).map((item) => item.id);
+
+      setActiveIds((previous) =>
+        previous.length === ids.length && previous.every((id, index) => id === ids[index])
+          ? previous
+          : ids,
+      );
+    };
+
+    const observer = new ResizeObserver(updateActiveItems);
+    observer.observe(document.body);
+    updateActiveItems();
+    window.addEventListener("scroll", updateActiveItems, { passive: true });
+    window.addEventListener("resize", updateActiveItems);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", updateActiveItems);
+      window.removeEventListener("resize", updateActiveItems);
+    };
+  }, []);
+
+  return activeIds;
+}
 
 export default function SettingsRoute() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const rootRef = useRef<HTMLElement>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const activeIds = useActiveItems();
+  const legacyTab = searchParams.get("tab");
 
-  const tabParam = searchParams.get("tab");
-  const displayedSection = useMemo(() => {
-    try {
-      if (tabParam && isValidSection(tabParam)) {
-        return tabParam;
+  useEffect(() => {
+    const targetId = location.hash ? location.hash.slice(1) : legacyTab && `section-${legacyTab}`;
+    if (!targetId) return;
+
+    let attempts = 0;
+    let frameId = window.requestAnimationFrame(function scrollToTarget() {
+      if (!scrollToElement(targetId) && attempts++ < 10) {
+        frameId = window.requestAnimationFrame(scrollToTarget);
       }
-      return sections[0].id;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_error) {
-      return sections[0].id;
-    }
-  }, [tabParam]);
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [location.hash, location.key, legacyTab]);
 
   const handleNavigateBack = () => {
     const chatId = searchParams.get("chatId");
-    if (chatId) {
-      void navigate(`/chat/${chatId}`);
-    } else {
-      void navigate("/chat");
-    }
+    void navigate(chatId ? `/chat/${chatId}` : "/chat");
   };
 
-  const previousSectionRef = useRef(displayedSection);
+  const handleNavigate = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
 
-  useEffect(() => {
-    const sectionChanged = previousSectionRef.current !== displayedSection;
-
-    previousSectionRef.current = displayedSection;
-
-    if (location.hash) {
-      const targetId = location.hash.slice(1);
-      let frameId = 0;
-      let attempts = 0;
-
-      const scrollToHashTarget = () => {
-        const target = document.getElementById(targetId);
-
-        if (target) {
-          target.scrollIntoView({
-            behavior: "smooth",
-            block: target.getBoundingClientRect().height > window.innerHeight ? "start" : "center",
-          });
-          return;
-        }
-
-        if (attempts < 10) {
-          attempts += 1;
-          frameId = window.requestAnimationFrame(scrollToHashTarget);
-        }
-      };
-
-      frameId = window.requestAnimationFrame(scrollToHashTarget);
-
-      return () => {
-        window.cancelAnimationFrame(frameId);
-      };
-    }
-
-    if (sectionChanged) {
-      rootRef.current?.scrollIntoView({ block: "start" });
-      window.requestAnimationFrame(() => {
-        rootRef.current?.scrollIntoView({ block: "start" });
-      });
-    }
-  }, [displayedSection, location.hash]);
-
-  const handleSectionChange = (section: string) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.set("tab", section);
-      return next;
-    });
+  const handleSearchSelect = (id: string) => {
+    void navigate({ search: location.search, hash: id }, { replace: true });
   };
 
   return (
-    <main ref={rootRef} role="main" className="bg-background min-h-svh pl-[calc(100vw-100%)]">
+    <main role="main" className="bg-background min-h-svh pl-[calc(100vw-100%)]">
       <h1 className="sr-only">Settings</h1>
+      <SettingsSearch
+        open={isSearchOpen}
+        onOpenChange={setIsSearchOpen}
+        onSelect={handleSearchSelect}
+      />
       <div className="bg-background sticky top-0 z-10 border-b p-4 md:hidden">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleNavigateBack}>
             <IconArrowLeft data-icon="inline-start" />
             Back
           </Button>
+          <div className="min-w-0 flex-1">
+            <SettingsSearchTrigger onClick={() => setIsSearchOpen(true)} />
+          </div>
           <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
             <DrawerTrigger asChild>
               <Button variant="outline" size="icon" aria-label="Open settings menu">
@@ -114,13 +135,14 @@ export default function SettingsRoute() {
             </DrawerTrigger>
             <DrawerContent>
               <DrawerHeader>
-                <DrawerTitle className="mb-2">Setting Categories</DrawerTitle>
+                <DrawerTitle>Setting Categories</DrawerTitle>
                 <DrawerDescription className="sr-only">List of setting sections</DrawerDescription>
-                <SettingsSidebar
-                  activeSection={displayedSection}
-                  onSectionChange={(section) => {
-                    handleSectionChange(section);
+                <SettingsNav
+                  className="mt-1 max-h-[60svh]"
+                  activeIds={activeIds}
+                  onNavigate={(id) => {
                     setIsDrawerOpen(false);
+                    handleNavigate(id);
                   }}
                 />
               </DrawerHeader>
@@ -129,31 +151,25 @@ export default function SettingsRoute() {
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-5xl p-4 md:flex md:flex-col md:p-6">
+      <div className="mx-auto w-full max-w-5xl p-4 md:p-6">
         <div className="flex flex-col gap-6 md:flex-row">
-          <div className="hidden w-48 shrink-0 md:sticky md:top-6 md:flex md:flex-col md:self-start lg:w-64">
-            <div className="flex flex-col gap-2 pl-0.5">
-              <div className="mb-2">
-                <Button variant="outline" onClick={handleNavigateBack} className="w-full">
-                  <IconArrowLeft data-icon="inline-start" />
-                  Back to Chat
-                </Button>
-              </div>
-              <SettingsSidebar
-                activeSection={displayedSection}
-                onSectionChange={handleSectionChange}
-              />
+          <div className="hidden w-48 shrink-0 md:sticky md:top-6 md:flex md:max-h-[calc(100svh-3rem)] md:flex-col md:gap-3 md:self-start lg:w-64">
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="outline"
+                onClick={handleNavigateBack}
+                className="w-full justify-start"
+              >
+                <IconArrowLeft data-icon="inline-start" />
+                Back to Chat
+              </Button>
+              <SettingsSearchTrigger onClick={() => setIsSearchOpen(true)} />
             </div>
+            <SettingsNav activeIds={activeIds} onNavigate={handleNavigate} />
           </div>
 
-          <div className="min-w-0 flex-1">
-            <div
-              role="tabpanel"
-              tabIndex={0}
-              className="focus-visible:border-ring/50 focus-visible:border-[3px] focus-visible:outline-1"
-            >
-              <SettingsContent activeSection={displayedSection} />
-            </div>
+          <div className="flex min-w-0 flex-1 flex-col gap-12">
+            <SettingsSections />
           </div>
         </div>
       </div>
