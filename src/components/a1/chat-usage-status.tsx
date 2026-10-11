@@ -1,9 +1,8 @@
 import NumberFlow from "@number-flow/react";
-import { IconChevronLeft, IconCoins } from "@tabler/icons-react";
+import { IconChevronLeft } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 
-import { SettingsLink } from "@/components/a1/settings-link";
 import {
   AdaptiveTooltip,
   AdaptiveTooltipContent,
@@ -129,7 +128,7 @@ export const ChatUsageStatus = () => {
               {showSkeleton ? (
                 <>
                   <Skeleton className="size-5 rounded-full" />
-                  <Skeleton className={isAgentOneModel ? "size-5 rounded-full" : "h-5 w-12"} />
+                  {!isAgentOneModel && <Skeleton className="h-5 w-12" />}
                 </>
               ) : (
                 <>
@@ -164,34 +163,7 @@ export const ChatUsageStatus = () => {
                     </AdaptiveTooltipContent>
                   </AdaptiveTooltip>
 
-                  {isAgentOneModel ? (
-                    <AdaptiveTooltip>
-                      <AdaptiveTooltipTrigger
-                        className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-help rounded outline-none focus-visible:ring-[3px]"
-                        tabIndex={isCollapsed ? -1 : 0}
-                        asChild
-                      >
-                        <SettingsLink
-                          id="setting-credits-used"
-                          aria-label="View AgentOne credit usage in Settings"
-                        >
-                          <IconCoins className="text--muted-foreground size-5" />
-                        </SettingsLink>
-                      </AdaptiveTooltipTrigger>
-                      <AdaptiveTooltipContent className="max-w-xs whitespace-normal">
-                        <span>
-                          AgentOne usage consumes credits.{" "}
-                          <SettingsLink
-                            id="setting-credits-used"
-                            className="underline underline-offset-2"
-                          >
-                            View credit usage in Settings
-                          </SettingsLink>
-                          .
-                        </span>
-                      </AdaptiveTooltipContent>
-                    </AdaptiveTooltip>
-                  ) : (
+                  {!isAgentOneModel && (
                     <AdaptiveTooltip>
                       <AdaptiveTooltipTrigger
                         className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-help rounded outline-none focus-visible:ring-[3px]"
