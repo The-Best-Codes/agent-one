@@ -115,7 +115,7 @@ const SidebarContent = ({
         <Button variant="outline" className="w-full justify-start" asChild>
           <SettingsLink data-icon="inline-start">
             <IconSettings data-icon="inline-start" />
-            Configure AgentOne
+            Open Settings
           </SettingsLink>
         </Button>
       </div>
