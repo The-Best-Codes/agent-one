@@ -127,7 +127,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     label: "Account",
     cards: [
       {
-        title: "Account, Sync & Access",
+        title: "Sync & Access",
         items: [
           {
             id: "account",
@@ -177,7 +177,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     label: "Appearance",
     cards: [
       {
-        title: "General Look and Feel",
+        title: "General",
         items: [
           {
             id: "theme",
@@ -205,7 +205,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
         ],
       },
       {
-        title: "Chat Background",
+        title: "Background",
         items: [
           {
             id: "chat-background",
@@ -232,7 +232,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
         ],
       },
       {
-        title: "Chat Appearance",
+        title: "Chat",
         items: [
           { id: "markdown-highlighting", key: "MARKDOWN_HIGHLIGHTING" },
           { id: "input-style", key: "INPUT_STYLE" },
@@ -246,7 +246,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     label: "Chats",
     cards: [
       {
-        title: "Chat Behavior",
+        title: "Behavior",
         items: [
           { id: "chat-sort-order", key: "CHAT_SORT" },
           { id: "sidebar-chat-time-grouping", key: "SIDEBAR_CHAT_TIME_GROUPING" },
@@ -263,14 +263,14 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
         ],
       },
       {
-        title: "Streaming Experience",
+        title: "Streaming",
         items: [
           { id: "extract-reasoning", key: "EXTRACT_REASONING_ENABLED" },
           { id: "throttle-value", key: "THROTTLE_VALUE" },
         ],
       },
       {
-        title: "Chat Titles",
+        title: "Titles",
         resetKey: "TITLE_GENERATION",
         items: [
           {
@@ -357,7 +357,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
         ],
       },
       {
-        title: "Chat Virtualization",
+        title: "Virtualization",
         items: [
           {
             id: "virtualize-chat-messages",
@@ -373,7 +373,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
         ],
       },
       {
-        title: "Extension Runtime",
+        title: "Extensions",
         items: [{ id: "mcp-parallel-load-limit", key: "MCP_PARALLEL_LOAD_LIMIT" }],
       },
     ],
@@ -385,10 +385,10 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     cards: [
       {
         id: "built-in-providers",
-        title: "Built-in Providers",
+        title: "Built-in",
         description:
           "Enable built-in providers, set keys and headers, and override model metadata when needed.",
-        keywords: ["api key", "models"],
+        keywords: ["providers", "api key", "models"],
         size: "sm",
         render: BuiltInProviders,
         searchEntries: PROVIDER_REGISTRY.filter((provider) => provider.id !== "agent-one").map(
@@ -401,28 +401,28 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
       },
       {
         id: "local-providers",
-        title: "Local Providers",
+        title: "Local",
         description:
           "Configure built-in local providers that can automatically discover models on startup.",
-        keywords: ["ollama", "lm studio", "offline"],
+        keywords: ["providers", "ollama", "lm studio", "offline"],
         size: "sm",
         render: LocalProviders,
       },
       {
         id: "custom-providers",
-        title: "Custom Providers",
+        title: "Custom",
         description:
           "Add OpenAI-compatible providers and configure exactly which models they expose.",
-        keywords: ["openai compatible", "base url", "api key"],
+        keywords: ["providers", "openai compatible", "base url", "api key"],
         size: "sm",
         render: CustomProviders,
       },
       {
         id: "tts-providers",
-        title: "Text-to-Speech Providers",
+        title: "Text-to-Speech",
         description:
           "Choose which voice service reads assistant replies out loud and adjust how it sounds.",
-        keywords: ["tts", "voice", "read aloud", "speech"],
+        keywords: ["providers", "tts", "voice", "read aloud", "speech"],
         size: "sm",
         render: TtsProviders,
         searchEntries: TTS_PROVIDER_OPTIONS.map((provider) => ({
@@ -455,20 +455,20 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     cards: [
       {
         id: "app-updates",
-        title: "App Updates",
-        keywords: ["version", "release notes", "changelog", "download", "install"],
+        title: "App",
+        keywords: ["updates", "version", "release notes", "changelog", "download", "install"],
         render: AppUpdates,
       },
       {
         id: "model-directory",
-        title: "Model List Updates",
-        keywords: ["models", "refresh", "download"],
+        title: "Model List",
+        keywords: ["updates", "models", "refresh", "download"],
         render: ModelDirectoryUpdates,
       },
       {
         id: "extension-list",
-        title: "Extension List Updates",
-        keywords: ["mcp", "extensions", "refresh", "download"],
+        title: "Extension List",
+        keywords: ["updates", "mcp", "extensions", "refresh", "download"],
         render: ExtensionListUpdates,
       },
       {
