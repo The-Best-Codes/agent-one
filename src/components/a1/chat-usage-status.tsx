@@ -155,8 +155,8 @@ export const ChatUsageStatus = () => {
                     <AdaptiveTooltipContent className="max-w-xs">
                       {isAgentOneModel
                         ? contextUsagePercent === null
-                          ? "The maximum conversation length for this model is unavailable."
-                          : `This chat is using ${contextUsagePercent}% of the model's conversation capacity.`
+                          ? "The context window size for this model is unavailable."
+                          : `This chat is using ${contextUsagePercent}% of the model's context window.`
                         : maxTokens !== undefined
                           ? `This chat is currently ${totalTokens} tokens long. The model you're using supports up to ${maxTokens.toLocaleString()} tokens.`
                           : `This chat is currently ${totalTokens} tokens long. The model you're using supports an unknown number of tokens.`}
