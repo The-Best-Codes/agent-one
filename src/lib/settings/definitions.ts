@@ -106,14 +106,14 @@ const DEFAULT_TOOL_CONFIGS: ToolConfigs = {
 
 export const SETTINGS = {
   THEME: select({
-    keywords: ["dark mode", "light mode"],
+    keywords: ["dark mode", "light mode", "appearance", "night mode", "color scheme"],
     ai: "write",
     label: "Theme",
     default: "system",
     options: { system: "System", light: "Light", dark: "Dark" },
   }),
   COLOR_THEME: select({
-    keywords: ["accent", "colour"],
+    keywords: ["accent", "colour", "brand", "highlight", "primary"],
     ai: "write",
     label: "Primary Color",
     description:
@@ -122,7 +122,7 @@ export const SETTINGS = {
     options: COLOR_OPTIONS,
   }),
   UI_TINT: select({
-    keywords: ["colour", "background"],
+    keywords: ["colour", "background", "hue", "wash", "surface"],
     ai: "write",
     label: "Tint",
     description:
@@ -131,6 +131,7 @@ export const SETTINGS = {
     options: COLOR_OPTIONS,
   }),
   UI_TINT_STRENGTH: slider({
+    keywords: ["intensity", "amount", "saturation", "colour", "hue"],
     ai: "write",
     label: "Tint Strength",
     description: "Choose how light or strong the tint should feel.",
@@ -141,7 +142,7 @@ export const SETTINGS = {
     unit: "/10",
   }),
   FONT: select({
-    keywords: ["typeface"],
+    keywords: ["typeface", "typography", "font family", "text"],
     ai: "write",
     label: "Font",
     description: "Choose the font for the application.",
@@ -149,7 +150,7 @@ export const SETTINGS = {
     options: { default: "Default", system: "System", mono: "Mono", roboto: "Roboto" },
   }),
   ROUNDNESS: select({
-    keywords: ["corners", "radius"],
+    keywords: ["corners", "radius", "rounded", "border radius", "sharp", "square"],
     ai: "write",
     label: "Roundness",
     description: "Adjust the corner radius of UI elements.",
@@ -157,7 +158,7 @@ export const SETTINGS = {
     options: { none: "Not Round", sm: "Slightly Round", md: "Round", lg: "Very Round" },
   }),
   TEXT_SCALE: select({
-    keywords: ["font size", "zoom"],
+    keywords: ["font size", "zoom", "text size", "bigger", "smaller", "accessibility", "ui scale"],
     ai: "write",
     label: "Text Scale",
     description: "Adjust the text size throughout the application.",
@@ -187,12 +188,14 @@ export const SETTINGS = {
     },
   }),
   MARKDOWN_HIGHLIGHTING: toggle({
+    keywords: ["syntax", "formatting", "editor", "composer", "input", "preview"],
     ai: "write",
     label: "Markdown Highlighting",
     description: "Show markdown formatting styles while typing in the chat input.",
     default: true,
   }),
   INPUT_STYLE: select({
+    keywords: ["composer", "prompt box", "text box", "chat box", "position", "layout"],
     ai: "write",
     label: "Input Style",
     description: "Choose how the chat input box is displayed.",
@@ -200,6 +203,17 @@ export const SETTINGS = {
     options: { docked: "Docked", floating: "Floating" },
   }),
   COLLAPSED_SIDEBAR_LAYOUT: select({
+    keywords: [
+      "vertical",
+      "horizontal",
+      "orientation",
+      "direction",
+      "stack",
+      "minimized",
+      "icons",
+      "buttons",
+      "navigation",
+    ],
     ai: "write",
     label: "Collapsed Sidebar Layout",
     description: "Choose whether collapsed sidebar buttons are laid out in a row or column.",
@@ -207,6 +221,7 @@ export const SETTINGS = {
     options: { row: "Row", column: "Column" },
   }),
   CHAT_SORT: select({
+    keywords: ["order", "ordering", "arrange", "sidebar", "history", "conversations", "recent"],
     ai: "write",
     label: "Chat Sort Order",
     description:
@@ -219,12 +234,14 @@ export const SETTINGS = {
     },
   }),
   SIDEBAR_CHAT_TIME_GROUPING: toggle({
+    keywords: ["date", "sections", "categorize", "organize", "history", "conversations"],
     ai: "write",
     label: "Group sidebar chats by time",
     description: "Organize chats into time sections such as Recent, Last Week, and monthly groups.",
     default: false,
   }),
   MARKDOWN_RENDERING: select({
+    keywords: ["formatting", "rich text", "plain text", "raw", "display"],
     ai: "write",
     label: "Markdown Rendering",
     description: "Choose which messages should render markdown formatting.",
@@ -237,13 +254,14 @@ export const SETTINGS = {
     },
   }),
   REMEND_ENABLED: toggle({
+    keywords: ["remend", "incomplete", "broken formatting", "repair", "markdown"],
     ai: "write",
     label: "Fix Streaming Markdown",
     description: "Automatically fix incomplete formatting in streamed responses.",
     default: true,
   }),
   NOTIFICATION_SETTING: select({
-    keywords: ["alert"],
+    keywords: ["alert", "notify", "push", "desktop notification", "ping", "sound"],
     ai: "write",
     label: "Agent Notifications",
     description: "Show a notification when AgentOne responds or needs your attention.",
@@ -251,7 +269,7 @@ export const SETTINGS = {
     options: { always: "Always", "when-unfocused": "When window unfocused", never: "Never" },
   }),
   SHOW_MESSAGE_ACTION_ROW: select({
-    keywords: ["copy", "edit"],
+    keywords: ["copy", "edit", "buttons", "toolbar", "hover", "actions", "retry"],
     ai: "write",
     label: "Message Action Row",
     description: "Control when message actions (copy, edit, etc.) are visible.",
@@ -259,7 +277,7 @@ export const SETTINGS = {
     options: { hover: "Show on hover", always: "Always show", never: "Never show" },
   }),
   SUBMIT_KEY: select({
-    keywords: ["send", "keyboard shortcut"],
+    keywords: ["send", "keyboard shortcut", "enter", "newline", "hotkey"],
     ai: "write",
     label: "Submit Key",
     description: "Choose which key combination submits your message.",
@@ -267,7 +285,7 @@ export const SETTINGS = {
     options: { enter: "Enter", "ctrl-enter": "Ctrl/CMD + Enter" },
   }),
   INTERRUPT_KEY: select({
-    keywords: ["stop", "keyboard shortcut"],
+    keywords: ["stop", "keyboard shortcut", "cancel", "abort", "hotkey"],
     ai: "write",
     label: "Interrupt Key",
     description: "Choose which key combination stops the response and sends your message.",
@@ -279,18 +297,21 @@ export const SETTINGS = {
     },
   }),
   REGENERATE_ON_SAVE: toggle({
+    keywords: ["edit", "retry", "rerun", "resend", "automatic"],
     ai: "write",
     label: "Regenerate on Save",
     description: "Automatically regenerate the AI response when you save an edited message.",
     default: true,
   }),
   SHOW_CHAT_TO_BOTTOM_BUTTON: toggle({
+    keywords: ["jump", "scroll", "down", "latest", "arrow"],
     ai: "write",
     label: "Chat Scroll to Bottom Button",
     description: "Show a button to quickly scroll to the bottom of the chat.",
     default: true,
   }),
   SHOW_MESSAGE_PREVIEW_RAIL: toggle({
+    keywords: ["minimap", "scrollbar", "outline", "jump", "overview", "sidebar"],
     ai: "write",
     label: "Message Navigation Rail",
     description:
@@ -298,14 +319,14 @@ export const SETTINGS = {
     default: true,
   }),
   SHOW_CHAT_STATUS_INDICATOR: toggle({
-    keywords: ["unread"],
+    keywords: ["unread", "badge", "dot", "loading", "spinner", "error"],
     ai: "write",
     label: "Chat Status Indicators",
     description: "Show status icons in the sidebar for loading, error, and unread chats.",
     default: true,
   }),
   EXTRACT_REASONING_ENABLED: toggle({
-    keywords: ["thinking"],
+    keywords: ["thinking", "think tags", "chain of thought", "reasoning", "deepseek"],
     ai: "write",
     label: "Extract Reasoning from Think Tags",
     description:
@@ -313,7 +334,7 @@ export const SETTINGS = {
     default: false,
   }),
   THROTTLE_VALUE: slider({
-    keywords: ["speed", "streaming"],
+    keywords: ["speed", "streaming", "refresh rate", "update interval", "performance", "lag"],
     label: "Throttle",
     description: "Control how often streaming messages update the interface.",
     default: 100,
@@ -357,6 +378,7 @@ export const SETTINGS = {
     },
   }),
   MAX_MESSAGE_LENGTH: number({
+    keywords: ["performance", "long messages", "limit", "lag", "size"],
     ai: "write",
     label: "Max Message Length",
     description: "Maximum characters before activating performance mode for that message.",
@@ -365,6 +387,7 @@ export const SETTINGS = {
     max: 1000000,
   }),
   MAX_CODEBLOCK_CHARS: number({
+    keywords: ["performance", "code", "syntax highlighting", "limit", "lag"],
     ai: "write",
     label: "Max Codeblock Characters",
     description: "Maximum characters in code blocks before switching to plain text rendering.",
@@ -373,6 +396,7 @@ export const SETTINGS = {
     max: 1000000,
   }),
   MAX_TOOL_RESULT_CHARS: number({
+    keywords: ["performance", "tool output", "limit", "lag"],
     ai: "write",
     label: "Max Tool Result Characters",
     description: "Maximum characters in tool results before switching to performant rendering.",
@@ -381,6 +405,7 @@ export const SETTINGS = {
     max: 1000000,
   }),
   CHAT_VIRTUALIZATION_MODE: select({
+    keywords: ["performance", "lag", "long chats", "lazy loading", "speed"],
     ai: "write",
     label: "Virtualize Chat Messages",
     description:
@@ -389,6 +414,7 @@ export const SETTINGS = {
     options: { off: "Off", threshold: "On" },
   }),
   CHAT_VIRTUALIZATION_THRESHOLD: number({
+    keywords: ["performance", "virtualization", "long chats", "limit"],
     ai: "write",
     label: "Message Count Threshold",
     description:
@@ -398,6 +424,7 @@ export const SETTINGS = {
     max: 100000,
   }),
   MCP_PARALLEL_LOAD_LIMIT: number({
+    keywords: ["extensions", "concurrency", "servers", "startup", "performance"],
     ai: "write",
     label: "MCP Parallel Load Limit",
     description: "Maximum number of MCP servers loaded concurrently.",
@@ -406,13 +433,21 @@ export const SETTINGS = {
     max: 64,
   }),
   USER_NAME: text({
+    keywords: ["nickname", "profile", "call me", "display name", "personalization"],
     label: "Your Name",
     description: "AgentOne will use this name to address you.",
     default: "",
     placeholder: "Enter your name",
   }),
   SYSTEM_PROMPT_APPENDIX: text({
-    keywords: ["system prompt", "custom instructions"],
+    keywords: [
+      "system prompt",
+      "custom instructions",
+      "personality",
+      "behavior",
+      "persona",
+      "rules",
+    ],
     label: "AI Instructions",
     description:
       "Add custom instructions that will be appended to the system prompt. These will guide how AgentOne responds to you.",
@@ -422,12 +457,14 @@ export const SETTINGS = {
     multiline: true,
   }),
   MEMORY: data<string[]>({
+    keywords: ["remember", "facts", "personalization", "preferences", "context"],
     label: "Memory",
     description:
       "Save the things you want AgentOne to remember about you across chats, like your preferences, goals, or ongoing projects.",
     default: [],
   }),
   KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS: toggle({
+    keywords: ["hotkeys", "keyboard shortcuts", "keybindings", "typing", "text field"],
     ai: "write",
     label: "Activate shortcuts in input fields",
     description:
