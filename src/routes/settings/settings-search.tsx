@@ -137,9 +137,6 @@ export function SettingsSearch({ open, onOpenChange, onSelect }: SettingsSearchP
             placeholder="Search settings..."
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck="false"
           />
         </div>
         <CommandList>

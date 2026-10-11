@@ -20,6 +20,10 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
         <Input
           ref={ref}
           type="search"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck="false"
           className={cn(
             "bg-background pl-7 transition-[padding] duration-200 group-focus-within/search-input:pl-2",
             className,

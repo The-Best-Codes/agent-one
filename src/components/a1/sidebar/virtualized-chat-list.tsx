@@ -470,9 +470,6 @@ export const VirtualizedChatList = ({
               placeholder={searchContent ? "Search chats..." : "Search titles..."}
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
-              autoCorrect="off"
-              autoCapitalize="off"
-              spellCheck="false"
             />
 
             <DropdownMenu>
