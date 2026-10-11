@@ -329,9 +329,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       });
 
       try {
+        const chunkSize = Math.max(1, Math.floor(parallelLoadLimit) || 1);
         const chunks: McpServerConfig[][] = [];
-        for (let i = 0; i < serversToLoad.length; i += parallelLoadLimit) {
-          chunks.push(serversToLoad.slice(i, i + parallelLoadLimit));
+        for (let i = 0; i < serversToLoad.length; i += chunkSize) {
+          chunks.push(serversToLoad.slice(i, i + chunkSize));
         }
 
         for (const chunk of chunks) {

@@ -2,7 +2,7 @@ import { IconRestore } from "@tabler/icons-react";
 import { deepEqual } from "fast-equals";
 import { type Atom, atom, useAtom, useAtomValue } from "jotai";
 import { RESET } from "jotai/utils";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -118,6 +118,45 @@ export function SliderLabel({ settingKey }: { settingKey: SettingKey }) {
   return `${definition.label}: ${String(value)}${"unit" in definition ? definition.unit : ""}`;
 }
 
+interface NumberControlProps {
+  id: string;
+  value: number;
+  onChange: (value: number) => void;
+  min: number;
+  max: number;
+  disabled: boolean;
+}
+
+function NumberControl({ id, value, onChange, min, max, disabled }: NumberControlProps) {
+  const [draft, setDraft] = useState<string | null>(null);
+
+  const commit = (nextValue: number) => {
+    if (nextValue !== value) onChange(nextValue);
+  };
+
+  return (
+    <Input
+      id={id}
+      type="number"
+      min={min}
+      max={max}
+      value={draft ?? value}
+      onChange={(event) => {
+        setDraft(event.target.value);
+        const parsed = Number.parseInt(event.target.value, 10);
+        if (parsed >= min && parsed <= max) commit(parsed);
+      }}
+      onBlur={() => {
+        const parsed = Number.parseInt(draft ?? "", 10);
+        if (!Number.isNaN(parsed)) commit(Math.min(max, Math.max(min, parsed)));
+        setDraft(null);
+      }}
+      disabled={disabled}
+      className="w-full md:w-32"
+    />
+  );
+}
+
 interface SettingControlProps {
   settingKey: SettingKey;
   id: string;
@@ -153,18 +192,13 @@ export function SettingControl({ settingKey, id, disabledAtom = neverAtom }: Set
       );
     case "number":
       return (
-        <Input
+        <NumberControl
           id={id}
-          type="number"
+          value={value as number}
+          onChange={setValue}
           min={definition.min}
           max={definition.max}
-          value={value as number}
-          onChange={(event) => setValue(parseInt(event.target.value) || definition.default)}
-          onBlur={() =>
-            setValue(Math.min(definition.max, Math.max(definition.min, value as number)))
-          }
           disabled={disabled}
-          className="w-full md:w-32"
         />
       );
     case "slider":
