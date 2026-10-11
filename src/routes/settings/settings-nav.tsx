@@ -41,6 +41,24 @@ export default function SettingsNav({ activeIds, onNavigate, className }: Settin
   const viewportRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [track, setTrack] = useState<Track | null>(null);
+  const [navigatingId, setNavigatingId] = useState<string | null>(null);
+
+  if (navigatingId && activeIds.includes(navigatingId)) {
+    setNavigatingId(null);
+  }
+
+  useEffect(() => {
+    if (!navigatingId) return;
+
+    const stop = () => setNavigatingId(null);
+    const timeoutId = window.setTimeout(stop, 2000);
+    const events = ["wheel", "touchstart", "keydown"] as const;
+    events.forEach((event) => window.addEventListener(event, stop, { passive: true }));
+    return () => {
+      window.clearTimeout(timeoutId);
+      events.forEach((event) => window.removeEventListener(event, stop));
+    };
+  }, [navigatingId]);
 
   useLayoutEffect(() => {
     const container = containerRef.current;
@@ -90,7 +108,7 @@ export default function SettingsNav({ activeIds, onNavigate, className }: Settin
   useEffect(() => {
     const viewport = viewportRef.current;
     const container = containerRef.current;
-    if (!viewport || !container || !hasActive) return;
+    if (!viewport || !container || !hasActive || navigatingId) return;
 
     const top = container.offsetTop + trackTop;
     const bottom = container.offsetTop + trackBottom;
@@ -109,7 +127,7 @@ export default function SettingsNav({ activeIds, onNavigate, className }: Settin
           : (top + bottom) / 2 - viewport.clientHeight / 2,
       behavior: "smooth",
     });
-  }, [hasActive, trackTop, trackBottom]);
+  }, [hasActive, navigatingId, trackTop, trackBottom]);
 
   return (
     <div
@@ -146,7 +164,10 @@ export default function SettingsNav({ activeIds, onNavigate, className }: Settin
             previous={items[index - 1]}
             next={items[index + 1]}
             active={activeIds.includes(item.id)}
-            onClick={() => onNavigate(item.id)}
+            onClick={() => {
+              setNavigatingId(item.id);
+              onNavigate(item.id);
+            }}
           />
         ))}
       </nav>
