@@ -15,7 +15,7 @@ import {
 import SettingsNav from "./settings-nav";
 import { SettingsSections } from "./settings-renderer";
 import { SETTINGS_SECTIONS } from "./settings-schema";
-import { SettingsSearch } from "./settings-search";
+import { SettingsSearch, SettingsSearchTrigger } from "./settings-search";
 
 function scrollToElement(id: string, behavior: ScrollBehavior = "smooth") {
   const target = document.getElementById(id);
@@ -60,6 +60,7 @@ export default function SettingsRoute() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const activeSection = useActiveSection();
   const legacyTab = searchParams.get("tab");
 
@@ -87,12 +88,17 @@ export default function SettingsRoute() {
   };
 
   const handleSearchSelect = (id: string) => {
-    void navigate({ search: location.search, hash: `setting-${id}` }, { replace: true });
+    void navigate({ search: location.search, hash: id }, { replace: true });
   };
 
   return (
     <main role="main" className="bg-background min-h-svh pl-[calc(100vw-100%)]">
       <h1 className="sr-only">Settings</h1>
+      <SettingsSearch
+        open={isSearchOpen}
+        onOpenChange={setIsSearchOpen}
+        onSelect={handleSearchSelect}
+      />
       <div className="bg-background sticky top-0 z-10 border-b p-4 md:hidden">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleNavigateBack}>
@@ -100,7 +106,7 @@ export default function SettingsRoute() {
             Back
           </Button>
           <div className="min-w-0 flex-1">
-            <SettingsSearch onSelect={handleSearchSelect} />
+            <SettingsSearchTrigger onClick={() => setIsSearchOpen(true)} />
           </div>
           <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
             <DrawerTrigger asChild>
@@ -132,7 +138,7 @@ export default function SettingsRoute() {
               <IconArrowLeft data-icon="inline-start" />
               Back to Chat
             </Button>
-            <SettingsSearch onSelect={handleSearchSelect} />
+            <SettingsSearchTrigger onClick={() => setIsSearchOpen(true)} />
             <SettingsNav activeSection={activeSection} onSectionChange={handleSectionChange} />
           </div>
 

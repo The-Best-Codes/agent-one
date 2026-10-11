@@ -50,6 +50,8 @@ import type { SettingsLayout } from "@/components/settings-components/setting-co
 import { ToolRow } from "@/components/settings-components/tools/tool-row";
 import { ToolsIntro } from "@/components/settings-components/tools/tools-intro";
 import { TOOL_GROUPS, TOOL_INFO } from "@/components/settings-components/tools/tools-metadata";
+import { PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
+import { TTS_PROVIDER_OPTIONS } from "@/lib/ai/tts";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { debugModeEnabledAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { keyboardShortcutDefinitions } from "@/lib/kbd-registry";
@@ -109,6 +111,7 @@ export interface SettingsCard {
   visible?: Atom<boolean>;
   items?: SettingsItem[];
   render?: ComponentType;
+  searchEntries?: SettingsSearchEntry[];
 }
 
 export interface SettingsSection {
@@ -163,7 +166,6 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
           {
             id: "ai-instructions",
             key: "SYSTEM_PROMPT_APPENDIX",
-            keywords: ["system prompt", "custom instructions"],
           },
           { id: "memory", key: "MEMORY", layout: "stacked", control: MemoryControl },
         ],
@@ -180,29 +182,26 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
           {
             id: "theme",
             key: "THEME",
-            keywords: ["dark mode", "light mode"],
             control: ThemeControl,
           },
           {
             id: "primary-color",
             key: "COLOR_THEME",
-            keywords: ["accent", "colour"],
             control: ColorThemeControl,
           },
-          { id: "tint", key: "UI_TINT", keywords: ["colour", "background"], control: TintControl },
+          { id: "tint", key: "UI_TINT", control: TintControl },
           {
             id: "tint-strength",
             key: "UI_TINT_STRENGTH",
             disabled: atom((get) => get(settingAtoms.UI_TINT) === "default"),
           },
-          { id: "font", key: "FONT", keywords: ["typeface"], control: FontControl },
+          { id: "font", key: "FONT", control: FontControl },
           {
             id: "roundness",
             key: "ROUNDNESS",
-            keywords: ["corners", "radius"],
             control: RoundnessControl,
           },
-          { id: "text-scale", key: "TEXT_SCALE", keywords: ["font size", "zoom"] },
+          { id: "text-scale", key: "TEXT_SCALE" },
         ],
       },
       {
@@ -253,21 +252,21 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
           { id: "sidebar-chat-time-grouping", key: "SIDEBAR_CHAT_TIME_GROUPING" },
           { id: "markdown-rendering", key: "MARKDOWN_RENDERING" },
           { id: "remend", key: "REMEND_ENABLED" },
-          { id: "completion-notification", key: "NOTIFICATION_SETTING", keywords: ["alert"] },
-          { id: "message-action-row", key: "SHOW_MESSAGE_ACTION_ROW", keywords: ["copy", "edit"] },
-          { id: "submit-key", key: "SUBMIT_KEY", keywords: ["send", "keyboard shortcut"] },
-          { id: "interrupt-key", key: "INTERRUPT_KEY", keywords: ["stop", "keyboard shortcut"] },
+          { id: "completion-notification", key: "NOTIFICATION_SETTING" },
+          { id: "message-action-row", key: "SHOW_MESSAGE_ACTION_ROW" },
+          { id: "submit-key", key: "SUBMIT_KEY" },
+          { id: "interrupt-key", key: "INTERRUPT_KEY" },
           { id: "regenerate-on-save", key: "REGENERATE_ON_SAVE" },
           { id: "show-scroll-to-bottom-button", key: "SHOW_CHAT_TO_BOTTOM_BUTTON" },
           { id: "show-message-preview-rail", key: "SHOW_MESSAGE_PREVIEW_RAIL" },
-          { id: "chat-status-indicators", key: "SHOW_CHAT_STATUS_INDICATOR", keywords: ["unread"] },
+          { id: "chat-status-indicators", key: "SHOW_CHAT_STATUS_INDICATOR" },
         ],
       },
       {
         title: "Streaming Experience",
         items: [
-          { id: "extract-reasoning", key: "EXTRACT_REASONING_ENABLED", keywords: ["thinking"] },
-          { id: "throttle-value", key: "THROTTLE_VALUE", keywords: ["speed", "streaming"] },
+          { id: "extract-reasoning", key: "EXTRACT_REASONING_ENABLED" },
+          { id: "throttle-value", key: "THROTTLE_VALUE" },
         ],
       },
       {
@@ -389,9 +388,16 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
         title: "Built-in Providers",
         description:
           "Enable built-in providers, set keys and headers, and override model metadata when needed.",
-        keywords: ["api key", "openai", "anthropic", "google", "openrouter", "models"],
+        keywords: ["api key", "models"],
         size: "sm",
         render: BuiltInProviders,
+        searchEntries: PROVIDER_REGISTRY.filter((provider) => provider.id !== "agent-one").map(
+          (provider) => ({
+            id: "built-in-providers",
+            label: provider.label,
+            keywords: ["provider", "api key"],
+          }),
+        ),
       },
       {
         id: "local-providers",
@@ -416,9 +422,14 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
         title: "Text-to-Speech Providers",
         description:
           "Choose which voice service reads assistant replies out loud and adjust how it sounds.",
-        keywords: ["tts", "voice", "read aloud", "speech", "elevenlabs", "hume", "gemini"],
+        keywords: ["tts", "voice", "read aloud", "speech"],
         size: "sm",
         render: TtsProviders,
+        searchEntries: TTS_PROVIDER_OPTIONS.map((provider) => ({
+          id: "tts-providers",
+          label: `${provider.label} Text-to-Speech`,
+          keywords: ["tts", "voice"],
+        })),
       },
     ],
   },

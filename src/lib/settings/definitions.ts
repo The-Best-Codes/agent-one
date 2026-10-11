@@ -14,6 +14,7 @@ import type {
 interface SettingMeta {
   label?: string;
   description?: string;
+  keywords?: string[];
   ai?: "read" | "write";
 }
 
@@ -105,12 +106,14 @@ const DEFAULT_TOOL_CONFIGS: ToolConfigs = {
 
 export const SETTINGS = {
   THEME: select({
+    keywords: ["dark mode", "light mode"],
     ai: "write",
     label: "Theme",
     default: "system",
     options: { system: "System", light: "Light", dark: "Dark" },
   }),
   COLOR_THEME: select({
+    keywords: ["accent", "colour"],
     ai: "write",
     label: "Primary Color",
     description:
@@ -119,6 +122,7 @@ export const SETTINGS = {
     options: COLOR_OPTIONS,
   }),
   UI_TINT: select({
+    keywords: ["colour", "background"],
     ai: "write",
     label: "Tint",
     description:
@@ -137,6 +141,7 @@ export const SETTINGS = {
     unit: "/10",
   }),
   FONT: select({
+    keywords: ["typeface"],
     ai: "write",
     label: "Font",
     description: "Choose the font for the application.",
@@ -144,6 +149,7 @@ export const SETTINGS = {
     options: { default: "Default", system: "System", mono: "Mono", roboto: "Roboto" },
   }),
   ROUNDNESS: select({
+    keywords: ["corners", "radius"],
     ai: "write",
     label: "Roundness",
     description: "Adjust the corner radius of UI elements.",
@@ -151,6 +157,7 @@ export const SETTINGS = {
     options: { none: "Not Round", sm: "Slightly Round", md: "Round", lg: "Very Round" },
   }),
   TEXT_SCALE: select({
+    keywords: ["font size", "zoom"],
     ai: "write",
     label: "Text Scale",
     description: "Adjust the text size throughout the application.",
@@ -236,6 +243,7 @@ export const SETTINGS = {
     default: true,
   }),
   NOTIFICATION_SETTING: select({
+    keywords: ["alert"],
     ai: "write",
     label: "Agent Notifications",
     description: "Show a notification when AgentOne responds or needs your attention.",
@@ -243,6 +251,7 @@ export const SETTINGS = {
     options: { always: "Always", "when-unfocused": "When window unfocused", never: "Never" },
   }),
   SHOW_MESSAGE_ACTION_ROW: select({
+    keywords: ["copy", "edit"],
     ai: "write",
     label: "Message Action Row",
     description: "Control when message actions (copy, edit, etc.) are visible.",
@@ -250,6 +259,7 @@ export const SETTINGS = {
     options: { hover: "Show on hover", always: "Always show", never: "Never show" },
   }),
   SUBMIT_KEY: select({
+    keywords: ["send", "keyboard shortcut"],
     ai: "write",
     label: "Submit Key",
     description: "Choose which key combination submits your message.",
@@ -257,6 +267,7 @@ export const SETTINGS = {
     options: { enter: "Enter", "ctrl-enter": "Ctrl/CMD + Enter" },
   }),
   INTERRUPT_KEY: select({
+    keywords: ["stop", "keyboard shortcut"],
     ai: "write",
     label: "Interrupt Key",
     description: "Choose which key combination stops the response and sends your message.",
@@ -287,12 +298,14 @@ export const SETTINGS = {
     default: true,
   }),
   SHOW_CHAT_STATUS_INDICATOR: toggle({
+    keywords: ["unread"],
     ai: "write",
     label: "Chat Status Indicators",
     description: "Show status icons in the sidebar for loading, error, and unread chats.",
     default: true,
   }),
   EXTRACT_REASONING_ENABLED: toggle({
+    keywords: ["thinking"],
     ai: "write",
     label: "Extract Reasoning from Think Tags",
     description:
@@ -300,6 +313,7 @@ export const SETTINGS = {
     default: false,
   }),
   THROTTLE_VALUE: slider({
+    keywords: ["speed", "streaming"],
     label: "Throttle",
     description: "Control how often streaming messages update the interface.",
     default: 100,
@@ -398,6 +412,7 @@ export const SETTINGS = {
     placeholder: "Enter your name",
   }),
   SYSTEM_PROMPT_APPENDIX: text({
+    keywords: ["system prompt", "custom instructions"],
     label: "AI Instructions",
     description:
       "Add custom instructions that will be appended to the system prompt. These will guide how AgentOne responds to you.",
