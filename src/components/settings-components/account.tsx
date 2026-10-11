@@ -38,15 +38,16 @@ import {
   isAgentOneAccountProvisioning,
 } from "@/contexts/use-web-auth/web-auth-contexts";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
+import {
+  AGENT_ONE_BILLING_URL,
+  AGENT_ONE_DASHBOARD_URL,
+  AGENT_ONE_UPGRADE_URL,
+} from "@/lib/constants";
 import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { MAX_MEMORY_ENTRIES, MAX_MEMORY_ENTRY_CHARS } from "@/lib/memory";
 
 import { SettingsTarget } from "./settings-target";
-
-const DASHBOARD_URL = "https://www.agent-one.dev/dashboard";
-const BILLING_URL = `${DASHBOARD_URL}/billing`;
-const UPGRADE_URL = `${BILLING_URL}?hint=upgrade`;
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(value);
@@ -113,7 +114,7 @@ export function AccountStatus() {
             user ? (
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" asChild>
-                  <a href={DASHBOARD_URL} target="_blank" rel="noopener noreferrer">
+                  <a href={AGENT_ONE_DASHBOARD_URL} target="_blank" rel="noopener noreferrer">
                     <IconExternalLink data-icon="inline-start" />
                     <span>Account</span>
                     <span className="sr-only lg:not-sr-only">{" Dashboard"}</span>
@@ -165,7 +166,7 @@ export function AccountStatus() {
                 </div>
                 <Button size="sm" asChild>
                   <a
-                    href={activeSubscription ? BILLING_URL : UPGRADE_URL}
+                    href={activeSubscription ? AGENT_ONE_BILLING_URL : AGENT_ONE_UPGRADE_URL}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

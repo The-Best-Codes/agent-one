@@ -1,14 +1,7 @@
-import {
-  IconLayoutSidebar,
-  IconPlus,
-  IconClock,
-  IconPuzzle,
-  IconSearch,
-  IconSettings,
-} from "@tabler/icons-react";
+import { IconLayoutSidebar, IconPlus, IconSearch } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useCallback, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 
 import {
@@ -32,7 +25,7 @@ import { debugModeEnabledAtom, sidebarCollapsedAtom } from "@/lib/jotai/unsynced
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
-import { SettingsLink } from "../settings-link";
+import { AccountMenu } from "./account-menu";
 import { ChatList } from "./chat-list";
 import { SearchModal } from "./search-modal";
 
@@ -99,25 +92,8 @@ const SidebarContent = ({
         />
       </div>
 
-      <div className="border-sidebar-border flex flex-col gap-2 pt-2">
-        <Button variant="outline" className="w-full justify-start" asChild>
-          <Link to={`/extensions${activeChatId ? `?chatId=${activeChatId}` : ""}`}>
-            <IconPuzzle data-icon="inline-start" />
-            Browse Extensions
-          </Link>
-        </Button>
-        <Button variant="outline" className="w-full justify-start" asChild>
-          <Link to={`/scheduled-agents${activeChatId ? `?chatId=${activeChatId}` : ""}`}>
-            <IconClock data-icon="inline-start" />
-            Scheduled Agents
-          </Link>
-        </Button>
-        <Button variant="outline" className="w-full justify-start" asChild>
-          <SettingsLink data-icon="inline-start">
-            <IconSettings data-icon="inline-start" />
-            Open Settings
-          </SettingsLink>
-        </Button>
+      <div className="pt-2">
+        <AccountMenu activeChatId={activeChatId} />
       </div>
     </div>
   );
