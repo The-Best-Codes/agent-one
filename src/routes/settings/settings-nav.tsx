@@ -174,7 +174,7 @@ function SettingsNavItem({ item, previous, next, active, onClick }: SettingsNavI
       data-active={active}
       aria-current={active ? "true" : undefined}
       onClick={onClick}
-      className="text-muted-foreground hover:text-accent-foreground focus-visible:text-accent-foreground data-[active=true]:text-primary relative py-1.5 text-start text-sm wrap-anywhere transition-colors outline-none first:pt-0 last:pb-0"
+      className="text-muted-foreground hover:text-accent-foreground focus-visible:text-accent-foreground data-[active=true]:text-primary relative py-1.5 text-start text-sm wrap-anywhere transition-colors outline-none last:pb-0 first-of-type:pt-0"
       style={{ paddingInlineStart: getItemOffset(item.depth) }}
     >
       <svg
