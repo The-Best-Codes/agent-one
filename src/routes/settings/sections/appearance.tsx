@@ -8,7 +8,6 @@ import { type ComponentProps, useRef, useState } from "react";
 import { ColorPicker } from "@/components/a1/color-picker";
 import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -18,227 +17,170 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   chatBackgroundPresets,
   cssImageUrl,
   resolveChatBackgroundAssetUrl,
 } from "@/lib/chat-backgrounds";
-import {
-  chatBackgroundAtom,
-  collapsedSidebarLayoutAtom,
-  colorThemeAtom,
-  fontAtom,
-  inputStyleAtom,
-  markdownHighlightingAtom,
-  roundnessAtom,
-  textScaleAtom,
-  uiTintAtom,
-  uiTintStrengthAtom,
-} from "@/lib/jotai/settings-atoms";
-import { resetSetting } from "@/lib/settings/reset-settings";
-import {
-  type ChatBackgroundPresetOption,
-  type CollapsedSidebarLayoutOption,
-  DEFAULT_SETTINGS,
-  type InputStyleOption,
-} from "@/lib/settings/types";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
+import { DEFAULT_SETTINGS, SETTINGS, type SettingValue } from "@/lib/settings/definitions";
+import type { ChatBackgroundPresetOption, ChatBackgroundSettings } from "@/lib/settings/types";
 import { cn } from "@/lib/utils";
 
-import SettingsTarget from "../settings-target";
+import { SettingsRow } from "../settings-sections";
 
-const roundnessOptions = [
-  { value: "none", label: "Not Round", radius: "rounded-[0px]" },
-  { value: "sm", label: "Slightly Round", radius: "rounded-[0.3125rem]" },
-  { value: "md", label: "Round", radius: "rounded-[0.625rem]" },
-  { value: "lg", label: "Very Round", radius: "rounded-[1.25rem]" },
-] as const;
+const COLOR_CLASSES: Record<SettingValue<"COLOR_THEME">, string> = {
+  default:
+    "bg-[oklch(0.205_0_0)] dark:bg-[oklch(0.922_0_0)] hover:bg-[oklch(0.205_0_0)] dark:hover:bg-[oklch(0.922_0_0)] text-white dark:text-black",
+  amber:
+    "bg-[oklch(0.555_0.163_48.998)] dark:bg-[oklch(0.473_0.137_46.201)] hover:bg-[oklch(0.555_0.163_48.998)] dark:hover:bg-[oklch(0.473_0.137_46.201)] text-white",
+  blue: "bg-[oklch(0.488_0.243_264.376)] dark:bg-[oklch(0.424_0.199_265.638)] hover:bg-[oklch(0.488_0.243_264.376)] dark:hover:bg-[oklch(0.424_0.199_265.638)] text-white",
+  cyan: "bg-[oklch(0.52_0.105_223.128)] dark:bg-[oklch(0.45_0.085_224.283)] hover:bg-[oklch(0.52_0.105_223.128)] dark:hover:bg-[oklch(0.45_0.085_224.283)] text-white",
+  emerald:
+    "bg-[oklch(0.508_0.118_165.612)] dark:bg-[oklch(0.432_0.095_166.913)] hover:bg-[oklch(0.508_0.118_165.612)] dark:hover:bg-[oklch(0.432_0.095_166.913)] text-white",
+  fuchsia:
+    "bg-[oklch(0.518_0.253_323.949)] dark:bg-[oklch(0.452_0.211_324.591)] hover:bg-[oklch(0.518_0.253_323.949)] dark:hover:bg-[oklch(0.452_0.211_324.591)] text-white",
+  green:
+    "bg-[oklch(0.527_0.154_150.069)] dark:bg-[oklch(0.448_0.119_151.328)] hover:bg-[oklch(0.527_0.154_150.069)] dark:hover:bg-[oklch(0.448_0.119_151.328)] text-white",
+  indigo:
+    "bg-[oklch(0.457_0.24_277.023)] dark:bg-[oklch(0.398_0.195_277.366)] hover:bg-[oklch(0.457_0.24_277.023)] dark:hover:bg-[oklch(0.398_0.195_277.366)] text-white",
+  lime: "bg-[oklch(0.841_0.238_128.85)] dark:bg-[oklch(0.768_0.233_130.85)] hover:bg-[oklch(0.841_0.238_128.85)] dark:hover:bg-[oklch(0.768_0.233_130.85)] text-black",
+  orange:
+    "bg-[oklch(0.553_0.195_38.402)] dark:bg-[oklch(0.47_0.157_37.304)] hover:bg-[oklch(0.553_0.195_38.402)] dark:hover:bg-[oklch(0.47_0.157_37.304)] text-white",
+  pink: "bg-[oklch(0.525_0.223_3.958)] dark:bg-[oklch(0.459_0.187_3.815)] hover:bg-[oklch(0.525_0.223_3.958)] dark:hover:bg-[oklch(0.459_0.187_3.815)] text-white",
+  purple:
+    "bg-[oklch(0.496_0.265_301.924)] dark:bg-[oklch(0.438_0.218_303.724)] hover:bg-[oklch(0.496_0.265_301.924)] dark:hover:bg-[oklch(0.438_0.218_303.724)] text-white",
+  red: "bg-[oklch(0.505_0.213_27.518)] dark:bg-[oklch(0.444_0.177_26.899)] hover:bg-[oklch(0.505_0.213_27.518)] dark:hover:bg-[oklch(0.444_0.177_26.899)] text-white",
+  rose: "bg-[oklch(0.514_0.222_16.935)] dark:bg-[oklch(0.455_0.188_13.697)] hover:bg-[oklch(0.514_0.222_16.935)] dark:hover:bg-[oklch(0.455_0.188_13.697)] text-white",
+  sky: "bg-[oklch(0.5_0.134_242.749)] dark:bg-[oklch(0.443_0.11_240.79)] hover:bg-[oklch(0.5_0.134_242.749)] dark:hover:bg-[oklch(0.443_0.11_240.79)] text-white",
+  teal: "bg-[oklch(0.511_0.096_186.391)] dark:bg-[oklch(0.437_0.078_188.216)] hover:bg-[oklch(0.511_0.096_186.391)] dark:hover:bg-[oklch(0.437_0.078_188.216)] text-white",
+  violet:
+    "bg-[oklch(0.491_0.27_292.581)] dark:bg-[oklch(0.432_0.232_292.759)] hover:bg-[oklch(0.491_0.27_292.581)] dark:hover:bg-[oklch(0.432_0.232_292.759)] text-white",
+  yellow:
+    "bg-[oklch(0.852_0.199_91.936)] dark:bg-[oklch(0.795_0.184_86.047)] hover:bg-[oklch(0.852_0.199_91.936)] dark:hover:bg-[oklch(0.795_0.184_86.047)] text-black",
+};
 
-const fontOptions = [
-  { value: "default", label: "Default", className: "font-space-grotesk" },
-  { value: "system", label: "System", className: "font-sans" },
-  { value: "mono", label: "Mono", className: "font-mono" },
-  { value: "roboto", label: "Roboto", className: "font-roboto" },
-] as const;
+const COLOR_PICKER_OPTIONS = Object.entries(SETTINGS.COLOR_THEME.options).map(([value, label]) => ({
+  value,
+  label,
+  className: COLOR_CLASSES[value as SettingValue<"COLOR_THEME">],
+}));
 
-const textScaleOptions = [
-  { value: "xs", label: "Tiny" },
-  { value: "sm", label: "Small" },
-  { value: "md", label: "Default" },
-  { value: "lg", label: "Large" },
-  { value: "xl", label: "Huge" },
-  { value: "2xl", label: "Gigantic" },
-] as const;
+const FONT_CLASSES: Record<SettingValue<"FONT">, string> = {
+  default: "font-space-grotesk",
+  system: "font-sans",
+  mono: "font-mono",
+  roboto: "font-roboto",
+};
 
-const colorThemeOptions = [
-  {
-    value: "default",
-    label: "Default",
-    className:
-      "bg-[oklch(0.205_0_0)] dark:bg-[oklch(0.922_0_0)] hover:bg-[oklch(0.205_0_0)] dark:hover:bg-[oklch(0.922_0_0)] text-white dark:text-black",
-  },
-  {
-    value: "amber",
-    label: "Amber",
-    className:
-      "bg-[oklch(0.555_0.163_48.998)] dark:bg-[oklch(0.473_0.137_46.201)] hover:bg-[oklch(0.555_0.163_48.998)] dark:hover:bg-[oklch(0.473_0.137_46.201)] text-white",
-  },
-  {
-    value: "blue",
-    label: "Blue",
-    className:
-      "bg-[oklch(0.488_0.243_264.376)] dark:bg-[oklch(0.424_0.199_265.638)] hover:bg-[oklch(0.488_0.243_264.376)] dark:hover:bg-[oklch(0.424_0.199_265.638)] text-white",
-  },
-  {
-    value: "cyan",
-    label: "Cyan",
-    className:
-      "bg-[oklch(0.52_0.105_223.128)] dark:bg-[oklch(0.45_0.085_224.283)] hover:bg-[oklch(0.52_0.105_223.128)] dark:hover:bg-[oklch(0.45_0.085_224.283)] text-white",
-  },
-  {
-    value: "emerald",
-    label: "Emerald",
-    className:
-      "bg-[oklch(0.508_0.118_165.612)] dark:bg-[oklch(0.432_0.095_166.913)] hover:bg-[oklch(0.508_0.118_165.612)] dark:hover:bg-[oklch(0.432_0.095_166.913)] text-white",
-  },
-  {
-    value: "fuchsia",
-    label: "Fuchsia",
-    className:
-      "bg-[oklch(0.518_0.253_323.949)] dark:bg-[oklch(0.452_0.211_324.591)] hover:bg-[oklch(0.518_0.253_323.949)] dark:hover:bg-[oklch(0.452_0.211_324.591)] text-white",
-  },
-  {
-    value: "green",
-    label: "Green",
-    className:
-      "bg-[oklch(0.527_0.154_150.069)] dark:bg-[oklch(0.448_0.119_151.328)] hover:bg-[oklch(0.527_0.154_150.069)] dark:hover:bg-[oklch(0.448_0.119_151.328)] text-white",
-  },
-  {
-    value: "indigo",
-    label: "Indigo",
-    className:
-      "bg-[oklch(0.457_0.24_277.023)] dark:bg-[oklch(0.398_0.195_277.366)] hover:bg-[oklch(0.457_0.24_277.023)] dark:hover:bg-[oklch(0.398_0.195_277.366)] text-white",
-  },
-  {
-    value: "lime",
-    label: "Lime",
-    className:
-      "bg-[oklch(0.841_0.238_128.85)] dark:bg-[oklch(0.768_0.233_130.85)] hover:bg-[oklch(0.841_0.238_128.85)] dark:hover:bg-[oklch(0.768_0.233_130.85)] text-black",
-  },
-  {
-    value: "orange",
-    label: "Orange",
-    className:
-      "bg-[oklch(0.553_0.195_38.402)] dark:bg-[oklch(0.47_0.157_37.304)] hover:bg-[oklch(0.553_0.195_38.402)] dark:hover:bg-[oklch(0.47_0.157_37.304)] text-white",
-  },
-  {
-    value: "pink",
-    label: "Pink",
-    className:
-      "bg-[oklch(0.525_0.223_3.958)] dark:bg-[oklch(0.459_0.187_3.815)] hover:bg-[oklch(0.525_0.223_3.958)] dark:hover:bg-[oklch(0.459_0.187_3.815)] text-white",
-  },
-  {
-    value: "purple",
-    label: "Purple",
-    className:
-      "bg-[oklch(0.496_0.265_301.924)] dark:bg-[oklch(0.438_0.218_303.724)] hover:bg-[oklch(0.496_0.265_301.924)] dark:hover:bg-[oklch(0.438_0.218_303.724)] text-white",
-  },
-  {
-    value: "red",
-    label: "Red",
-    className:
-      "bg-[oklch(0.505_0.213_27.518)] dark:bg-[oklch(0.444_0.177_26.899)] hover:bg-[oklch(0.505_0.213_27.518)] dark:hover:bg-[oklch(0.444_0.177_26.899)] text-white",
-  },
-  {
-    value: "rose",
-    label: "Rose",
-    className:
-      "bg-[oklch(0.514_0.222_16.935)] dark:bg-[oklch(0.455_0.188_13.697)] hover:bg-[oklch(0.514_0.222_16.935)] dark:hover:bg-[oklch(0.455_0.188_13.697)] text-white",
-  },
-  {
-    value: "sky",
-    label: "Sky",
-    className:
-      "bg-[oklch(0.5_0.134_242.749)] dark:bg-[oklch(0.443_0.11_240.79)] hover:bg-[oklch(0.5_0.134_242.749)] dark:hover:bg-[oklch(0.443_0.11_240.79)] text-white",
-  },
-  {
-    value: "teal",
-    label: "Teal",
-    className:
-      "bg-[oklch(0.511_0.096_186.391)] dark:bg-[oklch(0.437_0.078_188.216)] hover:bg-[oklch(0.511_0.096_186.391)] dark:hover:bg-[oklch(0.437_0.078_188.216)] text-white",
-  },
-  {
-    value: "violet",
-    label: "Violet",
-    className:
-      "bg-[oklch(0.491_0.27_292.581)] dark:bg-[oklch(0.432_0.232_292.759)] hover:bg-[oklch(0.491_0.27_292.581)] dark:hover:bg-[oklch(0.432_0.232_292.759)] text-white",
-  },
-  {
-    value: "yellow",
-    label: "Yellow",
-    className:
-      "bg-[oklch(0.852_0.199_91.936)] dark:bg-[oklch(0.795_0.184_86.047)] hover:bg-[oklch(0.852_0.199_91.936)] dark:hover:bg-[oklch(0.795_0.184_86.047)] text-black",
-  },
-];
+const ROUNDNESS_CLASSES: Record<SettingValue<"ROUNDNESS">, string> = {
+  none: "rounded-[0px]",
+  sm: "rounded-[0.3125rem]",
+  md: "rounded-[0.625rem]",
+  lg: "rounded-[1.25rem]",
+};
+
+export function ThemeControl() {
+  return <ThemeToggle className="md:justify-end" />;
+}
+
+export function ColorThemeControl() {
+  const [colorTheme, setColorTheme] = useAtom(settingAtoms.COLOR_THEME);
+
+  return (
+    <ColorPicker
+      label="Primary color"
+      value={colorTheme}
+      onValueChange={(value) => setColorTheme(value as typeof colorTheme)}
+      options={COLOR_PICKER_OPTIONS}
+    />
+  );
+}
+
+export function TintControl() {
+  const [uiTint, setUiTint] = useAtom(settingAtoms.UI_TINT);
+
+  return (
+    <ColorPicker
+      label="Tint"
+      value={uiTint}
+      onValueChange={(value) => setUiTint(value as typeof uiTint)}
+      options={COLOR_PICKER_OPTIONS}
+    />
+  );
+}
+
+export function FontControl() {
+  const [font, setFont] = useAtom(settingAtoms.FONT);
+
+  return (
+    <ToggleGroup
+      type="single"
+      variant="outline"
+      value={font}
+      onValueChange={(value) => {
+        if (value) setFont(value as typeof font);
+      }}
+      aria-label="Select font"
+      className="w-full min-w-64 md:w-fit"
+    >
+      {Object.entries(SETTINGS.FONT.options).map(([value, label]) => (
+        <ToggleGroupItem
+          key={value}
+          value={value}
+          aria-label={label}
+          className={FONT_CLASSES[value as typeof font]}
+        >
+          {label}
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
+  );
+}
+
+export function RoundnessControl() {
+  const [roundness, setRoundness] = useAtom(settingAtoms.ROUNDNESS);
+
+  return (
+    <ToggleGroup
+      type="single"
+      variant="outline"
+      value={roundness}
+      onValueChange={(value) => {
+        if (value) setRoundness(value as typeof roundness);
+      }}
+      aria-label="Select roundness"
+      className="w-full md:w-fit"
+      size="lg"
+    >
+      {Object.entries(SETTINGS.ROUNDNESS.options).map(([value, label]) => (
+        <ToggleGroupItem
+          key={value}
+          value={value}
+          aria-label={label}
+          title={label}
+          size="lg"
+          className="size-16"
+        >
+          <div className={cn("bg-primary size-10", ROUNDNESS_CLASSES[value as typeof roundness])} />
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
+  );
+}
 
 const CUSTOM_BACKGROUND_DIR = "chat-backgrounds";
 const CUSTOM_BACKGROUND_IMAGE_DIR = `${CUSTOM_BACKGROUND_DIR}/images`;
 const CUSTOM_BACKGROUND_THUMBNAIL_DIR = `${CUSTOM_BACKGROUND_DIR}/thumbnails`;
 const chatBackgroundDefaults = DEFAULT_SETTINGS.CHAT_BACKGROUND;
+const EFFECT_KEYS = ["tint", "blur", "dim", "x", "y", "zoom", "backgroundShade"] as const;
 
 type PendingCustomBackground = {
   url: string;
-};
-
-const ChatBackgroundSlider = ({
-  label,
-  value,
-  defaultValue,
-  suffix,
-  onCommit,
-  ...props
-}: {
-  label: string;
-  value: number | undefined;
-  defaultValue: number;
-  suffix: string;
-  onCommit: (value: number) => void;
-} & Omit<
-  ComponentProps<typeof Slider>,
-  "defaultValue" | "value" | "onValueChange" | "onValueCommit"
->) => {
-  const [draggingValue, setDraggingValue] = useState<number | null>(null);
-  const displayValue = [draggingValue ?? value ?? defaultValue];
-
-  return (
-    <div className="flex flex-col gap-2">
-      <Label className="text-sm tabular-nums">
-        {label}: {displayValue[0]}
-        {suffix}
-      </Label>
-      <Slider
-        value={displayValue}
-        onValueChange={(nextValue) => setDraggingValue(nextValue[0])}
-        onValueCommit={(nextValue) => {
-          setDraggingValue(null);
-          onCommit(nextValue[0]);
-        }}
-        {...props}
-      />
-    </div>
-  );
 };
 
 function createCustomBackgroundId() {
@@ -308,54 +250,27 @@ async function createThumbnailFile(sourceUrl: string, destinationPath: string) {
   await writeManagedFile(destinationPath, thumbnailBytes);
 }
 
-export default function AppearanceSection() {
-  const [chatBackground, setChatBackground] = useAtom(chatBackgroundAtom);
-  const [colorTheme, setColorTheme] = useAtom(colorThemeAtom);
-  const [font, setFont] = useAtom(fontAtom);
-  const [roundness, setRoundness] = useAtom(roundnessAtom);
-  const [textScale, setTextScale] = useAtom(textScaleAtom);
-  const [uiTint, setUiTint] = useAtom(uiTintAtom);
-  const [uiTintStrength, setUiTintStrength] = useAtom(uiTintStrengthAtom);
-  const [markdownHighlighting, setMarkdownHighlighting] = useAtom(markdownHighlightingAtom);
-  const [inputStyle, setInputStyle] = useAtom(inputStyleAtom);
-  const [collapsedSidebarLayout, setCollapsedSidebarLayout] = useAtom(collapsedSidebarLayoutAtom);
+function useChatBackground() {
+  const [chatBackground, setChatBackground] = useAtom(settingAtoms.CHAT_BACKGROUND);
+
+  const updateChatBackground = (updates: Partial<ChatBackgroundSettings>) => {
+    setChatBackground((prev) => ({ ...chatBackgroundDefaults, ...prev, ...updates }));
+  };
+
+  return { chatBackground, setChatBackground, updateChatBackground };
+}
+
+export function ChatBackgroundPicker() {
+  const { chatBackground, setChatBackground, updateChatBackground } = useChatBackground();
   const [pendingCustomBackgrounds, setPendingCustomBackgrounds] = useState<
     PendingCustomBackground[]
   >([]);
   const [removingCustomUrl, setRemovingCustomUrl] = useState<string | null>(null);
   const addingCustomBackgroundRef = useRef(false);
 
-  const isMarkdownHighlightingDefault =
-    markdownHighlighting === DEFAULT_SETTINGS.MARKDOWN_HIGHLIGHTING;
-  const isUiTintStrengthDefault = uiTintStrength === DEFAULT_SETTINGS.UI_TINT_STRENGTH;
-  const isChatBackgroundDefault =
-    chatBackground.tint === chatBackgroundDefaults.tint &&
-    chatBackground.blur === chatBackgroundDefaults.blur &&
-    chatBackground.dim === chatBackgroundDefaults.dim &&
-    (chatBackground.x ?? chatBackgroundDefaults.x) === chatBackgroundDefaults.x &&
-    (chatBackground.y ?? chatBackgroundDefaults.y) === chatBackgroundDefaults.y &&
-    (chatBackground.zoom ?? chatBackgroundDefaults.zoom) === chatBackgroundDefaults.zoom &&
-    (chatBackground.backgroundShade ?? chatBackgroundDefaults.backgroundShade) ===
-      chatBackgroundDefaults.backgroundShade;
-  const isInputStyleDefault = inputStyle === DEFAULT_SETTINGS.INPUT_STYLE;
-  const isCollapsedSidebarLayoutDefault =
-    collapsedSidebarLayout === DEFAULT_SETTINGS.COLLAPSED_SIDEBAR_LAYOUT;
-
-  const handleResetMarkdownHighlighting = () => {
-    resetSetting("MARKDOWN_HIGHLIGHTING");
-  };
-
-  const handleResetInputStyle = () => {
-    resetSetting("INPUT_STYLE");
-  };
-
-  const handleResetCollapsedSidebarLayout = () => {
-    resetSetting("COLLAPSED_SIDEBAR_LAYOUT");
-  };
-
-  const updateChatBackground = (updates: Partial<typeof DEFAULT_SETTINGS.CHAT_BACKGROUND>) => {
-    setChatBackground((prev) => ({ ...DEFAULT_SETTINGS.CHAT_BACKGROUND, ...prev, ...updates }));
-  };
+  const isEffectsDefault = EFFECT_KEYS.every(
+    (key) => (chatBackground[key] ?? chatBackgroundDefaults[key]) === chatBackgroundDefaults[key],
+  );
 
   const removeManagedBackgroundFile = async (url: string) => {
     const thumbnailUrl = chatBackground.customThumbnails?.[url];
@@ -375,7 +290,7 @@ export default function AppearanceSection() {
       const isRemovingActive = prev.preset === "custom" && prev.customUrl === url;
 
       return {
-        ...DEFAULT_SETTINGS.CHAT_BACKGROUND,
+        ...chatBackgroundDefaults,
         ...prev,
         customUrls,
         customThumbnails,
@@ -430,7 +345,7 @@ export default function AppearanceSection() {
           : [imageAbsolutePath, ...currentUrls];
 
         return {
-          ...DEFAULT_SETTINGS.CHAT_BACKGROUND,
+          ...chatBackgroundDefaults,
           ...prev,
           customUrl: imageAbsolutePath,
           customUrls,
@@ -443,16 +358,9 @@ export default function AppearanceSection() {
 
       try {
         await createThumbnailFile(imageUrl, thumbnailRelativePath);
-        setChatBackground((prev) => ({
-          ...DEFAULT_SETTINGS.CHAT_BACKGROUND,
-          ...prev,
-          customThumbnails: {
-            ...prev.customThumbnails,
-          },
-        }));
       } catch {
         setChatBackground((prev) => ({
-          ...DEFAULT_SETTINGS.CHAT_BACKGROUND,
+          ...chatBackgroundDefaults,
           ...prev,
           customThumbnails: {
             ...prev.customThumbnails,
@@ -470,683 +378,216 @@ export default function AppearanceSection() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>General Look and Feel</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-6">
-          <SettingsTarget id="setting-theme">
-            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-              <div className="flex flex-col items-start">
-                <Label className="text-sm font-medium">Theme</Label>
-              </div>
-              <ThemeToggle className="md:justify-end" />
-            </div>
-          </SettingsTarget>
+    <div className="flex flex-col gap-4">
+      <SettingsRow
+        label="Background Image"
+        description="Pick a preset or add your own image behind the main chat area."
+        action={
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              updateChatBackground(
+                Object.fromEntries(EFFECT_KEYS.map((key) => [key, chatBackgroundDefaults[key]])),
+              );
+            }}
+            disabled={isEffectsDefault}
+            aria-label="Reset chat background"
+          >
+            <IconRestore />
+          </Button>
+        }
+      />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <Button
+          type="button"
+          variant="outline"
+          className="flex aspect-video h-auto flex-col gap-1"
+          onClick={() => void handleAddCustomBackground()}
+        >
+          <IconPhotoPlus data-icon="inline-start" />
+          Add Custom
+        </Button>
 
-          <SettingsTarget id="setting-primary-color">
-            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-              <div className="flex flex-col items-start">
-                <Label className="text-sm font-medium">Primary Color</Label>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  Controls the accent color used for switches, badges, highlights, and primary
-                  actions.
-                </p>
-              </div>
-              <ColorPicker
-                label="Primary color"
-                value={colorTheme}
-                onValueChange={(value) => {
-                  setColorTheme(value as typeof colorTheme);
-                }}
-                options={colorThemeOptions.map((option) => ({
-                  ...option,
-                  label:
-                    {
-                      default: "Default",
-                      amber: "Amber",
-                      blue: "Blue",
-                      cyan: "Cyan",
-                      emerald: "Emerald",
-                      fuchsia: "Fuchsia",
-                      green: "Green",
-                      indigo: "Indigo",
-                      lime: "Lime",
-                      orange: "Orange",
-                      pink: "Pink",
-                      purple: "Purple",
-                      red: "Red",
-                      rose: "Rose",
-                      sky: "Sky",
-                      teal: "Teal",
-                      violet: "Violet",
-                      yellow: "Yellow",
-                    }[option.value] ?? option.value,
-                }))}
-              />
-            </div>
-          </SettingsTarget>
+        <Button
+          type="button"
+          variant="outline"
+          className="relative flex aspect-video h-auto flex-col gap-1 overflow-hidden"
+          onClick={() => updateChatBackground({ preset: "none" })}
+        >
+          <IconPhotoOff data-icon="inline-start" />
+          None
+          {chatBackground.preset === "none" && (
+            <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-white">
+              <IconCheck className="size-8" data-icon="inline-start" />
+            </span>
+          )}
+        </Button>
 
-          <SettingsTarget id="setting-tint">
-            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-              <div className="flex flex-col items-start">
-                <Label className="text-sm font-medium">Tint</Label>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  Adds a subtle color wash to surfaces like backgrounds, panels, sidebars, and muted
-                  buttons.
-                </p>
-              </div>
-              <ColorPicker
-                label="Tint"
-                value={uiTint}
-                onValueChange={(value) => {
-                  setUiTint(value as typeof uiTint);
-                }}
-                options={colorThemeOptions.map((option) => ({
-                  ...option,
-                  label:
-                    {
-                      default: "Default",
-                      amber: "Amber",
-                      blue: "Blue",
-                      cyan: "Cyan",
-                      emerald: "Emerald",
-                      fuchsia: "Fuchsia",
-                      green: "Green",
-                      indigo: "Indigo",
-                      lime: "Lime",
-                      orange: "Orange",
-                      pink: "Pink",
-                      purple: "Purple",
-                      red: "Red",
-                      rose: "Rose",
-                      sky: "Sky",
-                      teal: "Teal",
-                      violet: "Violet",
-                      yellow: "Yellow",
-                    }[option.value] ?? option.value,
-                }))}
-              />
-            </div>
-          </SettingsTarget>
-
-          <SettingsTarget id="setting-tint-strength">
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-                <div className="flex flex-col items-start">
-                  <Label className="text-sm font-medium tabular-nums">
-                    {`Tint Strength: ${uiTintStrength}/10`}
-                  </Label>
-                  <p className="text-muted-foreground mt-1 text-sm">
-                    Choose how light or strong the tint should feel.
-                  </p>
-                </div>
+        {(chatBackground.customUrls ?? []).map((url) => (
+          <Button
+            key={url}
+            type="button"
+            variant="outline"
+            className="relative aspect-video h-auto overflow-hidden bg-cover bg-center p-0"
+            style={{
+              backgroundImage: cssImageUrl(
+                resolveChatBackgroundAssetUrl(chatBackground.customThumbnails?.[url] ?? url),
+              ),
+            }}
+            onClick={() => updateChatBackground({ preset: "custom", customUrl: url })}
+            title="Custom background"
+          >
+            <Popover
+              open={removingCustomUrl === url}
+              onOpenChange={(open) => setRemovingCustomUrl(open ? url : null)}
+            >
+              <PopoverTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    resetSetting("UI_TINT_STRENGTH");
-                  }}
-                  disabled={isUiTintStrengthDefault}
-                  aria-label="Reset tint strength to default"
+                  size="icon-sm"
+                  className="bg-background/80 hover:bg-background absolute top-1 right-1"
+                  aria-label="Remove custom background"
+                  onMouseDown={(event) => event.stopPropagation()}
+                  onClick={(event) => event.stopPropagation()}
                 >
-                  <IconRestore data-icon="inline-start" />
+                  <IconX data-icon="inline-start" />
                 </Button>
-              </div>
-              <Slider
-                value={[uiTintStrength]}
-                onValueChange={(value) => {
-                  setUiTintStrength(value[0] as typeof uiTintStrength);
-                }}
-                min={1}
-                max={10}
-                step={1}
-                className="w-full"
-                aria-label="Tint strength"
-                disabled={uiTint === "default"}
-              />
-            </div>
-          </SettingsTarget>
-
-          <SettingsTarget id="setting-font">
-            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-              <div className="flex flex-col items-start">
-                <Label className="text-sm font-medium">Font</Label>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  Choose the font for the application.
-                </p>
-              </div>
-              <ToggleGroup
-                type="single"
-                variant="outline"
-                value={font}
-                onValueChange={(value) => {
-                  if (value) {
-                    setFont(value as typeof font);
-                  }
-                }}
-                aria-label="Select font"
-                className="w-full min-w-64 md:w-fit"
-              >
-                {fontOptions.map((option) => (
-                  <ToggleGroupItem
-                    key={option.value}
-                    value={option.value}
-                    aria-label={
-                      { default: "Default", system: "System", mono: "Mono", roboto: "Roboto" }[
-                        option.value
-                      ]
-                    }
-                    className={option.className}
-                  >
-                    {
-                      { default: "Default", system: "System", mono: "Mono", roboto: "Roboto" }[
-                        option.value
-                      ]
-                    }
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-            </div>
-          </SettingsTarget>
-
-          <SettingsTarget id="setting-roundness">
-            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-              <div className="flex flex-col items-start">
-                <Label className="text-sm font-medium">Roundness</Label>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  Adjust the corner radius of UI elements.
-                </p>
-              </div>
-              <ToggleGroup
-                type="single"
-                variant="outline"
-                value={roundness}
-                onValueChange={(value) => {
-                  if (value) {
-                    setRoundness(value as typeof roundness);
-                  }
-                }}
-                aria-label="Select roundness"
-                className="w-full md:w-fit"
-                size="lg"
-              >
-                {roundnessOptions.map((option) => (
-                  <ToggleGroupItem
-                    key={option.value}
-                    value={option.value}
-                    aria-label={
-                      { none: "Not Round", sm: "Slightly Round", md: "Round", lg: "Very Round" }[
-                        option.value
-                      ]
-                    }
-                    title={
-                      { none: "Not Round", sm: "Slightly Round", md: "Round", lg: "Very Round" }[
-                        option.value
-                      ]
-                    }
-                    size="lg"
-                    className="size-16"
-                  >
-                    <div className={cn("bg-primary size-10", option.radius)} />
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-            </div>
-          </SettingsTarget>
-
-          <SettingsTarget id="setting-text-scale">
-            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-              <div className="flex flex-col items-start">
-                <Label className="text-sm font-medium">Text Scale</Label>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  Adjust the text size throughout the application.
-                </p>
-              </div>
-              <div className="w-full md:max-w-64">
-                <Select
-                  value={textScale}
-                  onValueChange={(value) => {
-                    setTextScale(value as typeof textScale);
-                  }}
-                >
-                  <SelectTrigger
-                    className="w-full md:w-fit md:max-w-96"
-                    aria-label="Select text scale"
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {textScaleOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {
-                            {
-                              xs: "Tiny",
-                              sm: "Small",
-                              md: "Default",
-                              lg: "Large",
-                              xl: "Huge",
-                              "2xl": "Gigantic",
-                            }[option.value]
-                          }
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </SettingsTarget>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Chat Background</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-6">
-          <SettingsTarget id="setting-chat-background">
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-                <div className="flex flex-1 flex-col items-start">
-                  <Label className="text-sm font-medium">Background Image</Label>
-                  <p className="text-muted-foreground mt-1 text-sm">
-                    Pick a preset or add your own image behind the main chat area.
-                  </p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    setChatBackground((prev) => ({
-                      ...prev,
-                      tint: chatBackgroundDefaults.tint,
-                      blur: chatBackgroundDefaults.blur,
-                      dim: chatBackgroundDefaults.dim,
-                      x: chatBackgroundDefaults.x,
-                      y: chatBackgroundDefaults.y,
-                      zoom: chatBackgroundDefaults.zoom,
-                      backgroundShade: chatBackgroundDefaults.backgroundShade,
-                    }));
-                  }}
-                  disabled={isChatBackgroundDefault}
-                  aria-label="Reset chat background"
-                >
-                  <IconRestore data-icon="inline-start" />
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="flex aspect-video h-auto flex-col gap-1"
-                  onClick={() => void handleAddCustomBackground()}
-                >
-                  <IconPhotoPlus data-icon="inline-start" />
-                  Add Custom
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="relative flex aspect-video h-auto flex-col gap-1 overflow-hidden"
-                  onClick={() => updateChatBackground({ preset: "none" })}
-                >
-                  <IconPhotoOff data-icon="inline-start" />
-                  None
-                  {chatBackground.preset === "none" && (
-                    <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-white">
-                      <IconCheck className="size-8" data-icon="inline-start" />
-                    </span>
-                  )}
-                </Button>
-
-                {(chatBackground.customUrls ?? []).map((url) => (
+              </PopoverTrigger>
+              <PopoverContent align="end">
+                <PopoverHeader>
+                  <PopoverTitle>Delete this background?</PopoverTitle>
+                  <PopoverDescription>This removes it from your custom list.</PopoverDescription>
+                </PopoverHeader>
+                <div className="flex justify-end gap-2">
                   <Button
-                    key={url}
-                    type="button"
+                    size="sm"
                     variant="outline"
-                    className="relative aspect-video h-auto overflow-hidden bg-cover bg-center p-0"
-                    style={{
-                      backgroundImage: cssImageUrl(
-                        resolveChatBackgroundAssetUrl(
-                          chatBackground.customThumbnails?.[url] ?? url,
-                        ),
-                      ),
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setRemovingCustomUrl(null);
                     }}
-                    onClick={() => updateChatBackground({ preset: "custom", customUrl: url })}
-                    title="Custom background"
                   >
-                    <Popover
-                      open={removingCustomUrl === url}
-                      onOpenChange={(open) => setRemovingCustomUrl(open ? url : null)}
-                    >
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className="bg-background/80 hover:bg-background absolute top-1 right-1"
-                          aria-label="Remove custom background"
-                          onMouseDown={(event) => event.stopPropagation()}
-                          onClick={(event) => event.stopPropagation()}
-                        >
-                          <IconX data-icon="inline-start" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent align="end">
-                        <PopoverHeader>
-                          <PopoverTitle>Delete this background?</PopoverTitle>
-                          <PopoverDescription>
-                            This removes it from your custom list.
-                          </PopoverDescription>
-                        </PopoverHeader>
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              setRemovingCustomUrl(null);
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              removeCustomBackground(url);
-                              setRemovingCustomUrl(null);
-                            }}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                    {pendingCustomBackgrounds.some((background) => background.url === url) ? (
-                      <span className="absolute inset-0">
-                        <Skeleton className="h-full w-full rounded-[inherit]" />
-                      </span>
-                    ) : null}
-                    {chatBackground.preset === "custom" && chatBackground.customUrl === url && (
-                      <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-white">
-                        <IconCheck className="size-8" data-icon="inline-start" />
-                      </span>
-                    )}
-                    <span className="absolute right-2 bottom-2 text-xs font-medium text-white drop-shadow">
-                      Custom
-                    </span>
+                    Cancel
                   </Button>
-                ))}
-
-                {Object.entries(chatBackgroundPresets).map(([value, preset]) => (
                   <Button
-                    key={value}
-                    type="button"
-                    variant="outline"
-                    className="relative aspect-video h-auto overflow-hidden bg-cover bg-center p-0"
-                    style={{ backgroundImage: cssImageUrl(preset.thumbnailUrl) }}
-                    onClick={() =>
-                      updateChatBackground({ preset: value as ChatBackgroundPresetOption })
-                    }
-                    title={preset.label}
+                    size="sm"
+                    variant="destructive"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      removeCustomBackground(url);
+                      setRemovingCustomUrl(null);
+                    }}
                   >
-                    {chatBackground.preset === value && (
-                      <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-white">
-                        <IconCheck className="size-8" data-icon="inline-start" />
-                      </span>
-                    )}
-                    <span className="absolute right-2 bottom-2 text-xs font-medium text-white drop-shadow">
-                      {preset.label}
-                    </span>
+                    Delete
                   </Button>
-                ))}
-              </div>
-            </div>
-          </SettingsTarget>
-
-          <SettingsTarget id="setting-chat-background-effects">
-            <div className="grid gap-4 md:grid-cols-3">
-              <ChatBackgroundSlider
-                label="Opacity"
-                value={chatBackground.tint}
-                defaultValue={chatBackgroundDefaults.tint}
-                suffix="%"
-                onCommit={(value) => updateChatBackground({ tint: value })}
-                min={0}
-                max={70}
-                step={5}
-                aria-label="Chat background tint"
-                disabled={chatBackground.preset === "none"}
-                orientation="horizontal"
-              />
-
-              <ChatBackgroundSlider
-                label="Blur"
-                value={chatBackground.blur}
-                defaultValue={chatBackgroundDefaults.blur}
-                suffix="px"
-                onCommit={(value) => updateChatBackground({ blur: value })}
-                min={0}
-                max={20}
-                step={1}
-                aria-label="Chat background blur"
-                disabled={chatBackground.preset === "none"}
-                orientation="horizontal"
-              />
-
-              <ChatBackgroundSlider
-                label="Dim"
-                value={chatBackground.dim}
-                defaultValue={chatBackgroundDefaults.dim}
-                suffix="%"
-                onCommit={(value) => updateChatBackground({ dim: value })}
-                min={0}
-                max={70}
-                step={5}
-                aria-label="Chat background dim"
-                disabled={chatBackground.preset === "none"}
-                orientation="horizontal"
-              />
-
-              <ChatBackgroundSlider
-                label="X"
-                value={chatBackground.x}
-                defaultValue={chatBackgroundDefaults.x}
-                suffix="%"
-                onCommit={(value) => updateChatBackground({ x: value })}
-                min={0}
-                max={100}
-                step={1}
-                aria-label="Chat background horizontal position"
-                disabled={chatBackground.preset === "none"}
-                orientation="horizontal"
-              />
-
-              <ChatBackgroundSlider
-                label="Y"
-                value={chatBackground.y}
-                defaultValue={chatBackgroundDefaults.y}
-                suffix="%"
-                onCommit={(value) => updateChatBackground({ y: value })}
-                min={0}
-                max={100}
-                step={1}
-                aria-label="Chat background vertical position"
-                disabled={chatBackground.preset === "none"}
-                orientation="horizontal"
-              />
-
-              <ChatBackgroundSlider
-                label="Zoom"
-                value={chatBackground.zoom}
-                defaultValue={chatBackgroundDefaults.zoom}
-                suffix="%"
-                onCommit={(value) => updateChatBackground({ zoom: value })}
-                min={100}
-                max={200}
-                step={5}
-                aria-label="Chat background zoom"
-                disabled={chatBackground.preset === "none"}
-                orientation="horizontal"
-              />
-            </div>
-          </SettingsTarget>
-
-          <Separator orientation="horizontal" />
-
-          <SettingsTarget id="setting-chat-background-overlay">
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-row items-center justify-between gap-2">
-                <div className="flex flex-1 flex-col items-start">
-                  <Label className="text-sm font-medium">Chat Background Shade</Label>
-                  <p className="text-muted-foreground mt-1 text-sm">
-                    Places a shade over the background image on chat pages to improve text
-                    readability when a chat is open.
-                  </p>
                 </div>
-              </div>
-              <ChatBackgroundSlider
-                label="Shade Opacity"
-                value={chatBackground.backgroundShade}
-                defaultValue={chatBackgroundDefaults.backgroundShade}
-                suffix="%"
-                onCommit={(value) => updateChatBackground({ backgroundShade: value })}
-                min={0}
-                max={100}
-                step={5}
-                aria-label="Chat background shade opacity"
-                disabled={chatBackground.preset === "none"}
-                orientation="horizontal"
-              />
-            </div>
-          </SettingsTarget>
-        </CardContent>
-      </Card>
+              </PopoverContent>
+            </Popover>
+            {pendingCustomBackgrounds.some((background) => background.url === url) ? (
+              <span className="absolute inset-0">
+                <Skeleton className="h-full w-full rounded-[inherit]" />
+              </span>
+            ) : null}
+            {chatBackground.preset === "custom" && chatBackground.customUrl === url && (
+              <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-white">
+                <IconCheck className="size-8" data-icon="inline-start" />
+              </span>
+            )}
+            <span className="absolute right-2 bottom-2 text-xs font-medium text-white drop-shadow">
+              Custom
+            </span>
+          </Button>
+        ))}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Chat Appearance</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-6">
-          <SettingsTarget id="setting-markdown-highlighting">
-            <div className="flex flex-row items-center justify-between gap-2">
-              <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">Markdown Highlighting</Label>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  Show markdown formatting styles while typing in the chat input.
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={markdownHighlighting}
-                  onCheckedChange={(checked) => {
-                    setMarkdownHighlighting(checked);
-                  }}
-                  aria-label="Toggle markdown highlighting"
-                />
-
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleResetMarkdownHighlighting}
-                  disabled={isMarkdownHighlightingDefault}
-                  aria-label="Reset to default"
-                >
-                  <IconRestore data-icon="inline-start" />
-                </Button>
-              </div>
-            </div>
-          </SettingsTarget>
-
-          <SettingsTarget id="setting-input-style">
-            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-              <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">Input Style</Label>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  Choose how the chat input box is displayed.
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Select
-                  value={inputStyle}
-                  onValueChange={(value) => {
-                    setInputStyle(value as InputStyleOption);
-                  }}
-                >
-                  <SelectTrigger
-                    className="w-full md:w-fit md:max-w-96"
-                    aria-label="Select input style"
-                  >
-                    <SelectValue placeholder="Select style" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="docked">Docked</SelectItem>
-                      <SelectItem value="floating">Floating</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleResetInputStyle}
-                  disabled={isInputStyleDefault}
-                  aria-label="Reset to default"
-                >
-                  <IconRestore data-icon="inline-start" />
-                </Button>
-              </div>
-            </div>
-          </SettingsTarget>
-
-          <SettingsTarget id="setting-collapsed-sidebar-layout">
-            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-              <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">Collapsed Sidebar Layout</Label>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  Choose whether collapsed sidebar buttons are laid out in a row or column.
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Select
-                  value={collapsedSidebarLayout}
-                  onValueChange={(value) => {
-                    setCollapsedSidebarLayout(value as CollapsedSidebarLayoutOption);
-                  }}
-                >
-                  <SelectTrigger
-                    className="w-full md:w-fit md:max-w-96"
-                    aria-label="Select collapsed sidebar layout"
-                  >
-                    <SelectValue placeholder="Select layout" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="row">Row</SelectItem>
-                      <SelectItem value="column">Column</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleResetCollapsedSidebarLayout}
-                  disabled={isCollapsedSidebarLayoutDefault}
-                  aria-label="Reset to default"
-                >
-                  <IconRestore data-icon="inline-start" />
-                </Button>
-              </div>
-            </div>
-          </SettingsTarget>
-        </CardContent>
-      </Card>
+        {Object.entries(chatBackgroundPresets).map(([value, preset]) => (
+          <Button
+            key={value}
+            type="button"
+            variant="outline"
+            className="relative aspect-video h-auto overflow-hidden bg-cover bg-center p-0"
+            style={{ backgroundImage: cssImageUrl(preset.thumbnailUrl) }}
+            onClick={() => updateChatBackground({ preset: value as ChatBackgroundPresetOption })}
+            title={preset.label}
+          >
+            {chatBackground.preset === value && (
+              <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-white">
+                <IconCheck className="size-8" data-icon="inline-start" />
+              </span>
+            )}
+            <span className="absolute right-2 bottom-2 text-xs font-medium text-white drop-shadow">
+              {preset.label}
+            </span>
+          </Button>
+        ))}
+      </div>
     </div>
+  );
+}
+
+const ChatBackgroundSlider = ({
+  label,
+  field,
+  suffix,
+  ...props
+}: {
+  label: string;
+  field: (typeof EFFECT_KEYS)[number];
+  suffix: string;
+} & Omit<
+  ComponentProps<typeof Slider>,
+  "defaultValue" | "value" | "onValueChange" | "onValueCommit"
+>) => {
+  const { chatBackground, updateChatBackground } = useChatBackground();
+  const [draggingValue, setDraggingValue] = useState<number | null>(null);
+  const displayValue = [draggingValue ?? chatBackground[field] ?? chatBackgroundDefaults[field]];
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Label className="text-sm tabular-nums">
+        {label}: {displayValue[0]}
+        {suffix}
+      </Label>
+      <Slider
+        value={displayValue}
+        onValueChange={(nextValue) => setDraggingValue(nextValue[0])}
+        onValueCommit={(nextValue) => {
+          setDraggingValue(null);
+          updateChatBackground({ [field]: nextValue[0] });
+        }}
+        aria-label={`Chat background ${label.toLowerCase()}`}
+        disabled={chatBackground.preset === "none"}
+        {...props}
+      />
+    </div>
+  );
+};
+
+export function ChatBackgroundEffects() {
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="grid gap-4 md:grid-cols-3">
+        <ChatBackgroundSlider label="Opacity" field="tint" suffix="%" min={0} max={70} step={5} />
+        <ChatBackgroundSlider label="Blur" field="blur" suffix="px" min={0} max={20} step={1} />
+        <ChatBackgroundSlider label="Dim" field="dim" suffix="%" min={0} max={70} step={5} />
+        <ChatBackgroundSlider label="X" field="x" suffix="%" min={0} max={100} step={1} />
+        <ChatBackgroundSlider label="Y" field="y" suffix="%" min={0} max={100} step={1} />
+        <ChatBackgroundSlider label="Zoom" field="zoom" suffix="%" min={100} max={200} step={5} />
+      </div>
+      <Separator orientation="horizontal" />
+    </div>
+  );
+}
+
+export function ChatBackgroundShade() {
+  return (
+    <ChatBackgroundSlider
+      label="Shade Opacity"
+      field="backgroundShade"
+      suffix="%"
+      min={0}
+      max={100}
+      step={5}
+    />
   );
 }

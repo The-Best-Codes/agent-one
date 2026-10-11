@@ -21,7 +21,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { generateChatTitleAI, getChatTitleFallback } from "@/lib/ai/title-generator";
-import { extractReasoningEnabledAtom, titleGenerationAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -46,8 +46,8 @@ const ChangeTitleForm = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const { saveChatTitle, loadChatMetadata, loadChatMessages } = usePersistence();
   const { getModelById } = useModelCatalog();
-  const titleGenerationSettings = useAtomValue(titleGenerationAtom);
-  const extractReasoningEnabled = useAtomValue(extractReasoningEnabledAtom);
+  const titleGenerationSettings = useAtomValue(settingAtoms.TITLE_GENERATION);
+  const extractReasoningEnabled = useAtomValue(settingAtoms.EXTRACT_REASONING_ENABLED);
 
   const handleSave = () => {
     if (title.trim() && title.trim() !== currentTitle) {

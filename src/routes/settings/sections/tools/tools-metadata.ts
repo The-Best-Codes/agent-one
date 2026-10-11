@@ -1,4 +1,5 @@
-import { DEFAULT_SETTINGS, type ToolConfigs, type ToolId } from "@/lib/settings/types";
+import { DEFAULT_SETTINGS } from "@/lib/settings/definitions";
+import type { ToolConfigs, ToolId } from "@/lib/settings/types";
 
 export interface ToolInfo {
   name: string;
@@ -150,55 +151,10 @@ export const TOOL_GROUPS: ToolGroup[] = [
 ];
 
 export function getMergedToolConfigs(toolConfigs: ToolConfigs): ToolConfigs {
-  return {
-    dateTime: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.dateTime, ...toolConfigs.dateTime },
-    waitNumberMilliseconds: {
-      ...DEFAULT_SETTINGS.TOOL_CONFIGS.waitNumberMilliseconds,
-      ...toolConfigs.waitNumberMilliseconds,
-    },
-    getUrlContent: {
-      ...DEFAULT_SETTINGS.TOOL_CONFIGS.getUrlContent,
-      ...toolConfigs.getUrlContent,
-    },
-    webSearch: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.webSearch, ...toolConfigs.webSearch },
-    wikipedia: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.wikipedia, ...toolConfigs.wikipedia },
-    memory: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.memory, ...toolConfigs.memory },
-    editFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.editFile, ...toolConfigs.editFile },
-    createFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.createFile, ...toolConfigs.createFile },
-    deleteFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.deleteFile, ...toolConfigs.deleteFile },
-    viewFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.viewFile, ...toolConfigs.viewFile },
-    executeCommand: {
-      ...DEFAULT_SETTINGS.TOOL_CONFIGS.executeCommand,
-      ...toolConfigs.executeCommand,
-    },
-    subAgent: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.subAgent, ...toolConfigs.subAgent },
-    listSettings: {
-      ...DEFAULT_SETTINGS.TOOL_CONFIGS.listSettings,
-      ...toolConfigs.listSettings,
-    },
-    getSetting: {
-      ...DEFAULT_SETTINGS.TOOL_CONFIGS.getSetting,
-      ...toolConfigs.getSetting,
-    },
-    updateSetting: {
-      ...DEFAULT_SETTINGS.TOOL_CONFIGS.updateSetting,
-      ...toolConfigs.updateSetting,
-    },
-    listScheduledAgents: {
-      ...DEFAULT_SETTINGS.TOOL_CONFIGS.listScheduledAgents,
-      ...toolConfigs.listScheduledAgents,
-    },
-    createScheduledAgent: {
-      ...DEFAULT_SETTINGS.TOOL_CONFIGS.createScheduledAgent,
-      ...toolConfigs.createScheduledAgent,
-    },
-    updateScheduledAgent: {
-      ...DEFAULT_SETTINGS.TOOL_CONFIGS.updateScheduledAgent,
-      ...toolConfigs.updateScheduledAgent,
-    },
-    deleteScheduledAgent: {
-      ...DEFAULT_SETTINGS.TOOL_CONFIGS.deleteScheduledAgent,
-      ...toolConfigs.deleteScheduledAgent,
-    },
-  };
+  return Object.fromEntries(
+    Object.entries(DEFAULT_SETTINGS.TOOL_CONFIGS).map(([toolId, defaults]) => [
+      toolId,
+      { ...defaults, ...toolConfigs[toolId as ToolId] },
+    ]),
+  ) as ToolConfigs;
 }

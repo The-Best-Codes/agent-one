@@ -1,7 +1,7 @@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 
-import { sections } from "./sections-config";
+import { SETTINGS_SECTIONS } from "./settings-schema";
 
 interface SettingsSidebarProps {
   activeSection: string;
@@ -28,7 +28,7 @@ export default function SettingsSidebar({
       role="tablist"
       aria-orientation="vertical"
     >
-      {sections.map((section) => (
+      {SETTINGS_SECTIONS.map((section) => (
         <ToggleGroupItem
           key={section.id}
           value={section.id}

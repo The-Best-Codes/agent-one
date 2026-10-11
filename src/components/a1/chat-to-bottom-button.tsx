@@ -11,7 +11,7 @@ import {
   ContextMenuLabel,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { showChatToBottomButtonAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 
 interface ChatToBottomButtonProps {
   onClick: () => void;
@@ -19,7 +19,7 @@ interface ChatToBottomButtonProps {
 }
 
 export function ChatToBottomButton({ onClick, className }: ChatToBottomButtonProps) {
-  const [showSetting, setShowSetting] = useAtom(showChatToBottomButtonAtom);
+  const [showSetting, setShowSetting] = useAtom(settingAtoms.SHOW_CHAT_TO_BOTTOM_BUTTON);
 
   if (!showSetting) return null;
 

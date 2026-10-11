@@ -12,7 +12,8 @@ import {
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { DEFAULT_SETTINGS, type ToolConfigs, type ToolId } from "@/lib/settings/types";
+import { DEFAULT_SETTINGS } from "@/lib/settings/definitions";
+import type { ToolConfigs, ToolId } from "@/lib/settings/types";
 
 import { TOOL_INFO } from "./tools-metadata";
 

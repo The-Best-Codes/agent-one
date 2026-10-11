@@ -7,7 +7,7 @@ import {
   type ChatStatusIndicator as ChatStatusIndicatorType,
   chatStatusIndicatorsAtom,
 } from "@/lib/jotai/atoms";
-import { showChatStatusIndicatorAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 const DEBOUNCE_MS = 150;
@@ -43,7 +43,7 @@ const StatusIcon = ({ status }: { status: ChatStatusIndicatorType }) => {
 };
 
 export const ChatStatusIndicator = ({ chatId }: { chatId: string }) => {
-  const showStatusIndicator = useAtomValue(showChatStatusIndicatorAtom);
+  const showStatusIndicator = useAtomValue(settingAtoms.SHOW_CHAT_STATUS_INDICATOR);
   const chatStatusIndicators = useAtomValue(chatStatusIndicatorsAtom);
   const rawStatus = showStatusIndicator ? chatStatusIndicators[chatId] : null;
 

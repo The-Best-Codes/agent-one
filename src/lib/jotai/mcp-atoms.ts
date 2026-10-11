@@ -1,7 +1,7 @@
 import { atom } from "jotai";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 
-import { DEFAULT_SETTINGS, type McpServerConfig } from "@/lib/settings/types";
+import type { McpServerConfig } from "@/lib/settings/types";
 
 const mcpServersStorage = createJSONStorage<McpServerConfig[] | undefined>(() => localStorage);
 const mcpServersKey = "agent-one-MCP_SERVERS";
@@ -15,12 +15,9 @@ if (mcpServersStorage.getItem(mcpServersKey, undefined) === undefined) {
 }
 mcpServersStorage.removeItem(legacyMcpServersKey);
 
-export const mcpServersAtom = atomWithStorage<McpServerConfig[]>(
-  mcpServersKey,
-  DEFAULT_SETTINGS.MCP_SERVERS,
-  undefined,
-  { getOnInit: true },
-);
+export const mcpServersAtom = atomWithStorage<McpServerConfig[]>(mcpServersKey, [], undefined, {
+  getOnInit: true,
+});
 
 export type McpAuthState = "logged-in" | "logged-out" | "no-auth" | "supports-oauth" | undefined;
 

@@ -1,93 +1,29 @@
-// Some settings are intentionally omitted from the inspectable setting atoms list. You should still consider adding new settings here.
-import type { Atom } from "jotai";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 
-import {
-  chatSortAtom,
-  chatVirtualizationModeAtom,
-  chatVirtualizationThresholdAtom,
-  collapsedSidebarLayoutAtom,
-  colorThemeAtom,
-  extractReasoningEnabledAtom,
-  fontAtom,
-  inputStyleAtom,
-  interruptKeyAtom,
-  keyboardShortcutsEnabledInInputsAtom,
-  markdownHighlightingAtom,
-  markdownRenderingAtom,
-  maxCodeblockCharsAtom,
-  maxMessageLengthAtom,
-  maxToolResultCharsAtom,
-  mcpParallelLoadLimitAtom,
-  notificationSettingAtom,
-  regenerateOnSaveAtom,
-  remendEnabledAtom,
-  roundnessAtom,
-  showChatStatusIndicatorAtom,
-  sidebarChatTimeGroupingAtom,
-  showMessageActionRowAtom,
-  showChatToBottomButtonAtom,
-  showMessagePreviewRailAtom,
-  submitKeyAtom,
-  textScaleAtom,
-  themeAtom,
-  uiTintAtom,
-  uiTintStrengthAtom,
-} from "@/lib/jotai/settings-atoms";
+import { SETTING_KEYS, SETTINGS, type SettingKey } from "./definitions";
 
-import { DEFAULT_SETTINGS } from "./types";
-import * as types from "./types";
+const INSPECTABLE_CONTROLS = new Set(["select", "switch", "number", "slider"]);
 
-const inspectableSettingAtoms = {
-  CHAT_SORT: chatSortAtom,
-  SIDEBAR_CHAT_TIME_GROUPING: sidebarChatTimeGroupingAtom,
-  CHAT_VIRTUALIZATION_MODE: chatVirtualizationModeAtom,
-  CHAT_VIRTUALIZATION_THRESHOLD: chatVirtualizationThresholdAtom,
-  COLLAPSED_SIDEBAR_LAYOUT: collapsedSidebarLayoutAtom,
-  COLOR_THEME: colorThemeAtom,
-  EXTRACT_REASONING_ENABLED: extractReasoningEnabledAtom,
-  FONT: fontAtom,
-  INPUT_STYLE: inputStyleAtom,
-  KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS: keyboardShortcutsEnabledInInputsAtom,
-  MARKDOWN_HIGHLIGHTING: markdownHighlightingAtom,
-  MARKDOWN_RENDERING: markdownRenderingAtom,
-  MAX_CODEBLOCK_CHARS: maxCodeblockCharsAtom,
-  MAX_MESSAGE_LENGTH: maxMessageLengthAtom,
-  MAX_TOOL_RESULT_CHARS: maxToolResultCharsAtom,
-  MCP_PARALLEL_LOAD_LIMIT: mcpParallelLoadLimitAtom,
-  NOTIFICATION_SETTING: notificationSettingAtom,
-  REGENERATE_ON_SAVE: regenerateOnSaveAtom,
-  REMEND_ENABLED: remendEnabledAtom,
-  ROUNDNESS: roundnessAtom,
-  SHOW_CHAT_STATUS_INDICATOR: showChatStatusIndicatorAtom,
-  SHOW_MESSAGE_ACTION_ROW: showMessageActionRowAtom,
-  SHOW_CHAT_TO_BOTTOM_BUTTON: showChatToBottomButtonAtom,
-  SHOW_MESSAGE_PREVIEW_RAIL: showMessagePreviewRailAtom,
-  SUBMIT_KEY: submitKeyAtom,
-  INTERRUPT_KEY: interruptKeyAtom,
-  TEXT_SCALE: textScaleAtom,
-  THEME: themeAtom,
-  UI_TINT: uiTintAtom,
-  UI_TINT_STRENGTH: uiTintStrengthAtom,
-} satisfies Record<string, Atom<unknown>>;
+const inspectableKeys = SETTING_KEYS.filter((key) =>
+  INSPECTABLE_CONTROLS.has(SETTINGS[key].control),
+);
 
-type InspectableSettingKey = keyof typeof inspectableSettingAtoms;
-
-function getSettingOptions(key: InspectableSettingKey): readonly unknown[] | undefined {
-  return (types as unknown as Record<string, readonly unknown[] | undefined>)[`${key}_OPTIONS`];
-}
-
-export function isInspectableKey(key: string): key is InspectableSettingKey {
-  return key in inspectableSettingAtoms;
+export function isInspectableKey(key: string): key is SettingKey {
+  return (inspectableKeys as string[]).includes(key);
 }
 
 export function getInspectableKeys(): string[] {
-  return Object.keys(inspectableSettingAtoms);
+  return inspectableKeys;
 }
 
 export interface SettingMetadata {
   key: string;
+  label?: string;
+  description?: string;
   type: string;
   options: readonly unknown[] | null;
+  min?: number;
+  max?: number;
   defaultValue: unknown;
 }
 
@@ -96,19 +32,27 @@ export function getSettingMetadata(key: string): SettingMetadata | null {
     return null;
   }
 
-  const defaultValue = DEFAULT_SETTINGS[key];
-  const options = getSettingOptions(key);
+  const definition = SETTINGS[key];
 
   return {
     key,
-    type: options ? "enum" : typeof defaultValue,
-    options: options || (typeof defaultValue === "boolean" ? [true, false] : null),
-    defaultValue,
+    label: definition.label,
+    description: definition.description,
+    type: "options" in definition ? "enum" : typeof definition.default,
+    options:
+      "options" in definition
+        ? Object.keys(definition.options)
+        : typeof definition.default === "boolean"
+          ? [true, false]
+          : null,
+    min: "min" in definition ? definition.min : undefined,
+    max: "max" in definition ? definition.max : undefined,
+    defaultValue: definition.default,
   };
 }
 
 export function getSettingAtom(key: string) {
-  return isInspectableKey(key) ? inspectableSettingAtoms[key] : null;
+  return isInspectableKey(key) ? settingAtoms[key] : null;
 }
 
 export function validateSettingValue(
@@ -135,6 +79,18 @@ export function validateSettingValue(
     return {
       success: false,
       error: `Expected type ${expectedType}, but received ${typeof value}`,
+    };
+  }
+
+  if (
+    typeof value === "number" &&
+    (!Number.isInteger(value) ||
+      (metadata.min !== undefined && value < metadata.min) ||
+      (metadata.max !== undefined && value > metadata.max))
+  ) {
+    return {
+      success: false,
+      error: `Expected a whole number between ${metadata.min} and ${metadata.max}`,
     };
   }
 

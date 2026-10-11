@@ -27,7 +27,7 @@ import {
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useSettingsPath } from "@/hooks/use-settings-path";
-import { collapsedSidebarLayoutAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { debugModeEnabledAtom, sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
@@ -52,7 +52,7 @@ const SidebarContent = ({
   onChatClick?: (id: string) => void;
 }) => {
   const navigate = useNavigate();
-  const debugSettingsPath = useSettingsPath({ tab: "about", id: "setting-debug" });
+  const debugSettingsPath = useSettingsPath({ id: "setting-debug" });
   const [debugMode, setDebugMode] = useAtom(debugModeEnabledAtom);
   const clickTimestamps = useRef<number[]>([]);
 
@@ -125,7 +125,7 @@ const SidebarContent = ({
 
 export const Sidebar = ({ className }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useAtom(sidebarCollapsedAtom);
-  const [collapsedLayout] = useAtom(collapsedSidebarLayoutAtom);
+  const [collapsedLayout] = useAtom(settingAtoms.COLLAPSED_SIDEBAR_LAYOUT);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");

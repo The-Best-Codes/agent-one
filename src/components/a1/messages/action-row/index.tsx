@@ -9,8 +9,7 @@ import {
 } from "@/components/ui/adaptive-tooltip";
 import { isTtsProviderConfigured, normalizeTtsSettings } from "@/lib/ai/tts";
 import { apiKeyAtomFamily } from "@/lib/jotai/api-key-atoms";
-import { showMessageActionRowAtom } from "@/lib/jotai/settings-atoms";
-import { ttsSettingsAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 import { BranchButton } from "./branch-button";
@@ -33,7 +32,7 @@ export const MessageActionRow = ({
   onEdit?: () => void;
   onBranch?: () => void;
 }) => {
-  const [showMessageActionRow] = useAtom(showMessageActionRowAtom);
+  const [showMessageActionRow] = useAtom(settingAtoms.SHOW_MESSAGE_ACTION_ROW);
 
   return (
     <div
@@ -108,7 +107,7 @@ export const MessageActionRow = ({
 };
 
 function TtsAction({ messageId, text }: { messageId: string; text: string }) {
-  const rawTtsSettings = useAtomValue(ttsSettingsAtom);
+  const rawTtsSettings = useAtomValue(settingAtoms.TTS);
   const ttsSettings = normalizeTtsSettings(rawTtsSettings);
   const apiKeys = {
     openai: useAtomValue(apiKeyAtomFamily("tts-openai")),

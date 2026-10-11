@@ -3,7 +3,7 @@ import { useAtomValue } from "jotai";
 
 import { MemoizedMarkdown } from "@/components/a1/markdown/memoized-markdown";
 import { PerformantMarkdown } from "@/components/a1/markdown/performant-markdown";
-import { markdownRenderingAtom, maxMessageLengthAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 export const MessagePartText = ({
@@ -15,8 +15,8 @@ export const MessagePartText = ({
   text: TextUIPart["text"];
   messageRole: UIMessage["role"];
 }) => {
-  const maxMessageLength = useAtomValue(maxMessageLengthAtom);
-  const markdownRendering = useAtomValue(markdownRenderingAtom);
+  const maxMessageLength = useAtomValue(settingAtoms.MAX_MESSAGE_LENGTH);
+  const markdownRendering = useAtomValue(settingAtoms.MARKDOWN_RENDERING);
   const shouldUsePerformantRenderer = text.length > maxMessageLength;
 
   if (!text || text.trim() === "") return null;

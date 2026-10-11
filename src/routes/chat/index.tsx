@@ -18,12 +18,7 @@ import {
   clearEditingMessagesAtom,
   editingMessageIdsAtom,
 } from "@/lib/jotai/chat-message-editing-atoms";
-import {
-  chatBackgroundAtom,
-  chatVirtualizationModeAtom,
-  chatVirtualizationThresholdAtom,
-  showMessagePreviewRailAtom,
-} from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
@@ -36,10 +31,10 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
   const [delayPassed, setDelayPassed] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const editingMessageIds = useAtomValue(editingMessageIdsAtom);
-  const chatBackground = useAtomValue(chatBackgroundAtom);
-  const chatVirtualizationMode = useAtomValue(chatVirtualizationModeAtom);
-  const chatVirtualizationThreshold = useAtomValue(chatVirtualizationThresholdAtom);
-  const showMessagePreviewRail = useAtomValue(showMessagePreviewRailAtom);
+  const chatBackground = useAtomValue(settingAtoms.CHAT_BACKGROUND);
+  const chatVirtualizationMode = useAtomValue(settingAtoms.CHAT_VIRTUALIZATION_MODE);
+  const chatVirtualizationThreshold = useAtomValue(settingAtoms.CHAT_VIRTUALIZATION_THRESHOLD);
+  const showMessagePreviewRail = useAtomValue(settingAtoms.SHOW_MESSAGE_PREVIEW_RAIL);
   const clearEditingMessages = useSetAtom(clearEditingMessagesAtom);
 
   useEffect(() => {

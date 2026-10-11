@@ -8,7 +8,7 @@ import {
   IconRocket,
   IconShieldCheck,
 } from "@tabler/icons-react";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtomValue } from "jotai";
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -24,7 +24,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
   Select,
@@ -38,32 +37,17 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { useUpdate } from "@/contexts/use-update/update-hooks";
 import { modelDirectoryStatusAtom, updateModelDirectory } from "@/lib/ai/models/model-directory";
-import { debugModeEnabledAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { extensionListStatusAtom, updateExtensionList } from "@/lib/mcp-registry/sync";
 
-import SettingsTarget from "../settings-target";
+import { SettingsTarget } from "../settings-target";
 
 function formatModelDirectoryTimestamp(value: number, neverLabel: string): string {
   return value ? new Date(value).toLocaleString() : neverLabel;
 }
 
-export default function AboutSection() {
-  const navigate = useNavigate();
+export function AppUpdates() {
   const { updateStatus, updateProgress, updateVersion, checkForUpdates, downloadAndInstallUpdate } =
     useUpdate();
-  const [debugMode] = useAtom(debugModeEnabledAtom);
-  const extensionListStatus = useAtomValue(extensionListStatusAtom);
-  const extensionListProgress =
-    extensionListStatus.totalCount === null
-      ? undefined
-      : extensionListStatus.totalCount === 0
-        ? 100
-        : Math.min(
-            100,
-            (extensionListStatus.processedCount / extensionListStatus.totalCount) * 100,
-          );
-  const modelDirectoryStatus = useAtomValue(modelDirectoryStatusAtom);
-  const [isUpdatingModelDirectory, setIsUpdatingModelDirectory] = useState(false);
 
   const currentVersion = packageJson.version;
   const releaseNoteVersions = useMemo(() => getReleaseNotesVersions(), []);
@@ -190,16 +174,78 @@ export default function AboutSection() {
 
   const stateDisplay = getStateDisplay();
 
-  const handleUpdateExtensionList = async () => {
-    const result = await updateExtensionList();
-    if (!result.ok) {
-      toast.error("Failed to update extension list", { description: result.error });
-      return;
-    }
-    toast.success("Extension list updated", {
-      description: `${(result.entryCount ?? 0).toLocaleString()} extensions loaded.`,
-    });
-  };
+  return (
+    <div className="flex flex-col gap-6">
+      <div>
+        <p className="text-muted-foreground text-sm">Current Version</p>
+        <p className="text-3xl font-bold tracking-tight">{currentVersion}</p>
+      </div>
+
+      <Separator />
+
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-lg">
+              {stateDisplay.icon}
+            </div>
+            <div>
+              <p className="leading-none font-medium">{stateDisplay.title}</p>
+              <p className="text-muted-foreground text-sm">{stateDisplay.description}</p>
+            </div>
+          </div>
+          {getActionButton()}
+        </div>
+
+        {(updateStatus === "downloading" || updateStatus === "installing") && (
+          <Progress
+            value={updateProgress}
+            indeterminate={!(updateProgress >= 1 && updateProgress <= 99)}
+          />
+        )}
+      </div>
+
+      {selectedReleaseNotes && (
+        <Accordion type="single" collapsible className="border-t pt-3">
+          <AccordionItem value="release-notes" className="border-b-0">
+            <AccordionTrigger className="py-1.5">Release notes</AccordionTrigger>
+            <AccordionContent className="h-auto overflow-visible pb-0">
+              <Select
+                value={selectedReleaseNotesVersion}
+                onValueChange={setSelectedReleaseNotesVersion}
+              >
+                <SelectTrigger className="mb-3" size="sm" aria-label="Select release notes version">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {releaseNoteVersions.map((version) => (
+                      <SelectItem key={version} value={version}>
+                        v{version}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <div className="prose prose-sm prose-neutral dark:prose-invert prose-quoteless max-w-none">
+                <MemoizedMarkdown
+                  allowInternalLinks
+                  content={selectedReleaseNotes}
+                  id={`release-notes-${selectedReleaseNotesVersion}`}
+                  messageRole="assistant"
+                />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      )}
+    </div>
+  );
+}
+
+export function ModelDirectoryUpdates() {
+  const modelDirectoryStatus = useAtomValue(modelDirectoryStatusAtom);
+  const [isUpdatingModelDirectory, setIsUpdatingModelDirectory] = useState(false);
 
   const handleUpdateModelDirectory = async () => {
     setIsUpdatingModelDirectory(true);
@@ -220,246 +266,172 @@ export default function AboutSection() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <SettingsTarget id="setting-app-updates">
-        <Card>
-          <CardHeader>
-            <CardTitle>App Updates</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-6">
-            <div>
-              <p className="text-muted-foreground text-sm">Current Version</p>
-              <p className="text-3xl font-bold tracking-tight">{currentVersion}</p>
-            </div>
-
-            <Separator />
-
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-lg">
-                    {stateDisplay.icon}
-                  </div>
-                  <div>
-                    <p className="leading-none font-medium">{stateDisplay.title}</p>
-                    <p className="text-muted-foreground text-sm">{stateDisplay.description}</p>
-                  </div>
-                </div>
-                {getActionButton()}
-              </div>
-
-              {(updateStatus === "downloading" || updateStatus === "installing") && (
-                <Progress
-                  value={updateProgress}
-                  indeterminate={!(updateProgress >= 1 && updateProgress <= 99)}
-                />
-              )}
-            </div>
-
-            {selectedReleaseNotes && (
-              <Accordion type="single" collapsible className="border-t pt-3">
-                <AccordionItem value="release-notes" className="border-b-0">
-                  <AccordionTrigger className="py-1.5">Release notes</AccordionTrigger>
-                  <AccordionContent className="h-auto overflow-visible pb-0">
-                    <Select
-                      value={selectedReleaseNotesVersion}
-                      onValueChange={setSelectedReleaseNotesVersion}
-                    >
-                      <SelectTrigger
-                        className="mb-3"
-                        size="sm"
-                        aria-label="Select release notes version"
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {releaseNoteVersions.map((version) => (
-                            <SelectItem key={version} value={version}>
-                              v{version}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <div className="prose prose-sm prose-neutral dark:prose-invert prose-quoteless max-w-none">
-                      <MemoizedMarkdown
-                        allowInternalLinks
-                        content={selectedReleaseNotes}
-                        id={`release-notes-${selectedReleaseNotesVersion}`}
-                        messageRole="assistant"
-                      />
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
+    <>
+      <p className="text-muted-foreground text-sm">
+        {"Download the latest"}{" "}
+        <SettingsLink className="underline" id="setting-built-in-providers">
+          built-in providers'
+        </SettingsLink>{" "}
+        model metadata. This will update the model list available in the UI.
+      </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-1">
+          <p className="text-sm font-medium">
+            {modelDirectoryStatus.hasDownloadedList ? "Model list loaded" : "Model list not loaded"}
+          </p>
+          <p className="text-muted-foreground text-sm tabular-nums">
+            {`Last updated: ${formatModelDirectoryTimestamp(
+              modelDirectoryStatus.hasDownloadedList ? modelDirectoryStatus.fetchedAt : 0,
+              "Never",
+            )}`}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={handleUpdateModelDirectory}
+            disabled={isUpdatingModelDirectory}
+            size="sm"
+          >
+            {isUpdatingModelDirectory ? (
+              <Spinner data-icon="inline-start" />
+            ) : (
+              <IconRefresh data-icon="inline-start" />
             )}
-          </CardContent>
-        </Card>
-      </SettingsTarget>
-      <SettingsTarget id="setting-model-directory">
-        <Card>
-          <CardHeader>
-            <CardTitle>Model List Updates</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <p className="text-muted-foreground text-sm">
-              {"Download the latest"}{" "}
-              <SettingsLink className="underline" tab="providers" id="setting-built-in-providers">
-                built-in providers'
-              </SettingsLink>{" "}
-              model metadata. This will update the model list available in the UI.
+            Update now
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export function ExtensionListUpdates() {
+  const extensionListStatus = useAtomValue(extensionListStatusAtom);
+  const extensionListProgress =
+    extensionListStatus.totalCount === null
+      ? undefined
+      : extensionListStatus.totalCount === 0
+        ? 100
+        : Math.min(
+            100,
+            (extensionListStatus.processedCount / extensionListStatus.totalCount) * 100,
+          );
+
+  const handleUpdateExtensionList = async () => {
+    const result = await updateExtensionList();
+    if (!result.ok) {
+      toast.error("Failed to update extension list", { description: result.error });
+      return;
+    }
+    toast.success("Extension list updated", {
+      description: `${(result.entryCount ?? 0).toLocaleString()} extensions loaded.`,
+    });
+  };
+
+  return (
+    <>
+      <p className="text-muted-foreground text-sm">
+        Download the latest extension metadata. This will update the{" "}
+        <Link className="underline" to="/extensions">
+          extension list
+        </Link>{" "}
+        available in the UI.
+      </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-1">
+          <p className="text-sm font-medium">
+            {extensionListStatus.hasDownloadedList
+              ? "Extension list loaded"
+              : "Extension list not loaded"}
+          </p>
+          <p className="text-muted-foreground text-sm tabular-nums">
+            Last updated: {formatModelDirectoryTimestamp(extensionListStatus.fetchedAt, "Never")}
+          </p>
+          {extensionListStatus.isUpdating ? (
+            <p className="text-muted-foreground text-sm tabular-nums">
+              {extensionListStatus.totalCount === null
+                ? `${extensionListStatus.processedCount.toLocaleString()} entries processed`
+                : `${extensionListStatus.processedCount.toLocaleString()} of ${extensionListStatus.totalCount.toLocaleString()} entries processed`}
             </p>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-col gap-1">
-                <p className="text-sm font-medium">
-                  {modelDirectoryStatus.hasDownloadedList
-                    ? "Model list loaded"
-                    : "Model list not loaded"}
-                </p>
-                <p className="text-muted-foreground text-sm tabular-nums">
-                  {`Last updated: ${formatModelDirectoryTimestamp(
-                    modelDirectoryStatus.hasDownloadedList ? modelDirectoryStatus.fetchedAt : 0,
-                    "Never",
-                  )}`}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={handleUpdateModelDirectory}
-                  disabled={isUpdatingModelDirectory}
-                  size="sm"
-                >
-                  {isUpdatingModelDirectory ? (
-                    <Spinner data-icon="inline-start" />
-                  ) : (
-                    <IconRefresh data-icon="inline-start" />
-                  )}
-                  Update now
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </SettingsTarget>
-      <SettingsTarget id="setting-extension-list">
-        <Card>
-          <CardHeader>
-            <CardTitle>Extension List Updates</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <p className="text-muted-foreground text-sm">
-              Download the latest extension metadata. This will update the{" "}
-              <Link className="underline" to="/extensions">
-                extension list
-              </Link>{" "}
-              available in the UI.
-            </p>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-col gap-1">
-                <p className="text-sm font-medium">
-                  {extensionListStatus.hasDownloadedList
-                    ? "Extension list loaded"
-                    : "Extension list not loaded"}
-                </p>
-                <p className="text-muted-foreground text-sm tabular-nums">
-                  Last updated:{" "}
-                  {formatModelDirectoryTimestamp(extensionListStatus.fetchedAt, "Never")}
-                </p>
-                {extensionListStatus.isUpdating ? (
-                  <p className="text-muted-foreground text-sm tabular-nums">
-                    {extensionListStatus.totalCount === null
-                      ? `${extensionListStatus.processedCount.toLocaleString()} entries processed`
-                      : `${extensionListStatus.processedCount.toLocaleString()} of ${extensionListStatus.totalCount.toLocaleString()} entries processed`}
-                  </p>
-                ) : null}
-                {extensionListStatus.error ? (
-                  <p className="text-destructive text-sm">{extensionListStatus.error}</p>
-                ) : null}
-              </div>
-              <Button
-                onClick={handleUpdateExtensionList}
-                disabled={extensionListStatus.isUpdating}
-                size="sm"
-              >
-                {extensionListStatus.isUpdating ? (
-                  <Spinner data-icon="inline-start" />
-                ) : (
-                  <IconRefresh data-icon="inline-start" />
-                )}
-                Update now
-              </Button>
-            </div>
-            {extensionListStatus.isUpdating ? (
-              <Progress
-                value={extensionListProgress}
-                indeterminate={extensionListStatus.totalCount === null}
-                aria-label="Extension list update progress"
-              />
-            ) : null}
-          </CardContent>
-        </Card>
-      </SettingsTarget>
-      <Card>
-        <CardHeader>
-          <CardTitle>Help</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-6">
-          <div className="flex flex-col gap-1">
-            <a
-              target="_blank"
-              href="https://github.com/AgentOne-Dev/agent-one-public/issues/new"
-              className="flex w-fit items-center gap-1 underline"
-            >
-              Report a bug
-              <IconExternalLink className="size-4" />
-            </a>
-            <a
-              target="_blank"
-              href="https://www.agent-one.dev/discord"
-              className="flex w-fit items-center gap-1 underline"
-            >
-              Get help on Discord
-              <IconExternalLink className="size-4" />
-            </a>
-            <a
-              target="_blank"
-              href="https://docs.agent-one.dev/docs"
-              className="flex w-fit items-center gap-1 underline"
-            >
-              Read the docs
-              <IconExternalLink className="size-4" />
-            </a>
-          </div>
-        </CardContent>
-      </Card>
-      {debugMode && (
-        <SettingsTarget id="setting-debug">
-          <Card>
-            <CardHeader>
-              <CardTitle>Debug</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-lg">
-                    <IconBug className="text-muted-foreground size-5" />
-                  </div>
-                  <div>
-                    <p className="leading-none font-medium">Internal Tests</p>
-                    <p className="text-muted-foreground text-sm">
-                      Access internal testing tools and utilities.
-                    </p>
-                  </div>
-                </div>
-                <Button onClick={() => navigate("/tests")} size="sm">
-                  Open Tests
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </SettingsTarget>
-      )}
+          ) : null}
+          {extensionListStatus.error ? (
+            <p className="text-destructive text-sm">{extensionListStatus.error}</p>
+          ) : null}
+        </div>
+        <Button
+          onClick={handleUpdateExtensionList}
+          disabled={extensionListStatus.isUpdating}
+          size="sm"
+        >
+          {extensionListStatus.isUpdating ? (
+            <Spinner data-icon="inline-start" />
+          ) : (
+            <IconRefresh data-icon="inline-start" />
+          )}
+          Update now
+        </Button>
+      </div>
+      {extensionListStatus.isUpdating ? (
+        <Progress
+          value={extensionListProgress}
+          indeterminate={extensionListStatus.totalCount === null}
+          aria-label="Extension list update progress"
+        />
+      ) : null}
+    </>
+  );
+}
+
+export function HelpLinks() {
+  return (
+    <div className="flex flex-col gap-1">
+      <a
+        target="_blank"
+        href="https://github.com/AgentOne-Dev/agent-one-public/issues/new"
+        className="flex w-fit items-center gap-1 underline"
+      >
+        Report a bug
+        <IconExternalLink className="size-4" />
+      </a>
+      <a
+        target="_blank"
+        href="https://www.agent-one.dev/discord"
+        className="flex w-fit items-center gap-1 underline"
+      >
+        Get help on Discord
+        <IconExternalLink className="size-4" />
+      </a>
+      <a
+        target="_blank"
+        href="https://docs.agent-one.dev/docs"
+        className="flex w-fit items-center gap-1 underline"
+      >
+        Read the docs
+        <IconExternalLink className="size-4" />
+      </a>
+    </div>
+  );
+}
+
+export function DebugTools() {
+  const navigate = useNavigate();
+
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center gap-3">
+        <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-lg">
+          <IconBug className="text-muted-foreground size-5" />
+        </div>
+        <div>
+          <p className="leading-none font-medium">Internal Tests</p>
+          <p className="text-muted-foreground text-sm">
+            Access internal testing tools and utilities.
+          </p>
+        </div>
+      </div>
+      <Button onClick={() => navigate("/tests")} size="sm">
+        Open Tests
+      </Button>
     </div>
   );
 }

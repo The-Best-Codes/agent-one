@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { hasEnabledProviderAtom } from "@/lib/jotai/provider-atoms";
 import { cn } from "@/lib/utils";
-import { ProvidersList } from "@/routes/settings/sections/providers/providers-list";
+import { SettingsSectionCards } from "@/routes/settings/settings-sections";
 
 interface AccountStepProps {
   onSubmit: () => void;
@@ -57,8 +57,8 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
             </p>
           </div>
 
-          <div className="max-h-[50svh] overflow-y-auto p-1">
-            <ProvidersList />
+          <div className="flex max-h-[50svh] flex-col gap-4 overflow-y-auto p-1">
+            <SettingsSectionCards sectionId="providers" />
           </div>
 
           <div className="flex flex-col gap-3">

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { generateTtsAudio, normalizeTtsSettings } from "@/lib/ai/tts";
 import { apiKeyAtomFamily } from "@/lib/jotai/api-key-atoms";
-import { ttsSettingsAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { ttsPlaybackControllerAtom, ttsPlaybackStateAtom } from "@/lib/jotai/tts-atoms";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
@@ -23,7 +23,7 @@ export function TtsButton({
 }) {
   const [ttsState, setTtsState] = useAtom(ttsPlaybackStateAtom);
   const [controller, setController] = useAtom(ttsPlaybackControllerAtom);
-  const rawTtsSettings = useAtomValue(ttsSettingsAtom);
+  const rawTtsSettings = useAtomValue(settingAtoms.TTS);
   const apiKeys = {
     openai: useAtomValue(apiKeyAtomFamily("tts-openai")),
     elevenlabs: useAtomValue(apiKeyAtomFamily("tts-elevenlabs")),

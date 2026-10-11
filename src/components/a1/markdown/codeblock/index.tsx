@@ -4,7 +4,7 @@ import { useAtomValue } from "jotai";
 
 import { CopyButton } from "@/components/a1/copy-button";
 import { Button } from "@/components/ui/button";
-import { maxCodeblockCharsAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 import { usePreview } from "./preview";
@@ -37,7 +37,7 @@ const BestHighlighter = ({
 };
 
 export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
-  const maxCodeblockChars = useAtomValue(maxCodeblockCharsAtom);
+  const maxCodeblockChars = useAtomValue(settingAtoms.MAX_CODEBLOCK_CHARS);
   const {
     isPreviewMode,
     togglePreview,

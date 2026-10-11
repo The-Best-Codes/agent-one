@@ -12,7 +12,7 @@ interface SettingsTargetProps {
   className?: string;
 }
 
-export default function SettingsTarget({ id, children, className }: SettingsTargetProps) {
+export function SettingsTarget({ id, children, className }: SettingsTargetProps) {
   const location = useLocation();
   const [phase, setPhase] = useState<"idle" | "active" | "fading">("idle");
 
@@ -30,7 +30,7 @@ export default function SettingsTarget({ id, children, className }: SettingsTarg
     return () => {
       timeouts.forEach(window.clearTimeout);
     };
-  }, [id, location.hash]);
+  }, [id, location.hash, location.key]);
 
   return (
     <div

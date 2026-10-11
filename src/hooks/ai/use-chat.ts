@@ -8,7 +8,7 @@ import { useTools } from "@/contexts/use-tools/tools-hooks";
 import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { CustomChatTransport } from "@/lib/ai/custom-chat-transport";
 import { systemPromptAtom } from "@/lib/jotai/atoms";
-import { extractReasoningEnabledAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -35,7 +35,7 @@ export function useChat(
   modelConfig: ModelConfig,
   options?: CustomChatOptions,
 ) {
-  const extractReasoningEnabled = useAtomValue(extractReasoningEnabledAtom);
+  const extractReasoningEnabled = useAtomValue(settingAtoms.EXTRACT_REASONING_ENABLED);
   const systemPrompt = useAtomValue(systemPromptAtom);
   const { getApiKeysLoadedPromise } = useApiKeys();
   const { getTools } = useTools();

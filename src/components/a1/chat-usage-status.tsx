@@ -15,7 +15,7 @@ import { useModel } from "@/contexts/use-model/model-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { calculateChatUsageFromMessages, getLastAssistantUsage } from "@/lib/ai/chat-usage";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
-import { collapsedSidebarLayoutAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { cn } from "@/lib/utils";
 
@@ -73,7 +73,7 @@ export const ChatUsageStatus = () => {
   const isChatLoading = useChatLoading();
   const { currentModel } = useModel();
   const [isSidebarCollapsed] = useAtom(sidebarCollapsedAtom);
-  const [collapsedLayout] = useAtom(collapsedSidebarLayoutAtom);
+  const [collapsedLayout] = useAtom(settingAtoms.COLLAPSED_SIDEBAR_LAYOUT);
   const [delayPassed, setDelayPassed] = useState(false);
   const currentUsage = useMemo(() => calculateChatUsageFromMessages(messages), [messages]);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -172,7 +172,6 @@ export const ChatUsageStatus = () => {
                         asChild
                       >
                         <SettingsLink
-                          tab="account"
                           id="setting-credits-used"
                           aria-label="View AgentOne credit usage in Settings"
                         >
@@ -183,7 +182,6 @@ export const ChatUsageStatus = () => {
                         <span>
                           AgentOne usage consumes credits.{" "}
                           <SettingsLink
-                            tab="account"
                             id="setting-credits-used"
                             className="underline underline-offset-2"
                           >

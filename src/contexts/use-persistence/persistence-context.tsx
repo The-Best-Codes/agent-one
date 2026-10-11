@@ -5,7 +5,7 @@ import React, { type ReactNode, useCallback, useEffect, useRef, useState } from 
 
 import { DEFAULT_MODEL_CONFIG, type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { chatIdsAtom, chatUpdateTriggerAtom, lastVacuumTimestampAtom } from "@/lib/jotai/atoms";
-import { chatSortAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { type ChatSearchResult, chatStorage } from "@/lib/storage/chat-storage";
 
@@ -105,7 +105,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
   const setChatIds = useSetAtom(chatIdsAtom);
   const [chatUpdateTrigger, setChatUpdateTrigger] = useAtom(chatUpdateTriggerAtom);
   const [lastVacuumTimestamp, setLastVacuumTimestamp] = useAtom(lastVacuumTimestampAtom);
-  const [chatSort] = useAtom(chatSortAtom);
+  const [chatSort] = useAtom(settingAtoms.CHAT_SORT);
 
   const metadataCacheRef = useRef<Map<string, ChatMetadata>>(new Map());
   const [isMetadataLoaded, setIsMetadataLoaded] = useState(false);
