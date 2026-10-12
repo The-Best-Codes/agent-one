@@ -1,6 +1,12 @@
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { useEffect } from "react";
 
+import {
+  activeCustomFontAtom,
+  BUILT_IN_FONT_CLASSES,
+  loadCustomFontFace,
+  resolveFontSetting,
+} from "@/lib/custom-fonts";
 import { getResolvedTheme } from "@/lib/get-resolved-theme";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { jsonParseCatch } from "@/lib/json-parse-catch";
@@ -10,6 +16,8 @@ const PRIMARY_COLOR_THEMES = Object.keys(SETTINGS.COLOR_THEME.options).filter(
   (option) => option !== "default",
 );
 const UI_TINTS = Object.keys(SETTINGS.UI_TINT.options).filter((option) => option !== "default");
+
+const FONT_CLASSES = [...Object.values(BUILT_IN_FONT_CLASSES), "font-custom"];
 
 const UI_TINT_STRENGTHS: Record<number, string> = {
   1: "2%",
@@ -32,13 +40,14 @@ export function ThemeRegistry() {
   const [rawRoundness] = useAtom(settingAtoms.ROUNDNESS);
   const [rawFont] = useAtom(settingAtoms.FONT);
   const [rawTextScale] = useAtom(settingAtoms.TEXT_SCALE);
+  const activeCustomFont = useAtomValue(activeCustomFontAtom);
 
   const theme = jsonParseCatch(rawTheme);
   const colorTheme = jsonParseCatch(rawColorTheme);
   const uiTint = jsonParseCatch(rawUiTint);
   const uiTintStrength = rawUiTintStrength;
   const roundness = jsonParseCatch(rawRoundness);
-  const font = jsonParseCatch(rawFont);
+  const font = resolveFontSetting(jsonParseCatch(rawFont), activeCustomFont !== null);
   const textScale = jsonParseCatch(rawTextScale);
 
   useEffect(() => {
@@ -84,22 +93,34 @@ export function ThemeRegistry() {
     root.setAttribute("data-roundness", roundness || "md");
 
     // Handle font
-    root.classList.remove("font-space-grotesk", "font-sans", "font-mono", "font-roboto");
-    if (font === "default") {
-      root.classList.add("font-space-grotesk");
-    } else if (font === "system") {
-      root.classList.add("font-sans");
-    } else if (font === "mono") {
-      root.classList.add("font-mono");
-    } else if (font === "roboto") {
-      root.classList.add("font-roboto");
-    }
-    root.setAttribute("data-font", font || "default");
+    root.classList.remove(...FONT_CLASSES);
+    root.classList.add(font === "custom" ? "font-custom" : BUILT_IN_FONT_CLASSES[font]);
+    root.setAttribute("data-font", font);
 
     root.classList.remove("text-xs", "text-sm", "text-md", "text-lg", "text-xl", "text-2xl");
     root.classList.add(`text-${textScale || "md"}`);
     root.setAttribute("data-text-scale", textScale || "md");
   }, [theme, colorTheme, uiTint, uiTintStrength, roundness, font, textScale]);
+
+  useEffect(() => {
+    if (font !== "custom" || !activeCustomFont) return;
+
+    let cancelled = false;
+    let fontFace: FontFace | null = null;
+
+    loadCustomFontFace(activeCustomFont)
+      .then((loadedFontFace) => {
+        if (cancelled) return;
+        fontFace = loadedFontFace;
+        document.fonts.add(loadedFontFace);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+      if (fontFace) document.fonts.delete(fontFace);
+    };
+  }, [font, activeCustomFont]);
 
   return null;
 }

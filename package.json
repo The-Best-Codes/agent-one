@@ -40,7 +40,6 @@
     "@codemirror/state": "6.7.6",
     "@codemirror/view": "6.43.13",
     "@eslint/js": "^10.0.1",
-    "@fontsource-variable/roboto": "^5.3.0",
     "@fontsource-variable/space-grotesk": "^5.3.0",
     "@number-flow/react": "^0.6.2",
     "@openrouter/ai-sdk-provider": "^3.1.0",

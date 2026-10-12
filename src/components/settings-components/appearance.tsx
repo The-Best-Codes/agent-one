@@ -1,8 +1,40 @@
-import { useAtom } from "jotai";
+import { IconTrash, IconUpload } from "@tabler/icons-react";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { ColorPicker } from "@/components/a1/color-picker";
 import ThemeToggle from "@/components/theme/toggle-menu";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  activeCustomFontAtom,
+  activeCustomFontIdAtom,
+  BUILT_IN_FONT_CLASSES,
+  customFontsAtom,
+  deleteCustomFontFile,
+  importCustomFont,
+  resolveFontSetting,
+  validCustomFontsAtom,
+} from "@/lib/custom-fonts";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { SETTINGS, type SettingValue } from "@/lib/settings/definitions";
 import { cn } from "@/lib/utils";
@@ -44,12 +76,7 @@ const COLOR_PICKER_OPTIONS = Object.entries(SETTINGS.COLOR_THEME.options).map(([
   className: COLOR_CLASSES[value as SettingValue<"COLOR_THEME">],
 }));
 
-const FONT_CLASSES: Record<SettingValue<"FONT">, string> = {
-  default: "font-space-grotesk",
-  system: "font-sans",
-  mono: "font-mono",
-  roboto: "font-roboto",
-};
+const CUSTOM_FONT_VALUE_PREFIX = "custom:";
 
 const ROUNDNESS_CLASSES: Record<SettingValue<"ROUNDNESS">, string> = {
   none: "rounded-[0px]",
@@ -90,29 +117,135 @@ export function TintControl() {
 
 export function FontControl() {
   const [font, setFont] = useAtom(settingAtoms.FONT);
+  const customFonts = useAtomValue(validCustomFontsAtom);
+  const setCustomFonts = useSetAtom(customFontsAtom);
+  const activeCustomFont = useAtomValue(activeCustomFontAtom);
+  const setActiveCustomFontId = useSetAtom(activeCustomFontIdAtom);
+  const [isRemoveOpen, setIsRemoveOpen] = useState(false);
+  const importingRef = useRef(false);
+
+  const resolvedFont = resolveFontSetting(font, activeCustomFont !== null);
+  const value =
+    resolvedFont === "custom" && activeCustomFont
+      ? `${CUSTOM_FONT_VALUE_PREFIX}${activeCustomFont.id}`
+      : resolvedFont;
+
+  const handleValueChange = (nextValue: string) => {
+    if (nextValue.startsWith(CUSTOM_FONT_VALUE_PREFIX)) {
+      setActiveCustomFontId(nextValue.slice(CUSTOM_FONT_VALUE_PREFIX.length));
+      setFont("custom");
+      return;
+    }
+
+    setFont(nextValue as typeof font);
+  };
+
+  const handleUpload = async () => {
+    if (importingRef.current) return;
+    importingRef.current = true;
+
+    try {
+      const customFont = await importCustomFont();
+      if (!customFont) return;
+
+      setCustomFonts((prev) => [...(Array.isArray(prev) ? prev : []), customFont]);
+      setActiveCustomFontId(customFont.id);
+      setFont("custom");
+    } catch (error) {
+      toast.error("Couldn't add font", {
+        description: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      importingRef.current = false;
+    }
+  };
+
+  const handleRemove = () => {
+    if (!activeCustomFont) return;
+
+    void deleteCustomFontFile(activeCustomFont);
+    setCustomFonts((prev) =>
+      (Array.isArray(prev) ? prev : []).filter(
+        (customFont) => customFont.id !== activeCustomFont.id,
+      ),
+    );
+    setActiveCustomFontId(null);
+  };
 
   return (
-    <ToggleGroup
-      type="single"
-      variant="outline"
-      value={font}
-      onValueChange={(value) => {
-        if (value) setFont(value as typeof font);
-      }}
-      aria-label="Select font"
-      className="w-full min-w-64 md:w-fit"
-    >
-      {Object.entries(SETTINGS.FONT.options).map(([value, label]) => (
-        <ToggleGroupItem
-          key={value}
-          value={value}
-          aria-label={label}
-          className={FONT_CLASSES[value as typeof font]}
-        >
-          {label}
-        </ToggleGroupItem>
-      ))}
-    </ToggleGroup>
+    <div className="flex w-full items-center gap-2 md:w-fit">
+      <Select value={value} onValueChange={handleValueChange}>
+        <SelectTrigger aria-label="Select font" className="w-full md:w-48">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            {Object.entries(BUILT_IN_FONT_CLASSES).map(([option, className]) => (
+              <SelectItem key={option} value={option} className={className}>
+                {SETTINGS.FONT.options[option as keyof typeof BUILT_IN_FONT_CLASSES]}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+          {customFonts.length > 0 && (
+            <>
+              <SelectSeparator />
+              <SelectGroup>
+                <SelectLabel>Custom</SelectLabel>
+                {customFonts.map((customFont) => (
+                  <SelectItem
+                    key={customFont.id}
+                    value={`${CUSTOM_FONT_VALUE_PREFIX}${customFont.id}`}
+                  >
+                    {customFont.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </>
+          )}
+        </SelectContent>
+      </Select>
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => void handleUpload()}
+        aria-label="Upload font"
+        title="Upload font"
+      >
+        <IconUpload />
+      </Button>
+      {resolvedFont === "custom" && activeCustomFont && (
+        <Popover open={isRemoveOpen} onOpenChange={setIsRemoveOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="icon" aria-label="Remove font" title="Remove font">
+              <IconTrash />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="end">
+            <PopoverHeader>
+              <PopoverTitle>Remove this font?</PopoverTitle>
+              <PopoverDescription>
+                {activeCustomFont.name} will be removed from this device.
+              </PopoverDescription>
+            </PopoverHeader>
+            <div className="flex justify-end gap-2">
+              <Button size="sm" variant="outline" onClick={() => setIsRemoveOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => {
+                  handleRemove();
+                  setIsRemoveOpen(false);
+                }}
+              >
+                Remove
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
+      )}
+    </div>
   );
 }
 

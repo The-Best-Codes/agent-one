@@ -2,7 +2,6 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/space-grotesk";
-@import "@fontsource-variable/roboto";
 @plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
@@ -88,7 +87,7 @@
   );
   --color-sidebar-ring: var(--sidebar-ring);
   --font-space-grotesk: "Space Grotesk Variable", sans-serif;
-  --font-roboto: "Roboto Variable", sans-serif;
+  --font-custom: "AgentOne Custom Font", "Space Grotesk Variable", sans-serif;
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);

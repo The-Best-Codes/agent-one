@@ -46,12 +46,13 @@
       let parsedFont = jsonParseCatch(fontFromStorage) || "default";
 
       document.documentElement.classList.remove("font-space-grotesk", "font-sans", "font-mono");
-      if (parsedFont === "default") {
-        document.documentElement.classList.add("font-space-grotesk");
-      } else if (parsedFont === "system") {
+      if (parsedFont === "system") {
         document.documentElement.classList.add("font-sans");
       } else if (parsedFont === "mono") {
         document.documentElement.classList.add("font-mono");
+      } else {
+        parsedFont = "default";
+        document.documentElement.classList.add("font-space-grotesk");
       }
       document.documentElement.setAttribute("data-font", parsedFont);
     </script>
