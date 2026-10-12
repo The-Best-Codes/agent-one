@@ -6,6 +6,7 @@ import { AutoScrollContainer, type AutoScrollHandle } from "@/components/a1/auto
 import { ChatMessageLoading } from "@/components/a1/chat-message-loading";
 import { ChatUsageStatus } from "@/components/a1/chat-usage-status";
 import { NoMessagesGreeting } from "@/components/a1/empty-states/no-messages";
+import { GuidedTour } from "@/components/a1/guided-tour";
 import { MainChatInput } from "@/components/a1/input/main-chat-input";
 import { MessagePreviewRail } from "@/components/a1/message-preview-rail";
 import { MessageParts } from "@/components/a1/messages";
@@ -214,6 +215,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => (
     <Sidebar />
     {chatId && <ChatUsageStatus />}
     <ChatContent chatId={chatId} />
+    <GuidedTour />
   </main>
 );
 

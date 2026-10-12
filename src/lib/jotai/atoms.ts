@@ -21,6 +21,8 @@ export const onboardingCompletedAtom = atomWithStorage(
   { getOnInit: true },
 );
 
+export const tourActiveAtom = atom(false);
+
 export const syncEnabledAtom = atomWithStorage("agent-one-sync-enabled", true, undefined, {
   getOnInit: true,
 });

@@ -84,7 +84,7 @@ const SidebarContent = ({
           AgentOne
         </span>
       </div>
-      <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex min-h-0 flex-1 flex-col" data-tour="chat-list">
         <ChatList
           activeChatId={activeChatId}
           handleNewChat={handleNewChat}
@@ -92,7 +92,7 @@ const SidebarContent = ({
         />
       </div>
 
-      <div className="pt-2">
+      <div className="pt-2" data-tour="account-menu">
         <AccountMenu activeChatId={activeChatId} />
       </div>
     </div>
