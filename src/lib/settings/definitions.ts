@@ -333,6 +333,26 @@ export const SETTINGS = {
       "Automatically extract <think> tag content from model responses and display it as a collapsible reasoning section. Does not apply to past messages or non-reasoning models.",
     default: false,
   }),
+  AUTO_COMPACT_ENABLED: toggle({
+    keywords: ["compaction", "compact", "summarize", "context window", "long chats", "memory"],
+    ai: "write",
+    label: "Automatically Summarize Long Chats",
+    description:
+      "When a chat gets close to the model's context window limit, older messages are summarized so the conversation can continue.",
+    default: true,
+  }),
+  AUTO_COMPACT_THRESHOLD: slider({
+    keywords: ["compaction", "compact", "summarize", "context window", "limit", "percent"],
+    ai: "write",
+    label: "Summarize At",
+    description:
+      "How full the model's context window should be before older messages are summarized.",
+    default: 80,
+    min: 50,
+    max: 95,
+    step: 5,
+    unit: "%",
+  }),
   THROTTLE_VALUE: slider({
     keywords: ["speed", "streaming", "refresh rate", "update interval", "performance", "lag"],
     label: "Throttle",

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useTools } from "@/contexts/use-tools/tools-hooks";
 import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
+import { COMPACT_REQUEST_BODY_KEY } from "@/lib/ai/context-compaction";
 import { CustomChatTransport } from "@/lib/ai/custom-chat-transport";
 import { systemPromptAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
@@ -16,6 +17,7 @@ const logger = getLogger(import.meta.url);
 type CustomChatOptions = Omit<ChatInit<UIMessage>, "transport"> &
   Pick<UseChatOptions<UIMessage>, "resume" | "throttle"> & {
     onUserMessageSent?: () => void;
+    contextWindow?: number;
   };
 
 function canResumeFromMessages(messages: UIMessage[]) {
@@ -40,6 +42,7 @@ export function useChat(
   const { getApiKeysLoadedPromise } = useApiKeys();
   const { getTools } = useTools();
   const getSystemPrompt = useCallback(() => systemPrompt, [systemPrompt]);
+  const contextWindow = options?.contextWindow;
   const [transport] = useState(
     () =>
       new CustomChatTransport(
@@ -47,6 +50,7 @@ export function useChat(
         modelId,
         providerName,
         modelConfig,
+        contextWindow,
         extractReasoningEnabled,
         getTools,
         getSystemPrompt,
@@ -73,6 +77,10 @@ export function useChat(
   }, [modelConfig, transport]);
 
   useEffect(() => {
+    transport.updateContextWindow(contextWindow);
+  }, [contextWindow, transport]);
+
+  useEffect(() => {
     transport.updateExtractReasoningEnabled(extractReasoningEnabled);
     logger.verbose(
       "Updated chat transport with extract reasoning setting:",
@@ -90,7 +98,8 @@ export function useChat(
     logger.verbose("Updated chat transport with new API keys loaded promise");
   }, [getApiKeysLoadedPromise, transport]);
 
-  const { onUserMessageSent, ...sdkOptions } = options ?? {};
+  const { onUserMessageSent, contextWindow: _contextWindow, ...sdkOptions } = options ?? {};
+  void _contextWindow;
 
   const {
     addToolApprovalResponse,
@@ -118,8 +127,17 @@ export function useChat(
     transport.updateModel(model, providerName);
     transport.updateModelId(modelId);
     transport.updateModelConfig(modelConfig);
+    transport.updateContextWindow(contextWindow);
     transport.updateExtractReasoningEnabled(extractReasoningEnabled);
-  }, [model, modelId, providerName, modelConfig, extractReasoningEnabled, transport]);
+  }, [
+    model,
+    modelId,
+    providerName,
+    modelConfig,
+    contextWindow,
+    extractReasoningEnabled,
+    transport,
+  ]);
 
   const sendMessage = useCallback<typeof sendMessageSdk>(
     async (message, sendOptions) => {
@@ -154,6 +172,11 @@ export function useChat(
     [resumeStreamSdk, sendMessageSdk, syncTransport],
   );
 
+  const compactContext = useCallback(async () => {
+    syncTransport();
+    return sendMessageSdk(undefined, { body: { [COMPACT_REQUEST_BODY_KEY]: true } });
+  }, [sendMessageSdk, syncTransport]);
+
   const updateMcpAppModelContext = useCallback(
     (viewId: string, context: unknown) => {
       transport.updateMcpAppModelContext(viewId, context);
@@ -165,6 +188,7 @@ export function useChat(
     addToolApprovalResponse,
     addToolOutput,
     clearError,
+    compactContext,
     error,
     messages,
     regenerate,

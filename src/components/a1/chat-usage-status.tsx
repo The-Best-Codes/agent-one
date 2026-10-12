@@ -1,18 +1,30 @@
 import NumberFlow from "@number-flow/react";
-import { IconChevronLeft } from "@tabler/icons-react";
+import { IconChevronLeft, IconFold } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 
+import {
+  AdaptivePopover,
+  AdaptivePopoverContent,
+  AdaptivePopoverTrigger,
+} from "@/components/ui/adaptive-popover";
 import {
   AdaptiveTooltip,
   AdaptiveTooltipContent,
   AdaptiveTooltipTrigger,
 } from "@/components/ui/adaptive-tooltip";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useChatLoading, useChatMessages } from "@/contexts/use-chat/chat-hooks";
+import {
+  useChatFunctions,
+  useChatLoading,
+  useChatMessages,
+  useChatStatus,
+} from "@/contexts/use-chat/chat-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { calculateChatUsageFromMessages, getLastAssistantUsage } from "@/lib/ai/chat-usage";
+import { calculateChatUsageFromMessages } from "@/lib/ai/chat-usage";
+import { estimateContextTokens, hasMessagesToCompact } from "@/lib/ai/context-compaction";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
@@ -70,6 +82,9 @@ const CircularProgress = ({
 export const ChatUsageStatus = () => {
   const messages = useChatMessages();
   const isChatLoading = useChatLoading();
+  const { status } = useChatStatus();
+  const { compactContext } = useChatFunctions();
+  const [isCompactPopoverOpen, setIsCompactPopoverOpen] = useState(false);
   const { currentModel } = useModel();
   const [isSidebarCollapsed] = useAtom(sidebarCollapsedAtom);
   const [collapsedLayout] = useAtom(settingAtoms.COLLAPSED_SIDEBAR_LAYOUT);
@@ -98,13 +113,14 @@ export const ChatUsageStatus = () => {
   }, [isChatLoading]);
 
   const showSkeleton = isChatLoading && delayPassed;
-  const lastUsage = getLastAssistantUsage(messages);
+  const totalTokens = useMemo(() => estimateContextTokens(messages), [messages]);
+  const canCompact = useMemo(
+    () => (status === "ready" || status === "error" ? hasMessagesToCompact(messages) : false),
+    [messages, status],
+  );
 
   const totalCostUsd = currentUsage.totalCostUsd;
   const hasUnknownCost = currentUsage.hasUnknownCost;
-  const contextInputTokens = lastUsage.inputTokens;
-  const contextOutputTokens = lastUsage.outputTokens;
-  const totalTokens = contextInputTokens + contextOutputTokens;
   const maxTokens = currentModel?.contextWindow;
   const isExceeded = maxTokens !== undefined && totalTokens > maxTokens;
   const contextUsagePercent = maxTokens ? Math.round((totalTokens / maxTokens) * 100) : null;
@@ -132,36 +148,59 @@ export const ChatUsageStatus = () => {
                 </>
               ) : (
                 <>
-                  <AdaptiveTooltip>
-                    <AdaptiveTooltipTrigger
-                      className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-help rounded outline-none focus-visible:ring-[3px]"
+                  <AdaptivePopover
+                    open={isCompactPopoverOpen}
+                    onOpenChange={setIsCompactPopoverOpen}
+                  >
+                    <AdaptivePopoverTrigger
+                      className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-pointer rounded outline-none focus-visible:ring-[3px]"
                       tabIndex={isCollapsed ? -1 : 0}
-                      asChild
+                      aria-label="Context window usage"
                     >
-                      <div>
-                        <CircularProgress
-                          value={totalTokens}
-                          max={maxTokens}
-                          progressClassName={
-                            isExceeded
-                              ? "text-destructive"
-                              : maxTokens === undefined
-                                ? "text-yellow-500"
-                                : undefined
-                          }
-                        />
-                      </div>
-                    </AdaptiveTooltipTrigger>
-                    <AdaptiveTooltipContent className="max-w-xs">
-                      {isAgentOneModel
-                        ? contextUsagePercent === null
-                          ? "The context window size for this model is unavailable."
-                          : `This chat is using ${contextUsagePercent}% of the model's context window.`
-                        : maxTokens !== undefined
-                          ? `This chat is currently ${totalTokens} tokens long. The model you're using supports up to ${maxTokens.toLocaleString()} tokens.`
-                          : `This chat is currently ${totalTokens} tokens long. The model you're using supports an unknown number of tokens.`}
-                    </AdaptiveTooltipContent>
-                  </AdaptiveTooltip>
+                      <CircularProgress
+                        value={totalTokens}
+                        max={maxTokens}
+                        progressClassName={
+                          isExceeded
+                            ? "text-destructive"
+                            : maxTokens === undefined
+                              ? "text-yellow-500"
+                              : undefined
+                        }
+                      />
+                    </AdaptivePopoverTrigger>
+                    <AdaptivePopoverContent
+                      title="Context Window"
+                      align="start"
+                      className="flex w-72 flex-col gap-3 text-sm"
+                    >
+                      <p>
+                        {isAgentOneModel
+                          ? contextUsagePercent === null
+                            ? "The context window size for this model is unavailable."
+                            : `This chat is using ${contextUsagePercent}% of the model's context window.`
+                          : maxTokens !== undefined
+                            ? `This chat is currently ${totalTokens.toLocaleString()} tokens long. The model you're using supports up to ${maxTokens.toLocaleString()} tokens.`
+                            : `This chat is currently ${totalTokens.toLocaleString()} tokens long. The model you're using supports an unknown number of tokens.`}
+                      </p>
+                      <p className="text-muted-foreground">
+                        Summarizing replaces older messages with a short summary so the chat can
+                        keep going. You can still scroll up to read them.
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={!canCompact}
+                        onClick={() => {
+                          setIsCompactPopoverOpen(false);
+                          void compactContext();
+                        }}
+                      >
+                        <IconFold />
+                        Summarize chat
+                      </Button>
+                    </AdaptivePopoverContent>
+                  </AdaptivePopover>
 
                   {!isAgentOneModel && (
                     <AdaptiveTooltip>

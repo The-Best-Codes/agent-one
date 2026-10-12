@@ -264,6 +264,17 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
         ],
       },
       {
+        title: "Context",
+        items: [
+          { id: "auto-compact", key: "AUTO_COMPACT_ENABLED" },
+          {
+            id: "auto-compact-threshold",
+            key: "AUTO_COMPACT_THRESHOLD",
+            disabled: atom((get) => get(settingAtoms.AUTO_COMPACT_ENABLED) === false),
+          },
+        ],
+      },
+      {
         title: "Streaming",
         items: [
           { id: "extract-reasoning", key: "EXTRACT_REASONING_ENABLED" },

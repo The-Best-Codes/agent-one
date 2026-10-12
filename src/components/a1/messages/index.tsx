@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router";
 
 import { useGetChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
+import { COMPACTION_PART_TYPE, getCompactionData } from "@/lib/ai/context-compaction";
 import type { ToolDisplayLabels } from "@/lib/ai/tools/describeNextTool";
 import { getToolDisplayName } from "@/lib/ai/tools/mcp";
 import { setMessageEditingAtom } from "@/lib/jotai/chat-message-editing-atoms";
@@ -13,6 +14,7 @@ import { getLogger } from "@/lib/logger";
 // When these imports are updates, check if ./src/components/a1/messages/parts/subagent-transcript.tsx needs to be updated as well!
 import { ChatMessageLoading } from "../chat-message-loading";
 import { MessageGroup } from "./group";
+import { MessagePartCompaction } from "./parts/compaction";
 import { MessagePartDynamicTool } from "./parts/dynamic-tool";
 import { MessagePartFallback } from "./parts/fallback";
 import { MessagePartFile } from "./parts/file";
@@ -81,6 +83,8 @@ const MessagePartsInternal = ({
           return `[Source Document: ${part?.title || "Unnamed document"}, ${
             part?.filename || "Unnamed file"
           }]`;
+        } else if (part.type === COMPACTION_PART_TYPE) {
+          return null;
         } else if (part.type.startsWith("data-")) {
           return `[Data: ${JSON.stringify(part)}]`;
         } else if (part.type === "tool-describeNextTool") {
@@ -161,6 +165,13 @@ const MessagePartsInternal = ({
           return <MessagePartDynamicTool key={key} part={part} labels={toolLabels} />;
         }
         default:
+          if (part.type === COMPACTION_PART_TYPE) {
+            const compaction = getCompactionData(part);
+            return compaction ? (
+              <MessagePartCompaction key={key} id={message.id} summary={compaction.summary} />
+            ) : null;
+          }
+
           if (part.type.startsWith("tool-")) {
             return <MessageToolHandler key={key} part={{ ...part }} />; // Using a spread operator to ensure React.memo will get a new instance of part
           }

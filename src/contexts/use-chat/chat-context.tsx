@@ -515,6 +515,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     addToolOutput = noopAsync,
     addToolApprovalResponse = noopAsync,
     regenerate = noopAsync,
+    compactContext = noopAsync,
     clearError = () => {},
     resumeStream = noopAsync,
     stop = noopAsync,
@@ -599,6 +600,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       addToolOutput,
       addToolApprovalResponse,
       regenerate,
+      compactContext: isNewChat ? noopAsync : compactContext,
       clearError,
       resumeStream,
       stop,
@@ -613,6 +615,8 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       addToolOutput,
       addToolApprovalResponse,
       regenerate,
+      compactContext,
+      noopAsync,
       clearError,
       resumeStream,
       stop,
@@ -653,6 +657,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
             modelId={chatModel.id}
             providerName={chatModel.provider}
             modelConfig={chatConfig}
+            contextWindow={chatModel.contextWindow}
             initialMessages={initialMessages}
             onInstanceUpdate={handleInstanceUpdate}
             onStatusChange={handleStatusChange}

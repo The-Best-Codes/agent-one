@@ -15,6 +15,7 @@ import {
 import { z } from "zod";
 
 import type { ModelConfig } from "@/hooks/ai/use-model-catalog";
+import { createCompactionPrepareStep } from "@/lib/ai/context-compaction";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -32,6 +33,7 @@ export interface SubAgentInput {
 export interface SubAgentExecutionContext {
   model: LanguageModel;
   modelConfig: ModelConfig;
+  contextWindow?: number;
   systemPrompt: string;
   extractReasoningEnabled: boolean;
   getTools: () => Promise<ToolSet>;
@@ -277,6 +279,7 @@ async function* streamSubAgentRun({
             ignoreIncompleteToolCalls: true,
           });
 
+    const instructions = buildSubAgentInstructions(context.systemPrompt);
     const result = streamText({
       model: wrappedModel,
       temperature: context.modelConfig.temperature,
@@ -291,7 +294,13 @@ async function* streamSubAgentRun({
       tools,
       toolChoice: "auto",
       stopWhen: isStepCount(context.modelConfig.maxSteps ?? 20),
-      instructions: buildSubAgentInstructions(context.systemPrompt),
+      instructions,
+      prepareStep: createCompactionPrepareStep({
+        model: wrappedModel,
+        contextWindow: context.contextWindow,
+        instructions,
+        abortSignal,
+      }),
     });
 
     let latestMessage: UIMessage | undefined;

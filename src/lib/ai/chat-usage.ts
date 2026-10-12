@@ -38,27 +38,6 @@ export interface ChatMessageMetadata {
   totalUsage?: MessageTokenUsage;
 }
 
-function createEmptyUsage(): Required<
-  Pick<
-    ChatUsageSummary,
-    | "inputTokens"
-    | "outputTokens"
-    | "totalTokens"
-    | "cacheReadTokens"
-    | "cacheWriteTokens"
-    | "reasoningTokens"
-  >
-> {
-  return {
-    inputTokens: 0,
-    outputTokens: 0,
-    totalTokens: 0,
-    cacheReadTokens: 0,
-    cacheWriteTokens: 0,
-    reasoningTokens: 0,
-  };
-}
-
 export function createEmptyMessageTokenUsage(): MessageTokenUsage {
   return {
     inputTokens: undefined,
@@ -176,21 +155,6 @@ export function summarizeUsage(usage: MessageTokenUsage | undefined) {
     cacheWriteTokens: normalized.cacheWriteTokens,
     reasoningTokens: normalized.reasoningTokens,
   };
-}
-
-export function getLastAssistantUsage(messages: UIMessage[]) {
-  for (let i = messages.length - 1; i >= 0; i--) {
-    const message = messages[i];
-    if (message.role !== "assistant") continue;
-
-    const metadata = message.metadata as ChatMessageMetadata | undefined;
-    if (!metadata || typeof metadata !== "object") continue;
-    if (!metadata.usage) continue;
-
-    return summarizeUsage(metadata.usage);
-  }
-
-  return createEmptyUsage();
 }
 
 export function calculateMessageCostFromMetadata(
