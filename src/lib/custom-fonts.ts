@@ -16,7 +16,7 @@ const CUSTOM_FONT_FAMILY = "AgentOne Custom Font";
 const CUSTOM_FONT_DIR = "custom-fonts";
 const baseDir = BaseDirectory.AppLocalData;
 
-export const BUILT_IN_FONT_CLASSES: Record<Exclude<SettingValue<"FONT">, "custom">, string> = {
+export const FONT_CLASSES: Record<SettingValue<"FONT">, string> = {
   default: "font-space-grotesk",
   system: "font-sans",
   mono: "font-mono",
@@ -42,10 +42,9 @@ export const activeCustomFontAtom = atom((get) => {
   return (Array.isArray(fonts) && fonts.find((font) => font?.id === activeId)) || null;
 });
 
-export function resolveFontSetting(font: unknown, hasActiveCustomFont: boolean) {
-  if (font === "custom") return hasActiveCustomFont ? "custom" : "default";
-  return typeof font === "string" && Object.hasOwn(BUILT_IN_FONT_CLASSES, font)
-    ? (font as keyof typeof BUILT_IN_FONT_CLASSES)
+export function resolveFontSetting(font: unknown): SettingValue<"FONT"> {
+  return typeof font === "string" && Object.hasOwn(FONT_CLASSES, font)
+    ? (font as SettingValue<"FONT">)
     : "default";
 }
 
@@ -63,8 +62,9 @@ export async function importCustomFonts() {
   const failed: string[] = [];
 
   for (const path of paths ?? []) {
-    const fileName = await basename(path);
+    let fileName = path;
     try {
+      fileName = await basename(path);
       const bytes = await readFile(path);
       await new FontFace(`${CUSTOM_FONT_FAMILY} Validation`, bytes).load();
       const id = crypto.randomUUID();

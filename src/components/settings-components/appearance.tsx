@@ -20,7 +20,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   activeCustomFontAtom,
   activeCustomFontIdAtom,
-  BUILT_IN_FONT_CLASSES,
+  FONT_CLASSES,
   type CustomFont,
   customFontsAtom,
   deleteCustomFontFile,
@@ -112,23 +112,27 @@ export function FontControl() {
   const setActiveCustomFontId = useSetAtom(activeCustomFontIdAtom);
   const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
 
-  const resolvedFont = resolveFontSetting(font, activeCustomFont !== null);
+  const resolvedFont = resolveFontSetting(font);
   const fonts = Array.isArray(customFonts) ? customFonts : [];
 
   const selectFont = (value: string) => {
-    if (Object.hasOwn(BUILT_IN_FONT_CLASSES, value)) return setFont(value as typeof font);
-    setActiveCustomFontId(value);
-    setFont("custom");
+    const isBuiltIn = Object.hasOwn(FONT_CLASSES, value);
+    setActiveCustomFontId(isBuiltIn ? null : value);
+    setFont(isBuiltIn ? (value as typeof font) : "default");
   };
 
   const handleUpload = async () => {
-    const { fonts: added, failed } = await importCustomFonts();
-    if (added.length > 0) {
-      setCustomFonts([...fonts, ...added]);
-      selectFont(added[0].id);
-    }
-    if (failed.length > 0) {
-      toast.error("Couldn't add font", { description: `Not a valid font: ${failed.join(", ")}` });
+    try {
+      const { fonts: added, failed } = await importCustomFonts();
+      if (added.length > 0) {
+        setCustomFonts([...fonts, ...added]);
+        selectFont(added[0].id);
+      }
+      if (failed.length > 0) {
+        toast.error("Couldn't add font", { description: `Not a valid font: ${failed.join(", ")}` });
+      }
+    } catch (error) {
+      toast.error("Couldn't add font", { description: String(error) });
     }
   };
 
@@ -147,21 +151,19 @@ export function FontControl() {
           className="w-full justify-between md:w-48"
         >
           <span className="truncate">
-            {activeCustomFont && resolvedFont === "custom"
-              ? activeCustomFont.name
-              : SETTINGS.FONT.options[resolvedFont]}
+            {activeCustomFont?.name ?? SETTINGS.FONT.options[resolvedFont]}
           </span>
           <IconChevronDown data-icon="inline-end" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="md:min-w-64">
         <DropdownMenuRadioGroup
-          value={resolvedFont === "custom" ? activeCustomFont?.id : resolvedFont}
+          value={activeCustomFont?.id ?? resolvedFont}
           onValueChange={selectFont}
         >
-          {Object.entries(BUILT_IN_FONT_CLASSES).map(([option, className]) => (
+          {Object.entries(FONT_CLASSES).map(([option, className]) => (
             <DropdownMenuRadioItem key={option} value={option} className={className}>
-              {SETTINGS.FONT.options[option as keyof typeof BUILT_IN_FONT_CLASSES]}
+              {SETTINGS.FONT.options[option as typeof font]}
             </DropdownMenuRadioItem>
           ))}
           {fonts.length > 0 && <DropdownMenuSeparator />}
@@ -176,11 +178,17 @@ export function FontControl() {
                     size="icon-xs"
                     variant="destructive"
                     className="border-destructive/40"
+                    aria-label={`Remove ${customFont.name}`}
                     onClick={() => removeFont(customFont)}
                   >
                     <IconCheck />
                   </Button>
-                  <Button size="icon-xs" variant="outline" onClick={() => setPendingRemoveId(null)}>
+                  <Button
+                    size="icon-xs"
+                    variant="outline"
+                    aria-label="Cancel"
+                    onClick={() => setPendingRemoveId(null)}
+                  >
                     <IconX />
                   </Button>
                 </ButtonGroup>

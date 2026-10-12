@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 import {
   activeCustomFontAtom,
-  BUILT_IN_FONT_CLASSES,
+  FONT_CLASSES,
   loadCustomFontFace,
   resolveFontSetting,
 } from "@/lib/custom-fonts";
@@ -16,8 +16,6 @@ const PRIMARY_COLOR_THEMES = Object.keys(SETTINGS.COLOR_THEME.options).filter(
   (option) => option !== "default",
 );
 const UI_TINTS = Object.keys(SETTINGS.UI_TINT.options).filter((option) => option !== "default");
-
-const FONT_CLASSES = [...Object.values(BUILT_IN_FONT_CLASSES), "font-custom"];
 
 const UI_TINT_STRENGTHS: Record<number, string> = {
   1: "2%",
@@ -47,7 +45,7 @@ export function ThemeRegistry() {
   const uiTint = jsonParseCatch(rawUiTint);
   const uiTintStrength = rawUiTintStrength;
   const roundness = jsonParseCatch(rawRoundness);
-  const font = resolveFontSetting(jsonParseCatch(rawFont), activeCustomFont !== null);
+  const font = resolveFontSetting(jsonParseCatch(rawFont));
   const textScale = jsonParseCatch(rawTextScale);
 
   useEffect(() => {
@@ -93,22 +91,22 @@ export function ThemeRegistry() {
     root.setAttribute("data-roundness", roundness || "md");
 
     // Handle font
-    root.classList.remove(...FONT_CLASSES);
-    root.classList.add(font === "custom" ? "font-custom" : BUILT_IN_FONT_CLASSES[font]);
-    root.setAttribute("data-font", font);
+    root.classList.remove(...Object.values(FONT_CLASSES), "font-custom");
+    root.classList.add(activeCustomFont ? "font-custom" : FONT_CLASSES[font]);
+    root.setAttribute("data-font", activeCustomFont ? "custom" : font);
 
     root.classList.remove("text-xs", "text-sm", "text-md", "text-lg", "text-xl", "text-2xl");
     root.classList.add(`text-${textScale || "md"}`);
     root.setAttribute("data-text-scale", textScale || "md");
-  }, [theme, colorTheme, uiTint, uiTintStrength, roundness, font, textScale]);
+  }, [theme, colorTheme, uiTint, uiTintStrength, roundness, font, activeCustomFont, textScale]);
 
   useEffect(() => {
-    if (font !== "custom" || !activeCustomFont) return;
+    if (!activeCustomFont) return;
 
     const fontFace = loadCustomFontFace(activeCustomFont).catch(() => null);
     void fontFace.then((face) => face && document.fonts.add(face));
     return () => void fontFace.then((face) => face && document.fonts.delete(face));
-  }, [font, activeCustomFont]);
+  }, [activeCustomFont]);
 
   return null;
 }

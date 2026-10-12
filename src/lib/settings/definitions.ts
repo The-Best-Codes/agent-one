@@ -145,10 +145,9 @@ export const SETTINGS = {
     keywords: ["typeface", "typography", "font family", "text"],
     ai: "write",
     label: "Font",
-    description:
-      "Choose the font for the application. Custom uses a font file uploaded on each device and falls back to Default when none is selected.",
+    description: "Choose the font for the application.",
     default: "default",
-    options: { default: "Default", system: "System", mono: "Mono", custom: "Custom" },
+    options: { default: "Default", system: "System", mono: "Mono" },
   }),
   ROUNDNESS: select({
     keywords: ["corners", "radius", "rounded", "border radius", "sharp", "square"],
