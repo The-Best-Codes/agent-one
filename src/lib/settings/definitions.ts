@@ -147,7 +147,7 @@ export const SETTINGS = {
     label: "Font",
     description: "Choose the font for the application.",
     default: "default",
-    options: { default: "Default", system: "System", mono: "Mono", roboto: "Roboto" },
+    options: { default: "Default", system: "System", mono: "Mono" },
   }),
   ROUNDNESS: select({
     keywords: ["corners", "radius", "rounded", "border radius", "sharp", "square"],
