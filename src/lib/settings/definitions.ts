@@ -147,7 +147,7 @@ export const SETTINGS = {
     label: "Font",
     description: "Choose the font for the application.",
     default: "default",
-    options: { default: "Default", system: "System", mono: "Mono", roboto: "Roboto" },
+    options: { default: "Default", system: "System", mono: "Mono" },
   }),
   ROUNDNESS: select({
     keywords: ["corners", "radius", "rounded", "border radius", "sharp", "square"],
@@ -498,6 +498,13 @@ export const SETTINGS = {
     ) as Record<ToolId, boolean>,
   }),
   TOOL_CONFIGS: data<ToolConfigs>({ default: DEFAULT_TOOL_CONFIGS }),
+  CONFIRM_YOLO_MODE: toggle({
+    keywords: ["yolo", "auto-run", "approval", "warning", "confirmation", "tool behavior"],
+    label: "Confirm before turning on YOLO mode",
+    description:
+      "Show a warning before switching tool behavior to YOLO, which runs tools without asking for your approval.",
+    default: true,
+  }),
 };
 
 export type SettingKey = keyof typeof SETTINGS;

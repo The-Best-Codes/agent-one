@@ -1,8 +1,32 @@
-import { useAtom } from "jotai";
+import { IconCheck, IconChevronDown, IconTrash, IconUpload, IconX } from "@tabler/icons-react";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useState } from "react";
+import { toast } from "sonner";
 
 import { ColorPicker } from "@/components/a1/color-picker";
 import ThemeToggle from "@/components/theme/toggle-menu";
+import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  activeCustomFontAtom,
+  activeCustomFontIdAtom,
+  FONT_CLASSES,
+  type CustomFont,
+  customFontsAtom,
+  deleteCustomFontFile,
+  importCustomFonts,
+  resolveFontSetting,
+} from "@/lib/custom-fonts";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { SETTINGS, type SettingValue } from "@/lib/settings/definitions";
 import { cn } from "@/lib/utils";
@@ -44,13 +68,6 @@ const COLOR_PICKER_OPTIONS = Object.entries(SETTINGS.COLOR_THEME.options).map(([
   className: COLOR_CLASSES[value as SettingValue<"COLOR_THEME">],
 }));
 
-const FONT_CLASSES: Record<SettingValue<"FONT">, string> = {
-  default: "font-space-grotesk",
-  system: "font-sans",
-  mono: "font-mono",
-  roboto: "font-roboto",
-};
-
 const ROUNDNESS_CLASSES: Record<SettingValue<"ROUNDNESS">, string> = {
   none: "rounded-[0px]",
   sm: "rounded-[0.3125rem]",
@@ -90,29 +107,111 @@ export function TintControl() {
 
 export function FontControl() {
   const [font, setFont] = useAtom(settingAtoms.FONT);
+  const [customFonts, setCustomFonts] = useAtom(customFontsAtom);
+  const activeCustomFont = useAtomValue(activeCustomFontAtom);
+  const setActiveCustomFontId = useSetAtom(activeCustomFontIdAtom);
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
+
+  const resolvedFont = resolveFontSetting(font);
+  const fonts = Array.isArray(customFonts) ? customFonts : [];
+
+  const selectFont = (value: string) => {
+    const isBuiltIn = Object.hasOwn(FONT_CLASSES, value);
+    setActiveCustomFontId(isBuiltIn ? null : value);
+    setFont(isBuiltIn ? (value as typeof font) : "default");
+  };
+
+  const handleUpload = async () => {
+    try {
+      const { fonts: added, failed } = await importCustomFonts();
+      if (added.length > 0) {
+        setCustomFonts([...fonts, ...added]);
+        selectFont(added[0].id);
+      }
+      if (failed.length > 0) {
+        toast.error("Couldn't add font", { description: `Not a valid font: ${failed.join(", ")}` });
+      }
+    } catch (error) {
+      toast.error("Couldn't add font", { description: String(error) });
+    }
+  };
+
+  const removeFont = (customFont: CustomFont) => {
+    void deleteCustomFontFile(customFont);
+    setCustomFonts(fonts.filter((f) => f.id !== customFont.id));
+    if (activeCustomFont?.id === customFont.id) setActiveCustomFontId(null);
+  };
 
   return (
-    <ToggleGroup
-      type="single"
-      variant="outline"
-      value={font}
-      onValueChange={(value) => {
-        if (value) setFont(value as typeof font);
-      }}
-      aria-label="Select font"
-      className="w-full min-w-64 md:w-fit"
-    >
-      {Object.entries(SETTINGS.FONT.options).map(([value, label]) => (
-        <ToggleGroupItem
-          key={value}
-          value={value}
-          aria-label={label}
-          className={FONT_CLASSES[value as typeof font]}
+    <DropdownMenu onOpenChange={() => setPendingRemoveId(null)}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          aria-label="Select font"
+          className="w-full justify-between md:w-48"
         >
-          {label}
-        </ToggleGroupItem>
-      ))}
-    </ToggleGroup>
+          <span className="truncate">
+            {activeCustomFont?.name ?? SETTINGS.FONT.options[resolvedFont]}
+          </span>
+          <IconChevronDown data-icon="inline-end" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="md:min-w-64">
+        <DropdownMenuRadioGroup
+          value={activeCustomFont?.id ?? resolvedFont}
+          onValueChange={selectFont}
+        >
+          {Object.entries(FONT_CLASSES).map(([option, className]) => (
+            <DropdownMenuRadioItem key={option} value={option} className={className}>
+              {SETTINGS.FONT.options[option as typeof font]}
+            </DropdownMenuRadioItem>
+          ))}
+          {fonts.length > 0 && <DropdownMenuSeparator />}
+          {fonts.map((customFont) => (
+            <div key={customFont.id} className="flex items-center gap-1">
+              <DropdownMenuRadioItem value={customFont.id} className="min-w-0 flex-1">
+                <span className="truncate">{customFont.name}</span>
+              </DropdownMenuRadioItem>
+              {pendingRemoveId === customFont.id ? (
+                <ButtonGroup>
+                  <Button
+                    size="icon-xs"
+                    variant="destructive"
+                    className="border-destructive/40"
+                    aria-label={`Remove ${customFont.name}`}
+                    onClick={() => removeFont(customFont)}
+                  >
+                    <IconCheck />
+                  </Button>
+                  <Button
+                    size="icon-xs"
+                    variant="outline"
+                    aria-label="Cancel"
+                    onClick={() => setPendingRemoveId(null)}
+                  >
+                    <IconX />
+                  </Button>
+                </ButtonGroup>
+              ) : (
+                <Button
+                  size="icon-xs"
+                  variant="destructive"
+                  aria-label={`Remove ${customFont.name}`}
+                  onClick={() => setPendingRemoveId(customFont.id)}
+                >
+                  <IconTrash />
+                </Button>
+              )}
+            </div>
+          ))}
+        </DropdownMenuRadioGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={() => void handleUpload()}>
+          <IconUpload />
+          Upload fonts…
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 

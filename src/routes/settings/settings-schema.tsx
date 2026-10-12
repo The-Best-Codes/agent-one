@@ -451,17 +451,23 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     label: "Tools",
     searchPriority: 0.8,
     intro: ToolsIntro,
-    cards: TOOL_GROUPS.map((group) => ({
-      title: group.title,
-      description: group.description,
-      items: group.toolIds.map((toolId) => ({
-        id: `tool-${TOOL_INFO[toolId].anchor}`,
-        label: TOOL_INFO[toolId].name,
-        description: TOOL_INFO[toolId].description,
-        keywords: ["tool"],
-        render: () => <ToolRow toolId={toolId} />,
+    cards: [
+      {
+        title: "Approvals",
+        items: [{ id: "confirm-yolo-mode", key: "CONFIRM_YOLO_MODE" }],
+      },
+      ...TOOL_GROUPS.map((group) => ({
+        title: group.title,
+        description: group.description,
+        items: group.toolIds.map((toolId) => ({
+          id: `tool-${TOOL_INFO[toolId].anchor}`,
+          label: TOOL_INFO[toolId].name,
+          description: TOOL_INFO[toolId].description,
+          keywords: ["tool"],
+          render: () => <ToolRow toolId={toolId} />,
+        })),
       })),
-    })),
+    ],
   },
   {
     id: "about",
