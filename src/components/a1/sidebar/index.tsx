@@ -152,6 +152,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           size="icon-sm"
           onClick={() => setIsCollapsed(!isCollapsed)}
           aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
+          data-tour="sidebar-toggle"
           className="size-6"
         >
           <IconLayoutSidebar data-icon="inline-start" />
@@ -164,7 +165,13 @@ export const Sidebar = ({ className }: SidebarProps) => {
       <AdaptiveTooltip>
         <AdaptiveTooltipTrigger asChild>
           <DrawerTrigger asChild>
-            <Button variant="outline" size="icon-sm" aria-label={toggleTooltip} className="size-6">
+            <Button
+              variant="outline"
+              size="icon-sm"
+              aria-label={toggleTooltip}
+              className="size-6"
+              data-tour="sidebar-toggle"
+            >
               <IconLayoutSidebar />
             </Button>
           </DrawerTrigger>

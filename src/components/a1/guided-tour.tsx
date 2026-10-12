@@ -15,58 +15,62 @@ import { tourActiveAtom } from "@/lib/jotai/atoms";
 import { cn } from "@/lib/utils";
 
 interface TourStep {
-  target?: string;
+  targets?: string[];
   side?: "top" | "right" | "bottom" | "left";
   title: string;
   description: string;
-  tips?: ReactNode[];
+  list?: ReactNode[];
 }
 
 const TOUR_STEPS: TourStep[] = [
   {
     title: "Welcome to AgentOne",
     description:
-      "AgentOne is an AI agent that can answer questions, research topics, and get things done for you. With extensions, it can even work with your other apps. Let's take a quick look around.",
+      "AgentOne is an AI agent. Tell it what you need in plain language, and it can answer questions, research topics, and get tasks done for you. This quick tour shows you where everything is.",
   },
   {
-    target: "chat-input",
+    targets: ["chat-input"],
     side: "top",
-    title: "Chat with your agent",
+    title: "The message box",
     description:
-      "Type a message here and press Enter to send it. Your agent can answer questions, do research, and take actions for you.",
+      "After the tour, this is where you'll talk to your agent. Write what you need the way you'd ask a person, like \"Help me plan a 3-day trip to Chicago,\" and press Enter to send it. You can keep replying to refine the answer.",
   },
   {
-    target: "attach",
+    targets: ["attach"],
     side: "top",
-    title: "Add files",
+    title: "Attaching files",
     description:
-      "Attach images, documents, and other files to your message. You can also drag and drop them onto the message box.",
+      "Want your agent to look at something? This button attaches images, PDFs, documents, and other files to your message. You can also drag files onto the message box.",
   },
   {
-    target: "model-selector",
+    targets: ["model-selector"],
     side: "top",
-    title: "Pick a model",
+    title: "Choosing a model",
     description:
-      "Choose which AI model answers you. The button next to it lets you fine-tune how the model behaves in this chat.",
+      "Your agent is powered by an AI model, and you can choose which one. Some are faster, some are smarter, and some are better at certain tasks. The button next to it has extra options for the current chat, like whether your agent asks before using tools.",
   },
   {
-    target: "chat-list",
+    targets: ["chat-list", "sidebar-toggle"],
     side: "right",
     title: "Your chats",
     description:
-      "Every conversation is saved here. Start a new chat, search past ones, or right-click a chat for more options.",
+      "Each chat is a separate conversation. Within a chat, your agent remembers what you've talked about, so start a new chat whenever you move on to a different topic or task. Your past chats are saved in the sidebar, so you can search them or pick up where you left off.",
   },
   {
-    target: "account-menu",
+    targets: ["account-menu", "sidebar-toggle"],
     side: "right",
     title: "Extensions, settings, and more",
-    description:
-      "Open this menu to add extensions that give your agent new abilities, set up scheduled agents, and change your settings.",
+    description: "Click your account at the bottom of the sidebar to find:",
+    list: [
+      "Extensions, which connect your agent to other apps and give it new abilities.",
+      'Scheduled Agents, which do tasks for you automatically, like "every morning."',
+      "Settings, where you can change how AgentOne looks and works.",
+    ],
   },
   {
     title: "You're ready!",
     description: "A few tips to get the most out of AgentOne:",
-    tips: [
+    list: [
       'Ask it to remember things, like "Remember that I prefer short answers."',
       'Ask it to do something on a schedule, like "Summarize the news every morning."',
       <>
@@ -90,55 +94,54 @@ interface Rect {
   height: number;
 }
 
-const getTargetElement = (target: string) => {
-  const element = document.querySelector<HTMLElement>(`[data-tour="${target}"]`);
-  if (!element) return null;
-  const rect = element.getBoundingClientRect();
-  return rect.width > 0 && rect.height > 0 ? element : null;
+const measureTargets = (targets: string[] | undefined): Rect | null => {
+  for (const target of targets ?? []) {
+    const element = document.querySelector<HTMLElement>(`[data-tour="${target}"]`);
+    const rect = element?.getBoundingClientRect();
+    if (rect && rect.width > 0 && rect.height > 0) {
+      return {
+        top: rect.top - SPOTLIGHT_PADDING,
+        left: rect.left - SPOTLIGHT_PADDING,
+        width: rect.width + SPOTLIGHT_PADDING * 2,
+        height: rect.height + SPOTLIGHT_PADDING * 2,
+      };
+    }
+  }
+  return null;
 };
 
-const measure = (element: HTMLElement): Rect => {
-  const rect = element.getBoundingClientRect();
-  return {
-    top: rect.top - SPOTLIGHT_PADDING,
-    left: rect.left - SPOTLIGHT_PADDING,
-    width: rect.width + SPOTLIGHT_PADDING * 2,
-    height: rect.height + SPOTLIGHT_PADDING * 2,
-  };
-};
+const isSameRect = (a: Rect | null, b: Rect | null) =>
+  a === b ||
+  (!!a &&
+    !!b &&
+    a.top === b.top &&
+    a.left === b.left &&
+    a.width === b.width &&
+    a.height === b.height);
 
 const GuidedTourContent = ({ onFinish }: { onFinish: () => void }) => {
-  const [steps] = useState(() =>
-    TOUR_STEPS.filter((step) => !step.target || getTargetElement(step.target)),
-  );
   const [stepIndex, setStepIndex] = useState(0);
-  const [measured, setMeasured] = useState<{ target: string; rect: Rect } | null>(null);
+  const [measured, setMeasured] = useState<{ stepIndex: number; rect: Rect | null } | null>(null);
   const maskId = useId();
-  const step = steps[stepIndex]!;
-  const isLastStep = stepIndex === steps.length - 1;
-  const rect = step.target && measured?.target === step.target ? measured.rect : null;
+  const step = TOUR_STEPS[stepIndex]!;
+  const isLastStep = stepIndex === TOUR_STEPS.length - 1;
+  const rect = measured?.stepIndex === stepIndex ? measured.rect : null;
 
   useLayoutEffect(() => {
-    const target = step.target;
-    const element = target ? getTargetElement(target) : null;
-    if (!target || !element) return;
-
-    const update = () => setMeasured({ target, rect: measure(element) });
-    const resizeObserver = new ResizeObserver(update);
-    resizeObserver.observe(element);
-    window.addEventListener("resize", update);
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", update);
-    };
-  }, [step.target]);
+    let frame = requestAnimationFrame(function track() {
+      const next = measureTargets(step.targets);
+      setMeasured((current) =>
+        current?.stepIndex === stepIndex && isSameRect(current.rect, next)
+          ? current
+          : { stepIndex, rect: next },
+      );
+      frame = requestAnimationFrame(track);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [stepIndex, step.targets]);
 
   const goToStep = (index: number) => {
-    const target = steps[index]!.target;
-    const element = target ? getTargetElement(target) : null;
-    if (target && element) {
-      setMeasured({ target, rect: measure(element) });
-    }
+    setMeasured({ stepIndex: index, rect: measureTargets(TOUR_STEPS[index]!.targets) });
     setStepIndex(index);
   };
 
@@ -173,7 +176,7 @@ const GuidedTourContent = ({ onFinish }: { onFinish: () => void }) => {
         </svg>
         {rect && (
           <div
-            key={step.target}
+            key={stepIndex}
             className="ring-primary animate-in fade-in-0 zoom-in-95 fixed rounded-lg ring-2 duration-100"
             style={rect}
           />
@@ -191,6 +194,7 @@ const GuidedTourContent = ({ onFinish }: { onFinish: () => void }) => {
           side={rect ? step.side : "bottom"}
           sideOffset={rect ? 12 : 0}
           avoidCollisions={!!rect}
+          updatePositionStrategy="always"
           className={cn(!rect && "-translate-y-1/2")}
           aria-label={step.title}
           onInteractOutside={(e) => e.preventDefault()}
@@ -201,18 +205,18 @@ const GuidedTourContent = ({ onFinish }: { onFinish: () => void }) => {
             <PopoverTitle>{step.title}</PopoverTitle>
             <PopoverDescription>{step.description}</PopoverDescription>
           </PopoverHeader>
-          {step.tips && (
+          {step.list && (
             <div className="prose prose-sm prose-neutral dark:prose-invert prose-ul:my-0">
               <ul>
-                {step.tips.map((tip, index) => (
-                  <li key={index}>{tip}</li>
+                {step.list.map((item, index) => (
+                  <li key={index}>{item}</li>
                 ))}
               </ul>
             </div>
           )}
           <div className="flex items-center justify-between gap-2">
             <span className="text-muted-foreground text-xs">
-              {`${stepIndex + 1} of ${steps.length}`}
+              {`${stepIndex + 1} of ${TOUR_STEPS.length}`}
             </span>
             <div className="flex items-center gap-2">
               {!isLastStep && (
