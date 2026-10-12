@@ -1,39 +1,31 @@
-import { IconTrash, IconUpload } from "@tabler/icons-react";
+import { IconCheck, IconChevronDown, IconTrash, IconUpload, IconX } from "@tabler/icons-react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { ColorPicker } from "@/components/a1/color-picker";
 import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
-  Popover,
-  PopoverContent,
-  PopoverDescription,
-  PopoverHeader,
-  PopoverTitle,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectSeparator,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   activeCustomFontAtom,
   activeCustomFontIdAtom,
   BUILT_IN_FONT_CLASSES,
+  type CustomFont,
   customFontsAtom,
   deleteCustomFontFile,
-  importCustomFont,
+  importCustomFonts,
   resolveFontSetting,
-  validCustomFontsAtom,
 } from "@/lib/custom-fonts";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { SETTINGS, type SettingValue } from "@/lib/settings/definitions";
@@ -76,8 +68,6 @@ const COLOR_PICKER_OPTIONS = Object.entries(SETTINGS.COLOR_THEME.options).map(([
   className: COLOR_CLASSES[value as SettingValue<"COLOR_THEME">],
 }));
 
-const CUSTOM_FONT_VALUE_PREFIX = "custom:";
-
 const ROUNDNESS_CLASSES: Record<SettingValue<"ROUNDNESS">, string> = {
   none: "rounded-[0px]",
   sm: "rounded-[0.3125rem]",
@@ -117,135 +107,103 @@ export function TintControl() {
 
 export function FontControl() {
   const [font, setFont] = useAtom(settingAtoms.FONT);
-  const customFonts = useAtomValue(validCustomFontsAtom);
-  const setCustomFonts = useSetAtom(customFontsAtom);
+  const [customFonts, setCustomFonts] = useAtom(customFontsAtom);
   const activeCustomFont = useAtomValue(activeCustomFontAtom);
   const setActiveCustomFontId = useSetAtom(activeCustomFontIdAtom);
-  const [isRemoveOpen, setIsRemoveOpen] = useState(false);
-  const importingRef = useRef(false);
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
 
   const resolvedFont = resolveFontSetting(font, activeCustomFont !== null);
-  const value =
-    resolvedFont === "custom" && activeCustomFont
-      ? `${CUSTOM_FONT_VALUE_PREFIX}${activeCustomFont.id}`
-      : resolvedFont;
+  const fonts = Array.isArray(customFonts) ? customFonts : [];
 
-  const handleValueChange = (nextValue: string) => {
-    if (nextValue.startsWith(CUSTOM_FONT_VALUE_PREFIX)) {
-      setActiveCustomFontId(nextValue.slice(CUSTOM_FONT_VALUE_PREFIX.length));
-      setFont("custom");
-      return;
-    }
-
-    setFont(nextValue as typeof font);
+  const selectFont = (value: string) => {
+    if (Object.hasOwn(BUILT_IN_FONT_CLASSES, value)) return setFont(value as typeof font);
+    setActiveCustomFontId(value);
+    setFont("custom");
   };
 
   const handleUpload = async () => {
-    if (importingRef.current) return;
-    importingRef.current = true;
-
-    try {
-      const customFont = await importCustomFont();
-      if (!customFont) return;
-
-      setCustomFonts((prev) => [...(Array.isArray(prev) ? prev : []), customFont]);
-      setActiveCustomFontId(customFont.id);
-      setFont("custom");
-    } catch (error) {
-      toast.error("Couldn't add font", {
-        description: error instanceof Error ? error.message : String(error),
-      });
-    } finally {
-      importingRef.current = false;
+    const { fonts: added, failed } = await importCustomFonts();
+    if (added.length > 0) {
+      setCustomFonts([...fonts, ...added]);
+      selectFont(added[0].id);
+    }
+    if (failed.length > 0) {
+      toast.error("Couldn't add font", { description: `Not a valid font: ${failed.join(", ")}` });
     }
   };
 
-  const handleRemove = () => {
-    if (!activeCustomFont) return;
-
-    void deleteCustomFontFile(activeCustomFont);
-    setCustomFonts((prev) =>
-      (Array.isArray(prev) ? prev : []).filter(
-        (customFont) => customFont.id !== activeCustomFont.id,
-      ),
-    );
-    setActiveCustomFontId(null);
+  const removeFont = (customFont: CustomFont) => {
+    void deleteCustomFontFile(customFont);
+    setCustomFonts(fonts.filter((f) => f.id !== customFont.id));
+    if (activeCustomFont?.id === customFont.id) setActiveCustomFontId(null);
   };
 
   return (
-    <div className="flex w-full items-center gap-2 md:w-fit">
-      <Select value={value} onValueChange={handleValueChange}>
-        <SelectTrigger aria-label="Select font" className="w-full md:w-48">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            {Object.entries(BUILT_IN_FONT_CLASSES).map(([option, className]) => (
-              <SelectItem key={option} value={option} className={className}>
-                {SETTINGS.FONT.options[option as keyof typeof BUILT_IN_FONT_CLASSES]}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-          {customFonts.length > 0 && (
-            <>
-              <SelectSeparator />
-              <SelectGroup>
-                <SelectLabel>Custom</SelectLabel>
-                {customFonts.map((customFont) => (
-                  <SelectItem
-                    key={customFont.id}
-                    value={`${CUSTOM_FONT_VALUE_PREFIX}${customFont.id}`}
+    <DropdownMenu onOpenChange={() => setPendingRemoveId(null)}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          aria-label="Select font"
+          className="w-full justify-between md:w-48"
+        >
+          <span className="truncate">
+            {activeCustomFont && resolvedFont === "custom"
+              ? activeCustomFont.name
+              : SETTINGS.FONT.options[resolvedFont]}
+          </span>
+          <IconChevronDown data-icon="inline-end" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="md:min-w-64">
+        <DropdownMenuRadioGroup
+          value={resolvedFont === "custom" ? activeCustomFont?.id : resolvedFont}
+          onValueChange={selectFont}
+        >
+          {Object.entries(BUILT_IN_FONT_CLASSES).map(([option, className]) => (
+            <DropdownMenuRadioItem key={option} value={option} className={className}>
+              {SETTINGS.FONT.options[option as keyof typeof BUILT_IN_FONT_CLASSES]}
+            </DropdownMenuRadioItem>
+          ))}
+          {fonts.length > 0 && <DropdownMenuSeparator />}
+          {fonts.map((customFont) => (
+            <div key={customFont.id} className="flex items-center gap-1">
+              <DropdownMenuRadioItem value={customFont.id} className="min-w-0 flex-1">
+                <span className="truncate">{customFont.name}</span>
+              </DropdownMenuRadioItem>
+              {pendingRemoveId === customFont.id ? (
+                <ButtonGroup>
+                  <Button
+                    size="icon-xs"
+                    variant="destructive"
+                    className="border-destructive/40"
+                    onClick={() => removeFont(customFont)}
                   >
-                    {customFont.name}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </>
-          )}
-        </SelectContent>
-      </Select>
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={() => void handleUpload()}
-        aria-label="Upload font"
-        title="Upload font"
-      >
-        <IconUpload />
-      </Button>
-      {resolvedFont === "custom" && activeCustomFont && (
-        <Popover open={isRemoveOpen} onOpenChange={setIsRemoveOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="icon" aria-label="Remove font" title="Remove font">
-              <IconTrash />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent align="end">
-            <PopoverHeader>
-              <PopoverTitle>Remove this font?</PopoverTitle>
-              <PopoverDescription>
-                {activeCustomFont.name} will be removed from this device.
-              </PopoverDescription>
-            </PopoverHeader>
-            <div className="flex justify-end gap-2">
-              <Button size="sm" variant="outline" onClick={() => setIsRemoveOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={() => {
-                  handleRemove();
-                  setIsRemoveOpen(false);
-                }}
-              >
-                Remove
-              </Button>
+                    <IconCheck />
+                  </Button>
+                  <Button size="icon-xs" variant="outline" onClick={() => setPendingRemoveId(null)}>
+                    <IconX />
+                  </Button>
+                </ButtonGroup>
+              ) : (
+                <Button
+                  size="icon-xs"
+                  variant="destructive"
+                  aria-label={`Remove ${customFont.name}`}
+                  onClick={() => setPendingRemoveId(customFont.id)}
+                >
+                  <IconTrash />
+                </Button>
+              )}
             </div>
-          </PopoverContent>
-        </Popover>
-      )}
-    </div>
+          ))}
+        </DropdownMenuRadioGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={() => void handleUpload()}>
+          <IconUpload />
+          Upload fonts…
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 

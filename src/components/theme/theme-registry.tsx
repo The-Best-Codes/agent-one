@@ -105,21 +105,9 @@ export function ThemeRegistry() {
   useEffect(() => {
     if (font !== "custom" || !activeCustomFont) return;
 
-    let cancelled = false;
-    let fontFace: FontFace | null = null;
-
-    loadCustomFontFace(activeCustomFont)
-      .then((loadedFontFace) => {
-        if (cancelled) return;
-        fontFace = loadedFontFace;
-        document.fonts.add(loadedFontFace);
-      })
-      .catch(() => undefined);
-
-    return () => {
-      cancelled = true;
-      if (fontFace) document.fonts.delete(fontFace);
-    };
+    const fontFace = loadCustomFontFace(activeCustomFont).catch(() => null);
+    void fontFace.then((face) => face && document.fonts.add(face));
+    return () => void fontFace.then((face) => face && document.fonts.delete(face));
   }, [font, activeCustomFont]);
 
   return null;
