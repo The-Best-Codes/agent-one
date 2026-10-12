@@ -208,3 +208,5 @@ streamable
 julianday
 NOCASE
 colour
+dont
+Dont
