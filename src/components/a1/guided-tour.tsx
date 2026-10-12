@@ -17,12 +17,14 @@ interface TourStep {
   side?: "top" | "right" | "bottom" | "left";
   title: string;
   description: string;
+  tips?: string[];
 }
 
 const TOUR_STEPS: TourStep[] = [
   {
     title: "Welcome to AgentOne",
-    description: "Let's take a quick look around so you know where everything is.",
+    description:
+      "AgentOne is an AI agent that can answer questions, research topics, and get things done for you. With extensions, it can even work with your other apps. Let's take a quick look around.",
   },
   {
     target: "chat-input",
@@ -61,7 +63,13 @@ const TOUR_STEPS: TourStep[] = [
   },
   {
     title: "You're ready!",
-    description: "That's everything you need to get started. Have fun!",
+    description: "A few tips to get the most out of AgentOne:",
+    tips: [
+      'Ask it to remember things, like "Remember that I prefer short answers."',
+      'Ask it to do something on a schedule, like "Summarize the news every morning."',
+      "Find keyboard shortcuts in Settings under Keyboard Shortcuts.",
+      "You can take this tour again anytime from Settings under Help & Updates.",
+    ],
   },
 ];
 
@@ -153,6 +161,13 @@ const GuidedTourContent = ({ onFinish }: { onFinish: () => void }) => {
             <PopoverTitle>{step.title}</PopoverTitle>
             <PopoverDescription>{step.description}</PopoverDescription>
           </PopoverHeader>
+          {step.tips && (
+            <ul className="text-muted-foreground flex list-disc flex-col gap-1 pl-4">
+              {step.tips.map((tip) => (
+                <li key={tip}>{tip}</li>
+              ))}
+            </ul>
+          )}
           <div className="flex items-center justify-between gap-2">
             <span className="text-muted-foreground text-xs">
               {`${stepIndex + 1} of ${steps.length}`}

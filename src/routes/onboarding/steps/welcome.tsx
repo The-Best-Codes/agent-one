@@ -1,6 +1,7 @@
 import { IconBook, IconExternalLink, IconMap, IconRocket } from "@tabler/icons-react";
 import { useState } from "react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AGENT_ONE_DOCS_URL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -36,22 +37,25 @@ export function WelcomeStep({ name, onComplete, onStartTour }: WelcomeStepProps)
       <div className="flex w-full flex-col gap-3">
         <Button
           size="lg"
-          className="h-14 justify-start px-6 text-lg"
-          onClick={() => exitThen(onComplete)}
+          className="relative h-14 justify-start px-6 text-lg"
+          onClick={() => exitThen(onStartTour)}
           disabled={isExiting}
         >
-          <IconRocket data-icon="inline-start" />
-          Launch AgentOne
+          <Badge variant="secondary" className="absolute -top-2 -right-2">
+            Recommended
+          </Badge>
+          <IconMap data-icon="inline-start" />
+          Take the Tour
         </Button>
         <Button
           variant="outline"
           size="lg"
           className="h-14 justify-start px-6 text-lg"
-          onClick={() => exitThen(onStartTour)}
+          onClick={() => exitThen(onComplete)}
           disabled={isExiting}
         >
-          <IconMap data-icon="inline-start" />
-          Take the Tour
+          <IconRocket data-icon="inline-start" />
+          Skip and Launch AgentOne
         </Button>
         <Button asChild variant="outline" size="lg" className="h-14 justify-between px-6 text-lg">
           <a href={AGENT_ONE_DOCS_URL} target="_blank" rel="noreferrer">

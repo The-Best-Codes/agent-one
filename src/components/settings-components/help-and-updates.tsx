@@ -4,11 +4,12 @@ import {
   IconCircleCheck,
   IconDownload,
   IconExternalLink,
+  IconMap,
   IconRefresh,
   IconRocket,
   IconShieldCheck,
 } from "@tabler/icons-react";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -37,6 +38,7 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { useUpdate } from "@/contexts/use-update/update-hooks";
 import { modelDirectoryStatusAtom, updateModelDirectory } from "@/lib/ai/models/model-directory";
+import { tourActiveAtom } from "@/lib/jotai/atoms";
 import { extensionListStatusAtom, updateExtensionList } from "@/lib/mcp-registry/sync";
 
 import { SettingsTarget } from "./settings-target";
@@ -383,8 +385,18 @@ export function ExtensionListUpdates() {
 }
 
 export function HelpLinks() {
+  const setTourActive = useSetAtom(tourActiveAtom);
+
   return (
     <div className="flex flex-col gap-1">
+      <Link
+        to="/chat"
+        onClick={() => setTourActive(true)}
+        className="flex w-fit items-center gap-1 underline"
+      >
+        Take the tour
+        <IconMap className="size-4" />
+      </Link>
       <a
         target="_blank"
         href="https://github.com/AgentOne-Dev/agent-one-public/issues/new"
