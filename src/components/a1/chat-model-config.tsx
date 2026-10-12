@@ -1,7 +1,9 @@
 import { IconAdjustments, IconInfoCircle, IconRestore } from "@tabler/icons-react";
+import { useAtom } from "jotai";
 import debounce from "lodash.debounce";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { YoloModeDialog } from "@/components/a1/yolo-mode-dialog";
 import {
   AdaptivePopover,
   AdaptivePopoverContent,
@@ -30,6 +32,7 @@ import {
   getToolBehavior,
   type ToolBehavior,
 } from "@/hooks/ai/use-model-catalog";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 interface SliderConfigProps {
@@ -167,6 +170,8 @@ export const ChatModelConfig = ({
   const effectiveOpen = disabled ? false : open;
   const toolBehavior = getToolBehavior(currentModelConfig);
   const selectedBehavior = TOOL_BEHAVIORS.find((behavior) => behavior.value === toolBehavior);
+  const [confirmYoloMode, setConfirmYoloMode] = useAtom(settingAtoms.CONFIRM_YOLO_MODE);
+  const [yoloDialogOpen, setYoloDialogOpen] = useState(false);
 
   const [localInputs, setLocalInputs] = useState({
     maxTokens: currentModelConfig.maxTokens,
@@ -186,6 +191,23 @@ export const ChatModelConfig = ({
   );
 
   useEffect(() => () => debouncedSetModelConfig.cancel(), [debouncedSetModelConfig]);
+
+  const setToolBehavior = (value: ToolBehavior) => {
+    setModelConfig({ ...configRef.current, toolBehavior: value });
+  };
+
+  const handleToolBehaviorChange = (value: ToolBehavior) => {
+    if (value === "yolo" && confirmYoloMode !== false) {
+      setYoloDialogOpen(true);
+      return;
+    }
+    setToolBehavior(value);
+  };
+
+  const handleYoloConfirm = (dontShowAgain: boolean) => {
+    if (dontShowAgain) setConfirmYoloMode(false);
+    setToolBehavior("yolo");
+  };
 
   const handleTemperatureChange = (value: number | undefined) => {
     setModelConfig({ ...configRef.current, temperature: value });
@@ -289,12 +311,7 @@ export const ChatModelConfig = ({
         </div>
         <Select
           value={toolBehavior}
-          onValueChange={(value) => {
-            setModelConfig({
-              ...configRef.current,
-              toolBehavior: value as ToolBehavior,
-            });
-          }}
+          onValueChange={(value) => handleToolBehaviorChange(value as ToolBehavior)}
         >
           <SelectTrigger id="toolBehavior" className="w-full">
             <SelectValue>{selectedBehavior ? selectedBehavior.label : ""}</SelectValue>
@@ -478,14 +495,21 @@ export const ChatModelConfig = ({
   );
 
   return (
-    <AdaptivePopover open={effectiveOpen} onOpenChange={setOpen}>
-      <AdaptivePopoverTrigger asChild>{trigger}</AdaptivePopoverTrigger>
-      <AdaptivePopoverContent
-        title="Model Configuration"
-        className="max-h-80 w-64 overflow-auto p-4"
-      >
-        {content}
-      </AdaptivePopoverContent>
-    </AdaptivePopover>
+    <>
+      <AdaptivePopover open={effectiveOpen} onOpenChange={setOpen}>
+        <AdaptivePopoverTrigger asChild>{trigger}</AdaptivePopoverTrigger>
+        <AdaptivePopoverContent
+          title="Model Configuration"
+          className="max-h-80 w-64 overflow-auto p-4"
+        >
+          {content}
+        </AdaptivePopoverContent>
+      </AdaptivePopover>
+      <YoloModeDialog
+        open={yoloDialogOpen}
+        onOpenChange={setYoloDialogOpen}
+        onConfirm={handleYoloConfirm}
+      />
+    </>
   );
 };
