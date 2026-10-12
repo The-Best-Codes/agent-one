@@ -522,6 +522,7 @@ export const MainChatInput = ({
       <MainInputIncompleteSection onRetry={onScrollNeededAction} />
       <form
         data-testid="chat-form"
+        data-tour="chat-input"
         onSubmit={handleSubmit}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
@@ -645,6 +646,7 @@ export const MainChatInput = ({
               <AdaptiveTooltipTrigger asChild>
                 <Button
                   data-testid="attach-button"
+                  data-tour="attach"
                   type="button"
                   disabled={
                     disabled ||
@@ -674,7 +676,7 @@ export const MainChatInput = ({
             </AdaptiveTooltip>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex flex-row">
+            <div className="flex flex-row" data-tour="model-selector">
               <ModelSelector
                 loading={isChatLoading}
                 className="w-40 min-w-0 flex-1 rounded-r-none sm:w-60"

@@ -1,8 +1,8 @@
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
-import { onboardingCompletedAtom } from "@/lib/jotai/atoms";
+import { onboardingCompletedAtom, tourActiveAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 
 import { AccountStep } from "./steps/account";
@@ -17,6 +17,7 @@ export default function OnboardingRoute() {
   const [onboardingCompleted, setOnboardingCompleted] = useAtom(onboardingCompletedAtom);
   const [currentStep, setCurrentStep] = useState<OnboardingStep>("splash");
   const [userName, setUserName] = useAtom(settingAtoms.USER_NAME);
+  const setTourActive = useSetAtom(tourActiveAtom);
 
   useEffect(() => {
     if (onboardingCompleted) {
@@ -41,6 +42,11 @@ export default function OnboardingRoute() {
     setOnboardingCompleted(true);
   };
 
+  const handleStartTour = () => {
+    setTourActive(true);
+    setOnboardingCompleted(true);
+  };
+
   return (
     <main role="main" className="bg-background flex min-h-screen items-center justify-center">
       {currentStep === "splash" && <SplashStep onGetStarted={handleGetStarted} />}
@@ -50,7 +56,11 @@ export default function OnboardingRoute() {
       {currentStep === "account" && <AccountStep onSubmit={handleAccountComplete} />}
 
       {currentStep === "welcome" && (
-        <WelcomeStep name={userName} onComplete={handleWelcomeComplete} />
+        <WelcomeStep
+          name={userName}
+          onComplete={handleWelcomeComplete}
+          onStartTour={handleStartTour}
+        />
       )}
     </main>
   );
