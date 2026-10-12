@@ -1,3 +1,4 @@
+import { IconX } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { type ReactNode, useCallback, useEffect, useId, useLayoutEffect, useState } from "react";
 
@@ -96,8 +97,7 @@ interface Rect {
 
 const measureTargets = (targets: string[] | undefined): Rect | null => {
   for (const target of targets ?? []) {
-    const element = document.querySelector<HTMLElement>(`[data-tour="${target}"]`);
-    const rect = element?.getBoundingClientRect();
+    const rect = document.querySelector(`[data-tour="${target}"]`)?.getBoundingClientRect();
     if (rect && rect.width > 0 && rect.height > 0) {
       return {
         top: rect.top - SPOTLIGHT_PADDING,
@@ -201,10 +201,15 @@ const GuidedTourContent = ({ onFinish }: { onFinish: () => void }) => {
           onEscapeKeyDown={onFinish}
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
-          <PopoverHeader>
-            <PopoverTitle>{step.title}</PopoverTitle>
-            <PopoverDescription>{step.description}</PopoverDescription>
-          </PopoverHeader>
+          <div className="flex items-start justify-between gap-2">
+            <PopoverHeader>
+              <PopoverTitle>{step.title}</PopoverTitle>
+              <PopoverDescription>{step.description}</PopoverDescription>
+            </PopoverHeader>
+            <Button variant="ghost" size="icon-xs" aria-label="Close tour" onClick={onFinish}>
+              <IconX />
+            </Button>
+          </div>
           {step.list && (
             <div className="prose prose-sm prose-neutral dark:prose-invert prose-ul:my-0">
               <ul>
@@ -219,11 +224,6 @@ const GuidedTourContent = ({ onFinish }: { onFinish: () => void }) => {
               {`${stepIndex + 1} of ${TOUR_STEPS.length}`}
             </span>
             <div className="flex items-center gap-2">
-              {!isLastStep && (
-                <Button variant="ghost" size="sm" onClick={onFinish}>
-                  Skip
-                </Button>
-              )}
               {stepIndex > 0 && (
                 <Button variant="outline" size="sm" onClick={() => goToStep(stepIndex - 1)}>
                   Back
