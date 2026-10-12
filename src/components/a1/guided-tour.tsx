@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useId, useLayoutEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,14 +10,16 @@ import {
   PopoverHeader,
   PopoverTitle,
 } from "@/components/ui/popover";
+import { AGENT_ONE_DOCS_URL } from "@/lib/constants";
 import { tourActiveAtom } from "@/lib/jotai/atoms";
+import { cn } from "@/lib/utils";
 
 interface TourStep {
   target?: string;
   side?: "top" | "right" | "bottom" | "left";
   title: string;
   description: string;
-  tips?: string[];
+  tips?: ReactNode[];
 }
 
 const TOUR_STEPS: TourStep[] = [
@@ -67,7 +69,13 @@ const TOUR_STEPS: TourStep[] = [
     tips: [
       'Ask it to remember things, like "Remember that I prefer short answers."',
       'Ask it to do something on a schedule, like "Summarize the news every morning."',
-      "Find keyboard shortcuts in Settings under Keyboard Shortcuts.",
+      <>
+        Have a question? Check out the{" "}
+        <a href={AGENT_ONE_DOCS_URL} target="_blank" rel="noreferrer">
+          documentation
+        </a>
+        .
+      </>,
       "You can take this tour again anytime from Settings under Help & Updates.",
     ],
   },
@@ -105,6 +113,7 @@ const GuidedTourContent = ({ onFinish }: { onFinish: () => void }) => {
   );
   const [stepIndex, setStepIndex] = useState(0);
   const [measured, setMeasured] = useState<{ target: string; rect: Rect } | null>(null);
+  const maskId = useId();
   const step = steps[stepIndex]!;
   const isLastStep = stepIndex === steps.length - 1;
   const rect = step.target && measured?.target === step.target ? measured.rect : null;
@@ -124,34 +133,65 @@ const GuidedTourContent = ({ onFinish }: { onFinish: () => void }) => {
     };
   }, [step.target]);
 
+  const goToStep = (index: number) => {
+    const target = steps[index]!.target;
+    const element = target ? getTargetElement(target) : null;
+    if (target && element) {
+      setMeasured({ target, rect: measure(element) });
+    }
+    setStepIndex(index);
+  };
+
   const handleNext = () => {
     if (isLastStep) {
       onFinish();
     } else {
-      setStepIndex(stepIndex + 1);
+      goToStep(stepIndex + 1);
     }
   };
-
-  const anchorStyle = rect
-    ? { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
-    : { top: "40%", left: "50%", width: 0, height: 0 };
 
   return (
     <>
       <div className="fixed inset-0 z-50" aria-hidden="true">
-        <div
-          className="fixed rounded-lg shadow-[0_0_0_9999px_rgb(0_0_0/0.5)] transition-all duration-300 motion-reduce:transition-none"
-          style={anchorStyle}
-        />
+        <svg className="pointer-events-none size-full">
+          <defs>
+            <mask id={maskId}>
+              <rect width="100%" height="100%" fill="white" />
+              {rect && (
+                <rect
+                  x={rect.left}
+                  y={rect.top}
+                  width={rect.width}
+                  height={rect.height}
+                  rx={8}
+                  fill="black"
+                />
+              )}
+            </mask>
+          </defs>
+          <rect width="100%" height="100%" fill="rgb(0 0 0 / 0.5)" mask={`url(#${maskId})`} />
+        </svg>
+        {rect && (
+          <div
+            key={step.target}
+            className="ring-primary animate-in fade-in-0 zoom-in-95 fixed rounded-lg ring-2 duration-100"
+            style={rect}
+          />
+        )}
       </div>
       <Popover open>
         <PopoverAnchor asChild>
-          <div className="pointer-events-none fixed" style={anchorStyle} />
+          <div
+            className="pointer-events-none fixed"
+            style={rect ?? { top: "50%", left: "50%", width: 0, height: 0 }}
+          />
         </PopoverAnchor>
         <PopoverContent
           key={stepIndex}
           side={rect ? step.side : "bottom"}
-          sideOffset={12}
+          sideOffset={rect ? 12 : 0}
+          avoidCollisions={!!rect}
+          className={cn(!rect && "-translate-y-1/2")}
           aria-label={step.title}
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={onFinish}
@@ -162,11 +202,13 @@ const GuidedTourContent = ({ onFinish }: { onFinish: () => void }) => {
             <PopoverDescription>{step.description}</PopoverDescription>
           </PopoverHeader>
           {step.tips && (
-            <ul className="text-muted-foreground flex list-disc flex-col gap-1 pl-4">
-              {step.tips.map((tip) => (
-                <li key={tip}>{tip}</li>
-              ))}
-            </ul>
+            <div className="prose prose-sm prose-neutral dark:prose-invert prose-ul:my-0">
+              <ul>
+                {step.tips.map((tip, index) => (
+                  <li key={index}>{tip}</li>
+                ))}
+              </ul>
+            </div>
           )}
           <div className="flex items-center justify-between gap-2">
             <span className="text-muted-foreground text-xs">
@@ -179,11 +221,11 @@ const GuidedTourContent = ({ onFinish }: { onFinish: () => void }) => {
                 </Button>
               )}
               {stepIndex > 0 && (
-                <Button variant="outline" size="sm" onClick={() => setStepIndex(stepIndex - 1)}>
+                <Button variant="outline" size="sm" onClick={() => goToStep(stepIndex - 1)}>
                   Back
                 </Button>
               )}
-              <Button size="sm" onClick={handleNext}>
+              <Button size="sm" autoFocus onClick={handleNext}>
                 {isLastStep ? "Finish" : "Next"}
               </Button>
             </div>
