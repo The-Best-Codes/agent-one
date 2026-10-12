@@ -479,6 +479,13 @@ export const SETTINGS = {
     ) as Record<ToolId, boolean>,
   }),
   TOOL_CONFIGS: data<ToolConfigs>({ default: DEFAULT_TOOL_CONFIGS }),
+  CONFIRM_YOLO_MODE: toggle({
+    keywords: ["yolo", "auto-run", "approval", "warning", "confirmation", "tool behavior"],
+    label: "Confirm before turning on YOLO mode",
+    description:
+      "Show a warning before switching tool behavior to YOLO, which runs tools without asking for your approval.",
+    default: true,
+  }),
 };
 
 export type SettingKey = keyof typeof SETTINGS;

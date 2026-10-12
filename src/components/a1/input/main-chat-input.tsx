@@ -40,6 +40,14 @@ import { MainInputProvisioningSection } from "./provisioning-section";
 
 const logger = getLogger(import.meta.url);
 
+function isFileDrag(dataTransfer: DataTransfer | null) {
+  return dataTransfer?.types.includes("Files") ?? false;
+}
+
+function isChatDrag(dataTransfer: DataTransfer | null) {
+  return dataTransfer?.types.includes("application/agent-one-chat") ?? false;
+}
+
 function getChatShortcut(key: SettingValue<"SUBMIT_KEY" | "INTERRUPT_KEY">) {
   switch (key) {
     case "enter":
@@ -115,12 +123,14 @@ export const MainChatInput = ({
   const [isInterruptSubmitting, setIsInterruptSubmitting] = useState(false);
   const [editorInitialValue] = useState(() => initialValue ?? loadChatInputDraft(draftKey));
   const [files, setFiles] = useState<FileList | undefined>(undefined);
-  const [isDragging, setIsDragging] = useState(false);
+  const [isDraggingFiles, setIsDraggingFiles] = useState(false);
+  const [isDraggingChat, setIsDraggingChat] = useState(false);
 
   const editorViewRef = useRef<EditorView | null>(null);
   const initialValueKeyRef = useRef(initialValueKey);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const dragCounter = useRef(0);
+  const fileDragCounter = useRef(0);
+  const chatDragCounter = useRef(0);
   const isSubmittingRef = useRef(false);
   const hasSentInterruptRef = useRef(false);
   const statusRef = useRef(status);
@@ -356,30 +366,28 @@ export const MainChatInput = ({
   };
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
+    if (!isChatDrag(e.dataTransfer)) return;
     e.preventDefault();
     e.stopPropagation();
-    dragCounter.current++;
-    if (
-      e.dataTransfer.types.includes("Files") ||
-      e.dataTransfer.types.includes("application/agent-one-chat")
-    ) {
-      logger.verbose("Drag enter detected, showing drop zone");
-      setIsDragging(true);
-    }
+    chatDragCounter.current++;
+    logger.verbose("Chat drag enter detected, showing drop zone");
+    setIsDraggingChat(true);
   }, []);
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
+    if (!isChatDrag(e.dataTransfer)) return;
     // TODO: Consider using `relatedTarget` here
     e.preventDefault();
     e.stopPropagation();
-    dragCounter.current--;
-    if (dragCounter.current === 0) {
-      logger.verbose("Drag leave detected, hiding drop zone");
-      setIsDragging(false);
+    chatDragCounter.current--;
+    if (chatDragCounter.current === 0) {
+      logger.verbose("Chat drag leave detected, hiding drop zone");
+      setIsDraggingChat(false);
     }
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
+    if (!isChatDrag(e.dataTransfer)) return;
     e.preventDefault();
     e.stopPropagation();
   }, []);
@@ -431,38 +439,78 @@ export const MainChatInput = ({
     [loadChatMessages, chatIds, addFiles],
   );
 
-  // Note: In src-tauri/tauri.conf.json, I set app.windows[0].dragDropEnabled to false to allow processing events in the JS here.
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
+      if (!isChatDrag(e.dataTransfer)) return;
       e.preventDefault();
       e.stopPropagation();
-      setIsDragging(false);
-      dragCounter.current = 0;
-      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        logger.verbose("Files dropped", {
-          fileCount: e.dataTransfer.files.length,
-          fileNames: Array.from(e.dataTransfer.files).map((f) => f.name),
-        });
-        addFiles(e.dataTransfer.files);
-        e.dataTransfer.clearData();
-      } else {
-        const chatData = e.dataTransfer.getData("application/agent-one-chat");
-        if (chatData) {
-          try {
-            const { chatId, title } = JSON.parse(chatData);
-            logger.verbose("AgentOne chat dropped", { chatId, title });
-            handleChatDrop(chatId, title);
-            e.dataTransfer.clearData();
-          } catch (error) {
-            logger.error("Failed to parse chat drop data", error);
-          }
-        } else {
-          logger.verbose("Drop event with no files or chat data");
-        }
+      setIsDraggingChat(false);
+      chatDragCounter.current = 0;
+      const chatData = e.dataTransfer.getData("application/agent-one-chat");
+      try {
+        const { chatId, title } = JSON.parse(chatData);
+        logger.verbose("AgentOne chat dropped", { chatId, title });
+        handleChatDrop(chatId, title);
+      } catch (error) {
+        logger.error("Failed to parse chat drop data", error);
       }
     },
-    [addFiles, handleChatDrop],
+    [handleChatDrop],
   );
+
+  // Note: In src-tauri/tauri.conf.json, I set app.windows[0].dragDropEnabled to false to allow processing events in the JS here.
+  useEffect(() => {
+    const handleWindowDragEnter = (e: DragEvent) => {
+      if (!isFileDrag(e.dataTransfer)) return;
+      fileDragCounter.current++;
+      if (fileDragCounter.current === 1) {
+        logger.verbose("File drag enter detected, showing drop zone");
+        setIsDraggingFiles(true);
+      }
+    };
+
+    const handleWindowDragLeave = (e: DragEvent) => {
+      if (!isFileDrag(e.dataTransfer)) return;
+      fileDragCounter.current = Math.max(0, fileDragCounter.current - 1);
+      if (fileDragCounter.current === 0) {
+        logger.verbose("File drag leave detected, hiding drop zone");
+        setIsDraggingFiles(false);
+      }
+    };
+
+    const handleWindowDragOver = (e: DragEvent) => {
+      if (!isFileDrag(e.dataTransfer)) return;
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = "copy";
+    };
+
+    const handleWindowDrop = (e: DragEvent) => {
+      if (!isFileDrag(e.dataTransfer)) return;
+      e.preventDefault();
+      fileDragCounter.current = 0;
+      setIsDraggingFiles(false);
+      const droppedFiles = e.dataTransfer?.files;
+      if (droppedFiles && droppedFiles.length > 0) {
+        logger.verbose("Files dropped", {
+          fileCount: droppedFiles.length,
+          fileNames: Array.from(droppedFiles).map((f) => f.name),
+        });
+        addFiles(droppedFiles);
+      }
+    };
+
+    window.addEventListener("dragenter", handleWindowDragEnter);
+    window.addEventListener("dragleave", handleWindowDragLeave);
+    window.addEventListener("dragover", handleWindowDragOver);
+    window.addEventListener("drop", handleWindowDrop);
+
+    return () => {
+      window.removeEventListener("dragenter", handleWindowDragEnter);
+      window.removeEventListener("dragleave", handleWindowDragLeave);
+      window.removeEventListener("dragover", handleWindowDragOver);
+      window.removeEventListener("drop", handleWindowDrop);
+    };
+  }, [addFiles]);
 
   const isFloating = inputStyle === "floating";
 
@@ -486,7 +534,7 @@ export const MainChatInput = ({
             : "rounded-none border-0 border-t md:rounded-md md:rounded-b-none md:border md:border-b-0 md:focus-within:ring-[3px]",
         )}
       >
-        {isDragging && (
+        {(isDraggingFiles || isDraggingChat) && (
           <div
             className={cn(
               "border-primary bg-background/80 absolute inset-0 z-20 flex items-center justify-center border-2 border-dashed backdrop-blur-sm",
