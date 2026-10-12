@@ -5,13 +5,14 @@ import { z } from "zod";
 import { raceWithAbort } from "@/lib/ai/tools/utils/abort";
 import { resolvePath } from "@/lib/ai/tools/utils/path";
 import { getLogger } from "@/lib/logger";
+import { describeSandboxFileTool, deleteSandboxFile } from "@/lib/openshell";
 import type { DeleteFileToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
-export const createDeleteFileTool = (config: DeleteFileToolConfig) =>
+export const createDeleteFileTool = (config: DeleteFileToolConfig, sandboxed = false) =>
   tool({
-    description: "Delete a file from the filesystem.",
+    description: describeSandboxFileTool("Delete a file from the filesystem.", sandboxed),
     needsApproval: config.requiresApproval,
     inputSchema: z.object({
       filePath: z
@@ -22,6 +23,12 @@ export const createDeleteFileTool = (config: DeleteFileToolConfig) =>
       logger.verbose("Executing deleteFile tool with input:", input);
 
       abortSignal?.throwIfAborted();
+
+      if (sandboxed) {
+        await raceWithAbort(deleteSandboxFile(input.filePath), abortSignal);
+        logger.verbose("Sandbox file deleted successfully:", input.filePath);
+        return {};
+      }
 
       const filePath = await raceWithAbort(resolvePath(input.filePath), abortSignal);
 

@@ -6,14 +6,21 @@ import { z } from "zod";
 import { raceWithAbort } from "@/lib/ai/tools/utils/abort";
 import { resolvePath } from "@/lib/ai/tools/utils/path";
 import { getLogger } from "@/lib/logger";
+import {
+  describeSandboxFileTool,
+  prepareSandboxFileWrite,
+  writeSandboxFile,
+} from "@/lib/openshell";
 import type { CreateFileToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
-export const createCreateFileTool = (config: CreateFileToolConfig) =>
+export const createCreateFileTool = (config: CreateFileToolConfig, sandboxed = false) =>
   tool({
-    description:
+    description: describeSandboxFileTool(
       "Create a new file or overwrite an existing file with the given content. Prefer this tool over shell `cat`/`echo`/heredoc redirection for writing files.",
+      sandboxed,
+    ),
     needsApproval: config.requiresApproval,
     inputSchema: z.object({
       filePath: z
@@ -37,6 +44,24 @@ export const createCreateFileTool = (config: CreateFileToolConfig) =>
       logger.verbose("Executing createFile tool with input:", input);
 
       abortSignal?.throwIfAborted();
+
+      if (sandboxed) {
+        const { path, existed } = await raceWithAbort(
+          prepareSandboxFileWrite(input.filePath, {
+            overwrite: input.overwrite ?? false,
+            createParentDirs: input.createParentDirs ?? true,
+          }),
+          abortSignal,
+        );
+
+        abortSignal?.throwIfAborted();
+
+        await raceWithAbort(writeSandboxFile(path, input.content), abortSignal);
+
+        logger.verbose("Sandbox file created successfully:", path);
+
+        return { overwritten: existed };
+      }
 
       const filePath = await raceWithAbort(resolvePath(input.filePath), abortSignal);
 

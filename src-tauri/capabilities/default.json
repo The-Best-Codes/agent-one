@@ -32,6 +32,11 @@
           "name": "zsh",
           "cmd": "zsh",
           "args": true
+        },
+        {
+          "name": "openshell",
+          "cmd": "openshell",
+          "args": true
         }
       ]
     },
@@ -51,6 +56,11 @@
         {
           "name": "zsh",
           "cmd": "zsh",
+          "args": true
+        },
+        {
+          "name": "openshell",
+          "cmd": "openshell",
           "args": true
         }
       ]

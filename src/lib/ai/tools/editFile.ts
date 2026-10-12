@@ -5,14 +5,21 @@ import { z } from "zod";
 import { raceWithAbort } from "@/lib/ai/tools/utils/abort";
 import { resolvePath } from "@/lib/ai/tools/utils/path";
 import { getLogger } from "@/lib/logger";
+import {
+  describeSandboxFileTool,
+  readSandboxFileWithPath,
+  writeSandboxFile,
+} from "@/lib/openshell";
 import type { EditFileToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
-export const createEditFileTool = (config: EditFileToolConfig) =>
+export const createEditFileTool = (config: EditFileToolConfig, sandboxed = false) =>
   tool({
-    description:
+    description: describeSandboxFileTool(
       "Edit a file by applying a text replacement. Provide the file path, the old text to find, and the new text to replace it with.",
+      sandboxed,
+    ),
     needsApproval: config.requiresApproval,
     inputSchema: z.object({
       filePath: z
@@ -26,11 +33,15 @@ export const createEditFileTool = (config: EditFileToolConfig) =>
 
       abortSignal?.throwIfAborted();
 
-      const filePath = await raceWithAbort(resolvePath(input.filePath), abortSignal);
-
-      abortSignal?.throwIfAborted();
-
-      const fileContent = await raceWithAbort(readTextFile(filePath), abortSignal);
+      const { path: filePath, content: fileContent } = await raceWithAbort(
+        sandboxed
+          ? readSandboxFileWithPath(input.filePath)
+          : resolvePath(input.filePath).then(async (path) => ({
+              path,
+              content: await readTextFile(path),
+            })),
+        abortSignal,
+      );
 
       abortSignal?.throwIfAborted();
 
@@ -39,7 +50,12 @@ export const createEditFileTool = (config: EditFileToolConfig) =>
       }
 
       const updatedContent = fileContent.replace(input.oldContent, input.newContent);
-      await raceWithAbort(writeTextFile(filePath, updatedContent), abortSignal);
+      await raceWithAbort(
+        sandboxed
+          ? writeSandboxFile(filePath, updatedContent)
+          : writeTextFile(filePath, updatedContent),
+        abortSignal,
+      );
 
       logger.verbose("File edited successfully:", filePath);
 

@@ -41,6 +41,14 @@ function buildShellArgs(command: string): { program: string; args: string[] } {
 
 export function spawnCommand(command: string, options: RunCommandOptions = {}): RunCommandProcess {
   const { program, args } = buildShellArgs(command);
+  return spawnProcess(program, args, options);
+}
+
+export function spawnProcess(
+  program: string,
+  args: string[],
+  options: RunCommandOptions = {},
+): RunCommandProcess {
   const spawnOptions: { env?: Record<string, string>; cwd?: string } = {};
   if (options.env && Object.keys(options.env).length > 0) spawnOptions.env = options.env;
   if (options.cwd) spawnOptions.cwd = options.cwd;

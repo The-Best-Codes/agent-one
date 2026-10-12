@@ -47,6 +47,7 @@ import {
   TtsProviders,
 } from "@/components/settings-components/providers/provider-cards";
 import type { SettingsLayout } from "@/components/settings-components/setting-controls";
+import { SandboxControl } from "@/components/settings-components/tools/sandbox";
 import { ToolRow } from "@/components/settings-components/tools/tool-row";
 import { ToolsIntro } from "@/components/settings-components/tools/tools-intro";
 import { TOOL_GROUPS, TOOL_INFO } from "@/components/settings-components/tools/tools-metadata";
@@ -440,17 +441,32 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     label: "Tools",
     searchPriority: 0.8,
     intro: ToolsIntro,
-    cards: TOOL_GROUPS.map((group) => ({
-      title: group.title,
-      description: group.description,
-      items: group.toolIds.map((toolId) => ({
-        id: `tool-${TOOL_INFO[toolId].anchor}`,
-        label: TOOL_INFO[toolId].name,
-        description: TOOL_INFO[toolId].description,
-        keywords: ["tool"],
-        render: () => <ToolRow toolId={toolId} />,
+    cards: [
+      {
+        title: "Sandbox",
+        items: [
+          {
+            id: "sandbox",
+            label: "Run tools in a sandbox",
+            description:
+              "Run the AI's commands and file changes in an isolated workspace instead of on your computer.",
+            keywords: ["openshell", "nvidia", "isolation", "security", "safety", "docker"],
+            render: SandboxControl,
+          },
+        ],
+      },
+      ...TOOL_GROUPS.map((group) => ({
+        title: group.title,
+        description: group.description,
+        items: group.toolIds.map((toolId) => ({
+          id: `tool-${TOOL_INFO[toolId].anchor}`,
+          label: TOOL_INFO[toolId].name,
+          description: TOOL_INFO[toolId].description,
+          keywords: ["tool"],
+          render: () => <ToolRow toolId={toolId} />,
+        })),
       })),
-    })),
+    ],
   },
   {
     id: "about",

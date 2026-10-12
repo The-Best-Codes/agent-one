@@ -3,6 +3,12 @@ import { z } from "zod";
 
 import { createAbortError, raceWithAbort } from "@/lib/ai/tools/utils/abort";
 import { getLogger } from "@/lib/logger";
+import {
+  ensureSandbox,
+  invalidateSandbox,
+  SANDBOX_WORKDIR,
+  spawnSandboxCommand,
+} from "@/lib/openshell";
 import { spawnCommand } from "@/lib/run-command";
 import type { ExecuteCommandToolConfig } from "@/lib/settings/types";
 
@@ -109,10 +115,11 @@ export const stopExecuteCommand = (toolCallId: string) => {
   executeCommandWakeMap.get(toolCallId)?.();
 };
 
-export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
+export const createExecuteCommandTool = (config: ExecuteCommandToolConfig, sandboxed = false) =>
   tool({
-    description:
-      "Execute a terminal command and return its output. Works on Windows, macOS, and Linux. Use this for running shell commands, scripts, build tools, git operations, and any other command-line tasks.",
+    description: sandboxed
+      ? `Execute a terminal command inside an isolated Linux sandbox and return its output. The user's own files and the internet are not available from the sandbox. The working directory is ${SANDBOX_WORKDIR}. Use this for running shell commands, scripts, build tools, and any other command-line tasks.`
+      : "Execute a terminal command and return its output. Works on Windows, macOS, and Linux. Use this for running shell commands, scripts, build tools, git operations, and any other command-line tasks.",
     needsApproval: config.requiresApproval,
     inputSchema: z.object({
       command: z.string().describe("The command to execute (passed to the system shell)"),
@@ -128,6 +135,10 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
       abortSignal?.throwIfAborted();
 
       const timeoutMs = input.timeoutMs ?? config.defaultTimeoutMs;
+
+      if (sandboxed) {
+        await raceWithAbort(ensureSandbox(), abortSignal);
+      }
 
       const startedAt = Date.now();
       executeCommandLiveStateMap.set(toolCallId, {
@@ -225,15 +236,18 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
         return controller.signal;
       })();
 
-      const { handle, result } = spawnCommand(input.command, {
+      const spawnOptions = {
         signal: combinedSignal,
-        onStdout: (data) => {
+        onStdout: (data: string) => {
           queueUpdate("stdout", data);
         },
-        onStderr: (data) => {
+        onStderr: (data: string) => {
           queueUpdate("stderr", data);
         },
-      });
+      };
+      const { handle, result } = sandboxed
+        ? spawnSandboxCommand(input.command, timeoutMs, spawnOptions)
+        : spawnCommand(input.command, spawnOptions);
 
       executeCommandKillMap.set(toolCallId, () => handle.kill());
 
@@ -251,6 +265,7 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
         .then((r) => {
           exitCode = r.exitCode;
           signal = r.signal;
+          if (sandboxed && r.exitCode !== 0) invalidateSandbox();
         })
         .catch(() => {})
         .finally(() => {

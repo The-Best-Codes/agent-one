@@ -39,6 +39,7 @@ import { clearMcpOAuthCredentials, dismissMcpLoginToasts } from "@/lib/ai/tools/
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom, mcpServersAtom } from "@/lib/jotai/mcp-atoms";
 import type { McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
+import { sandboxEnabledAtom } from "@/lib/jotai/sandbox-atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { DEFAULT_SETTINGS } from "@/lib/settings/definitions";
@@ -102,6 +103,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const [mcpServers] = useAtom(mcpServersAtom);
   const [parallelLoadLimit] = useAtom(settingAtoms.MCP_PARALLEL_LOAD_LIMIT);
   const [toolConfigs] = useAtom(settingAtoms.TOOL_CONFIGS);
+  const [sandboxEnabled] = useAtom(sandboxEnabledAtom);
   const [mcpAuthStates, setMcpAuthStates] = useAtom(mcpAuthStatesAtom);
   const [, setMcpServerLoadStates] = useAtom(mcpServerLoadStatesAtom);
 
@@ -548,20 +550,33 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         filteredStaticTools.memory = createMemoryTool(mergedToolConfigs.memory);
       }
       if (mergedEnabledTools.editFile) {
-        filteredStaticTools.editFile = createEditFileTool(mergedToolConfigs.editFile);
+        filteredStaticTools.editFile = createEditFileTool(
+          mergedToolConfigs.editFile,
+          sandboxEnabled,
+        );
       }
       if (mergedEnabledTools.createFile) {
-        filteredStaticTools.createFile = createCreateFileTool(mergedToolConfigs.createFile);
+        filteredStaticTools.createFile = createCreateFileTool(
+          mergedToolConfigs.createFile,
+          sandboxEnabled,
+        );
       }
       if (mergedEnabledTools.deleteFile) {
-        filteredStaticTools.deleteFile = createDeleteFileTool(mergedToolConfigs.deleteFile);
+        filteredStaticTools.deleteFile = createDeleteFileTool(
+          mergedToolConfigs.deleteFile,
+          sandboxEnabled,
+        );
       }
       if (mergedEnabledTools.viewFile) {
-        filteredStaticTools.viewFile = createViewFileTool(mergedToolConfigs.viewFile);
+        filteredStaticTools.viewFile = createViewFileTool(
+          mergedToolConfigs.viewFile,
+          sandboxEnabled,
+        );
       }
       if (mergedEnabledTools.executeCommand) {
         filteredStaticTools.executeCommand = createExecuteCommandTool(
           mergedToolConfigs.executeCommand,
+          sandboxEnabled,
         );
       }
       if (mergedEnabledTools.subAgent && options?.subAgentContext) {
@@ -620,7 +635,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
 
       return tools;
     },
-    [enabledTools, toolConfigs],
+    [enabledTools, toolConfigs, sandboxEnabled],
   );
 
   return (

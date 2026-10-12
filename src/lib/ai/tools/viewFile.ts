@@ -5,14 +5,17 @@ import { z } from "zod";
 import { raceWithAbort } from "@/lib/ai/tools/utils/abort";
 import { resolvePath } from "@/lib/ai/tools/utils/path";
 import { getLogger } from "@/lib/logger";
+import { describeSandboxFileTool, readSandboxFile } from "@/lib/openshell";
 import type { ViewFileToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
-export const createViewFileTool = (config: ViewFileToolConfig) =>
+export const createViewFileTool = (config: ViewFileToolConfig, sandboxed = false) =>
   tool({
-    description:
+    description: describeSandboxFileTool(
       "View the contents of a file. Supports reading specific line ranges and automatically truncates large files to avoid excessive output. Prefer this tool over shell commands like `cat` for simple file reads.",
+      sandboxed,
+    ),
     needsApproval: config.requiresApproval,
     inputSchema: z.object({
       filePath: z
@@ -30,11 +33,16 @@ export const createViewFileTool = (config: ViewFileToolConfig) =>
 
       abortSignal?.throwIfAborted();
 
-      const filePath = await raceWithAbort(resolvePath(input.filePath), abortSignal);
+      const filePath = sandboxed
+        ? input.filePath
+        : await raceWithAbort(resolvePath(input.filePath), abortSignal);
 
       abortSignal?.throwIfAborted();
 
-      const fileContent = await raceWithAbort(readTextFile(filePath), abortSignal);
+      const fileContent = await raceWithAbort(
+        sandboxed ? readSandboxFile(filePath) : readTextFile(filePath),
+        abortSignal,
+      );
       const allLines = fileContent.split("\n");
       const totalLines = allLines.length;
       const totalChars = fileContent.length;
