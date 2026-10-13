@@ -263,9 +263,9 @@ export const BuiltInProviderListItem = memo(function BuiltInProviderListItem({
       builtInModels={builtInModels}
       apiKeyPlaceholder={`Enter your ${label} API key`}
       apiKeyHint={hasEnvKey ? "Using environment variable. Override below if needed." : undefined}
-      addButtonLabel="Add Model Override"
-      emptyTitle="No model overrides"
-      emptyDescription="Add a model to override built-in metadata or to register an extra model for this provider."
+      addButtonLabel="Add Model"
+      emptyTitle="No models available"
+      emptyDescription="Download the model list or add a model manually to register it for this provider."
       onEnabledChange={(enabled) => updateConfig({ enabled })}
       showSetupButton={showSetupButton}
       showMissingKeyWarning={showMissingKeyWarning}

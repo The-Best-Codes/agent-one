@@ -1,4 +1,5 @@
 import {
+  IconArrowBackUp,
   IconCheck,
   IconCircleX,
   IconPlus,
@@ -8,8 +9,11 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import fuzzysort from "fuzzysort";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 
+import { SearchInput } from "@/components/a1/search-input";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -63,10 +67,48 @@ interface ModelConfigDialogProps {
   onChange: (model: ProviderModelMetadata) => void;
 }
 
+type ModelSource = "built-in" | "overridden" | "custom";
+
+interface DisplayModel {
+  model: ProviderModelMetadata;
+  source: ModelSource;
+}
+
 interface ModelRowProps {
   model: ProviderModelMetadata;
+  source: ModelSource;
+  showSourceBadge: boolean;
   onChange: (model: ProviderModelMetadata) => void;
   onDelete: (modelId: string) => void;
+}
+
+const MODEL_METADATA_KEYS = [
+  "name",
+  "supportsText",
+  "supportsTools",
+  "supportsImages",
+  "supportsImageInput",
+  "supportsAttachments",
+  "supportsReasoning",
+  "contextWindow",
+  "maxOutputTokens",
+] as const satisfies (keyof ProviderModelMetadata)[];
+
+function isSameModelMetadata(left: ProviderModelMetadata, right: ProviderModelMetadata) {
+  return MODEL_METADATA_KEYS.every((key) => left[key] === right[key]);
+}
+
+function mergeModelOverride(
+  builtInModel: ProviderModelMetadata,
+  override: ProviderModelMetadata,
+): ProviderModelMetadata {
+  return {
+    ...builtInModel,
+    ...override,
+    supportsImageInput: override.supportsImageInput ?? builtInModel.supportsImageInput,
+    supportsAttachments: override.supportsAttachments ?? builtInModel.supportsAttachments,
+    supportsReasoning: override.supportsReasoning ?? builtInModel.supportsReasoning,
+  };
 }
 
 function normalizeOptionalNumber(value: string) {
@@ -392,16 +434,25 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
   );
 }
 
-const ModelRow = memo(function ModelRow({ model, onChange, onDelete }: ModelRowProps) {
+const ModelRow = memo(function ModelRow({
+  model,
+  source,
+  showSourceBadge,
+  onChange,
+  onDelete,
+}: ModelRowProps) {
   const [configOpen, setConfigOpen] = useState(false);
 
   return (
     <>
       <div className="flex h-10 items-center gap-2 border-b px-1 last:border-b-0">
-        <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           <span className="truncate text-sm font-medium">{getProviderModelName(model)}</span>
           {model.name ? (
-            <span className="text-muted-foreground ml-2 truncate text-xs">{model.id}</span>
+            <span className="text-muted-foreground truncate text-xs">{model.id}</span>
+          ) : null}
+          {showSourceBadge && source !== "built-in" ? (
+            <Badge variant="secondary">{source === "overridden" ? "Overridden" : "Custom"}</Badge>
           ) : null}
         </div>
 
@@ -414,22 +465,37 @@ const ModelRow = memo(function ModelRow({ model, onChange, onDelete }: ModelRowP
             onClick={() => {
               setConfigOpen(true);
             }}
-            aria-label="Configure model"
+            aria-label={source === "built-in" ? "Override model" : "Configure model"}
           >
             <IconSettings />
           </Button>
-          <Button
-            type="button"
-            variant="destructive"
-            size="icon"
-            className="text-destructive hover:text-destructive size-8"
-            onClick={() => {
-              onDelete(model.id);
-            }}
-            aria-label="Delete model"
-          >
-            <IconTrash />
-          </Button>
+          {source === "overridden" ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="size-8"
+              onClick={() => {
+                onDelete(model.id);
+              }}
+              aria-label="Reset model override"
+            >
+              <IconArrowBackUp />
+            </Button>
+          ) : source === "custom" ? (
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              className="text-destructive hover:text-destructive size-8"
+              onClick={() => {
+                onDelete(model.id);
+              }}
+              aria-label="Delete model"
+            >
+              <IconTrash />
+            </Button>
+          ) : null}
         </div>
       </div>
 
@@ -463,6 +529,7 @@ export function ModelList({
   const resolvedEmptyDescription =
     emptyDescription ?? "Add a model to make it available in the model picker.";
   const [isAdding, setIsAdding] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [fetchState, setFetchState] = useState<"idle" | "fetching" | "success" | "error">("idle");
   const fetchResetTimeoutRef = useRef<number | null>(null);
   const hasAutoFetchedRef = useRef(false);
@@ -476,25 +543,52 @@ export function ModelList({
     };
   }, []);
 
-  const sortedModels = useMemo(
-    () =>
-      [...models].sort((left, right) =>
-        getProviderModelName(left).localeCompare(getProviderModelName(right)),
-      ),
-    [models],
-  );
-
   const builtInModelIds = useMemo(
     () => new Set(builtInModels.map((model) => model.id)),
     [builtInModels],
   );
+
+  const displayModels = useMemo<DisplayModel[]>(() => {
+    const overridesById = new Map(models.map((model) => [model.id, model]));
+    const merged: DisplayModel[] = builtInModels.map((builtInModel) => {
+      const override = overridesById.get(builtInModel.id);
+      return override
+        ? { model: mergeModelOverride(builtInModel, override), source: "overridden" }
+        : { model: builtInModel, source: "built-in" };
+    });
+
+    for (const model of models) {
+      if (!builtInModelIds.has(model.id)) {
+        merged.push({ model, source: "custom" });
+      }
+    }
+
+    return merged.sort((left, right) =>
+      getProviderModelName(left.model).localeCompare(getProviderModelName(right.model)),
+    );
+  }, [builtInModelIds, builtInModels, models]);
+
+  const sortedModels = useMemo(() => {
+    const query = searchQuery.trim();
+    if (!query) {
+      return displayModels;
+    }
+
+    return fuzzysort
+      .go(query, displayModels, {
+        keys: [(entry) => getProviderModelName(entry.model), (entry) => entry.model.id],
+      })
+      .map((result) => result.obj);
+  }, [displayModels, searchQuery]);
+
+  const hasBuiltInModels = builtInModels.length > 0;
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: sortedModels.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 40,
-    getItemKey: (index) => sortedModels[index]?.id ?? index,
+    getItemKey: (index) => sortedModels[index]?.model.id ?? index,
     overscan: 8,
   });
 
@@ -517,7 +611,16 @@ export function ModelList({
   };
 
   const handleUpdateModel = (nextModel: ProviderModelMetadata) => {
-    onChange(models.map((model) => (model.id === nextModel.id ? nextModel : model)));
+    const currentModel = displayModels.find((entry) => entry.model.id === nextModel.id)?.model;
+    if (currentModel && isSameModelMetadata(currentModel, nextModel)) {
+      return;
+    }
+
+    if (models.some((model) => model.id === nextModel.id)) {
+      onChange(models.map((model) => (model.id === nextModel.id ? nextModel : model)));
+    } else {
+      onChange([nextModel, ...models]);
+    }
   };
 
   const handleDeleteModel = (modelId: string) => {
@@ -619,6 +722,16 @@ export function ModelList({
         </div>
       ) : null}
 
+      {displayModels.length > 0 ? (
+        <SearchInput
+          containerClassName="mt-3"
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder="Search models..."
+          aria-label="Search models"
+        />
+      ) : null}
+
       {sortedModels.length > 0 ? (
         <div ref={parentRef} className="mt-3 max-h-80 overflow-y-auto">
           <div
@@ -629,7 +742,7 @@ export function ModelList({
             }}
           >
             {virtualizer.getVirtualItems().map((virtualItem) => {
-              const model = sortedModels[virtualItem.index];
+              const { model, source } = sortedModels[virtualItem.index];
 
               return (
                 <div
@@ -641,6 +754,8 @@ export function ModelList({
                 >
                   <ModelRow
                     model={model}
+                    source={source}
+                    showSourceBadge={hasBuiltInModels}
                     onChange={handleUpdateModel}
                     onDelete={handleDeleteModel}
                   />
@@ -649,6 +764,8 @@ export function ModelList({
             })}
           </div>
         </div>
+      ) : displayModels.length > 0 ? (
+        <p className="text-muted-foreground mt-3 text-center text-sm">No models found.</p>
       ) : !isAdding ? (
         <div className="mt-4">
           <Empty className="bg-muted/20 border">
