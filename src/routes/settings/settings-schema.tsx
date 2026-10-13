@@ -139,8 +139,18 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
             searchEntries: [
               {
                 id: "credits-used",
-                label: "Credits used",
-                keywords: ["plan", "billing", "subscription", "upgrade", "usage", "pro"],
+                label: "Monthly credits used",
+                keywords: [
+                  "plan",
+                  "billing",
+                  "subscription",
+                  "upgrade",
+                  "usage",
+                  "pro",
+                  "quota",
+                  "limit",
+                  "monthly",
+                ],
               },
             ],
           },

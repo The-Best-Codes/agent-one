@@ -35,6 +35,7 @@ import { Switch } from "@/components/ui/switch";
 import {
   getActivePaidSubscription,
   getBillingUsageSummary,
+  getCreditsSubscription,
   getPlanNameForSubscription,
   isAgentOneAccountProvisioning,
 } from "@/contexts/use-web-auth/web-auth-contexts";
@@ -52,6 +53,10 @@ import { SettingsTarget } from "./settings-target";
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(value);
+}
+
+function formatDate(date: string) {
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(date));
 }
 
 export function AccountStatus() {
@@ -79,9 +84,23 @@ export function AccountStatus() {
     ? getPlanNameForSubscription(activeSubscription)
     : "Free";
 
-  const renewalDate = activeSubscription?.current_period_end
-    ? new Date(activeSubscription.current_period_end).toLocaleDateString()
-    : null;
+  const planStatus = useMemo(() => {
+    if (!activeSubscription) {
+      return "Upgrade to Pro for higher limits and premium features.";
+    }
+    if (activeSubscription.cancel_at_period_end) {
+      return `Ends ${formatDate(activeSubscription.ends_at ?? activeSubscription.current_period_end)}.`;
+    }
+    if (String(activeSubscription.status) === "trialing" && activeSubscription.trial_end) {
+      return `Trial ends ${formatDate(activeSubscription.trial_end)}.`;
+    }
+    return `Renews ${formatDate(activeSubscription.current_period_end)}.`;
+  }, [activeSubscription]);
+
+  const creditsResetDate = useMemo(() => {
+    const periodEnd = getCreditsSubscription(customerState)?.current_period_end;
+    return periodEnd ? formatDate(periodEnd) : null;
+  }, [customerState]);
 
   const usageSummary = useMemo(() => {
     return getBillingUsageSummary(customerState);
@@ -161,13 +180,7 @@ export function AccountStatus() {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex flex-col gap-1">
                   <p className="font-medium">{`You're on the ${currentPlanName} Plan`}</p>
-                  <p className="text-muted-foreground text-sm">
-                    {activeSubscription
-                      ? renewalDate
-                        ? `Renews ${renewalDate}.`
-                        : "Your subscription is active."
-                      : "Upgrade to Pro for higher limits and premium features."}
-                  </p>
+                  <p className="text-muted-foreground text-sm">{planStatus}</p>
                 </div>
                 <Button size="sm" asChild>
                   <a
@@ -196,7 +209,7 @@ export function AccountStatus() {
               ) : usageSummary ? (
                 <Field>
                   <FieldLabel htmlFor="credits-used">
-                    <span>Credits used</span>
+                    <span>Monthly credits used</span>
                     <span className="text-muted-foreground ml-auto">
                       {usageSummary.credited > 0
                         ? `${formatNumber((usageSummary.consumed / usageSummary.credited) * 100)}%`
@@ -213,7 +226,9 @@ export function AccountStatus() {
                   />
 
                   <FieldDescription>
-                    {`${formatNumber(usageSummary.remaining)} credits remaining this period.`}
+                    {creditsResetDate
+                      ? `${formatNumber(usageSummary.remaining)} credits remaining. Resets ${creditsResetDate}.`
+                      : `${formatNumber(usageSummary.remaining)} credits remaining this month.`}
                   </FieldDescription>
                 </Field>
               ) : (
