@@ -150,10 +150,15 @@ export function AccountStep({ onSignedIn, onContinueWithoutAccount }: AccountSte
           ) : (
             !isLoading &&
             !isSigningIn && (
-              <Button variant="link" onClick={() => handleViewChange("byok")}>
-                I want to use my own API keys instead
-                <IconArrowRight data-icon="inline-end" />
-              </Button>
+              <>
+                <p className="text-muted-foreground text-center text-sm">
+                  Don&apos;t have an account? Click Sign in to create one.
+                </p>
+                <Button variant="link" onClick={() => handleViewChange("byok")}>
+                  I want to use my own API keys instead
+                  <IconArrowRight data-icon="inline-end" />
+                </Button>
+              </>
             )
           )}
         </div>
