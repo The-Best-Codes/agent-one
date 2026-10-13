@@ -4,6 +4,9 @@ import { atom, getDefaultStore } from "jotai";
 import { z } from "zod";
 
 import { lastModelDirectorySyncTimestampAtom } from "@/lib/jotai/atoms";
+import { getLogger } from "@/lib/logger";
+
+const logger = getLogger(import.meta.url);
 
 const MODEL_DIRECTORY_SOURCE_URL =
   "https://raw.githubusercontent.com/The-Best-Codes/ai-model-directory/main/data/all.min.json";
@@ -128,7 +131,8 @@ export async function loadPersistedModelDirectory(): Promise<void> {
       baseDir: BaseDirectory.AppLocalData,
     });
     getDefaultStore().set(downloadedModelDirectoryAtom, parseModelDirectory(raw));
-  } catch {
+  } catch (error) {
+    logger.warn("Failed to load persisted model directory", error);
     getDefaultStore().set(downloadedModelDirectoryAtom, null);
   }
 }
@@ -151,11 +155,13 @@ async function refreshModelDirectory(): Promise<ModelDirectoryUpdateResult> {
       headers: { accept: "application/json" },
     });
     if (!response.ok) {
+      logger.error(`Failed to download model directory: status ${response.status}`);
       return { ok: false, error: `Request failed with status ${response.status}` };
     }
     raw = await response.text();
     data = parseModelDirectory(raw);
   } catch (error) {
+    logger.error("Failed to download or parse model directory", error);
     return {
       ok: false,
       error: error instanceof Error ? error.message : "Failed to update model list",
@@ -165,6 +171,7 @@ async function refreshModelDirectory(): Promise<ModelDirectoryUpdateResult> {
   try {
     await writeTextFile(MODEL_DIRECTORY_FILENAME, raw, { baseDir: BaseDirectory.AppLocalData });
   } catch (error) {
+    logger.error("Failed to save model directory", error);
     return {
       ok: false,
       error: error instanceof Error ? error.message : "Failed to save model list",

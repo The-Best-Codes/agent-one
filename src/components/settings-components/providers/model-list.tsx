@@ -32,6 +32,9 @@ import {
   getProviderModelName,
   type ProviderModelMetadata,
 } from "@/lib/ai/providers/provider-models";
+import { getLogger } from "@/lib/logger";
+
+const logger = getLogger(import.meta.url);
 
 interface ModelListProps {
   models: ProviderModelMetadata[];
@@ -546,7 +549,8 @@ export function ModelList({
       }
 
       setFetchStateWithReset("success");
-    } catch {
+    } catch (error) {
+      logger.error(`Failed to fetch models from ${baseUrl}`, error);
       setFetchStateWithReset("error");
     }
   };
