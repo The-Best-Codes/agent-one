@@ -252,7 +252,7 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
       >
         <div
           ref={parentRef}
-          className="h-full w-full overflow-y-auto"
+          className="h-full w-full scrollbar-gutter-both overflow-y-auto"
           data-testid="auto-scroll-container-scrollable"
         >
           <div className={cn("min-h-full", scrollableClassName)}>

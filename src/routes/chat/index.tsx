@@ -126,13 +126,13 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
           style={{ opacity: chatBackgroundShade / 100 }}
         />
       )}
-      <div className="relative flex h-full w-full max-w-3xl flex-1 flex-col">
+      <div className="relative flex h-full w-full flex-1 flex-col items-center">
         {isChatLoading && showSpinner ? (
           <div className="flex flex-1 items-center justify-center">
             <Spinner className="text-muted-foreground size-8" />
           </div>
         ) : (
-          <div className="relative min-h-0 flex-1">
+          <div className="relative min-h-0 w-full flex-1">
             <AutoScrollContainer
               ref={scrollRef}
               className="max-h-full min-h-0 pt-2 pr-0 pb-2"
@@ -161,8 +161,7 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
               }
               getItemKey={shouldVirtualizeMessages ? (index) => messages[index]!.id : undefined}
               keepMountedIndexes={shouldVirtualizeMessages ? keepMountedIndexes : undefined}
-              overflowingClassName="md:pr-2"
-              scrollableClassName={cn("h-full pr-2")}
+              scrollableClassName="mx-auto h-full w-full max-w-3xl pr-4 md:pr-6"
               behavior="instant"
               buttonScrollBehavior={status === "streaming" ? "instant" : "smooth"}
             >
@@ -195,16 +194,18 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
             ) : null}
           </div>
         )}
-        <MainChatInput
-          key={chatId || "new-chat"}
-          draftKey={chatId || "new-chat"}
-          initialValue={initialInputValue}
-          initialValueKey={chatId ? undefined : location.key}
-          disabled={isChatLoading}
-          onScrollNeededAction={() => {
-            scrollRef.current?.scrollToBottom();
-          }}
-        />
+        <div className="w-full max-w-3xl">
+          <MainChatInput
+            key={chatId || "new-chat"}
+            draftKey={chatId || "new-chat"}
+            initialValue={initialInputValue}
+            initialValueKey={chatId ? undefined : location.key}
+            disabled={isChatLoading}
+            onScrollNeededAction={() => {
+              scrollRef.current?.scrollToBottom();
+            }}
+          />
+        </div>
       </div>
     </div>
   );
