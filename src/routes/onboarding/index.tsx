@@ -1,16 +1,17 @@
 import { useAtom, useSetAtom } from "jotai";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
+import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { onboardingCompletedAtom, tourActiveAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 
 import { AccountStep } from "./steps/account";
-import { NameStep } from "./steps/name";
+import { GreetingStep, NameStep } from "./steps/name";
 import { SplashStep } from "./steps/splash";
 import { WelcomeStep } from "./steps/welcome";
 
-type OnboardingStep = "splash" | "name" | "account" | "welcome";
+type OnboardingStep = "splash" | "account" | "name" | "greeting" | "welcome";
 
 export default function OnboardingRoute() {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ export default function OnboardingRoute() {
   const [currentStep, setCurrentStep] = useState<OnboardingStep>("splash");
   const [userName, setUserName] = useAtom(settingAtoms.USER_NAME);
   const setTourActive = useSetAtom(tourActiveAtom);
+  const { user } = useWebAuth();
 
   useEffect(() => {
     if (onboardingCompleted) {
@@ -26,17 +28,33 @@ export default function OnboardingRoute() {
   }, [onboardingCompleted, navigate]);
 
   const handleGetStarted = () => {
+    setCurrentStep("account");
+  };
+
+  const handleSignedIn = () => {
+    const name = userName.trim() || user?.name.trim() || "";
+    if (!name) {
+      setCurrentStep("name");
+      return;
+    }
+    if (!userName.trim()) {
+      setUserName(name);
+    }
+    setCurrentStep("greeting");
+  };
+
+  const handleContinueWithoutAccount = () => {
     setCurrentStep("name");
   };
 
   const handleNameSubmit = (name: string) => {
     setUserName(name);
-    setCurrentStep("account");
+    setCurrentStep("greeting");
   };
 
-  const handleAccountComplete = () => {
+  const handleGreetingComplete = useCallback(() => {
     setCurrentStep("welcome");
-  };
+  }, []);
 
   const handleWelcomeComplete = () => {
     setOnboardingCompleted(true);
@@ -48,12 +66,24 @@ export default function OnboardingRoute() {
   };
 
   return (
-    <main role="main" className="bg-background flex min-h-screen items-center justify-center">
+    <main
+      role="main"
+      className="bg-background flex min-h-screen items-center justify-center overflow-hidden"
+    >
       {currentStep === "splash" && <SplashStep onGetStarted={handleGetStarted} />}
+
+      {currentStep === "account" && (
+        <AccountStep
+          onSignedIn={handleSignedIn}
+          onContinueWithoutAccount={handleContinueWithoutAccount}
+        />
+      )}
 
       {currentStep === "name" && <NameStep onSubmit={handleNameSubmit} />}
 
-      {currentStep === "account" && <AccountStep onSubmit={handleAccountComplete} />}
+      {currentStep === "greeting" && (
+        <GreetingStep name={userName.trim()} onComplete={handleGreetingComplete} />
+      )}
 
       {currentStep === "welcome" && (
         <WelcomeStep
