@@ -81,10 +81,9 @@ export default function SettingsRoute() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const activeIds = useActiveItems();
-  const legacyTab = searchParams.get("tab");
 
   useEffect(() => {
-    const targetId = location.hash ? location.hash.slice(1) : legacyTab && `section-${legacyTab}`;
+    const targetId = location.hash.slice(1);
     if (!targetId) return;
 
     let attempts = 0;
@@ -95,7 +94,7 @@ export default function SettingsRoute() {
     });
 
     return () => window.cancelAnimationFrame(frameId);
-  }, [location.hash, location.key, legacyTab]);
+  }, [location.hash, location.key]);
 
   const handleNavigateBack = () => {
     const chatId = searchParams.get("chatId");
