@@ -48,7 +48,16 @@ export async function fetchProviderModels(
   }
 
   const json = await response.json();
-  if (!json || typeof json !== "object" || !Array.isArray(json.data)) {
+  if (!json || typeof json !== "object") {
+    throw new Error("Invalid models response format: expected an object");
+  }
+
+  // Ollama returns `data: null` when no models are installed
+  if (json.data === null) {
+    return { ...json, data: [] } as OpenAIModelsResponse;
+  }
+
+  if (!Array.isArray(json.data)) {
     throw new Error("Invalid models response format: missing 'data' array");
   }
 
