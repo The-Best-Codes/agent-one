@@ -46,7 +46,16 @@ const SEARCH_TARGETS: SearchTarget[] = SETTINGS_SECTIONS.flatMap((section) =>
     });
 
     const cardTargets = [
-      ...(card.id ? [toTarget({ ...card, id: card.id, label: location })] : []),
+      ...(card.id
+        ? [
+            toTarget({
+              ...card,
+              id: card.id,
+              label: location,
+              description: card.searchDescription ?? card.description,
+            }),
+          ]
+        : []),
       ...(card.searchEntries ?? []).map((entry) => toTarget(entry)),
     ];
 
@@ -144,20 +153,26 @@ export function SettingsSearch({ open, onOpenChange, onSelect }: SettingsSearchP
           {results ? (
             [...results].map(([section, targets]) => (
               <CommandGroup key={section} heading={section}>
-                {targets.map((target) => (
-                  <CommandItem
-                    key={`${target.id}:${target.label}`}
-                    value={`${target.id}:${target.label}`}
-                    onSelect={() => select(target.id)}
-                  >
-                    <div className="flex min-w-0 flex-col">
-                      <span className="truncate">{target.label}</span>
-                      <span className="text-muted-foreground truncate text-xs">
-                        {target.description || target.location}
-                      </span>
-                    </div>
-                  </CommandItem>
-                ))}
+                {targets.map((target) => {
+                  const subtitle =
+                    target.description ||
+                    (target.location !== target.label ? target.location : null);
+
+                  return (
+                    <CommandItem
+                      key={`${target.id}:${target.label}`}
+                      value={`${target.id}:${target.label}`}
+                      onSelect={() => select(target.id)}
+                    >
+                      <div className="flex min-w-0 flex-col">
+                        <span className="truncate">{target.label}</span>
+                        {subtitle ? (
+                          <span className="text-muted-foreground truncate text-xs">{subtitle}</span>
+                        ) : null}
+                      </div>
+                    </CommandItem>
+                  );
+                })}
               </CommandGroup>
             ))
           ) : (

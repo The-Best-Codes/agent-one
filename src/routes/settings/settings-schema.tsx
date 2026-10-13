@@ -106,6 +106,7 @@ export interface SettingsCard {
   description?: string;
   id?: string;
   keywords?: string[];
+  searchDescription?: string;
   size?: "default" | "sm";
   resetKey?: SettingKey;
   visible?: Atom<boolean>;
@@ -465,30 +466,35 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
       {
         id: "app-updates",
         title: "App",
+        searchDescription: "Check for updates, see your current version, and read release notes.",
         keywords: ["updates", "version", "release notes", "changelog", "download", "install"],
         render: AppUpdates,
       },
       {
         id: "model-directory",
         title: "Model List",
+        searchDescription: "Download the latest model metadata for built-in providers.",
         keywords: ["updates", "models", "refresh", "download"],
         render: ModelDirectoryUpdates,
       },
       {
         id: "extension-list",
         title: "Extension List",
+        searchDescription: "Download the latest metadata for the extension browser.",
         keywords: ["updates", "mcp", "extensions", "refresh", "download"],
         render: ExtensionListUpdates,
       },
       {
         id: "help",
         title: "Help",
+        searchDescription: "Take the tour, report a bug, get help on Discord, or read the docs.",
         keywords: ["bug", "report", "discord", "docs", "support"],
         render: HelpLinks,
       },
       {
         id: "debug",
         title: "Debug",
+        searchDescription: "Open internal testing tools and utilities.",
         keywords: ["internal tests"],
         visible: debugModeEnabledAtom,
         render: DebugTools,
