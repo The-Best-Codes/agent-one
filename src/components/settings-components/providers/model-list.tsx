@@ -15,7 +15,14 @@ import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { SearchInput } from "@/components/a1/search-input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Empty,
   EmptyContent,
@@ -58,6 +65,11 @@ interface AddModelFormProps {
   builtInModelIds: Set<string>;
   onAdd: (model: ProviderModelMetadata) => void;
   onCancel: () => void;
+}
+
+interface AddModelDialogProps extends Omit<AddModelFormProps, "onCancel"> {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 interface ModelConfigDialogProps {
@@ -162,127 +174,146 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
   };
 
   return (
-    <div className="bg-muted/30 rounded-lg border p-4">
-      <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor="new-model-id">Model ID</FieldLabel>
-          <Input
-            id="new-model-id"
-            value={id}
-            onChange={(event) => setId(event.target.value)}
-            placeholder="e.g. gpt-5"
-            aria-invalid={isDuplicate}
-          />
-
-          {isDuplicate ? (
-            <FieldDescription className="text-destructive">
-              Model ID already exists.
-            </FieldDescription>
-          ) : overridesBuiltIn ? (
-            <FieldDescription>
-              This matches a built-in model and will override its metadata.
-            </FieldDescription>
-          ) : (
-            <FieldDescription>Use the provider's raw model identifier.</FieldDescription>
-          )}
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="new-model-name">Display Name</FieldLabel>
-          <Input
-            id="new-model-name"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            placeholder="Optional label shown in the model picker"
-          />
-        </Field>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <Field data-invalid={parsedContextWindow === null || undefined}>
-            <FieldLabel htmlFor="new-model-context-window">Context Window</FieldLabel>
+    <>
+      <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor="new-model-id">Model ID</FieldLabel>
             <Input
-              id="new-model-context-window"
-              value={contextWindow}
-              onChange={(event) => setContextWindow(event.target.value)}
-              placeholder="e.g. 200000"
-              inputMode="numeric"
-              aria-invalid={parsedContextWindow === null}
+              id="new-model-id"
+              value={id}
+              onChange={(event) => setId(event.target.value)}
+              placeholder="e.g. gpt-5"
+              aria-invalid={isDuplicate}
             />
 
-            <FieldDescription>
-              {parsedContextWindow === null
-                ? "Enter a non-negative number."
-                : "Optional token limit used in the app UI."}
-            </FieldDescription>
+            {isDuplicate ? (
+              <FieldDescription className="text-destructive">
+                Model ID already exists.
+              </FieldDescription>
+            ) : overridesBuiltIn ? (
+              <FieldDescription>
+                This matches a built-in model and will override its metadata.
+              </FieldDescription>
+            ) : (
+              <FieldDescription>Use the provider's raw model identifier.</FieldDescription>
+            )}
           </Field>
 
-          <Field data-invalid={parsedMaxOutputTokens === null || undefined}>
-            <FieldLabel htmlFor="new-model-max-output">Max Output Tokens</FieldLabel>
+          <Field>
+            <FieldLabel htmlFor="new-model-name">Display Name</FieldLabel>
             <Input
-              id="new-model-max-output"
-              value={maxOutputTokens}
-              onChange={(event) => setMaxOutputTokens(event.target.value)}
-              placeholder="e.g. 8192"
-              inputMode="numeric"
-              aria-invalid={parsedMaxOutputTokens === null}
-            />
-
-            <FieldDescription>
-              {parsedMaxOutputTokens === null
-                ? "Enter a non-negative number."
-                : "Optional max output token metadata override."}
-            </FieldDescription>
-          </Field>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <Field orientation="horizontal">
-            <FieldLabel htmlFor="new-model-supports-text">Supports Text</FieldLabel>
-            <Switch
-              id="new-model-supports-text"
-              checked={supportsText}
-              onCheckedChange={setSupportsText}
+              id="new-model-name"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              placeholder="Optional label shown in the model picker"
             />
           </Field>
 
-          <Field orientation="horizontal">
-            <FieldLabel htmlFor="new-model-supports-tools">Supports Tools</FieldLabel>
-            <Switch
-              id="new-model-supports-tools"
-              checked={supportsTools}
-              onCheckedChange={setSupportsTools}
-            />
-          </Field>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field data-invalid={parsedContextWindow === null || undefined}>
+              <FieldLabel htmlFor="new-model-context-window">Context Window</FieldLabel>
+              <Input
+                id="new-model-context-window"
+                value={contextWindow}
+                onChange={(event) => setContextWindow(event.target.value)}
+                placeholder="e.g. 200000"
+                inputMode="numeric"
+                aria-invalid={parsedContextWindow === null}
+              />
 
-          <Field orientation="horizontal">
-            <FieldLabel htmlFor="new-model-supports-images">Supports Images</FieldLabel>
-            <Switch
-              id="new-model-supports-images"
-              checked={supportsImages}
-              onCheckedChange={setSupportsImages}
-            />
-          </Field>
+              <FieldDescription>
+                {parsedContextWindow === null
+                  ? "Enter a non-negative number."
+                  : "Optional token limit used in the app UI."}
+              </FieldDescription>
+            </Field>
 
-          <Field orientation="horizontal">
-            <FieldLabel htmlFor="new-model-supports-attachments">Supports Attachments</FieldLabel>
-            <Switch
-              id="new-model-supports-attachments"
-              checked={supportsAttachments}
-              onCheckedChange={setSupportsAttachments}
-            />
-          </Field>
-        </div>
-      </FieldGroup>
+            <Field data-invalid={parsedMaxOutputTokens === null || undefined}>
+              <FieldLabel htmlFor="new-model-max-output">Max Output Tokens</FieldLabel>
+              <Input
+                id="new-model-max-output"
+                value={maxOutputTokens}
+                onChange={(event) => setMaxOutputTokens(event.target.value)}
+                placeholder="e.g. 8192"
+                inputMode="numeric"
+                aria-invalid={parsedMaxOutputTokens === null}
+              />
 
-      <div className="mt-4 flex justify-end gap-2">
-        <Button variant="outline" size="sm" onClick={onCancel}>
+              <FieldDescription>
+                {parsedMaxOutputTokens === null
+                  ? "Enter a non-negative number."
+                  : "Optional max output token metadata override."}
+              </FieldDescription>
+            </Field>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor="new-model-supports-text">Supports Text</FieldLabel>
+              <Switch
+                id="new-model-supports-text"
+                checked={supportsText}
+                onCheckedChange={setSupportsText}
+              />
+            </Field>
+
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor="new-model-supports-tools">Supports Tools</FieldLabel>
+              <Switch
+                id="new-model-supports-tools"
+                checked={supportsTools}
+                onCheckedChange={setSupportsTools}
+              />
+            </Field>
+
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor="new-model-supports-images">Supports Images</FieldLabel>
+              <Switch
+                id="new-model-supports-images"
+                checked={supportsImages}
+                onCheckedChange={setSupportsImages}
+              />
+            </Field>
+
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor="new-model-supports-attachments">Supports Attachments</FieldLabel>
+              <Switch
+                id="new-model-supports-attachments"
+                checked={supportsAttachments}
+                onCheckedChange={setSupportsAttachments}
+              />
+            </Field>
+          </div>
+        </FieldGroup>
+      </div>
+
+      <DialogFooter>
+        <Button variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button size="sm" onClick={handleAdd} disabled={!isValid}>
+        <Button onClick={handleAdd} disabled={!isValid}>
           Add Model
         </Button>
-      </div>
-    </div>
+      </DialogFooter>
+    </>
+  );
+}
+
+function AddModelDialog({ open, onOpenChange, ...formProps }: AddModelDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Model</DialogTitle>
+          <DialogDescription>
+            Register a model and the metadata AgentOne should use.
+          </DialogDescription>
+        </DialogHeader>
+
+        <AddModelForm {...formProps} onCancel={() => onOpenChange(false)} />
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -711,16 +742,13 @@ export function ModelList({
         </div>
       </div>
 
-      {isAdding ? (
-        <div className="mt-4">
-          <AddModelForm
-            existingIds={models.map((model) => model.id)}
-            builtInModelIds={builtInModelIds}
-            onAdd={handleAddModel}
-            onCancel={() => setIsAdding(false)}
-          />
-        </div>
-      ) : null}
+      <AddModelDialog
+        open={isAdding}
+        onOpenChange={setIsAdding}
+        existingIds={models.map((model) => model.id)}
+        builtInModelIds={builtInModelIds}
+        onAdd={handleAddModel}
+      />
 
       {displayModels.length > 0 ? (
         <SearchInput
@@ -766,7 +794,7 @@ export function ModelList({
         </div>
       ) : displayModels.length > 0 ? (
         <p className="text-muted-foreground mt-3 text-center text-sm">No models found.</p>
-      ) : !isAdding ? (
+      ) : (
         <div className="mt-4">
           <Empty className="bg-muted/20 border">
             <EmptyHeader>
@@ -790,7 +818,7 @@ export function ModelList({
             </EmptyContent>
           </Empty>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
