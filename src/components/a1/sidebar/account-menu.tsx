@@ -185,9 +185,9 @@ function TriggerRow({
       <Avatar>
         <AvatarFallback>{icon}</AvatarFallback>
       </Avatar>
-      <div className="flex min-w-0 flex-col items-start gap-0.5 text-left">
-        <span className="w-full truncate text-sm leading-none font-medium">{title}</span>
-        <span className="text-muted-foreground w-full truncate text-xs leading-none">
+      <div className="flex min-w-0 flex-col items-start text-left">
+        <span className="w-full truncate text-sm leading-tight font-medium">{title}</span>
+        <span className="text-muted-foreground w-full truncate text-xs leading-tight">
           {description}
         </span>
       </div>
