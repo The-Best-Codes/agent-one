@@ -12,6 +12,10 @@
     "src-tauri/gen/schemas",
     "bun.lock",
     "*.log",
-    ".agents/*"
+    ".agents/*",
+    ".entire/*",
+    ".opencode/*",
+    ".claude/*",
+    ".codex/*"
   ]
 }
