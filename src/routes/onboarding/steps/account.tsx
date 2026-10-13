@@ -4,17 +4,19 @@ import { useState } from "react";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { hasEnabledProviderAtom } from "@/lib/jotai/provider-atoms";
 import { cn } from "@/lib/utils";
 import { SettingsSectionCards } from "@/routes/settings/settings-renderer";
 
 interface AccountStepProps {
-  onSubmit: () => void;
+  onSignedIn: () => void;
+  onContinueWithoutAccount: () => void;
 }
 
-export function AccountStep({ onSubmit }: AccountStepProps) {
-  const { user } = useWebAuth();
+export function AccountStep({ onSignedIn, onContinueWithoutAccount }: AccountStepProps) {
+  const { user, isLoading, isSigningIn } = useWebAuth();
   const [view, setView] = useState<"account" | "byok">("account");
   const [isExiting, setIsExiting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,11 +30,9 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
     }, 500);
   };
 
-  const handleSubmit = () => {
+  const exitThen = (callback: () => void) => {
     setIsSubmitting(true);
-    setTimeout(() => {
-      onSubmit();
-    }, 500);
+    setTimeout(callback, 500);
   };
 
   if (view === "byok") {
@@ -40,7 +40,7 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
       <div
         key="byok"
         className={cn(
-          "w-full max-w-xl px-4 duration-500",
+          "h-svh w-full max-w-xl px-4 py-6 duration-500",
           isSubmitting
             ? "animate-out slide-out-to-top-5 fade-out-0 fill-mode-forwards"
             : isExiting
@@ -48,30 +48,36 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
               : "animate-in slide-in-from-bottom-5 fade-in-0",
         )}
       >
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2">
+        <div className="flex h-full flex-col gap-4">
+          <div className="flex flex-col">
             <h2 className="text-foreground text-2xl font-bold">Configure providers</h2>
             <p className="text-muted-foreground text-sm">
-              Your API keys are stored securely on your device. Enable providers and configure their
-              API keys to get started.
+              Configure a provider and enable it to continue.
             </p>
           </div>
 
-          <div className="flex max-h-[50svh] flex-col gap-4 overflow-y-auto p-1">
-            <SettingsSectionCards sectionId="providers" />
-          </div>
+          <ScrollArea className="min-h-0 flex-1">
+            <div className="flex flex-col gap-4">
+              <SettingsSectionCards sectionId="providers" />
+            </div>
+          </ScrollArea>
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col-reverse gap-3 sm:flex-row">
             <Button
-              onClick={handleSubmit}
-              disabled={!hasEnabledProvider || isSubmitting}
-              className="w-full"
+              variant="outline"
+              onClick={() => handleViewChange("account")}
+              className="sm:flex-1"
             >
-              Finish Setup
-            </Button>
-            <Button variant="outline" onClick={() => handleViewChange("account")}>
               <IconArrowLeft data-icon="inline-start" />
               Back to account options
+            </Button>
+            <Button
+              onClick={() => exitThen(onContinueWithoutAccount)}
+              disabled={!hasEnabledProvider || isSubmitting}
+              className="sm:flex-1"
+            >
+              Continue
+              <IconArrowRight data-icon="inline-end" />
             </Button>
           </div>
         </div>
@@ -103,20 +109,20 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
             <AuthStatusDisplay />
           </div>
 
-          {user && (
-            <Button size="lg" onClick={handleSubmit} disabled={isSubmitting}>
+          {user ? (
+            <Button size="lg" onClick={() => exitThen(onSignedIn)} disabled={isSubmitting}>
               Continue
               <IconArrowRight data-icon="inline-end" />
             </Button>
+          ) : (
+            !isLoading &&
+            !isSigningIn && (
+              <Button variant="link" onClick={() => handleViewChange("byok")}>
+                I want to use my own API keys instead
+                <IconArrowRight data-icon="inline-end" />
+              </Button>
+            )
           )}
-
-          <button
-            type="button"
-            className="text-muted-foreground hover:text-foreground mt-2 cursor-pointer text-sm underline"
-            onClick={() => handleViewChange("byok")}
-          >
-            Or continue without an account
-          </button>
         </div>
       </div>
     </div>
