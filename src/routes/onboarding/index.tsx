@@ -66,7 +66,10 @@ export default function OnboardingRoute() {
   };
 
   return (
-    <main role="main" className="bg-background flex min-h-screen items-center justify-center">
+    <main
+      role="main"
+      className="bg-background flex min-h-screen items-center justify-center overflow-hidden"
+    >
       {currentStep === "splash" && <SplashStep onGetStarted={handleGetStarted} />}
 
       {currentStep === "account" && (
