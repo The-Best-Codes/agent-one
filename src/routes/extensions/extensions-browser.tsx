@@ -85,7 +85,7 @@ export function ExtensionsBrowser({
       aria-label="Extensions"
       aria-busy={isSearching || isLoading}
     >
-      {isLoading || (items.length === 0 && isSearching) ? (
+      {items.length === 0 && (isLoading || isSearching) ? (
         <div className="text-muted-foreground flex h-full flex-col items-center justify-center gap-2 text-center text-sm">
           <Spinner className="size-16" />
           <p>Loading...</p>
