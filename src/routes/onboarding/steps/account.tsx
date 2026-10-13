@@ -3,12 +3,35 @@ import { useAtomValue } from "jotai";
 import { useState } from "react";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
+import {
+  BuiltInProviders,
+  CustomProviders,
+  LocalProviders,
+} from "@/components/settings-components/providers/provider-cards";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { hasEnabledProviderAtom } from "@/lib/jotai/provider-atoms";
 import { cn } from "@/lib/utils";
-import { SettingsSectionCards } from "@/routes/settings/settings-renderer";
+
+const PROVIDER_CARDS = [
+  {
+    title: "Built-in",
+    description: "Enable built-in providers and set their API keys.",
+    Content: BuiltInProviders,
+  },
+  {
+    title: "Local",
+    description: "Use models running on your device, like Ollama or LM Studio.",
+    Content: LocalProviders,
+  },
+  {
+    title: "Custom",
+    description: "Add OpenAI-compatible providers and choose which models they expose.",
+    Content: CustomProviders,
+  },
+];
 
 interface AccountStepProps {
   onSignedIn: () => void;
@@ -58,7 +81,17 @@ export function AccountStep({ onSignedIn, onContinueWithoutAccount }: AccountSte
 
           <ScrollArea className="min-h-0 flex-1">
             <div className="flex flex-col gap-4">
-              <SettingsSectionCards sectionId="providers" />
+              {PROVIDER_CARDS.map(({ title, description, Content }) => (
+                <Card key={title} size="sm">
+                  <CardHeader>
+                    <CardTitle>{title}</CardTitle>
+                    <CardDescription>{description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex flex-col gap-4">
+                    <Content />
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </ScrollArea>
 

@@ -112,12 +112,6 @@ function SettingsCardView({ card, anchorId }: { card: SettingsCard; anchorId: st
   return card.id || card.title ? <SettingsTarget id={anchorId}>{content}</SettingsTarget> : content;
 }
 
-export function SettingsSectionCards({ sectionId }: { sectionId: string }) {
-  return SETTINGS_SECTIONS.find((section) => section.id === sectionId)?.cards.map((card, index) => (
-    <SettingsCardView key={index} card={card} anchorId={getCardAnchorId(sectionId, card, index)} />
-  ));
-}
-
 export function SettingsSections() {
   return SETTINGS_SECTIONS.map((section) => (
     <section
