@@ -118,8 +118,8 @@ export const SETTINGS = {
     label: "Primary Color",
     description:
       "Controls the accent color used for switches, badges, highlights, and primary actions.",
-    default: "default",
-    options: COLOR_OPTIONS,
+    default: "sky",
+    options: { ...COLOR_OPTIONS, default: "Neutral" },
   }),
   UI_TINT: select({
     keywords: ["colour", "background", "hue", "wash", "surface"],
