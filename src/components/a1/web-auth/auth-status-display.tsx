@@ -1,4 +1,4 @@
-import { IconExternalLink, IconUser } from "@tabler/icons-react";
+import { IconExternalLink, IconLogout, IconUser } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 
 import { CopyButton } from "@/components/a1/copy-button";
@@ -102,8 +102,12 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
         user={user}
         action={
           signedInAction ?? (
-            <Button variant="secondary" size="sm" onClick={signOut} disabled={isSigningOut}>
-              {isSigningOut && <Spinner data-icon="inline-start" />}
+            <Button variant="destructive" size="sm" onClick={signOut} disabled={isSigningOut}>
+              {isSigningOut ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <IconLogout data-icon="inline-start" />
+              )}
               Sign out
             </Button>
           )

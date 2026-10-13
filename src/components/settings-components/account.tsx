@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import {
   getActivePaidSubscription,
@@ -121,7 +122,11 @@ export function AccountStatus() {
                   </a>
                 </Button>
                 <Button variant="destructive" size="sm" onClick={signOut} disabled={isSigningOut}>
-                  <IconLogout data-icon="inline-start" />
+                  {isSigningOut ? (
+                    <Spinner data-icon="inline-start" />
+                  ) : (
+                    <IconLogout data-icon="inline-start" />
+                  )}
                   <span>Sign out</span>
                 </Button>
               </div>
