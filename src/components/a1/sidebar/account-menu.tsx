@@ -85,7 +85,7 @@ export function AccountMenu({ activeChatId }: { activeChatId?: string }) {
       <TriggerRow
         icon={<IconUser className="text-muted-foreground" />}
         title="Not signed in"
-        description="Sign in to sync your data"
+        description="Sign in for sync & more"
       />
     );
   }
