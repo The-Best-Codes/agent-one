@@ -47,6 +47,9 @@ import {
   setScheduledAgentEnabled,
   updateScheduledAgent,
 } from "@/lib/cron";
+import { getLogger } from "@/lib/logger";
+
+const logger = getLogger(import.meta.url);
 
 const DEFAULT_SCHEDULE = "0 7 * * *";
 
@@ -89,6 +92,7 @@ function AgentEditor({
       setSchedule(updated.schedule);
       setPrompt(updated.prompt);
     } catch (error) {
+      logger.error("Failed to update scheduled agent", error);
       onError(`Failed to update scheduled agent: ${String(error)}`);
     } finally {
       setSaving(false);
@@ -186,7 +190,10 @@ export default function ScheduledAgentsRoute() {
   useEffect(() => {
     void listScheduledAgents()
       .then(setAgents)
-      .catch((error) => setErrorMessage(`Failed to load scheduled agents: ${String(error)}`))
+      .catch((error) => {
+        logger.error("Failed to load scheduled agents", error);
+        setErrorMessage(`Failed to load scheduled agents: ${String(error)}`);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -220,6 +227,7 @@ export default function ScheduledAgentsRoute() {
       setSchedule(DEFAULT_SCHEDULE);
       setPrompt("");
     } catch (error) {
+      logger.error("Failed to create scheduled agent", error);
       setErrorMessage(`Failed to create scheduled agent: ${String(error)}`);
     } finally {
       setCreating(false);
@@ -232,6 +240,7 @@ export default function ScheduledAgentsRoute() {
       const updated = await setScheduledAgentEnabled(agent.id, enabled);
       setAgents((current) => current.map((item) => (item.id === agent.id ? updated : item)));
     } catch (error) {
+      logger.error("Failed to change scheduled agent state", error);
       setErrorMessage(`Failed to change scheduled agent state: ${String(error)}`);
     } finally {
       setBusyId(null);
@@ -246,6 +255,7 @@ export default function ScheduledAgentsRoute() {
       setAgents((current) => current.filter((agent) => agent.id !== deleteTarget.id));
       setDeleteTarget(null);
     } catch (error) {
+      logger.error("Failed to delete scheduled agent", error);
       setErrorMessage(`Failed to delete scheduled agent: ${String(error)}`);
     } finally {
       setBusyId(null);

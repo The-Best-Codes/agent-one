@@ -427,9 +427,9 @@ export const chatStorage = {
             row.title,
             content,
           ]);
-        } catch {
+        } catch (error) {
           malformedEntries += 1;
-          // skip malformed entries
+          logger.warn(`Skipping malformed chat ${row.id} while rebuilding search index`, error);
         }
       }
 

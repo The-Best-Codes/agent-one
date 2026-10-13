@@ -4,7 +4,10 @@ import { BaseDirectory, mkdir, readFile, remove, writeFile } from "@tauri-apps/p
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
+import { getLogger } from "@/lib/logger";
 import type { SettingValue } from "@/lib/settings/definitions";
+
+const logger = getLogger(import.meta.url);
 
 export interface CustomFont {
   id: string;
@@ -72,7 +75,8 @@ export async function importCustomFonts() {
       await mkdir(CUSTOM_FONT_DIR, { baseDir, recursive: true });
       await writeFile(`${CUSTOM_FONT_DIR}/${storedName}`, bytes, { baseDir });
       fonts.push({ id, name: fileName.replace(/\.[^.]+$/, ""), fileName: storedName });
-    } catch {
+    } catch (error) {
+      logger.warn(`Failed to import custom font ${fileName}`, error);
       failed.push(fileName);
     }
   }
@@ -81,5 +85,7 @@ export async function importCustomFonts() {
 }
 
 export async function deleteCustomFontFile(font: CustomFont) {
-  await remove(`${CUSTOM_FONT_DIR}/${font.fileName}`, { baseDir }).catch(() => undefined);
+  await remove(`${CUSTOM_FONT_DIR}/${font.fileName}`, { baseDir }).catch((error) =>
+    logger.warn(`Failed to delete custom font ${font.fileName}`, error),
+  );
 }

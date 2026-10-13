@@ -145,7 +145,7 @@ export const VirtualizedChatList = ({
             Object.fromEntries(agents.map((agent) => [agent.id, agent.title])),
           ),
         )
-        .catch(() => {});
+        .catch((error) => logger.warn("Failed to load scheduled agent titles", error));
     };
     refresh();
     window.addEventListener(SCHEDULED_AGENTS_CHANGED_EVENT, refresh);

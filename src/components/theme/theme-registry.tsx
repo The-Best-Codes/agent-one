@@ -10,7 +10,10 @@ import {
 import { getResolvedTheme } from "@/lib/get-resolved-theme";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { jsonParseCatch } from "@/lib/json-parse-catch";
+import { getLogger } from "@/lib/logger";
 import { SETTINGS } from "@/lib/settings/definitions";
+
+const logger = getLogger(import.meta.url);
 
 const PRIMARY_COLOR_THEMES = Object.keys(SETTINGS.COLOR_THEME.options).filter(
   (option) => option !== "default",
@@ -103,7 +106,10 @@ export function ThemeRegistry() {
   useEffect(() => {
     if (!activeCustomFont) return;
 
-    const fontFace = loadCustomFontFace(activeCustomFont).catch(() => null);
+    const fontFace = loadCustomFontFace(activeCustomFont).catch((error) => {
+      logger.warn("Failed to load custom font", error);
+      return null;
+    });
     void fontFace.then((face) => face && document.fonts.add(face));
     return () => void fontFace.then((face) => face && document.fonts.delete(face));
   }, [activeCustomFont]);

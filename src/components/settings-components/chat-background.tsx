@@ -24,10 +24,13 @@ import {
   resolveChatBackgroundAssetUrl,
 } from "@/lib/chat-backgrounds";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
+import { getLogger } from "@/lib/logger";
 import { DEFAULT_SETTINGS } from "@/lib/settings/definitions";
 import type { ChatBackgroundPresetOption, ChatBackgroundSettings } from "@/lib/settings/types";
 
 import { SettingsRow } from "./setting-controls";
+
+const logger = getLogger(import.meta.url);
 
 const CUSTOM_BACKGROUND_DIR = "chat-backgrounds";
 const CUSTOM_BACKGROUND_IMAGE_DIR = `${CUSTOM_BACKGROUND_DIR}/images`;
@@ -132,8 +135,12 @@ export function ChatBackgroundPicker() {
     const thumbnailUrl = chatBackground.customThumbnails?.[url];
 
     await Promise.all([
-      remove(url).catch(() => undefined),
-      thumbnailUrl ? remove(thumbnailUrl).catch(() => undefined) : Promise.resolve(undefined),
+      remove(url).catch((error) => logger.warn(`Failed to remove chat background ${url}`, error)),
+      thumbnailUrl
+        ? remove(thumbnailUrl).catch((error) =>
+            logger.warn(`Failed to remove chat background thumbnail ${thumbnailUrl}`, error),
+          )
+        : Promise.resolve(undefined),
     ]);
   };
 
@@ -214,7 +221,8 @@ export function ChatBackgroundPicker() {
 
       try {
         await createThumbnailFile(imageUrl, thumbnailRelativePath);
-      } catch {
+      } catch (error) {
+        logger.warn("Failed to create chat background thumbnail", error);
         setChatBackground((prev) => ({
           ...chatBackgroundDefaults,
           ...prev,

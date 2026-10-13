@@ -144,7 +144,8 @@ export async function mcpCheckAuth(
       };
     });
     return "logged-in";
-  } catch {
+  } catch (error) {
+    logger.debug(`No valid token for MCP server ${serverId}`, error);
     return undefined;
   }
 }

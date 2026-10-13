@@ -252,7 +252,7 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
           exitCode = r.exitCode;
           signal = r.signal;
         })
-        .catch(() => {})
+        .catch((error) => logger.error("Command failed to run", error))
         .finally(() => {
           done = true;
           flush();
