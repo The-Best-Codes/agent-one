@@ -1,4 +1,5 @@
 import { IconSearch } from "@tabler/icons-react";
+import { Command as CommandPrimitive } from "cmdk";
 import fuzzysort from "fuzzysort";
 import { useMemo, useState } from "react";
 
@@ -142,11 +143,9 @@ export function SettingsSearch({ open, onOpenChange, onSelect }: SettingsSearchP
     >
       <Command shouldFilter={false}>
         <div className="p-1 pb-0">
-          <SearchInput
-            placeholder="Search settings..."
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
+          <CommandPrimitive.Input value={query} onValueChange={setQuery} asChild>
+            <SearchInput placeholder="Search settings..." />
+          </CommandPrimitive.Input>
         </div>
         <CommandList>
           <CommandEmpty>{`No results for "${trimmedQuery}"`}</CommandEmpty>
