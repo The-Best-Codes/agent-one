@@ -70,7 +70,7 @@ export function AppUpdates() {
         };
       case "checking":
         return {
-          icon: <Spinner className="text-primary" data-icon="inline-start" />,
+          icon: <Spinner className="text-foreground" data-icon="inline-start" />,
           title: "Checking for updates...",
           description: "Please wait while we check for the latest version",
         };
@@ -88,19 +88,19 @@ export function AppUpdates() {
         };
       case "available":
         return {
-          icon: <IconRocket className="text-primary size-5" />,
+          icon: <IconRocket className="text-foreground size-5" />,
           title: `Update available: v${updateVersion}`,
           description: "A new version is ready to install",
         };
       case "downloading":
         return {
-          icon: <IconDownload className="text-primary size-5" />,
+          icon: <IconDownload className="text-foreground size-5" />,
           title: "Downloading update...",
           description: `${Math.round(updateProgress)}% complete`,
         };
       case "installing":
         return {
-          icon: <Spinner className="text-primary" data-icon="inline-start" />,
+          icon: <Spinner className="text-foreground" data-icon="inline-start" />,
           title: "Installing update...",
           description: "Please wait while we install the update",
         };
