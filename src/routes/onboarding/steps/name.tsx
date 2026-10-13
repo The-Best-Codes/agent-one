@@ -1,3 +1,4 @@
+import { IconArrowRight } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -65,6 +66,7 @@ export function NameStep({ onSubmit }: NameStepProps) {
 
           <Button onClick={handleSubmit} disabled={!nameInput.trim()} className="w-full">
             Continue
+            <IconArrowRight data-icon="inline-end" />
           </Button>
         </div>
       </div>
