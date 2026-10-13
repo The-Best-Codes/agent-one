@@ -18,7 +18,7 @@ export function getAnthropic(apiKey: string, headers?: Record<string, string>) {
     apiKey: apiKey || "unset",
     fetch: tauriFetch,
     headers: {
-      "anthropic-dangerous-direct-browser-access": "true",
+      Origin: "",
       ...headers,
     },
   });
