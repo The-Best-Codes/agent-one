@@ -1,6 +1,7 @@
 import { type AnthropicLanguageModelOptions, createAnthropic } from "@ai-sdk/anthropic";
-import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { defaultSettingsMiddleware, wrapLanguageModel } from "ai";
+
+import { providerFetch } from "@/lib/ai/providers/provider-fetch";
 
 const BLOCK_BINDING_MODEL_PREFIXES = [
   "claude-fable-5-1",
@@ -16,11 +17,8 @@ function supportsBlockBinding(modelId: string) {
 export function getAnthropic(apiKey: string, headers?: Record<string, string>) {
   const provider = createAnthropic({
     apiKey: apiKey || "unset",
-    fetch: tauriFetch,
-    headers: {
-      Origin: "",
-      ...headers,
-    },
+    fetch: providerFetch,
+    headers,
   });
 
   return {

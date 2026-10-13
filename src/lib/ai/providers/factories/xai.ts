@@ -1,10 +1,11 @@
 import { createXai } from "@ai-sdk/xai";
-import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
+
+import { providerFetch } from "@/lib/ai/providers/provider-fetch";
 
 export function getXai(apiKey: string, headers?: Record<string, string>) {
   return createXai({
     apiKey: apiKey || "unset",
-    fetch: tauriFetch,
+    fetch: providerFetch,
     headers,
   });
 }

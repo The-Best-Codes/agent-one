@@ -1,10 +1,11 @@
 import { createDeepInfra } from "@ai-sdk/deepinfra";
-import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
+
+import { providerFetch } from "@/lib/ai/providers/provider-fetch";
 
 export function getDeepInfra(apiKey: string, headers?: Record<string, string>) {
   return createDeepInfra({
     apiKey: apiKey || "unset",
-    fetch: tauriFetch,
+    fetch: providerFetch,
     headers,
   });
 }

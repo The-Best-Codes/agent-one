@@ -1,5 +1,6 @@
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
+
+import { providerFetch } from "@/lib/ai/providers/provider-fetch";
 
 export function createOpenAICompatibleFactory(
   name: string,
@@ -14,7 +15,7 @@ export function createOpenAICompatibleFactory(
       name,
       apiKey: apiKey || options?.emptyApiKey || "unset",
       baseURL,
-      fetch: tauriFetch,
+      fetch: providerFetch,
       headers: {
         ...defaultHeaders,
         ...headers,
