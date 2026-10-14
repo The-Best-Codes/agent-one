@@ -19,6 +19,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
+import { delayCutoffMinutesToSeconds, describeDelayCutoff } from "@/lib/cron";
 import { cn } from "@/lib/utils";
 
 import { ToolErrorAccordion } from "./tool-error-accordion";
@@ -28,33 +29,51 @@ interface UpdateScheduledAgentInput {
   title?: string;
   schedule?: string;
   prompt?: string;
+  delayCutoffMinutes?: number | null;
+  delayCutoffSeconds?: number | null;
   enabled?: boolean;
 }
 
-const Detail = ({ input }: { input: UpdateScheduledAgentInput }) => (
-  <div className="flex w-full flex-col gap-2">
-    {input.schedule && (
-      <div className="flex flex-col gap-0.5">
-        <span className="text-muted-foreground text-sm">Schedule</span>
-        <ScheduledAgentSchedule cron={input.schedule} className="text-foreground w-fit text-sm" />
-      </div>
-    )}
-    {typeof input.enabled === "boolean" && (
-      <div className="flex flex-col gap-0.5">
-        <span className="text-muted-foreground text-sm">Enabled</span>
-        <span className="text-foreground text-sm">{input.enabled ? "true" : "false"}</span>
-      </div>
-    )}
-    {input.prompt && (
-      <div className="flex flex-col gap-0.5">
-        <span className="text-muted-foreground text-sm">Prompt</span>
-        <span className="text-foreground text-sm wrap-break-word whitespace-pre-wrap">
-          {input.prompt}
-        </span>
-      </div>
-    )}
-  </div>
-);
+const getDelayCutoffSeconds = (input: UpdateScheduledAgentInput) => {
+  if (input.delayCutoffSeconds !== undefined) return input.delayCutoffSeconds;
+  if (input.delayCutoffMinutes !== undefined)
+    return delayCutoffMinutesToSeconds(input.delayCutoffMinutes);
+  return undefined;
+};
+
+const Detail = ({ input }: { input: UpdateScheduledAgentInput }) => {
+  const delayCutoffSeconds = getDelayCutoffSeconds(input);
+  return (
+    <div className="flex w-full flex-col gap-2">
+      {input.schedule && (
+        <div className="flex flex-col gap-0.5">
+          <span className="text-muted-foreground text-sm">Schedule</span>
+          <ScheduledAgentSchedule cron={input.schedule} className="text-foreground w-fit text-sm" />
+        </div>
+      )}
+      {typeof input.enabled === "boolean" && (
+        <div className="flex flex-col gap-0.5">
+          <span className="text-muted-foreground text-sm">Enabled</span>
+          <span className="text-foreground text-sm">{input.enabled ? "true" : "false"}</span>
+        </div>
+      )}
+      {delayCutoffSeconds !== undefined && (
+        <div className="flex flex-col gap-0.5">
+          <span className="text-muted-foreground text-sm">Late runs</span>
+          <span className="text-foreground text-sm">{describeDelayCutoff(delayCutoffSeconds)}</span>
+        </div>
+      )}
+      {input.prompt && (
+        <div className="flex flex-col gap-0.5">
+          <span className="text-muted-foreground text-sm">Prompt</span>
+          <span className="text-foreground text-sm wrap-break-word whitespace-pre-wrap">
+            {input.prompt}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const MessagePartToolUpdateScheduledAgent = ({ part }: { part: ToolUIPart }) => {
   const callId = part.toolCallId;

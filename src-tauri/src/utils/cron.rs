@@ -12,6 +12,8 @@ use uuid::Uuid;
 
 // TODO: Later on, probably migrate this to the kv table that already exists in the AgentOne DB?
 const CRON_STATE_FILE_NAME: &str = "crons.json";
+const DEFAULT_DELAY_CUTOFF_SECONDS: i64 = 300;
+const NEVER_SKIP_DELAY_CUTOFF_SECONDS: i64 = -1;
 static CRON_MUTATION_LOCK: OnceLock<Arc<tokio::sync::Mutex<()>>> = OnceLock::new();
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -229,11 +231,12 @@ pub fn get_cron_invocation(
 
     let delay_seconds = (now - scheduled_at).num_seconds().max(0);
     if let CronKind::ScheduledAgent {
-        delay_cutoff_seconds: Some(cutoff),
+        delay_cutoff_seconds,
         ..
     } = &cron.kind
     {
-        if delay_seconds > *cutoff {
+        let cutoff = delay_cutoff_seconds.unwrap_or(DEFAULT_DELAY_CUTOFF_SECONDS);
+        if cutoff >= 0 && delay_seconds > cutoff {
             return Ok(None);
         }
     }
@@ -259,8 +262,12 @@ pub async fn create_scheduled_agent(
     title: String,
     schedule: String,
     prompt: String,
+    delay_cutoff_seconds: Option<i64>,
 ) -> Result<Cron, String> {
-    run_blocking(move || create_scheduled_agent_blocking(app, title, schedule, prompt)).await
+    run_blocking(move || {
+        create_scheduled_agent_blocking(app, title, schedule, prompt, delay_cutoff_seconds)
+    })
+    .await
 }
 
 fn create_scheduled_agent_blocking(
@@ -268,6 +275,7 @@ fn create_scheduled_agent_blocking(
     title: String,
     schedule: String,
     prompt: String,
+    delay_cutoff_seconds: Option<i64>,
 ) -> Result<Cron, String> {
     let cron = Cron {
         id: Uuid::new_v4().to_string(),
@@ -278,7 +286,9 @@ fn create_scheduled_agent_blocking(
             prompt: normalize_required("Prompt", prompt)?,
             model_id: None,
             model_config: None,
-            delay_cutoff_seconds: None,
+            delay_cutoff_seconds: Some(normalize_delay_cutoff(
+                delay_cutoff_seconds.unwrap_or(DEFAULT_DELAY_CUTOFF_SECONDS),
+            )),
         },
     };
     let mut crons = read_crons(&app)?;
@@ -298,8 +308,12 @@ pub async fn update_scheduled_agent(
     title: String,
     schedule: String,
     prompt: String,
+    delay_cutoff_seconds: Option<i64>,
 ) -> Result<Cron, String> {
-    run_blocking(move || update_scheduled_agent_blocking(app, id, title, schedule, prompt)).await
+    run_blocking(move || {
+        update_scheduled_agent_blocking(app, id, title, schedule, prompt, delay_cutoff_seconds)
+    })
+    .await
 }
 
 fn update_scheduled_agent_blocking(
@@ -308,6 +322,7 @@ fn update_scheduled_agent_blocking(
     title: String,
     schedule: String,
     prompt: String,
+    delay_cutoff_seconds: Option<i64>,
 ) -> Result<Cron, String> {
     let schedule = normalize_schedule(&schedule)?;
     let mut crons = read_crons(&app)?;
@@ -316,7 +331,7 @@ fn update_scheduled_agent_blocking(
     let CronKind::ScheduledAgent {
         model_id,
         model_config,
-        delay_cutoff_seconds,
+        delay_cutoff_seconds: previous_delay_cutoff_seconds,
         ..
     } = &previous.kind
     else {
@@ -331,7 +346,9 @@ fn update_scheduled_agent_blocking(
             prompt: normalize_required("Prompt", prompt)?,
             model_id: model_id.clone(),
             model_config: model_config.clone(),
-            delay_cutoff_seconds: *delay_cutoff_seconds,
+            delay_cutoff_seconds: delay_cutoff_seconds
+                .map(normalize_delay_cutoff)
+                .or(*previous_delay_cutoff_seconds),
         },
     };
     if updated.enabled {
@@ -410,6 +427,10 @@ fn normalize_schedule(value: &str) -> Result<String, String> {
         return Err("Cron schedules must contain exactly five fields".to_string());
     }
     Ok(schedule)
+}
+
+fn normalize_delay_cutoff(value: i64) -> i64 {
+    value.max(NEVER_SKIP_DELAY_CUTOFF_SECONDS)
 }
 
 fn normalize_message(message: Option<String>) -> Option<String> {

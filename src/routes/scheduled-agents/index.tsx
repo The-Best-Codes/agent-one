@@ -13,6 +13,7 @@ import { ScheduledAgentSchedule } from "@/components/a1/scheduled-agent-schedule
 import { SearchInput } from "@/components/a1/search-input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -28,7 +29,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Accordion,
@@ -41,8 +42,11 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
   createScheduledAgent,
+  DEFAULT_DELAY_CUTOFF_SECONDS,
   deleteScheduledAgent,
   listScheduledAgents,
+  NEVER_SKIP_DELAY_CUTOFF_SECONDS,
+  resolveDelayCutoffSeconds,
   type ScheduledAgent,
   setScheduledAgentEnabled,
   updateScheduledAgent,
@@ -52,6 +56,70 @@ import { getLogger } from "@/lib/logger";
 const logger = getLogger(import.meta.url);
 
 const DEFAULT_SCHEDULE = "0 7 * * *";
+
+interface DelayCutoffDraft {
+  minutes: string;
+  neverSkip: boolean;
+}
+
+function toDelayCutoffDraft(delayCutoffSeconds: number | null | undefined): DelayCutoffDraft {
+  const seconds = resolveDelayCutoffSeconds(delayCutoffSeconds);
+  return seconds < 0
+    ? { minutes: String(DEFAULT_DELAY_CUTOFF_SECONDS / 60), neverSkip: true }
+    : { minutes: String(Math.round(seconds / 60)), neverSkip: false };
+}
+
+function fromDelayCutoffDraft(draft: DelayCutoffDraft): number | null {
+  if (draft.neverSkip) return NEVER_SKIP_DELAY_CUTOFF_SECONDS;
+  const minutes = draft.minutes.trim();
+  return /^\d+$/.test(minutes) ? Number(minutes) * 60 : null;
+}
+
+function DelayCutoffFields({
+  id,
+  value,
+  onChange,
+  disabled,
+}: {
+  id: string;
+  value: DelayCutoffDraft;
+  onChange: (value: DelayCutoffDraft) => void;
+  disabled: boolean;
+}) {
+  const invalid = fromDelayCutoffDraft(value) === null;
+
+  return (
+    <>
+      <Field data-invalid={invalid || undefined} data-disabled={value.neverSkip || undefined}>
+        <FieldLabel htmlFor={`delay-cutoff-${id}`}>Skip if late by (minutes)</FieldLabel>
+        <Input
+          id={`delay-cutoff-${id}`}
+          type="number"
+          inputMode="numeric"
+          min={0}
+          step={1}
+          value={value.minutes}
+          onChange={(event) => onChange({ ...value, minutes: event.target.value })}
+          disabled={disabled || value.neverSkip}
+          aria-invalid={invalid || undefined}
+        />
+        <FieldDescription>
+          Runs that start later than this, for example because your computer was asleep, are
+          skipped.
+        </FieldDescription>
+      </Field>
+      <Field orientation="horizontal">
+        <Checkbox
+          id={`never-skip-${id}`}
+          checked={value.neverSkip}
+          onCheckedChange={(checked) => onChange({ ...value, neverSkip: checked === true })}
+          disabled={disabled}
+        />
+        <FieldLabel htmlFor={`never-skip-${id}`}>Never skip late runs</FieldLabel>
+      </Field>
+    </>
+  );
+}
 
 function AgentEditor({
   agent,
@@ -71,26 +139,43 @@ function AgentEditor({
   const [title, setTitle] = useState(agent.title);
   const [schedule, setSchedule] = useState(agent.schedule);
   const [prompt, setPrompt] = useState(agent.prompt);
+  const [delayCutoff, setDelayCutoff] = useState(() =>
+    toDelayCutoffDraft(agent.delayCutoffSeconds),
+  );
   const [saving, setSaving] = useState(false);
   const disabled = busy || saving;
-  const dirty = title !== agent.title || schedule !== agent.schedule || prompt !== agent.prompt;
-  const valid = Boolean(title.trim() && schedule.trim() && prompt.trim());
+  const delayCutoffSeconds = fromDelayCutoffDraft(delayCutoff);
+  const dirty =
+    title !== agent.title ||
+    schedule !== agent.schedule ||
+    prompt !== agent.prompt ||
+    delayCutoffSeconds !== resolveDelayCutoffSeconds(agent.delayCutoffSeconds);
+  const valid =
+    Boolean(title.trim() && schedule.trim() && prompt.trim()) && delayCutoffSeconds !== null;
 
   const reset = () => {
     setTitle(agent.title);
     setSchedule(agent.schedule);
     setPrompt(agent.prompt);
+    setDelayCutoff(toDelayCutoffDraft(agent.delayCutoffSeconds));
   };
 
   const save = async () => {
-    if (!valid || disabled) return;
+    if (!valid || disabled || delayCutoffSeconds === null) return;
     setSaving(true);
     try {
-      const updated = await updateScheduledAgent(agent.id, title, schedule, prompt);
+      const updated = await updateScheduledAgent(
+        agent.id,
+        title,
+        schedule,
+        prompt,
+        delayCutoffSeconds,
+      );
       onSaved(updated);
       setTitle(updated.title);
       setSchedule(updated.schedule);
       setPrompt(updated.prompt);
+      setDelayCutoff(toDelayCutoffDraft(updated.delayCutoffSeconds));
     } catch (error) {
       logger.error("Failed to update scheduled agent", error);
       onError(`Failed to update scheduled agent: ${String(error)}`);
@@ -141,6 +226,12 @@ function AgentEditor({
               autoComplete="off"
             />
           </Field>
+          <DelayCutoffFields
+            id={agent.id}
+            value={delayCutoff}
+            onChange={setDelayCutoff}
+            disabled={disabled}
+          />
           <Field>
             <FieldLabel htmlFor={`prompt-${agent.id}`}>Prompt</FieldLabel>
             <Textarea
@@ -184,6 +275,7 @@ export default function ScheduledAgentsRoute() {
   const [title, setTitle] = useState("");
   const [schedule, setSchedule] = useState(DEFAULT_SCHEDULE);
   const [prompt, setPrompt] = useState("");
+  const [delayCutoff, setDelayCutoff] = useState(() => toDelayCutoffDraft(undefined));
   const [creating, setCreating] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -216,16 +308,22 @@ export default function ScheduledAgentsRoute() {
     void navigate(`/chat?initialMessage=${encodeURIComponent(initialMessage)}`);
   };
 
+  const delayCutoffSeconds = fromDelayCutoffDraft(delayCutoff);
+  const canCreate = Boolean(
+    title.trim() && schedule.trim() && prompt.trim() && delayCutoffSeconds !== null,
+  );
+
   const create = async () => {
-    if (!title.trim() || !schedule.trim() || !prompt.trim() || creating) return;
+    if (!canCreate || creating || delayCutoffSeconds === null) return;
     setCreating(true);
     try {
-      const agent = await createScheduledAgent(title, schedule, prompt);
+      const agent = await createScheduledAgent(title, schedule, prompt, delayCutoffSeconds);
       setAgents((current) => [...current, agent]);
       setCreateOpen(false);
       setTitle("");
       setSchedule(DEFAULT_SCHEDULE);
       setPrompt("");
+      setDelayCutoff(toDelayCutoffDraft(undefined));
     } catch (error) {
       logger.error("Failed to create scheduled agent", error);
       setErrorMessage(`Failed to create scheduled agent: ${String(error)}`);
@@ -360,6 +458,12 @@ export default function ScheduledAgentsRoute() {
                     autoComplete="off"
                   />
                 </Field>
+                <DelayCutoffFields
+                  id="new-agent"
+                  value={delayCutoff}
+                  onChange={setDelayCutoff}
+                  disabled={creating}
+                />
                 <Field>
                   <FieldLabel htmlFor="new-agent-prompt">Prompt</FieldLabel>
                   <Textarea
@@ -376,10 +480,7 @@ export default function ScheduledAgentsRoute() {
                 <Button variant="outline" onClick={() => setCreateOpen(false)} disabled={creating}>
                   Cancel
                 </Button>
-                <Button
-                  onClick={() => void create()}
-                  disabled={creating || !title.trim() || !schedule.trim() || !prompt.trim()}
-                >
+                <Button onClick={() => void create()} disabled={creating || !canCreate}>
                   {creating ? <Spinner data-icon="inline-start" /> : null}
                   {creating ? "Creating" : "Create"}
                 </Button>

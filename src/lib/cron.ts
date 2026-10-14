@@ -5,6 +5,23 @@ import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
 export const SCHEDULED_AGENTS_CHANGED_EVENT = "agent-one-scheduled-agents-changed";
+export const DEFAULT_DELAY_CUTOFF_SECONDS = 300;
+export const NEVER_SKIP_DELAY_CUTOFF_SECONDS = -1;
+
+export function resolveDelayCutoffSeconds(delayCutoffSeconds: number | null | undefined) {
+  return delayCutoffSeconds ?? DEFAULT_DELAY_CUTOFF_SECONDS;
+}
+
+export function delayCutoffMinutesToSeconds(minutes: number | null) {
+  return minutes === null ? NEVER_SKIP_DELAY_CUTOFF_SECONDS : minutes * 60;
+}
+
+export function describeDelayCutoff(delayCutoffSeconds: number | null | undefined) {
+  const seconds = resolveDelayCutoffSeconds(delayCutoffSeconds);
+  if (seconds < 0) return "Never skipped, no matter how late";
+  const minutes = Math.round(seconds / 60);
+  return `Skipped if more than ${minutes} ${minutes === 1 ? "minute" : "minutes"} late`;
+}
 
 function notifyScheduledAgentsChanged() {
   window.dispatchEvent(new Event(SCHEDULED_AGENTS_CHANGED_EVENT));
@@ -95,8 +112,14 @@ export async function createScheduledAgent(
   title: string,
   schedule: string,
   prompt: string,
+  delayCutoffSeconds?: number,
 ): Promise<ScheduledAgent> {
-  const agent = await invoke<ScheduledAgent>("create_scheduled_agent", { title, schedule, prompt });
+  const agent = await invoke<ScheduledAgent>("create_scheduled_agent", {
+    title,
+    schedule,
+    prompt,
+    delayCutoffSeconds,
+  });
   notifyScheduledAgentsChanged();
   return agent;
 }
@@ -106,12 +129,14 @@ export async function updateScheduledAgent(
   title: string,
   schedule: string,
   prompt: string,
+  delayCutoffSeconds?: number,
 ): Promise<ScheduledAgent> {
   const agent = await invoke<ScheduledAgent>("update_scheduled_agent", {
     id,
     title,
     schedule,
     prompt,
+    delayCutoffSeconds,
   });
   notifyScheduledAgentsChanged();
   return agent;
