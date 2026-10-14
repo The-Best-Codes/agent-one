@@ -54,8 +54,8 @@ export const MessagePartCompaction = ({
           <span aria-hidden className="relative flex-1 self-stretch">
             <span
               className={cn(
-                "border-border absolute inset-x-0 top-1/2 bottom-0 border-t border-l border-l-transparent transition-[border-color,border-radius] duration-200",
-                isOpen && "border-l-border rounded-tl-md",
+                "border-border absolute inset-x-0 top-1/2 bottom-0 border-t border-l border-l-transparent transition-[border-color,border-radius] duration-300",
+                isOpen && "border-l-border rounded-tl-md duration-0",
               )}
             />
           </span>
@@ -79,8 +79,8 @@ export const MessagePartCompaction = ({
           <span aria-hidden className="relative flex-1 self-stretch">
             <span
               className={cn(
-                "border-border absolute inset-x-0 top-1/2 bottom-0 border-t border-r border-r-transparent transition-[border-color,border-radius] duration-200",
-                isOpen && "border-r-border rounded-tr-md",
+                "border-border absolute inset-x-0 top-1/2 bottom-0 border-t border-r border-r-transparent transition-[border-color,border-radius] duration-300",
+                isOpen && "border-r-border rounded-tr-md duration-0",
               )}
             />
           </span>
