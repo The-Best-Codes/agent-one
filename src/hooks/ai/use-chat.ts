@@ -33,6 +33,7 @@ export function useChat(
   modelId: string | null,
   providerName: string | null,
   modelConfig: ModelConfig,
+  contextWindow: number | undefined,
   options?: CustomChatOptions,
 ) {
   const extractReasoningEnabled = useAtomValue(settingAtoms.EXTRACT_REASONING_ENABLED);
@@ -92,6 +93,10 @@ export function useChat(
 
   const { onUserMessageSent, ...sdkOptions } = options ?? {};
 
+  useEffect(() => {
+    transport.updateContextWindow(contextWindow);
+  }, [contextWindow, transport]);
+
   const {
     addToolApprovalResponse,
     addToolOutput,
@@ -118,8 +123,17 @@ export function useChat(
     transport.updateModel(model, providerName);
     transport.updateModelId(modelId);
     transport.updateModelConfig(modelConfig);
+    transport.updateContextWindow(contextWindow);
     transport.updateExtractReasoningEnabled(extractReasoningEnabled);
-  }, [model, modelId, providerName, modelConfig, extractReasoningEnabled, transport]);
+  }, [
+    model,
+    modelId,
+    providerName,
+    modelConfig,
+    contextWindow,
+    extractReasoningEnabled,
+    transport,
+  ]);
 
   const sendMessage = useCallback<typeof sendMessageSdk>(
     async (message, sendOptions) => {
@@ -154,6 +168,11 @@ export function useChat(
     [resumeStreamSdk, sendMessageSdk, syncTransport],
   );
 
+  const compact = useCallback(async () => {
+    syncTransport();
+    return sendMessageSdk(undefined, { body: { compact: true } });
+  }, [sendMessageSdk, syncTransport]);
+
   const updateMcpAppModelContext = useCallback(
     (viewId: string, context: unknown) => {
       transport.updateMcpAppModelContext(viewId, context);
@@ -165,6 +184,7 @@ export function useChat(
     addToolApprovalResponse,
     addToolOutput,
     clearError,
+    compact,
     error,
     messages,
     regenerate,

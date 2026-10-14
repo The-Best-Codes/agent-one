@@ -12,7 +12,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useChatLoading, useChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { calculateChatUsageFromMessages, getLastAssistantUsage } from "@/lib/ai/chat-usage";
+import { calculateChatUsageFromMessages } from "@/lib/ai/chat-usage";
+import { getContextTokens } from "@/lib/ai/compaction";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
@@ -98,13 +99,10 @@ export const ChatUsageStatus = () => {
   }, [isChatLoading]);
 
   const showSkeleton = isChatLoading && delayPassed;
-  const lastUsage = getLastAssistantUsage(messages);
+  const totalTokens = useMemo(() => getContextTokens(messages), [messages]);
 
   const totalCostUsd = currentUsage.totalCostUsd;
   const hasUnknownCost = currentUsage.hasUnknownCost;
-  const contextInputTokens = lastUsage.inputTokens;
-  const contextOutputTokens = lastUsage.outputTokens;
-  const totalTokens = contextInputTokens + contextOutputTokens;
   const maxTokens = currentModel?.contextWindow;
   const isExceeded = maxTokens !== undefined && totalTokens > maxTokens;
   const contextUsagePercent = maxTokens ? Math.round((totalTokens / maxTokens) * 100) : null;

@@ -11,6 +11,7 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { type ModelConfig, type ModelData } from "@/hooks/ai/use-model-catalog";
+import { isCompactionPart } from "@/lib/ai/compaction";
 import { TOOL_CANCELLED_BY_USER_SYMBOL, TOOL_INTERRUPTED_BY_ERROR_TEXT } from "@/lib/constants";
 import { chatIdsAtom, chatStatusIndicatorsAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
@@ -327,6 +328,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     defaultModelForNewChats?.id ?? null,
     defaultModelForNewChats?.provider ?? null,
     defaultModelConfigForNewChats,
+    defaultModelForNewChats?.contextWindow,
   );
   const pendingProgrammaticMessagesRef = useRef(
     new Map<string, { message: Parameters<typeof defaultChat.sendMessage>[0] }>(),
@@ -517,6 +519,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     regenerate = noopAsync,
     clearError = () => {},
     resumeStream = noopAsync,
+    compact = noopAsync,
     stop = noopAsync,
     setMessages = noopSetMessages,
     sendMessage = noopAsync,
@@ -557,11 +560,17 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
           }
           return part;
         });
+        const cleanedParts = (newParts as UIMessage["parts"]).filter(
+          (part) => !isCompactionPart(part) || part.data.status === "done",
+        );
+        if (cleanedParts.length !== newParts.length) {
+          hasChanges = true;
+        }
 
         if (hasChanges) {
           const updatedMessage: UIMessage = {
             ...lastMessage,
-            parts: newParts as UIMessage["parts"],
+            parts: cleanedParts,
           };
 
           const newMessages = [...messages.slice(0, -1), updatedMessage];
@@ -600,6 +609,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       regenerate,
       clearError,
       resumeStream,
+      compact,
       stop,
       setMessages,
       updateMcpAppModelContext,
@@ -614,6 +624,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       regenerate,
       clearError,
       resumeStream,
+      compact,
       stop,
       setMessages,
       updateMcpAppModelContext,
@@ -652,6 +663,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
             modelId={chatModel.id}
             providerName={chatModel.provider}
             modelConfig={chatConfig}
+            contextWindow={chatModel.contextWindow}
             initialMessages={initialMessages}
             onInstanceUpdate={handleInstanceUpdate}
             onStatusChange={handleStatusChange}
