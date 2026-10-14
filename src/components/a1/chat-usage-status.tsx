@@ -19,7 +19,7 @@ import {
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { calculateChatUsageFromMessages } from "@/lib/ai/chat-usage";
-import { estimateContextTokens, isCompactionPart } from "@/lib/ai/compaction";
+import { getContextTokens, isCompactionPart } from "@/lib/ai/compaction";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
@@ -107,7 +107,7 @@ export const ChatUsageStatus = () => {
   }, [isChatLoading]);
 
   const showSkeleton = isChatLoading && delayPassed;
-  const totalTokens = useMemo(() => estimateContextTokens(messages), [messages]);
+  const totalTokens = useMemo(() => getContextTokens(messages), [messages]);
 
   const totalCostUsd = currentUsage.totalCostUsd;
   const hasUnknownCost = currentUsage.hasUnknownCost;

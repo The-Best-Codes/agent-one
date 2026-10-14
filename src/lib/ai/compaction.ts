@@ -17,18 +17,11 @@ export const DEFAULT_COMPACTION_THRESHOLD = 95;
 export const MIN_COMPACTION_THRESHOLD = 5;
 export const MAX_COMPACTION_THRESHOLD = 95;
 
-const CHARS_PER_TOKEN = 4;
-
-export type CompactionTrigger = "auto" | "manual";
-
 export interface CompactionData {
   status: "compacting" | "done";
-  trigger: CompactionTrigger;
   summary?: string;
   modelId?: string;
   usage?: MessageTokenUsage;
-  contextTokens?: number;
-  retainedUserMessageId?: string;
 }
 
 export interface CompactionPart {
@@ -55,8 +48,7 @@ const SUMMARY_REQUEST = `Summarize the conversation so far. Include:
 
 Write the summary directly with no preamble. Do not continue the conversation or answer any requests, only write the summary.`;
 
-const RETAINED_USER_MESSAGE_NOTE =
-  "The user's latest message will be kept verbatim after this summary, so you don't need to repeat it.";
+const LATEST_USER_MESSAGE_LABEL = "This is the user's most recent message:";
 
 export function isCompactionPart(part: UIMessage["parts"][number]): part is CompactionPart {
   return (
@@ -137,16 +129,6 @@ export function getMessagesAfterCompaction(messages: UIMessage[]): {
 
   const { messageIndex, partIndex, part } = latest;
   const result: UIMessage[] = [];
-  const retainedUserMessageId = part.data.retainedUserMessageId;
-
-  if (retainedUserMessageId) {
-    const retainedIndex = messages.findIndex(
-      (message) => message.id === retainedUserMessageId && message.role === "user",
-    );
-    if (retainedIndex !== -1 && retainedIndex <= messageIndex) {
-      result.push(messages[retainedIndex]);
-    }
-  }
 
   const compactedMessage = messages[messageIndex];
   const remainingParts = compactedMessage.parts
@@ -184,36 +166,56 @@ export function withCompactionSummary(summary: string, messages: ModelMessage[])
   return [{ role: "user", content: [summaryPart] }, ...messages];
 }
 
+function labelLatestUserMessage(
+  messages: ModelMessage[],
+  startsWithSummary: boolean,
+): ModelMessage[] {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i];
+    if (message.role !== "user") continue;
+
+    const parts = toUserContentParts(message.content);
+    const summaryParts = i === 0 && startsWithSummary ? parts.slice(0, 1) : [];
+    const userParts = parts.slice(summaryParts.length);
+
+    if (userParts.length === 0) {
+      return messages;
+    }
+
+    return [
+      ...messages.slice(0, i),
+      {
+        ...message,
+        content: [...summaryParts, { type: "text", text: LATEST_USER_MESSAGE_LABEL }, ...userParts],
+      },
+      ...messages.slice(i + 1),
+    ];
+  }
+
+  return messages;
+}
+
 export async function summarizeConversation({
   model,
   messages,
-  hasRetainedUserMessage,
+  startsWithSummary,
   abortSignal,
 }: {
   model: LanguageModel;
   messages: ModelMessage[];
-  hasRetainedUserMessage: boolean;
+  startsWithSummary: boolean;
   abortSignal?: AbortSignal;
 }): Promise<{ summary: string; usage: LanguageModelUsage }> {
   const prunedMessages = pruneMessages({
-    messages,
+    messages: labelLatestUserMessage(messages, startsWithSummary),
     reasoning: "all",
-    toolCalls: "before-last-6-messages",
     emptyMessages: "remove",
   });
 
   const result = await generateText({
     model,
     instructions: SUMMARY_INSTRUCTIONS,
-    messages: [
-      ...prunedMessages,
-      {
-        role: "user",
-        content: hasRetainedUserMessage
-          ? `${SUMMARY_REQUEST}\n\n${RETAINED_USER_MESSAGE_NOTE}`
-          : SUMMARY_REQUEST,
-      },
-    ],
+    messages: [...prunedMessages, { role: "user", content: SUMMARY_REQUEST }],
     abortSignal,
   });
 
@@ -226,41 +228,11 @@ export async function summarizeConversation({
   return { summary, usage: result.usage };
 }
 
-export function estimateTextTokens(text: string) {
-  return Math.ceil(text.length / CHARS_PER_TOKEN);
-}
-
-function estimatePartTokens(part: UIMessage["parts"][number]): number {
-  if (part.type === "text" || part.type === "reasoning") {
-    return estimateTextTokens(part.text);
-  }
-
-  if (part.type.startsWith("tool-") || part.type === "dynamic-tool") {
-    const { input, output } = part as { input?: unknown; output?: unknown };
-    return estimateTextTokens(JSON.stringify({ input, output }) ?? "");
-  }
-
-  return 0;
-}
-
-export function estimateMessagesTokens(messages: UIMessage[]) {
-  return messages.reduce(
-    (total, message) =>
-      total + message.parts.reduce((sum, part) => sum + estimatePartTokens(part), 0),
-    0,
-  );
-}
-
 export function getUsageContextTokens(usage: MessageTokenUsage | LanguageModelUsage | undefined) {
-  const inputTokens = usage?.inputTokens;
-  const outputTokens = usage?.outputTokens;
-  return (
-    (typeof inputTokens === "number" && Number.isFinite(inputTokens) ? inputTokens : 0) +
-    (typeof outputTokens === "number" && Number.isFinite(outputTokens) ? outputTokens : 0)
-  );
+  return (usage?.inputTokens ?? 0) + (usage?.outputTokens ?? 0);
 }
 
-export function estimateContextTokens(messages: UIMessage[]): number {
+export function getContextTokens(messages: UIMessage[]): number {
   const latest = findLatestCompaction(messages);
 
   for (let i = messages.length - 1; i >= 0; i--) {
@@ -270,26 +242,14 @@ export function estimateContextTokens(messages: UIMessage[]): number {
     const metadata = message.metadata as ChatMessageMetadata | undefined;
     if (!metadata?.usage) continue;
 
-    const isUsageAfterCompaction =
-      !latest || i > latest.messageIndex || metadata.compactionId === latest.part.id;
+    if (!latest || i > latest.messageIndex || metadata.compactionId === latest.part.id) {
+      return getUsageContextTokens(metadata.usage);
+    }
 
-    if (!isUsageAfterCompaction) break;
-
-    return getUsageContextTokens(metadata.usage) + estimateMessagesTokens(messages.slice(i + 1));
+    break;
   }
 
-  if (!latest) {
-    return estimateMessagesTokens(messages);
-  }
-
-  const { messageIndex, partIndex, part } = latest;
-  const remainingParts = messages[messageIndex].parts.slice(partIndex + 1);
-
-  return (
-    (part.data.contextTokens ?? 0) +
-    remainingParts.reduce((sum, remainingPart) => sum + estimatePartTokens(remainingPart), 0) +
-    estimateMessagesTokens(messages.slice(messageIndex + 1))
-  );
+  return latest?.part.data.usage?.outputTokens ?? 0;
 }
 
 export function createCompactionChunk(

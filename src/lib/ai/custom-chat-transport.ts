@@ -28,12 +28,8 @@ import {
   type ChatMessageMetadata,
 } from "@/lib/ai/chat-usage";
 import {
-  type CompactionData,
-  type CompactionTrigger,
   createCompactionChunk,
-  estimateContextTokens,
-  estimateMessagesTokens,
-  estimateTextTokens,
+  getContextTokens,
   getCompactionThreshold,
   getMessagesAfterCompaction,
   getUsageContextTokens,
@@ -213,32 +209,21 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       return message;
     };
 
-    const compact = async ({
-      messagesToSummarize,
-      trigger,
-      retainedUserMessage,
-      writeChunk,
-    }: {
-      messagesToSummarize: ModelMessage[];
-      trigger: CompactionTrigger;
-      retainedUserMessage?: { message: UIMessage; modelMessages: ModelMessage[] };
-      writeChunk: (chunk: UIMessageChunk) => void;
-    }) => {
-      const compactionId = generateId();
-      const baseData: CompactionData = {
-        status: "compacting",
-        trigger,
-        retainedUserMessageId: retainedUserMessage?.message.id,
-      };
+    let activeCompactionId = existingCompaction?.id;
 
-      writeChunk(createCompactionChunk(compactionId, baseData));
+    const compact = async (
+      messagesToSummarize: ModelMessage[],
+      writeChunk: (chunk: UIMessageChunk) => void,
+    ) => {
+      const compactionId = generateId();
+      writeChunk(createCompactionChunk(compactionId, { status: "compacting" }));
 
       let result: Awaited<ReturnType<typeof summarizeConversation>>;
       try {
         result = await summarizeConversation({
           model,
           messages: messagesToSummarize,
-          hasRetainedUserMessage: retainedUserMessage !== undefined,
+          startsWithSummary: activeCompactionId !== undefined,
           abortSignal: options.abortSignal,
         });
       } catch (error) {
@@ -248,30 +233,21 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
 
         logger.error("Failed to compact conversation:", error);
         throw new Error(
-          `Couldn't compact the conversation: ${error instanceof Error ? error.message : String(error)}`,
+          `Couldn't compact the conversation: ${error instanceof Error ? error.message : String(error)}\n\nTry lowering the Auto-Compact threshold in the model config, or branch the chat from an earlier message.`,
           { cause: error },
         );
       }
 
-      const compactedMessages = withCompactionSummary(
-        result.summary,
-        retainedUserMessage?.modelMessages ?? [],
-      );
-
       writeChunk(
         createCompactionChunk(compactionId, {
-          ...baseData,
           status: "done",
           summary: result.summary,
           modelId: modelId ?? undefined,
           usage: result.usage,
-          contextTokens:
-            (result.usage.outputTokens ?? estimateTextTokens(result.summary)) +
-            (retainedUserMessage ? estimateMessagesTokens([retainedUserMessage.message]) : 0),
         }),
       );
 
-      return { compactionId, compactedMessages };
+      return { compactionId, summary: result.summary };
     };
 
     if ((options.body as { compact?: unknown } | undefined)?.compact === true) {
@@ -279,11 +255,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
         start: async (controller) => {
           controller.enqueue({ type: "start" });
           try {
-            await compact({
-              messagesToSummarize: messages,
-              trigger: "manual",
-              writeChunk: (chunk) => controller.enqueue(chunk),
-            });
+            await compact(messages, (chunk) => controller.enqueue(chunk));
             controller.enqueue({ type: "finish" });
           } catch (error) {
             if (!options.abortSignal?.aborted) {
@@ -295,19 +267,9 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       });
     }
 
-    const lastUserMessage = [...options.messages]
-      .reverse()
-      .find((message) => message.role === "user");
-    const retainedUserMessage = lastUserMessage
-      ? {
-          message: lastUserMessage,
-          modelMessages: await convertToModelMessages([lastUserMessage], { tools }),
-        }
-      : undefined;
     const compactionThreshold = getCompactionThreshold(modelConfig);
-    const initialContextTokens = estimateContextTokens(options.messages);
+    const initialContextTokens = getContextTokens(options.messages);
     const chunkInjector = new UIMessageChunkInjector();
-    let activeCompactionId = existingCompaction?.id;
     let lastCompactionStepNumber: number | undefined;
     let canAutoCompact = true;
 
@@ -336,19 +298,22 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
           ? getUsageContextTokens(lastStep.usage)
           : initialContextTokens;
 
+        const needsCompaction = shouldCompact({
+          contextTokens,
+          contextWindow,
+          threshold: compactionThreshold,
+        });
+
         if (
+          needsCompaction &&
           lastCompactionStepNumber !== undefined &&
-          stepNumber === lastCompactionStepNumber + 1 &&
-          shouldCompact({ contextTokens, contextWindow, threshold: compactionThreshold })
+          stepNumber === lastCompactionStepNumber + 1
         ) {
           canAutoCompact = false;
           logger.warn("Context is still above the compaction threshold after compacting");
         }
 
-        if (
-          !canAutoCompact ||
-          !shouldCompact({ contextTokens, contextWindow, threshold: compactionThreshold })
-        ) {
+        if (!needsCompaction || !canAutoCompact) {
           return undefined;
         }
 
@@ -356,17 +321,14 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
           `Compacting conversation at step ${stepNumber} (${contextTokens} / ${contextWindow} tokens)`,
         );
 
-        const { compactionId, compactedMessages } = await compact({
-          messagesToSummarize: stepMessages,
-          trigger: "auto",
-          retainedUserMessage,
-          writeChunk: (chunk) => chunkInjector.write(chunk),
-        });
+        const { compactionId, summary } = await compact(stepMessages, (chunk) =>
+          chunkInjector.write(chunk),
+        );
 
         activeCompactionId = compactionId;
         lastCompactionStepNumber = stepNumber;
 
-        return { messages: compactedMessages };
+        return { messages: withCompactionSummary(summary, []) };
       },
       onError: (error) => {
         logger.error("Error occurred in CustomChatTransport streamText:", error);
