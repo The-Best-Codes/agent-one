@@ -8,7 +8,7 @@ import { chatStorage } from "@/lib/storage/chat-storage";
 export const createSearchChatsTool = (config: SearchChatsToolConfig, context: ChatToolsContext) =>
   tool({
     description:
-      "Search the user's past conversations with you by keyword, or list the most recent conversations when no query is given. Each result includes the chat's ID and the length of its JSON transcript in characters (transcriptChars), so you can plan which ranges to read with the readChat tool. The conversation you are currently in is marked with isCurrent: true.",
+      "Search the user's past conversations with you by keyword, or list the most recent conversations when no query is given. Each result includes the chat's ID and how many messages it has (messageCount). The conversation you are currently in is marked with isCurrent: true.",
     needsApproval: config.requiresApproval,
     inputSchema: z.object({
       query: z
@@ -35,7 +35,7 @@ export const createSearchChatsTool = (config: SearchChatsToolConfig, context: Ch
 
       if (!trimmedQuery) {
         const chats = (await chatStorage.listChats("updated-at")).slice(0, maxResults);
-        const lengths = await chatStorage.getChatTranscriptLengths(chats.map((chat) => chat.id));
+        const messageCounts = await chatStorage.getChatMessageCounts(chats.map((chat) => chat.id));
         return {
           results: chats.map((chat) => ({
             chatId: chat.id,
@@ -43,14 +43,14 @@ export const createSearchChatsTool = (config: SearchChatsToolConfig, context: Ch
             lastMessageAt: chat.metadata.lastMessageAt
               ? new Date(chat.metadata.lastMessageAt).toISOString()
               : undefined,
-            transcriptChars: lengths.get(chat.id) ?? 0,
+            messageCount: messageCounts.get(chat.id) ?? 0,
             isCurrent: chat.id === context.currentChatId,
           })),
         };
       }
 
       const results = (await chatStorage.searchChats(trimmedQuery, rawSyntax)).slice(0, maxResults);
-      const lengths = await chatStorage.getChatTranscriptLengths(
+      const messageCounts = await chatStorage.getChatMessageCounts(
         results.map((result) => result.chatId),
       );
       return {
@@ -58,7 +58,7 @@ export const createSearchChatsTool = (config: SearchChatsToolConfig, context: Ch
           chatId: result.chatId,
           title: result.title,
           snippet: result.snippet.replace(/<\/?mark>/g, ""),
-          transcriptChars: lengths.get(result.chatId) ?? 0,
+          messageCount: messageCounts.get(result.chatId) ?? 0,
           isCurrent: result.chatId === context.currentChatId,
         })),
       };

@@ -238,28 +238,26 @@ export const chatStorage = {
   },
 
   async getChatMessages(id: string): Promise<UIMessage[] | null> {
-    const transcript = await chatStorage.getChatTranscript(id);
-    return transcript === null ? null : JSON.parse(transcript);
-  },
-
-  async getChatTranscript(id: string): Promise<string | null> {
     const d = await getDb();
     const rows = await d.select<{ messages: string }[]>(
       "SELECT messages FROM chat_messages WHERE id = $1",
       [id],
     );
-    return rows.length > 0 ? rows[0].messages : null;
+    if (rows.length === 0) return null;
+    return JSON.parse(rows[0].messages);
   },
 
-  async getChatTranscriptLengths(ids: string[]): Promise<Map<string, number>> {
+  async getChatMessageCounts(ids: string[]): Promise<Map<string, number>> {
     if (ids.length === 0) return new Map();
     const d = await getDb();
     const placeholders = ids.map((_, i) => `$${i + 1}`).join(", ");
-    const rows = await d.select<{ id: string; length: number }[]>(
-      `SELECT id, length(messages) AS length FROM chat_messages WHERE id IN (${placeholders})`,
+    const rows = await d.select<{ id: string; count: number | null }[]>(
+      `SELECT id, CASE WHEN json_valid(messages) THEN json_array_length(messages) END AS count
+       FROM chat_messages
+       WHERE id IN (${placeholders})`,
       ids,
     );
-    return new Map(rows.map((row) => [row.id, row.length]));
+    return new Map(rows.map((row) => [row.id, row.count ?? 0]));
   },
 
   async setChatMessages(id: string, messages: UIMessage[]): Promise<void> {
