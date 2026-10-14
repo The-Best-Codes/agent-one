@@ -14,14 +14,17 @@
 - [SDKs](https://modelcontextprotocol.io/docs/2026-07-28/sdk.md): Official SDKs for building with Model Context Protocol
 - [Understanding Authorization in MCP](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/authorization.md): Learn how to implement secure authorization for MCP servers using OAuth 2.1 to protect sensitive resources and operations
 - [Security Best Practices](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices.md): Security considerations, attack vectors, and best practices for MCP implementations
+- [Local Server Security](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/local-server-security.md): Practical defaults for running MCP servers safely on your own machine.
 - [MCP Inspector](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector.md): Interactive developer tooling for testing and debugging MCP servers, in the browser, on the command line, and in the terminal
 - [Web client](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/web.md): A tab-by-tab walkthrough of the graphical MCP Inspector
 - [CLI client](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/cli.md): Scripting the MCP Inspector: methods, output formats, exit codes, and CI recipes
 - [TUI client](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/tui.md): The terminal MCP Inspector: navigation, tabs, and keyboard reference
+- [mcpdo connection client](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/mcpdo.md): Connect to an MCP server once, then run many commands against that named connection
 - [Configuration and flags](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/configuration.md): Catalog vs. config files, which client owns which flag, and every environment variable
 - [Authorization](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/authorization.md): How the MCP Inspector performs OAuth, re-authorizes mid-session, and shares tokens between its clients
 - [Protocol eras](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/protocol-eras.md): How the Inspector negotiates legacy vs. modern MCP, and how every feature is handled between protocol eras
-- [Recipes](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/recipes.md): Practical guides for transports, importing configs, reviewing MCP Apps, Docker, and network hosting
+- [Recipes](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/recipes.md): Practical guides for transports, importing configs, reviewing MCP Apps, Docker, network hosting, and persistent connections with mcpdo
+- [Security](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/security.md): The Inspector's threat model in one place, covering the web backend, Docker, secret storage, stdio servers, and the mcpdo daemon
 - [Debugging](https://modelcontextprotocol.io/docs/2026-07-28/tools/debugging.md): A comprehensive guide to debugging Model Context Protocol (MCP) integrations
 - [Example Servers](https://modelcontextprotocol.io/examples.md): A list of example servers and implementations
 - [What is the Model Context Protocol (MCP)?](https://modelcontextprotocol.io/docs/2025-11-25/getting-started/intro.md)
@@ -106,14 +109,17 @@
 - [SDKs](https://modelcontextprotocol.io/docs/draft/sdk.md): Official SDKs for building with Model Context Protocol
 - [Understanding Authorization in MCP](https://modelcontextprotocol.io/docs/draft/tutorials/security/authorization.md): Learn how to implement secure authorization for MCP servers using OAuth 2.1 to protect sensitive resources and operations
 - [Security Best Practices](https://modelcontextprotocol.io/docs/draft/tutorials/security/security_best_practices.md): Security considerations, attack vectors, and best practices for MCP implementations
+- [Local Server Security](https://modelcontextprotocol.io/docs/draft/tutorials/security/local-server-security.md): Practical defaults for running MCP servers safely on your own machine.
 - [MCP Inspector](https://modelcontextprotocol.io/docs/draft/tools/inspector.md): Interactive developer tooling for testing and debugging MCP servers, in the browser, on the command line, and in the terminal
 - [Web client](https://modelcontextprotocol.io/docs/draft/tools/inspector/web.md): A tab-by-tab walkthrough of the graphical MCP Inspector
 - [CLI client](https://modelcontextprotocol.io/docs/draft/tools/inspector/cli.md): Scripting the MCP Inspector: methods, output formats, exit codes, and CI recipes
 - [TUI client](https://modelcontextprotocol.io/docs/draft/tools/inspector/tui.md): The terminal MCP Inspector: navigation, tabs, and keyboard reference
+- [mcpdo connection client](https://modelcontextprotocol.io/docs/draft/tools/inspector/mcpdo.md): Connect to an MCP server once, then run many commands against that named connection
 - [Configuration and flags](https://modelcontextprotocol.io/docs/draft/tools/inspector/configuration.md): Catalog vs. config files, which client owns which flag, and every environment variable
 - [Authorization](https://modelcontextprotocol.io/docs/draft/tools/inspector/authorization.md): How the MCP Inspector performs OAuth, re-authorizes mid-session, and shares tokens between its clients
 - [Protocol eras](https://modelcontextprotocol.io/docs/draft/tools/inspector/protocol-eras.md): How the Inspector negotiates legacy vs. modern MCP, and how every feature is handled between protocol eras
-- [Recipes](https://modelcontextprotocol.io/docs/draft/tools/inspector/recipes.md): Practical guides for transports, importing configs, reviewing MCP Apps, Docker, and network hosting
+- [Recipes](https://modelcontextprotocol.io/docs/draft/tools/inspector/recipes.md): Practical guides for transports, importing configs, reviewing MCP Apps, Docker, network hosting, and persistent connections with mcpdo
+- [Security](https://modelcontextprotocol.io/docs/draft/tools/inspector/security.md): The Inspector's threat model in one place, covering the web backend, Docker, secret storage, stdio servers, and the mcpdo daemon
 - [Debugging](https://modelcontextprotocol.io/docs/draft/tools/debugging.md): A comprehensive guide to debugging Model Context Protocol (MCP) integrations
 - [Example Servers](https://modelcontextprotocol.io/examples.md): A list of example servers and implementations
 - [Specification](https://modelcontextprotocol.io/specification/2026-07-28/index.md)
@@ -304,6 +310,7 @@
 - [SEP-1865: MCP Apps - Interactive User Interfaces for MCP](https://modelcontextprotocol.io/seps/1865-mcp-apps-interactive-user-interfaces-for-mcp.md): MCP Apps - Interactive User Interfaces for MCP
 - [SEP-2085: Governance Succession and Amendment Procedures](https://modelcontextprotocol.io/seps/2085-governance-succession-and-amendment.md): Governance Succession and Amendment Procedures
 - [SEP-2106: Tools `inputSchema` & `outputSchema` Conform to JSON Schema 2020-12](https://modelcontextprotocol.io/seps/2106-json-schema-2020-12.md): Tools `inputSchema` & `outputSchema` Conform to JSON Schema 2020-12
+- [SEP-2127: MCP Server Cards - HTTP Server Discovery](https://modelcontextprotocol.io/seps/2127-mcp-server-cards.md): MCP Server Cards - HTTP Server Discovery
 - [SEP-2133: Extensions](https://modelcontextprotocol.io/seps/2133-extensions.md): Extensions
 - [SEP-2148: MCP Contributor Ladder](https://modelcontextprotocol.io/seps/2148-contributor-ladder.md): MCP Contributor Ladder
 - [SEP-2149: MCP Group Governance and Charter Template](https://modelcontextprotocol.io/seps/2149-working-group-charter-template.md): MCP Group Governance and Charter Template
@@ -337,9 +344,11 @@
 - [Agents Charter](https://modelcontextprotocol.io/community/working-groups/agents.md): Charter for the MCP Agents Working Group.
 - [File Uploads Charter](https://modelcontextprotocol.io/community/working-groups/file-uploads.md): Charter for the MCP File Uploads Working Group.
 - [Filesystems Charter](https://modelcontextprotocol.io/community/working-groups/filesystems.md): Charter for the MCP Filesystems Working Group.
+- [Governance Working Group Charter](https://modelcontextprotocol.io/community/working-groups/governance.md): Charter for the MCP Governance Working Group.
 - [Infrastructure Charter](https://modelcontextprotocol.io/community/working-groups/infrastructure.md): Charter for the MCP Infrastructure Working Group.
 - [Inspector V2 Working Group Charter](https://modelcontextprotocol.io/community/working-groups/inspector-v2.md): Charter for the Inspector V2 Working Group, a Working Group of the Model Context Protocol community.
 - [Interceptors Charter](https://modelcontextprotocol.io/community/working-groups/interceptors.md): Charter for the MCP Interceptors Working Group.
+- [Progressive Disclosure Charter](https://modelcontextprotocol.io/community/working-groups/progressive-disclosure.md): Charter for the MCP Progressive Disclosure Working Group.
 - [Registry Charter](https://modelcontextprotocol.io/community/working-groups/registry.md): Charter for the MCP Registry Working Group.
 - [SDK Working Group Charter](https://modelcontextprotocol.io/community/working-groups/sdk.md): Charter for the MCP SDK Working Group.
 - [Server Card Charter](https://modelcontextprotocol.io/community/working-groups/server-card.md): Charter for the MCP Server Card Working Group.
@@ -350,7 +359,6 @@
 - [Enterprise Interest Group Charter](https://modelcontextprotocol.io/community/interest-groups/enterprise.md): Charter for the MCP Enterprise Interest Group.
 - [Enterprise-Managed Authorization Charter](https://modelcontextprotocol.io/community/interest-groups/enterprise-managed-authorization.md): Charter for the MCP Enterprise-Managed Authorization Interest Group.
 - [Financial Services Charter](https://modelcontextprotocol.io/community/interest-groups/financial-services.md): Charter for the MCP Financial Services Interest Group.
-- [Primitive Grouping Charter](https://modelcontextprotocol.io/community/interest-groups/primitive-grouping.md): Charter for the MCP Primitive Grouping Interest Group.
 - [Scientific Computing Charter](https://modelcontextprotocol.io/community/interest-groups/scientific-computing.md): Charter for the MCP Scientific Computing Interest Group.
 - [Security Charter](https://modelcontextprotocol.io/community/interest-groups/security.md): Charter for the MCP Security Interest Group.
 - [Tool Annotations Charter](https://modelcontextprotocol.io/community/interest-groups/tool-annotations.md): Charter for the MCP Tool Annotations Interest Group.
