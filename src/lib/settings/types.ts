@@ -140,7 +140,9 @@ export type ToolId =
   | "listScheduledAgents"
   | "createScheduledAgent"
   | "updateScheduledAgent"
-  | "deleteScheduledAgent";
+  | "deleteScheduledAgent"
+  | "searchChats"
+  | "readChat";
 
 export interface DateTimeToolConfig {
   requiresApproval: boolean;
@@ -219,6 +221,17 @@ export interface ScheduledAgentToolConfig {
   requiresApproval: boolean;
 }
 
+export interface SearchChatsToolConfig {
+  requiresApproval: boolean;
+  defaultMaxResults: number;
+}
+
+export interface ReadChatToolConfig {
+  requiresApproval: boolean;
+  defaultMaxChars: number;
+  maxChars: number;
+}
+
 export interface ToolConfigs {
   dateTime: DateTimeToolConfig;
   waitNumberMilliseconds: WaitToolConfig;
@@ -239,4 +252,6 @@ export interface ToolConfigs {
   createScheduledAgent: ScheduledAgentToolConfig;
   updateScheduledAgent: ScheduledAgentToolConfig;
   deleteScheduledAgent: ScheduledAgentToolConfig;
+  searchChats: SearchChatsToolConfig;
+  readChat: ReadChatToolConfig;
 }

@@ -344,6 +344,49 @@ export function ToolSettingsDialog({
               />
             </div>
           ) : null}
+
+          {toolId === "searchChats" ? (
+            <ToolNumberField
+              id="searchChats-maxresults"
+              label="Default Max Results"
+              description="Chats returned per search."
+              value={configs.searchChats.defaultMaxResults}
+              min={1}
+              max={50}
+              defaultValue={defaults.searchChats.defaultMaxResults}
+              onChange={(defaultMaxResults) => onConfigChange("searchChats", { defaultMaxResults })}
+            />
+          ) : null}
+
+          {toolId === "readChat" ? (
+            <div className="grid gap-4 md:grid-cols-2">
+              <ToolNumberField
+                id="readChat-defaultmaxchars"
+                label="Default Read Length (chars)"
+                description="Characters of a chat read at a time, unless AgentOne asks for more or less."
+                value={configs.readChat.defaultMaxChars}
+                min={1000}
+                max={configs.readChat.maxChars}
+                defaultValue={defaults.readChat.defaultMaxChars}
+                onChange={(defaultMaxChars) => onConfigChange("readChat", { defaultMaxChars })}
+              />
+              <ToolNumberField
+                id="readChat-maxchars"
+                label="Max Read Length (chars)"
+                description="The most characters AgentOne can read from a chat at once."
+                value={configs.readChat.maxChars}
+                min={5000}
+                max={100000}
+                defaultValue={defaults.readChat.maxChars}
+                onChange={(maxChars) =>
+                  onConfigChange("readChat", {
+                    maxChars,
+                    defaultMaxChars: Math.min(configs.readChat.defaultMaxChars, maxChars),
+                  })
+                }
+              />
+            </div>
+          ) : null}
         </FieldGroup>
       </DialogContent>
     </Dialog>

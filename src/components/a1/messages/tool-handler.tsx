@@ -18,6 +18,8 @@ import { MessagePartToolGetUrlContent } from "./tools/tool-getUrlContent";
 import { MessagePartToolListScheduledAgents } from "./tools/tool-listScheduledAgents";
 import { MessagePartToolListSettings } from "./tools/tool-listSettings";
 import { MessagePartToolMemory } from "./tools/tool-memory";
+import { MessagePartToolReadChat } from "./tools/tool-readChat";
+import { MessagePartToolSearchChats } from "./tools/tool-searchChats";
 import { MessagePartToolSubAgent } from "./tools/tool-subAgent";
 import { MessagePartToolUpdateScheduledAgent } from "./tools/tool-updateScheduledAgent";
 import { MessagePartToolUpdateSetting } from "./tools/tool-updateSetting";
@@ -80,6 +82,10 @@ export const MessageToolHandler = memo(
         return <MessagePartToolUpdateScheduledAgent part={part} />;
       case "tool-deleteScheduledAgent":
         return <MessagePartToolDeleteScheduledAgent part={part} />;
+      case "tool-searchChats":
+        return <MessagePartToolSearchChats part={part} />;
+      case "tool-readChat":
+        return <MessagePartToolReadChat part={part} />;
       default:
         return <MessagePartToolCall part={part as ToolUIPart} />;
     }

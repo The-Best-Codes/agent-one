@@ -24,6 +24,8 @@ import {
   createDeleteScheduledAgentTool,
   createListScheduledAgentsTool,
   createUpdateScheduledAgentTool,
+  createReadChatTool,
+  createSearchChatsTool,
 } from "@/lib/ai/tools";
 import {
   abortMcpServerLoad,
@@ -36,6 +38,7 @@ import {
   prefixMcpToolNames,
 } from "@/lib/ai/tools/mcp";
 import { clearMcpOAuthCredentials, dismissMcpLoginToasts } from "@/lib/ai/tools/mcp/oauth";
+import type { ChatToolsContext } from "@/lib/ai/tools/readChat";
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom, mcpServersAtom } from "@/lib/jotai/mcp-atoms";
 import type { McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
@@ -52,6 +55,7 @@ export interface ToolsContextType {
   getTools: (options?: {
     subAgentContext?: SubAgentExecutionContext;
     toolBehavior?: ToolBehavior;
+    chatContext?: ChatToolsContext;
   }) => Promise<ToolSet>;
   isMcpLoading: boolean;
   mcpLoaded: boolean;
@@ -473,6 +477,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     async (options?: {
       subAgentContext?: SubAgentExecutionContext;
       toolBehavior?: ToolBehavior;
+      chatContext?: ChatToolsContext;
     }): Promise<ToolSet> => {
       const filteredStaticTools: ToolSet = {};
       const mergedEnabledTools = { ...DEFAULT_SETTINGS.ENABLED_TOOLS, ...enabledTools };
@@ -523,6 +528,8 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
           ...DEFAULT_SETTINGS.TOOL_CONFIGS.deleteScheduledAgent,
           ...toolConfigs.deleteScheduledAgent,
         },
+        searchChats: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.searchChats, ...toolConfigs.searchChats },
+        readChat: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.readChat, ...toolConfigs.readChat },
       };
 
       if (mergedEnabledTools.dateTime) {
@@ -599,6 +606,19 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       if (mergedEnabledTools.deleteScheduledAgent) {
         filteredStaticTools.deleteScheduledAgent = createDeleteScheduledAgentTool(
           mergedToolConfigs.deleteScheduledAgent,
+        );
+      }
+
+      if (mergedEnabledTools.searchChats) {
+        filteredStaticTools.searchChats = createSearchChatsTool(
+          mergedToolConfigs.searchChats,
+          options?.chatContext ?? {},
+        );
+      }
+      if (mergedEnabledTools.readChat) {
+        filteredStaticTools.readChat = createReadChatTool(
+          mergedToolConfigs.readChat,
+          options?.chatContext ?? {},
         );
       }
 

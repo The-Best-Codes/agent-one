@@ -18,3 +18,5 @@ export { createCreateScheduledAgentTool } from "./createScheduledAgent";
 export { createDeleteScheduledAgentTool } from "./deleteScheduledAgent";
 export { createListScheduledAgentsTool } from "./listScheduledAgents";
 export { createUpdateScheduledAgentTool } from "./updateScheduledAgent";
+export { createReadChatTool } from "./readChat";
+export { createSearchChatsTool } from "./searchChats";

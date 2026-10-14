@@ -104,6 +104,16 @@ export const TOOL_INFO: Record<ToolId, ToolInfo> = {
     description: "Permanently delete a scheduled agent",
     anchor: "delete-scheduled-agent",
   },
+  searchChats: {
+    name: "Search chats",
+    description: "Search and list your past conversations",
+    anchor: "search-chats",
+  },
+  readChat: {
+    name: "Read chat",
+    description: "Read the messages of a past conversation",
+    anchor: "read-chat",
+  },
 };
 
 export interface ToolGroup {
@@ -147,6 +157,11 @@ export const TOOL_GROUPS: ToolGroup[] = [
       "updateScheduledAgent",
       "deleteScheduledAgent",
     ],
+  },
+  {
+    title: "Chat History",
+    description: "Let AgentOne look through and read your past conversations.",
+    toolIds: ["searchChats", "readChat"],
   },
 ];
 

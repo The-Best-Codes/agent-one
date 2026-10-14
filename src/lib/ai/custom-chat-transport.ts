@@ -39,6 +39,7 @@ import {
   UIMessageChunkInjector,
   withCompactionSummary,
 } from "@/lib/ai/compaction";
+import type { ChatToolsContext } from "@/lib/ai/tools/readChat";
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
 import { getLogger } from "@/lib/logger";
 
@@ -55,6 +56,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   private getTools: (options?: {
     subAgentContext?: SubAgentExecutionContext;
     toolBehavior?: ToolBehavior;
+    chatContext?: ChatToolsContext;
   }) => Promise<ToolSet>;
   private getSystemPrompt: () => string;
   private getApiKeysLoadedPromise: () => Promise<void>;
@@ -68,6 +70,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     getTools: (options?: {
       subAgentContext?: SubAgentExecutionContext;
       toolBehavior?: ToolBehavior;
+      chatContext?: ChatToolsContext;
     }) => Promise<ToolSet>,
     getSystemPrompt: () => string,
     getApiKeysLoadedPromise: () => Promise<void>,
@@ -175,15 +178,18 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     const instructions = mcpAppContextInstructions
       ? `${systemPrompt}\n\n${mcpAppContextInstructions}`
       : systemPrompt;
+    const chatContext: ChatToolsContext = { currentChatId: options.chatId };
     const subAgentContext: SubAgentExecutionContext = {
       model: baseModel,
       modelConfig,
       systemPrompt,
       extractReasoningEnabled,
-      getTools: () => this.getTools({ subAgentContext, toolBehavior }),
+      getTools: () => this.getTools({ subAgentContext, toolBehavior, chatContext }),
     };
     const tools =
-      toolBehavior === "disable" ? {} : await this.getTools({ subAgentContext, toolBehavior });
+      toolBehavior === "disable"
+        ? {}
+        : await this.getTools({ subAgentContext, toolBehavior, chatContext });
 
     const { compaction: existingCompaction, messages: uncompactedMessages } =
       getMessagesAfterCompaction(options.messages);

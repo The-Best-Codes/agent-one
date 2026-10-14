@@ -238,13 +238,28 @@ export const chatStorage = {
   },
 
   async getChatMessages(id: string): Promise<UIMessage[] | null> {
+    const transcript = await chatStorage.getChatTranscript(id);
+    return transcript === null ? null : JSON.parse(transcript);
+  },
+
+  async getChatTranscript(id: string): Promise<string | null> {
     const d = await getDb();
     const rows = await d.select<{ messages: string }[]>(
       "SELECT messages FROM chat_messages WHERE id = $1",
       [id],
     );
-    if (rows.length === 0) return null;
-    return JSON.parse(rows[0].messages);
+    return rows.length > 0 ? rows[0].messages : null;
+  },
+
+  async getChatTranscriptLengths(ids: string[]): Promise<Map<string, number>> {
+    if (ids.length === 0) return new Map();
+    const d = await getDb();
+    const placeholders = ids.map((_, i) => `$${i + 1}`).join(", ");
+    const rows = await d.select<{ id: string; length: number }[]>(
+      `SELECT id, length(messages) AS length FROM chat_messages WHERE id IN (${placeholders})`,
+      ids,
+    );
+    return new Map(rows.map((row) => [row.id, row.length]));
   },
 
   async setChatMessages(id: string, messages: UIMessage[]): Promise<void> {
