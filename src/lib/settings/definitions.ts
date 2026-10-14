@@ -317,7 +317,7 @@ export const SETTINGS = {
     ai: "write",
     label: "Message Navigation Rail",
     description:
-      "Show message previews and navigation on the right side of chats. Always hidden on narrow screens.",
+      "Show message previews and navigation on the left side of chats. Always hidden on narrow screens.",
     default: true,
   }),
   SHOW_CHAT_STATUS_INDICATOR: toggle({
