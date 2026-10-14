@@ -175,7 +175,11 @@ const MessagePartsInternal = ({
   const content = (
     <>
       {renderedParts}
-      <ChatMessageLoading mode="inMessage" messageId={message.id} messageRole={message.role} />
+      <ChatMessageLoading
+        mode="inMessage"
+        isLastMessage={isLastMessage}
+        messageRole={message.role}
+      />
     </>
   );
 
@@ -185,8 +189,11 @@ const MessagePartsInternal = ({
 
   return (
     <MessageGroup
-      contentToCopy={getCopyContent()}
-      contentToSpeak={getTextToSpeechContent()}
+      getContentToCopy={getCopyContent}
+      getContentToSpeak={getTextToSpeechContent}
+      hasContentToSpeak={message.parts.some(
+        (part) => part.type === "text" && /\S/.test((part as TextUIPart).text),
+      )}
       messageRole={message.role}
       messageId={message.id}
       onEdit={

@@ -14,11 +14,11 @@ const logger = getLogger(import.meta.url);
 
 export function TtsButton({
   messageId,
-  text,
+  getText,
   className,
 }: {
   messageId: string;
-  text: string;
+  getText: () => string;
   className?: string;
 }) {
   const [ttsState, setTtsState] = useAtom(ttsPlaybackStateAtom);
@@ -46,6 +46,7 @@ export function TtsButton({
       return;
     }
 
+    const text = getText();
     if (!text.trim()) {
       return;
     }

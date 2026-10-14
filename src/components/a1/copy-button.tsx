@@ -11,7 +11,7 @@ const logger = getLogger(import.meta.url);
 type ButtonVariant = "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
 
 type CopyButtonProps = {
-  text: string;
+  text: string | (() => string);
   disabledDuration?: number;
   variants?: {
     idle: ButtonVariant;
@@ -34,7 +34,7 @@ export const CopyButton = ({
   const handleCopy = async () => {
     try {
       setCopyState("copying");
-      await writeText(text);
+      await writeText(typeof text === "function" ? text() : text);
       setCopyState("success");
       setTimeout(() => setCopyState("idle"), disabledDuration || 2000);
     } catch (error) {

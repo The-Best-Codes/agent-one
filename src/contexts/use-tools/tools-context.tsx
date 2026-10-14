@@ -1,6 +1,6 @@
 import type { Tool, ToolSet } from "ai";
 import { useAtom } from "jotai";
-import React, { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { ToolBehavior } from "@/hooks/ai/use-model-catalog";
 import {
@@ -623,9 +623,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     [enabledTools, toolConfigs],
   );
 
-  return (
-    <ToolsContext.Provider value={{ getTools, isMcpLoading, mcpLoaded, restartMcpServer }}>
-      {children}
-    </ToolsContext.Provider>
+  const value = useMemo(
+    () => ({ getTools, isMcpLoading, mcpLoaded, restartMcpServer }),
+    [getTools, isMcpLoading, mcpLoaded, restartMcpServer],
   );
+
+  return <ToolsContext.Provider value={value}>{children}</ToolsContext.Provider>;
 };

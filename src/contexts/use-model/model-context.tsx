@@ -59,9 +59,10 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
     [saveNewChatModelConfig],
   );
 
-  return (
-    <ModelContext.Provider value={{ currentModel, setModel, currentModelConfig, setModelConfig }}>
-      {children}
-    </ModelContext.Provider>
+  const value = useMemo(
+    () => ({ currentModel, setModel, currentModelConfig, setModelConfig }),
+    [currentModel, setModel, currentModelConfig, setModelConfig],
   );
+
+  return <ModelContext.Provider value={value}>{children}</ModelContext.Provider>;
 };

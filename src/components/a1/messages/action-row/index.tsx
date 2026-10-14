@@ -18,15 +18,17 @@ import { RetryButton } from "./retry-button";
 import { TtsButton } from "./tts-button";
 
 export const MessageActionRow = ({
-  contentToCopy,
-  contentToSpeak,
+  getContentToCopy,
+  getContentToSpeak,
+  hasContentToSpeak,
   messageRole,
   messageId,
   onEdit,
   onBranch,
 }: {
-  contentToCopy: string;
-  contentToSpeak: string;
+  getContentToCopy: () => string;
+  getContentToSpeak: () => string;
+  hasContentToSpeak: boolean;
   messageRole: UIMessage["role"];
   messageId: UIMessage["id"];
   onEdit?: () => void;
@@ -59,7 +61,7 @@ export const MessageActionRow = ({
                   success: "outline",
                   error: "outline",
                 }}
-                text={contentToCopy}
+                text={getContentToCopy}
                 size="icon-sm"
               />
             </div>
@@ -67,8 +69,8 @@ export const MessageActionRow = ({
           <AdaptiveTooltipContent side="bottom">Copy message</AdaptiveTooltipContent>
         </AdaptiveTooltip>
 
-        {messageRole === "assistant" && contentToSpeak.trim() ? (
-          <TtsAction messageId={messageId} text={contentToSpeak} />
+        {messageRole === "assistant" && hasContentToSpeak ? (
+          <TtsAction messageId={messageId} getText={getContentToSpeak} />
         ) : null}
 
         {onBranch && messageRole === "assistant" && (
@@ -106,7 +108,7 @@ export const MessageActionRow = ({
   );
 };
 
-function TtsAction({ messageId, text }: { messageId: string; text: string }) {
+function TtsAction({ messageId, getText }: { messageId: string; getText: () => string }) {
   const rawTtsSettings = useAtomValue(settingAtoms.TTS);
   const ttsSettings = normalizeTtsSettings(rawTtsSettings);
   const apiKeys = {
@@ -124,7 +126,7 @@ function TtsAction({ messageId, text }: { messageId: string; text: string }) {
     <AdaptiveTooltip>
       <AdaptiveTooltipTrigger asChild>
         <div>
-          <TtsButton messageId={messageId} text={text} className="size-6" />
+          <TtsButton messageId={messageId} getText={getText} className="size-6" />
         </div>
       </AdaptiveTooltipTrigger>
       <AdaptiveTooltipContent side="bottom">Read aloud</AdaptiveTooltipContent>

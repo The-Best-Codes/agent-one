@@ -22,56 +22,59 @@ const LoadingIndicator = ({
   );
 };
 
-export const ChatMessageLoading = ({
-  mode = "inLayout",
-  messageId,
+const InMessageLoading = ({
+  isLastMessage,
   messageRole,
 }: {
-  mode?: "inLayout" | "inMessage";
-  messageId?: string;
+  isLastMessage?: boolean;
   messageRole?: UIMessage["role"];
 }) => {
+  const { status } = useChatStatus();
+  const { isApiKeysLoading } = useApiKeys();
+  const { isMcpLoading } = useTools();
+
+  if (!isLastMessage || messageRole !== "assistant") {
+    return null;
+  }
+
+  if (status === "streaming" || status === "submitted") {
+    return <LoadingIndicator isApiKeysLoading={isApiKeysLoading} isMcpLoading={isMcpLoading} />;
+  }
+
+  return null;
+};
+
+const InLayoutLoading = () => {
   const { status } = useChatStatus();
   const messages = useChatMessages();
   const { isApiKeysLoading } = useApiKeys();
   const { isMcpLoading } = useTools();
 
   const lastOverallMessage = messages[messages.length - 1];
-  const isLatestMessageOverall = lastOverallMessage?.id === messageId;
 
-  if (mode === "inMessage") {
-    if (!isLatestMessageOverall || messageRole !== "assistant") {
-      return null;
-    }
-
-    if (status === "streaming") {
-      return <LoadingIndicator isApiKeysLoading={isApiKeysLoading} isMcpLoading={isMcpLoading} />;
-    }
-
-    if (status === "submitted" && lastOverallMessage.role === "assistant") {
-      return <LoadingIndicator isApiKeysLoading={isApiKeysLoading} isMcpLoading={isMcpLoading} />;
-    }
-
-    return null;
-  }
-
-  if (mode === "inLayout") {
-    if (status === "streaming") {
-      return null;
-    }
-
-    if (status === "submitted") {
-      if (!lastOverallMessage || lastOverallMessage.role === "user") {
-        return (
-          <div className="justify-end p-2">
-            <LoadingIndicator isApiKeysLoading={isApiKeysLoading} isMcpLoading={isMcpLoading} />
-          </div>
-        );
-      }
-
-      return null;
-    }
+  if (status === "submitted" && (!lastOverallMessage || lastOverallMessage.role === "user")) {
+    return (
+      <div className="justify-end p-2">
+        <LoadingIndicator isApiKeysLoading={isApiKeysLoading} isMcpLoading={isMcpLoading} />
+      </div>
+    );
   }
 
   return null;
+};
+
+export const ChatMessageLoading = ({
+  mode = "inLayout",
+  isLastMessage,
+  messageRole,
+}: {
+  mode?: "inLayout" | "inMessage";
+  isLastMessage?: boolean;
+  messageRole?: UIMessage["role"];
+}) => {
+  if (mode === "inMessage") {
+    return <InMessageLoading isLastMessage={isLastMessage} messageRole={messageRole} />;
+  }
+
+  return <InLayoutLoading />;
 };
