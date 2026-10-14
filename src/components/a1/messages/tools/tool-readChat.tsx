@@ -1,12 +1,15 @@
 import { IconCircleCheck, IconCircleX, IconMessages, IconX } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
+import { useAtomValue } from "jotai";
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
+import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
+import { chatIdsAtom } from "@/lib/jotai/atoms";
 
 import { ToolErrorAccordion } from "./tool-error-accordion";
 
@@ -23,6 +26,28 @@ interface ReadChatOutput {
   transcriptChars?: number;
 }
 
+const ReadChatApprovalTarget = ({ chatId }: { chatId?: string }) => {
+  const { id: activeChatId } = useParams<{ id: string }>();
+  const chatIds = useAtomValue(chatIdsAtom);
+  const { loadChatMetadata } = usePersistence();
+
+  if (!chatId) return <span>AgentOne wants to read a past chat</span>;
+  if (chatId === activeChatId) return <span>AgentOne wants to read this chat</span>;
+  if (!chatIds.includes(chatId))
+    return (
+      <span className="max-w-2xl truncate">{`AgentOne wants to read unknown chat "${chatId}"`}</span>
+    );
+
+  return (
+    <span className="flex max-w-2xl min-w-0 gap-1">
+      <span className="shrink-0">AgentOne wants to read</span>
+      <Link to={`/chat/${chatId}`} className="truncate hover:underline">
+        {loadChatMetadata(chatId).title}
+      </Link>
+    </span>
+  );
+};
+
 export const MessagePartToolReadChat = ({ part }: { part: ToolUIPart }) => {
   const callId = part.toolCallId;
   const input = part.input as ReadChatInput | undefined;
@@ -35,7 +60,7 @@ export const MessagePartToolReadChat = ({ part }: { part: ToolUIPart }) => {
         <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1 text-sm font-bold">
             <IconMessages className="text-foreground size-4 shrink-0" />
-            <span>AgentOne wants to read a past chat</span>
+            <ReadChatApprovalTarget chatId={input?.chatId} />
           </div>
           <div className="flex items-center justify-end gap-2">
             <Button
