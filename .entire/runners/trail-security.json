@@ -1,0 +1,37 @@
+{
+  "id": "trail-security",
+  "display_name": "Security Review",
+  "enabled": true,
+  "scope": "trail",
+  "runtime": {
+    "kind": "prompt_runner",
+    "agent": "claude",
+    "timeout_ms": 300000,
+    "sandbox": {
+      "base_template": "claude",
+      "repo_token": "read"
+    }
+  },
+  "automation": {
+    "kind": "trail_prompt"
+  },
+  "prompt": {
+    "template": "You are a security risk evaluator for AgentOne, a production Tauri v2 desktop AI agent app (React/TypeScript frontend in src/, Rust backend in src-tauri/) with streaming AI SDK chats, tool calls with approvals, subagents, shell command execution, MCP extensions, web search/fetch via hidden webviews, SQLite persistence, keychain-stored API keys, and settings synced across devices. Analyze the changes on branch \"{{branch}}\" compared to \"{{base_branch}}\".\n\nRun `git diff origin/{{base_branch}}...HEAD`, then score **security risk** from 0 to 100 (review adversarially; higher = more suspicious or insecure). Focus on: API keys, OAuth tokens, or other secrets leaking into logs (logs are written to disk), prompts, URLs, error messages, or synced settings; shell command execution or tool calls that can run without the user's approval; MCP server spawning, arguments, and OAuth flows; untrusted web page, tool output, or model output reaching the webview as HTML, being executed, or being treated as instructions; Tauri capability, permission, or IPC command exposure; file system access outside intended paths; and new network endpoints or dependencies.\n\nScore bands: 0-20 for changes with no security-relevant surface; 21-40 for small changes near sensitive code with safe handling; 41-60 for changes to approval, credential, IPC, or fetch paths that need careful review; 61-80 for likely secret exposure, weakened approvals, or unsafe handling of untrusted content; 81-100 for credential leaks, approval bypass, or arbitrary command or code execution.\n\nOutput ONLY this JSON object as the very last line of your response:\n\n{\"value\": <number 0-100>, \"rationale\": \"<1-2 sentence explanation>\"}"
+  },
+  "select": {
+    "trigger_types": [
+      "api",
+      "push"
+    ]
+  },
+  "output": {
+    "adapter": "last_json_line",
+    "result_type": "trail_monitor",
+    "trail_monitor": {
+      "key": "security",
+      "label": "Security",
+      "value_type": "percent",
+      "polarity": "lower_is_better"
+    }
+  }
+}
