@@ -338,3 +338,4 @@ dont
 Dont
 xhigh
 uncompacted
+defaultmaxchars
