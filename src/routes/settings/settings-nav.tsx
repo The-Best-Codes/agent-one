@@ -147,14 +147,14 @@ export default function SettingsNav({ activeIds, onNavigate, className }: Settin
             aria-hidden
             xmlns="http://www.w3.org/2000/svg"
             viewBox={`0 0 ${track.width} ${track.height}`}
-            className="pointer-events-none absolute start-0 top-0 transition-[clip-path] duration-200"
+            className="pointer-events-none absolute inset-s-0 top-0 transition-[clip-path]"
             style={{
               width: track.width,
               height: track.height,
               clipPath: `polygon(0 ${trackTop}px, 100% ${trackTop}px, 100% ${trackBottom}px, 0 ${trackBottom}px)`,
             }}
           >
-            <path d={track.d} className="stroke-primary" strokeWidth="1" fill="none" />
+            <path d={track.d} className="stroke-foreground" strokeWidth="1" fill="none" />
           </svg>
         )}
         {items.map((item, index) => (
@@ -195,7 +195,7 @@ function SettingsNavItem({ item, previous, next, active, onClick }: SettingsNavI
       data-active={active}
       aria-current={active ? "true" : undefined}
       onClick={onClick}
-      className="text-muted-foreground hover:text-accent-foreground focus-visible:text-accent-foreground data-[active=true]:text-primary relative py-1.5 text-start text-sm wrap-anywhere transition-colors outline-none last:pb-0 first-of-type:pt-0"
+      className="text-muted-foreground hover:text-accent-foreground focus-visible:text-accent-foreground data-[active=true]:text-foreground relative py-1.5 text-start text-sm wrap-anywhere transition-colors outline-none last:pb-0 first-of-type:pt-0"
       style={{ paddingInlineStart: getItemOffset(item.depth) }}
     >
       <svg
