@@ -499,7 +499,10 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const triggerContent = displayedModel ? (
     <>
       <div className="min-w-0 flex-1">
-        <div className="scrollbar-size-xs scroll-fade-x w-full overflow-x-auto" tabIndex={0}>
+        <div
+          className="scrollbar-size-xs scroll-fade-x w-full overflow-x-auto [--scroll-fade-reveal:--spacing(4)]"
+          tabIndex={0}
+        >
           <div className="w-full text-left whitespace-nowrap">
             {displayedModel.providerId !== "agent-one" && (
               <span className="text-muted-foreground text-xs">{displayedModel.provider}/</span>
