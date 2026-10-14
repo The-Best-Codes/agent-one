@@ -11,7 +11,7 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { type ModelConfig, type ModelData } from "@/hooks/ai/use-model-catalog";
-import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
+import { TOOL_CANCELLED_BY_USER_SYMBOL, TOOL_INTERRUPTED_BY_ERROR_TEXT } from "@/lib/constants";
 import { chatIdsAtom, chatStatusIndicatorsAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
 
@@ -529,7 +529,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       wasBusyRef.current = true;
     }
 
-    if (wasBusyRef.current && statusValue.status === "ready") {
+    if (wasBusyRef.current && (statusValue.status === "ready" || statusValue.status === "error")) {
       wasBusyRef.current = false;
 
       const lastMessage = messages[messages.length - 1];
@@ -549,7 +549,10 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
             return {
               ...part,
               state: "output-error",
-              errorText: TOOL_CANCELLED_BY_USER_SYMBOL,
+              errorText:
+                statusValue.status === "error"
+                  ? TOOL_INTERRUPTED_BY_ERROR_TEXT
+                  : TOOL_CANCELLED_BY_USER_SYMBOL,
             } as UIToolInvocation<UITool>;
           }
           return part;
@@ -567,10 +570,6 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
           }
         }
       }
-    }
-
-    if (statusValue.status === "error") {
-      wasBusyRef.current = false;
     }
   }, [statusValue.status, messages, setMessages]);
 
