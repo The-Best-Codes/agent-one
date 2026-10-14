@@ -223,7 +223,7 @@ export async function summarizeConversation({
     throw new Error("The model returned an empty summary.");
   }
 
-  return { summary, usage: result.totalUsage };
+  return { summary, usage: result.usage };
 }
 
 export function estimateTextTokens(text: string) {
