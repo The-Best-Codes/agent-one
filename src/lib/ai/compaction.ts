@@ -37,18 +37,20 @@ interface CompactionLocation {
 }
 
 const SUMMARY_INSTRUCTIONS =
-  "You are summarizing a conversation between a user and an AI assistant so that the assistant can continue the work with a fresh context window. The summary will replace the conversation history, so it must contain everything needed to continue seamlessly.";
+  "You are summarizing a conversation between a user and an AI assistant so that the assistant can continue the work with a fresh context window. The summary will replace the conversation history, so it must contain everything needed to continue seamlessly. You can only see the messages, not the assistant's system prompt or tools, so the assistant may know things that never appear in the conversation (such as the user's name). Record what happened without judging it.";
 
-const SUMMARY_REQUEST = `Summarize the conversation so far. Include:
-1. The user's goals and requests, quoting exact wording where it matters.
-2. Decisions, constraints, and preferences the user expressed.
-3. Important facts, results, file names, code, URLs, and tool outputs that will still be needed.
-4. Work that has been completed.
-5. Work that is in progress and what should happen next.
+const SUMMARY_REQUEST = `Summarize the conversation so far. Cover:
+- The user's goals and requests, quoting exact wording where it matters.
+- Decisions, constraints, and preferences the user expressed.
+- Important facts, results, file names, code, URLs, and tool outputs that will still be needed.
+- Work that has been completed.
+- Work that is in progress and what should happen next.
 
-Write the summary directly with no preamble. Do not continue the conversation or answer any requests, only write the summary.`;
+Leave out anything that doesn't apply instead of saying it's empty. Don't comment on whether the assistant was right or where its information came from. Write the summary directly with no preamble. Do not continue the conversation or answer any requests, only write the summary.`;
 
-const LATEST_USER_MESSAGE_LABEL = "This is the user's most recent message:";
+const NEW_USER_MESSAGE_START =
+  "<new_user_message>\nThe user just sent this message and it hasn't been answered yet. Include it in the summary as the current request:";
+const NEW_USER_MESSAGE_END = "</new_user_message>";
 
 export function isCompactionPart(part: UIMessage["parts"][number]): part is CompactionPart {
   return (
@@ -166,33 +168,34 @@ export function withCompactionSummary(summary: string, messages: ModelMessage[])
   return [{ role: "user", content: [summaryPart] }, ...messages];
 }
 
-function labelLatestUserMessage(
-  messages: ModelMessage[],
-  startsWithSummary: boolean,
-): ModelMessage[] {
-  for (let i = messages.length - 1; i >= 0; i--) {
-    const message = messages[i];
-    if (message.role !== "user") continue;
+function labelNewUserMessage(messages: ModelMessage[], startsWithSummary: boolean): ModelMessage[] {
+  const lastIndex = messages.length - 1;
+  const lastMessage = messages[lastIndex];
 
-    const parts = toUserContentParts(message.content);
-    const summaryParts = i === 0 && startsWithSummary ? parts.slice(0, 1) : [];
-    const userParts = parts.slice(summaryParts.length);
-
-    if (userParts.length === 0) {
-      return messages;
-    }
-
-    return [
-      ...messages.slice(0, i),
-      {
-        ...message,
-        content: [...summaryParts, { type: "text", text: LATEST_USER_MESSAGE_LABEL }, ...userParts],
-      },
-      ...messages.slice(i + 1),
-    ];
+  if (lastMessage?.role !== "user") {
+    return messages;
   }
 
-  return messages;
+  const parts = toUserContentParts(lastMessage.content);
+  const summaryParts = lastIndex === 0 && startsWithSummary ? parts.slice(0, 1) : [];
+  const userParts = parts.slice(summaryParts.length);
+
+  if (userParts.length === 0) {
+    return messages;
+  }
+
+  return [
+    ...messages.slice(0, lastIndex),
+    {
+      ...lastMessage,
+      content: [
+        ...summaryParts,
+        { type: "text", text: NEW_USER_MESSAGE_START },
+        ...userParts,
+        { type: "text", text: NEW_USER_MESSAGE_END },
+      ],
+    },
+  ];
 }
 
 export async function summarizeConversation({
@@ -207,7 +210,7 @@ export async function summarizeConversation({
   abortSignal?: AbortSignal;
 }): Promise<{ summary: string; usage: LanguageModelUsage }> {
   const prunedMessages = pruneMessages({
-    messages: labelLatestUserMessage(messages, startsWithSummary),
+    messages: labelNewUserMessage(messages, startsWithSummary),
     reasoning: "all",
     emptyMessages: "remove",
   });
