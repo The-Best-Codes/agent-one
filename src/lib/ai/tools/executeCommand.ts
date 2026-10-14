@@ -59,6 +59,18 @@ const updateLiveState = (
   emitLiveState(toolCallId);
 };
 
+const pruneLiveState = (toolCallId: string) => {
+  const state = getLiveState(toolCallId);
+  if (
+    state?.status === "completed" &&
+    !state.skipRequested &&
+    !state.stopRequested &&
+    !executeCommandListenersMap.has(toolCallId)
+  ) {
+    executeCommandLiveStateMap.delete(toolCallId);
+  }
+};
+
 export const getExecuteCommandLiveState = (toolCallId: string) => getLiveState(toolCallId);
 
 export const subscribeExecuteCommandLiveState = (toolCallId: string, listener: () => void) => {
@@ -72,6 +84,7 @@ export const subscribeExecuteCommandLiveState = (toolCallId: string, listener: (
     currentListeners.delete(listener);
     if (currentListeners.size === 0) {
       executeCommandListenersMap.delete(toolCallId);
+      pruneLiveState(toolCallId);
     }
   };
 };
@@ -265,6 +278,7 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
             signal,
             timedOut,
           }));
+          pruneLiveState(toolCallId);
           clearTimeout(timeoutId);
           executeCommandKillMap.delete(toolCallId);
           executeCommandWakeMap.delete(toolCallId);

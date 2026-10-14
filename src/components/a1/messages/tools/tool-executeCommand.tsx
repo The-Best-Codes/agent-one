@@ -9,7 +9,7 @@ import {
 } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { AnsiHtml } from "fancy-ansi/react";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import {
   AdaptiveTooltip,
@@ -169,8 +169,12 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
   const [showLongRunningStop, setShowLongRunningStop] = useState(false);
 
+  const subscribeLiveState = useCallback(
+    (listener: () => void) => subscribeExecuteCommandLiveState(callId, listener),
+    [callId],
+  );
   const liveState = useSyncExternalStore(
-    (listener) => subscribeExecuteCommandLiveState(callId, listener),
+    subscribeLiveState,
     () => getExecuteCommandLiveState(callId),
     () => getExecuteCommandLiveState(callId),
   );

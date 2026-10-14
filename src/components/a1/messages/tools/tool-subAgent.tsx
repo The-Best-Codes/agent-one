@@ -53,8 +53,12 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
   const [isAccordionOpen, setIsAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
+  const subscribeLiveState = useCallback(
+    (listener: () => void) => subscribeSubAgentLiveState(callId, listener),
+    [callId],
+  );
   const liveState = useSyncExternalStore(
-    (listener) => subscribeSubAgentLiveState(callId, listener),
+    subscribeLiveState,
     () => getSubAgentLiveState(callId),
     () => getSubAgentLiveState(callId),
   );

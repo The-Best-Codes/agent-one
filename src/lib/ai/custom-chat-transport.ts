@@ -166,7 +166,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
 
     const stopWhenCondition: StopCondition<ToolSet> =
       modelConfig.maxSteps === undefined ? () => false : isStepCount(modelConfig.maxSteps);
-    const messages = await convertToModelMessages(options.messages);
+    const messages = await convertToModelMessages(options.messages, { tools });
 
     const result = streamText({
       model,
