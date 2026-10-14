@@ -96,7 +96,10 @@ export function AppUpdates() {
         return {
           icon: <IconDownload className="text-foreground size-5" />,
           title: "Downloading update...",
-          description: `${Math.round(updateProgress)}% complete`,
+          description:
+            updateProgress === null
+              ? "Please wait while the update downloads"
+              : `${Math.round(updateProgress)}% complete`,
         };
       case "installing":
         return {
@@ -201,8 +204,10 @@ export function AppUpdates() {
 
         {(updateStatus === "downloading" || updateStatus === "installing") && (
           <Progress
-            value={updateProgress}
-            indeterminate={!(updateProgress >= 1 && updateProgress <= 99)}
+            value={updateProgress ?? 0}
+            indeterminate={
+              updateProgress === null || !(updateProgress >= 1 && updateProgress <= 99)
+            }
           />
         )}
       </div>
