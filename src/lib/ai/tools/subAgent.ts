@@ -2,12 +2,12 @@ import type { Context, Tool, ToolExecutionOptions } from "@ai-sdk/provider-utils
 import {
   convertToModelMessages,
   extractReasoningMiddleware,
+  generateId,
   type LanguageModel,
   readUIMessageStream,
   isStepCount,
   streamText,
   toUIMessageStream,
-  type ModelMessage,
   type ToolSet,
   type UIMessage,
   wrapLanguageModel,
@@ -275,7 +275,9 @@ async function* streamSubAgentRun({
   context: SubAgentExecutionContext;
 }): AsyncGenerator<SubAgentOutput, UIMessage | undefined, undefined> {
   const tools = excludeSubAgentTool(await context.getTools());
-  const subAgentMessages: UIMessage[] = [];
+  const subAgentMessages: UIMessage[] = [
+    { id: generateId(), role: "user", parts: [{ type: "text", text: task }] },
+  ];
   let finalMessage: UIMessage | undefined;
 
   const wrappedModel =
@@ -289,13 +291,11 @@ async function* streamSubAgentRun({
   while (true) {
     abortSignal?.throwIfAborted();
 
-    const promptMessages =
-      subAgentMessages.length === 0
-        ? ([{ role: "user", content: [{ type: "text", text: task }] }] satisfies ModelMessage[])
-        : await convertToModelMessages(subAgentMessages, {
-            tools,
-            ignoreIncompleteToolCalls: true,
-          });
+    const promptMessages = await convertToModelMessages(subAgentMessages, {
+      tools,
+      ignoreIncompleteToolCalls: true,
+    });
+    const lastMessage = subAgentMessages.at(-1);
 
     const result = streamText({
       model: wrappedModel,
@@ -319,7 +319,7 @@ async function* streamSubAgentRun({
 
     for await (const message of readUIMessageStream({
       stream: toUIMessageStream({ stream: result.stream, tools }),
-      message: subAgentMessages.at(-1),
+      message: lastMessage?.role === "assistant" ? lastMessage : undefined,
     })) {
       latestMessage = cloneMessage(message);
       setLiveState(toolCallId, {
@@ -338,7 +338,7 @@ async function* streamSubAgentRun({
       break;
     }
 
-    if (subAgentMessages.length > 0 && subAgentMessages.at(-1)?.id === latestMessage.id) {
+    if (lastMessage?.role === "assistant" && lastMessage.id === latestMessage.id) {
       subAgentMessages[subAgentMessages.length - 1] = latestMessage;
     } else {
       subAgentMessages.push(latestMessage);
