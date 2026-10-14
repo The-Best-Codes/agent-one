@@ -8,6 +8,7 @@ If you are an AI agent, please follow the instructions in this file to ensure yo
 - Run ESLint: `bun run lint`
 - Run ESLint with fix: `bun run lint -- --fix` (run this to fix import order issues)
 - Format project (oxfmt & cargo fmt): `bun run fmt`
+- Run oxlint: `bunx oxlint --type-aware --type-check`
 - Run Rust check: `cd src-tauri && cargo check`
 - Run Rust clippy: `cd src-tauri && cargo clippy` (preferred over `cargo check`)
 - Install dependencies: `bun install *` or `cargo add *`
@@ -33,7 +34,7 @@ If you are an AI agent, please follow the instructions in this file to ensure yo
 ## Code Style
 
 - As an AI, you should only add comments to the code when absolutely necessary, as code should be self-explanatory. You should confirm before removing TODOs, TODO comments, or other important comments. The developer's job is to touch up your code, including writing comments, not your job.
-- **This is a production app.** Ensure backward compatibility between versions when applicable - meaning, consider whether any migrations are needed so that the app will correctly handle outdated data from older versions.
+- **This is a production app.** Ensure backward compatibility between versions when applicable - meaning, consider whether any migrations are needed so that the app will correctly handle outdated data from older versions. If you change a feature that hasn't been released yet, however, no backward compat is needed. Confirm before skipping backward compat by viewing the last release and other relevant context.
 - Any time you use the Tauri SQL plugin, if you are creating new tables in the TypeScript codebase, you're almost certainly doing it wrong. You can create and apply migrations in `src-tauri/migrations/` (and update `src-tauri/lib.rs`) instead.
 - Follow the project `PHILOSOPHY.md`.
 - Never use a subagent (or a task tool / explore agent) unless the user explicitly told you to use one. If you **must** use a subagent, pause and ask the user if it's okay.
