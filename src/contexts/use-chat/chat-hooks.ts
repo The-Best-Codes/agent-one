@@ -30,6 +30,7 @@ export type ChatFunctionsContextType = Pick<
   | "stop"
   | "setMessages"
 > & {
+  compact: () => Promise<void>;
   updateMcpAppModelContext: (viewId: string, context: unknown) => void;
   programmaticNewChat: (params: {
     message: string;

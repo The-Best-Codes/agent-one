@@ -32,6 +32,7 @@ export const ChatInstance = memo(
     modelId,
     providerName,
     modelConfig,
+    contextWindow,
     initialMessages,
     onInstanceUpdate,
     onStatusChange,
@@ -41,6 +42,7 @@ export const ChatInstance = memo(
     modelId: string;
     providerName: string;
     modelConfig: ModelConfig;
+    contextWindow: number | undefined;
     initialMessages: UIMessage[];
     onInstanceUpdate: (id: string, instance: ChatInstanceHelpers) => void;
     onStatusChange: (
@@ -80,6 +82,7 @@ export const ChatInstance = memo(
       throttle: throttleValue,
       sendAutomaticallyWhen,
       onUserMessageSent,
+      contextWindow,
       onFinish: ({ isAbort }) => {
         if (isAbort) {
           suppressAutoSubmitAfterAbortRef.current = true;
@@ -235,6 +238,7 @@ export const ChatInstance = memo(
       prevProps.model === nextProps.model &&
       prevProps.modelId === nextProps.modelId &&
       prevProps.providerName === nextProps.providerName &&
+      prevProps.contextWindow === nextProps.contextWindow &&
       prevProps.initialMessages === nextProps.initialMessages &&
       prevProps.onInstanceUpdate === nextProps.onInstanceUpdate &&
       prevProps.onStatusChange === nextProps.onStatusChange &&

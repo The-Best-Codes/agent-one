@@ -77,6 +77,7 @@ export interface ModelConfig {
   seed?: number;
   toolBehavior?: ToolBehavior;
   reasoningEffort?: ReasoningEffort;
+  compactionThreshold?: number | "off";
 }
 
 export const DEFAULT_MODEL_CONFIG: ModelConfig = {
@@ -90,6 +91,7 @@ export const DEFAULT_MODEL_CONFIG: ModelConfig = {
   seed: undefined,
   toolBehavior: "default",
   reasoningEffort: undefined,
+  compactionThreshold: undefined,
 };
 
 export function getToolBehavior(modelConfig: ModelConfig): ToolBehavior {

@@ -16,6 +16,7 @@ const logger = getLogger(import.meta.url);
 type CustomChatOptions = Omit<ChatInit<UIMessage>, "transport"> &
   Pick<UseChatOptions<UIMessage>, "resume" | "throttle"> & {
     onUserMessageSent?: () => void;
+    contextWindow?: number;
   };
 
 function canResumeFromMessages(messages: UIMessage[]) {
@@ -90,7 +91,11 @@ export function useChat(
     logger.verbose("Updated chat transport with new API keys loaded promise");
   }, [getApiKeysLoadedPromise, transport]);
 
-  const { onUserMessageSent, ...sdkOptions } = options ?? {};
+  const { onUserMessageSent, contextWindow, ...sdkOptions } = options ?? {};
+
+  useEffect(() => {
+    transport.updateContextWindow(contextWindow);
+  }, [contextWindow, transport]);
 
   const {
     addToolApprovalResponse,
@@ -118,8 +123,17 @@ export function useChat(
     transport.updateModel(model, providerName);
     transport.updateModelId(modelId);
     transport.updateModelConfig(modelConfig);
+    transport.updateContextWindow(contextWindow);
     transport.updateExtractReasoningEnabled(extractReasoningEnabled);
-  }, [model, modelId, providerName, modelConfig, extractReasoningEnabled, transport]);
+  }, [
+    model,
+    modelId,
+    providerName,
+    modelConfig,
+    contextWindow,
+    extractReasoningEnabled,
+    transport,
+  ]);
 
   const sendMessage = useCallback<typeof sendMessageSdk>(
     async (message, sendOptions) => {
@@ -154,6 +168,11 @@ export function useChat(
     [resumeStreamSdk, sendMessageSdk, syncTransport],
   );
 
+  const compact = useCallback(async () => {
+    syncTransport();
+    return sendMessageSdk(undefined, { body: { compact: true } });
+  }, [sendMessageSdk, syncTransport]);
+
   const updateMcpAppModelContext = useCallback(
     (viewId: string, context: unknown) => {
       transport.updateMcpAppModelContext(viewId, context);
@@ -165,6 +184,7 @@ export function useChat(
     addToolApprovalResponse,
     addToolOutput,
     clearError,
+    compact,
     error,
     messages,
     regenerate,

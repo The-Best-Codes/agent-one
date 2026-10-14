@@ -1,6 +1,7 @@
 import type { LanguageModelUsage, UIMessage } from "ai";
 import { getDefaultStore } from "jotai";
 
+import { isCompactionPart } from "@/lib/ai/compaction";
 import { modelDirectoryDataAtom, type ModelRecord } from "@/lib/ai/models/model-directory";
 import { PROVIDER_IDS } from "@/lib/ai/providers/registry";
 
@@ -36,6 +37,7 @@ export interface ChatMessageMetadata {
   modelId?: string;
   usage?: MessageTokenUsage;
   totalUsage?: MessageTokenUsage;
+  compactionId?: string;
 }
 
 function createEmptyUsage(): Required<
@@ -215,6 +217,30 @@ export function calculateChatUsageFromMessages(messages: UIMessage[]): ChatUsage
   for (const message of messages) {
     if (message.role !== "assistant") {
       continue;
+    }
+
+    for (const part of message.parts) {
+      if (!isCompactionPart(part) || !part.data.usage) continue;
+
+      const compactionUsage = summarizeUsage(part.data.usage);
+      inputTokens += compactionUsage.inputTokens;
+      outputTokens += compactionUsage.outputTokens;
+      totalTokens += compactionUsage.totalTokens;
+      cacheReadTokens += compactionUsage.cacheReadTokens;
+      cacheWriteTokens += compactionUsage.cacheWriteTokens;
+      reasoningTokens += compactionUsage.reasoningTokens;
+
+      const compactionCost = calculateMessageCostFromMetadata({
+        modelId: part.data.modelId,
+        totalUsage: part.data.usage,
+      });
+      if (compactionCost === null) {
+        if (compactionUsage.totalTokens > 0) {
+          hasUnknownCost = true;
+        }
+      } else {
+        totalCostUsd += compactionCost;
+      }
     }
 
     const metadata = message.metadata;
