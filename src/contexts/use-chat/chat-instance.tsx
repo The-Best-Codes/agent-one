@@ -78,11 +78,10 @@ export const ChatInstance = memo(
       markChatMessageSent(chatId);
     }, [chatId, markChatMessageSent]);
 
-    const chat = useChat(model, modelId, providerName, modelConfig, {
+    const chat = useChat(model, modelId, providerName, modelConfig, contextWindow, {
       throttle: throttleValue,
       sendAutomaticallyWhen,
       onUserMessageSent,
-      contextWindow,
       onFinish: ({ isAbort }) => {
         if (isAbort) {
           suppressAutoSubmitAfterAbortRef.current = true;

@@ -328,7 +328,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     defaultModelForNewChats?.id ?? null,
     defaultModelForNewChats?.provider ?? null,
     defaultModelConfigForNewChats,
-    { contextWindow: defaultModelForNewChats?.contextWindow },
+    defaultModelForNewChats?.contextWindow,
   );
   const pendingProgrammaticMessagesRef = useRef(
     new Map<string, { message: Parameters<typeof defaultChat.sendMessage>[0] }>(),

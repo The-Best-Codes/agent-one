@@ -16,7 +16,6 @@ const logger = getLogger(import.meta.url);
 type CustomChatOptions = Omit<ChatInit<UIMessage>, "transport"> &
   Pick<UseChatOptions<UIMessage>, "resume" | "throttle"> & {
     onUserMessageSent?: () => void;
-    contextWindow?: number;
   };
 
 function canResumeFromMessages(messages: UIMessage[]) {
@@ -34,6 +33,7 @@ export function useChat(
   modelId: string | null,
   providerName: string | null,
   modelConfig: ModelConfig,
+  contextWindow: number | undefined,
   options?: CustomChatOptions,
 ) {
   const extractReasoningEnabled = useAtomValue(settingAtoms.EXTRACT_REASONING_ENABLED);
@@ -91,7 +91,7 @@ export function useChat(
     logger.verbose("Updated chat transport with new API keys loaded promise");
   }, [getApiKeysLoadedPromise, transport]);
 
-  const { onUserMessageSent, contextWindow, ...sdkOptions } = options ?? {};
+  const { onUserMessageSent, ...sdkOptions } = options ?? {};
 
   useEffect(() => {
     transport.updateContextWindow(contextWindow);
