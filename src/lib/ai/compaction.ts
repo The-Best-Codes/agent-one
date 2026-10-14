@@ -13,7 +13,7 @@ import type { ModelConfig } from "@/hooks/ai/use-model-catalog";
 import type { ChatMessageMetadata, MessageTokenUsage } from "@/lib/ai/chat-usage";
 
 export const COMPACTION_PART_TYPE = "data-compaction";
-export const DEFAULT_COMPACTION_THRESHOLD = 95;
+export const DEFAULT_COMPACTION_THRESHOLD = 90;
 export const MIN_COMPACTION_THRESHOLD = 5;
 export const MAX_COMPACTION_THRESHOLD = 95;
 
