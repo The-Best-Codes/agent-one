@@ -448,9 +448,9 @@ export const MainChatInput = ({
         const chatData = {
           id: chatId,
           title,
-          info: "This chat was attached as a file by the user",
-          messages,
-          exportedAt: new Date().toISOString(),
+          info: `The user attached this past chat (ID "${chatId}") for you to reference. Its messages are not included here. If the readChat tool is available, use it with this chat ID to read the chat. If the readChat tool is not available, tell the user you can't read the attached chat, and that they can turn on the Chat History tools in Settings > Tools to let you read it.`,
+          messageCount: messages.length,
+          attachedAt: new Date().toISOString(),
         };
 
         const blob = new Blob([JSON.stringify(chatData, null, 2)], {
