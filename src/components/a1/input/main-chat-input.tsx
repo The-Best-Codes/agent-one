@@ -125,6 +125,7 @@ export const MainChatInput = ({
   const [files, setFiles] = useState<FileList | undefined>(undefined);
   const [isDraggingFiles, setIsDraggingFiles] = useState(false);
   const [isDraggingChat, setIsDraggingChat] = useState(false);
+  const [isEditorOverflowing, setIsEditorOverflowing] = useState(false);
 
   const editorViewRef = useRef<EditorView | null>(null);
   const initialValueKeyRef = useRef(initialValueKey);
@@ -565,11 +566,21 @@ export const MainChatInput = ({
             minHeight="40px"
             maxHeight="160px"
             placeholder="Ask anything..."
-            className="bg-transparent text-sm"
+            className={cn(
+              "[&_.cm-scroller]:no-scrollbar bg-transparent text-sm",
+              isEditorOverflowing &&
+                "[&_.cm-scroller]:scroll-fade [&_.cm-scroller]:[--scroll-fade-reveal:--spacing(6)]",
+            )}
             extensions={[
               ...(markdownHighlighting ? [markdown({ base: markdownLanguage })] : []),
               editorTheme,
               EditorView.lineWrapping,
+              EditorView.updateListener.of((update) => {
+                if (update.geometryChanged) {
+                  const { scrollHeight, clientHeight } = update.view.scrollDOM;
+                  setIsEditorOverflowing(scrollHeight > clientHeight);
+                }
+              }),
               EditorView.contentAttributes.of({
                 spellcheck: "true",
                 "aria-label": "Chat message input",
