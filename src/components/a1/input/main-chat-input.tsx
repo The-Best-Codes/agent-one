@@ -5,7 +5,7 @@ import { EditorView, keymap } from "@codemirror/view";
 import { IconArrowUp, IconPaperclip, IconPlayerStopFilled } from "@tabler/icons-react";
 import CodeMirror from "@uiw/react-codemirror";
 import { useAtomValue, useAtomValueRawSync } from "jotai";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import {
   AdaptiveTooltip,
@@ -39,6 +39,20 @@ import { MainInputNoModelSection } from "./no-model-section";
 import { MainInputProvisioningSection } from "./provisioning-section";
 
 const logger = getLogger(import.meta.url);
+
+const DRAFT_SAVE_DELAY_MS = 300;
+
+const EDITOR_BASIC_SETUP = {
+  lineNumbers: false,
+  foldGutter: false,
+  highlightActiveLine: false,
+  highlightActiveLineGutter: false,
+  highlightSelectionMatches: false,
+  autocompletion: false,
+  searchKeymap: false,
+  lintKeymap: false,
+  completionKeymap: false,
+};
 
 function isFileDrag(dataTransfer: DataTransfer | null) {
   return dataTransfer?.types.includes("Files") ?? false;
@@ -136,6 +150,8 @@ export const MainChatInput = ({
   const hasSentInterruptRef = useRef(false);
   const statusRef = useRef(status);
   const readyResolverRef = useRef<(() => void) | null>(null);
+  const pendingDraftRef = useRef<{ key: string; text: string } | null>(null);
+  const draftSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     statusRef.current = status;
@@ -197,8 +213,30 @@ export const MainChatInput = ({
     }
   });
 
+  const cancelDraftSave = useCallback(() => {
+    if (draftSaveTimeoutRef.current) {
+      clearTimeout(draftSaveTimeoutRef.current);
+      draftSaveTimeoutRef.current = null;
+    }
+    pendingDraftRef.current = null;
+  }, []);
+
+  const flushDraftSave = useCallback(() => {
+    const pendingDraft = pendingDraftRef.current;
+    cancelDraftSave();
+    if (pendingDraft) {
+      saveChatInputDraft(pendingDraft.key, pendingDraft.text);
+    }
+  }, [cancelDraftSave]);
+
+  useEffect(() => flushDraftSave, [draftKey, flushDraftSave]);
+
   const handleEditorChange = (newValue: string) => {
-    saveChatInputDraft(draftKey, newValue);
+    pendingDraftRef.current = { key: draftKey, text: newValue };
+    if (draftSaveTimeoutRef.current) {
+      clearTimeout(draftSaveTimeoutRef.current);
+    }
+    draftSaveTimeoutRef.current = setTimeout(flushDraftSave, DRAFT_SAVE_DELAY_MS);
     const newIsEmpty = !newValue.trim();
     if (newIsEmpty !== isEmpty) {
       setIsEmpty(newIsEmpty);
@@ -255,6 +293,7 @@ export const MainChatInput = ({
       } finally {
         isSubmittingRef.current = false;
       }
+      cancelDraftSave();
       saveChatInputDraft(draftKey, "");
 
       if (editorViewRef.current) {
@@ -515,6 +554,69 @@ export const MainChatInput = ({
 
   const isFloating = inputStyle === "floating";
 
+  const chatShortcutKey = showInterruptButton ? interruptKey : submitKey;
+  const editorHandlersRef = useRef({ disabled, isMobile, addFiles, submitMessage });
+  useLayoutEffect(() => {
+    editorHandlersRef.current = { disabled, isMobile, addFiles, submitMessage };
+  });
+
+  const editorExtensions = useMemo(
+    () => [
+      ...(markdownHighlighting ? [markdown({ base: markdownLanguage })] : []),
+      editorTheme,
+      EditorView.lineWrapping,
+      EditorView.updateListener.of((update) => {
+        if (update.geometryChanged) {
+          const { scrollHeight, clientHeight } = update.view.scrollDOM;
+          setIsEditorOverflowing(scrollHeight > clientHeight);
+        }
+      }),
+      EditorView.contentAttributes.of({
+        spellcheck: "true",
+        "aria-label": "Chat message input",
+        "data-testid": "chat-editor",
+      }),
+      // eslint-disable-next-line react-hooks/refs
+      EditorView.domEventHandlers({
+        paste: (event) => {
+          if (editorHandlersRef.current.disabled) {
+            return false;
+          }
+          const pastedFiles = event.clipboardData?.files;
+          if (pastedFiles && pastedFiles.length > 0) {
+            logger.verbose("Files pasted", {
+              fileCount: pastedFiles.length,
+              fileNames: Array.from(pastedFiles).map((f) => f.name),
+            });
+            editorHandlersRef.current.addFiles(pastedFiles);
+            event.preventDefault();
+            return true;
+          }
+          return false;
+        },
+      }),
+      Prec.highest(
+        // eslint-disable-next-line react-hooks/refs
+        keymap.of([
+          {
+            key: getChatShortcut(chatShortcutKey),
+            run: (view) => {
+              if (view.composing) {
+                return false;
+              }
+              if (editorHandlersRef.current.isMobile && chatShortcutKey === "enter") {
+                return false;
+              }
+              void editorHandlersRef.current.submitMessage();
+              return true;
+            },
+          },
+        ]),
+      ),
+    ],
+    [markdownHighlighting, chatShortcutKey],
+  );
+
   return (
     <div className={cn(isFloating ? "px-0 pb-0 md:px-2 md:pb-2" : "px-0 md:px-2")}>
       <MainInputProvisioningSection />
@@ -571,62 +673,7 @@ export const MainChatInput = ({
               isEditorOverflowing &&
                 "[&_.cm-scroller]:scroll-fade [&_.cm-scroller]:[--scroll-fade-reveal:--spacing(6)]",
             )}
-            extensions={[
-              ...(markdownHighlighting ? [markdown({ base: markdownLanguage })] : []),
-              editorTheme,
-              EditorView.lineWrapping,
-              EditorView.updateListener.of((update) => {
-                if (update.geometryChanged) {
-                  const { scrollHeight, clientHeight } = update.view.scrollDOM;
-                  setIsEditorOverflowing(scrollHeight > clientHeight);
-                }
-              }),
-              EditorView.contentAttributes.of({
-                spellcheck: "true",
-                "aria-label": "Chat message input",
-                "data-testid": "chat-editor",
-              }),
-              // eslint-disable-next-line react-hooks/refs
-              EditorView.domEventHandlers({
-                paste: (event) => {
-                  if (disabled) {
-                    return false;
-                  }
-                  const pastedFiles = event.clipboardData?.files;
-                  if (pastedFiles && pastedFiles.length > 0) {
-                    logger.verbose("Files pasted", {
-                      fileCount: pastedFiles.length,
-                      fileNames: Array.from(pastedFiles).map((f) => f.name),
-                    });
-                    addFiles(pastedFiles);
-                    event.preventDefault();
-                    return true;
-                  }
-                  return false;
-                },
-              }),
-              Prec.highest(
-                // eslint-disable-next-line react-hooks/refs
-                keymap.of([
-                  {
-                    key: getChatShortcut(showInterruptButton ? interruptKey : submitKey),
-                    run: (view) => {
-                      if (view.composing) {
-                        return false;
-                      }
-                      if (
-                        isMobile &&
-                        (showInterruptButton ? interruptKey : submitKey) === "enter"
-                      ) {
-                        return false;
-                      }
-                      void submitMessage();
-                      return true;
-                    },
-                  },
-                ]),
-              ),
-            ]}
+            extensions={editorExtensions}
             onChange={handleEditorChange}
             onCreateEditor={(view) => {
               editorViewRef.current = view;
@@ -638,17 +685,7 @@ export const MainChatInput = ({
               setIsEmpty(!view.state.doc.toString().trim());
             }}
             indentWithTab={false}
-            basicSetup={{
-              lineNumbers: false,
-              foldGutter: false,
-              highlightActiveLine: false,
-              highlightActiveLineGutter: false,
-              highlightSelectionMatches: false,
-              autocompletion: false,
-              searchKeymap: false,
-              lintKeymap: false,
-              completionKeymap: false,
-            }}
+            basicSetup={EDITOR_BASIC_SETUP}
           />
         </div>
         <div className="bg-secondary dark:bg-secondary flex items-center justify-between rounded-t-none rounded-b-md p-2 pr-0">
