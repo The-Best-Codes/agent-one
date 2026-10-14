@@ -11,7 +11,9 @@ export const usePendingToolApproval = () => {
         .at(-1)
         ?.parts.some(
           (part) =>
-            part.type.startsWith("tool-") && "state" in part && part.state === "approval-requested",
+            (part.type.startsWith("tool-") || part.type === "dynamic-tool") &&
+            "state" in part &&
+            part.state === "approval-requested",
         ) ?? false,
     [messages],
   );

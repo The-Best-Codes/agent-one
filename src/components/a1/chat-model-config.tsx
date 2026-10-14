@@ -41,6 +41,7 @@ import {
   type ReasoningEffort,
   type ToolBehavior,
 } from "@/hooks/ai/use-model-catalog";
+import { usePendingToolApproval } from "@/hooks/use-pending-tool-approval";
 import {
   DEFAULT_COMPACTION_THRESHOLD,
   getCompactionThreshold,
@@ -194,12 +195,14 @@ const CompactNowButton = ({ onCompact }: { onCompact: () => void }) => {
   const messages = useChatMessages();
   const { status } = useChatStatus();
   const { compact } = useChatFunctions();
+  const hasPendingApproval = usePendingToolApproval();
   const lastMessage = messages.at(-1);
   const lastPart = lastMessage?.parts.at(-1);
   const canCompact =
     (status === "ready" || status === "error") &&
     lastMessage?.role === "assistant" &&
-    !(lastPart && isCompactionPart(lastPart));
+    !(lastPart && isCompactionPart(lastPart)) &&
+    !hasPendingApproval;
 
   return (
     <Button
