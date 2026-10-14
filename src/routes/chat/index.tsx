@@ -161,7 +161,7 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
               }
               getItemKey={shouldVirtualizeMessages ? (index) => messages[index]!.id : undefined}
               keepMountedIndexes={shouldVirtualizeMessages ? keepMountedIndexes : undefined}
-              scrollableClassName="mx-auto h-full w-full max-w-3xl pr-4 md:pr-6"
+              scrollableClassName="mx-auto h-full w-full max-w-3xl pr-2"
               behavior="instant"
               buttonScrollBehavior={status === "streaming" ? "instant" : "smooth"}
             >
