@@ -1,5 +1,5 @@
 import NumberFlow from "@number-flow/react";
-import { IconArrowsMinimize, IconChevronLeft } from "@tabler/icons-react";
+import { IconChevronLeft } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 
@@ -8,18 +8,12 @@ import {
   AdaptiveTooltipContent,
   AdaptiveTooltipTrigger,
 } from "@/components/ui/adaptive-tooltip";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  useChatFunctions,
-  useChatLoading,
-  useChatMessages,
-  useChatStatus,
-} from "@/contexts/use-chat/chat-hooks";
+import { useChatLoading, useChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { calculateChatUsageFromMessages } from "@/lib/ai/chat-usage";
-import { getContextTokens, isCompactionPart } from "@/lib/ai/compaction";
+import { getContextTokens } from "@/lib/ai/compaction";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
@@ -77,8 +71,6 @@ const CircularProgress = ({
 export const ChatUsageStatus = () => {
   const messages = useChatMessages();
   const isChatLoading = useChatLoading();
-  const { status } = useChatStatus();
-  const { compact } = useChatFunctions();
   const { currentModel } = useModel();
   const [isSidebarCollapsed] = useAtom(sidebarCollapsedAtom);
   const [collapsedLayout] = useAtom(settingAtoms.COLLAPSED_SIDEBAR_LAYOUT);
@@ -114,12 +106,6 @@ export const ChatUsageStatus = () => {
   const maxTokens = currentModel?.contextWindow;
   const isExceeded = maxTokens !== undefined && totalTokens > maxTokens;
   const contextUsagePercent = maxTokens ? Math.round((totalTokens / maxTokens) * 100) : null;
-  const lastMessage = messages.at(-1);
-  const lastPart = lastMessage?.parts.at(-1);
-  const canCompact =
-    (status === "ready" || status === "error") &&
-    lastMessage?.role === "assistant" &&
-    !(lastPart && isCompactionPart(lastPart));
 
   return (
     <div
@@ -164,25 +150,14 @@ export const ChatUsageStatus = () => {
                         />
                       </div>
                     </AdaptiveTooltipTrigger>
-                    <AdaptiveTooltipContent className="flex max-w-xs flex-col items-start gap-2">
-                      <span>
-                        {isAgentOneModel
-                          ? contextUsagePercent === null
-                            ? "The context window size for this model is unavailable."
-                            : `This chat is using ${contextUsagePercent}% of the model's context window.`
-                          : maxTokens !== undefined
-                            ? `This chat is currently ${totalTokens} tokens long. The model you're using supports up to ${maxTokens.toLocaleString()} tokens.`
-                            : `This chat is currently ${totalTokens} tokens long. The model you're using supports an unknown number of tokens.`}
-                      </span>
-                      <Button
-                        variant="secondary"
-                        size="xs"
-                        disabled={!canCompact}
-                        onClick={() => void compact()}
-                      >
-                        <IconArrowsMinimize data-icon="inline-start" />
-                        Compact conversation
-                      </Button>
+                    <AdaptiveTooltipContent className="max-w-xs">
+                      {isAgentOneModel
+                        ? contextUsagePercent === null
+                          ? "The context window size for this model is unavailable."
+                          : `This chat is using ${contextUsagePercent}% of the model's context window.`
+                        : maxTokens !== undefined
+                          ? `This chat is currently ${totalTokens} tokens long. The model you're using supports up to ${maxTokens.toLocaleString()} tokens.`
+                          : `This chat is currently ${totalTokens} tokens long. The model you're using supports an unknown number of tokens.`}
                     </AdaptiveTooltipContent>
                   </AdaptiveTooltip>
 

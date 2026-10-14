@@ -1,4 +1,9 @@
-import { IconAdjustments, IconInfoCircle, IconRestore } from "@tabler/icons-react";
+import {
+  IconAdjustments,
+  IconArrowsMinimize,
+  IconInfoCircle,
+  IconRestore,
+} from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import debounce from "lodash.debounce";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -27,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { useChatFunctions, useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import {
   DEFAULT_MODEL_CONFIG,
@@ -38,6 +44,7 @@ import {
 import {
   DEFAULT_COMPACTION_THRESHOLD,
   getCompactionThreshold,
+  isCompactionPart,
   MAX_COMPACTION_THRESHOLD,
   MIN_COMPACTION_THRESHOLD,
 } from "@/lib/ai/compaction";
@@ -183,12 +190,42 @@ const SliderConfig = ({
   );
 };
 
+const CompactNowButton = ({ onCompact }: { onCompact: () => void }) => {
+  const messages = useChatMessages();
+  const { status } = useChatStatus();
+  const { compact } = useChatFunctions();
+  const lastMessage = messages.at(-1);
+  const lastPart = lastMessage?.parts.at(-1);
+  const canCompact =
+    (status === "ready" || status === "error") &&
+    lastMessage?.role === "assistant" &&
+    !(lastPart && isCompactionPart(lastPart));
+
+  return (
+    <Button
+      variant="outline"
+      size="xs"
+      className="w-fit"
+      disabled={!canCompact}
+      onClick={() => {
+        onCompact();
+        void compact();
+      }}
+    >
+      <IconArrowsMinimize data-icon="inline-start" />
+      Compact now
+    </Button>
+  );
+};
+
 const CompactionConfig = ({
   threshold,
   onChange,
+  onCompact,
 }: {
   threshold: number | null;
   onChange: (value: number | "off") => void;
+  onCompact: () => void;
 }) => {
   const [draggingValue, setDraggingValue] = useState<number | null>(null);
   const isEnabled = threshold !== null;
@@ -233,6 +270,7 @@ const CompactionConfig = ({
           aria-label="Auto-compact threshold"
         />
       )}
+      <CompactNowButton onCompact={onCompact} />
     </div>
   );
 };
@@ -475,6 +513,7 @@ export const ChatModelConfig = ({
       <CompactionConfig
         threshold={compactionThreshold}
         onChange={handleCompactionThresholdChange}
+        onCompact={() => setOpen(false)}
       />
 
       <SliderConfig
