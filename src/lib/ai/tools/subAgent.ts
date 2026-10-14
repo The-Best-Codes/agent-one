@@ -21,6 +21,7 @@ const logger = getLogger(import.meta.url);
 
 const SUBAGENT_TOOL_NAME = "subAgent";
 const DEFAULT_SUBAGENT_MAX_STEPS = 20;
+const LIVE_STATE_EMIT_INTERVAL_MS = 100;
 
 export interface SubAgentToolConfig {
   requiresApproval: boolean;
@@ -65,6 +66,10 @@ type ApprovalResponse = {
 
 const subAgentLiveStateMap = new Map<string, SubAgentLiveState>();
 const subAgentListenersMap = new Map<string, Set<() => void>>();
+const subAgentEmitThrottleMap = new Map<
+  string,
+  { lastEmitAt: number; timeoutId: ReturnType<typeof setTimeout> | null }
+>();
 const subAgentApprovalWaiters = new Map<
   string,
   {
@@ -94,7 +99,35 @@ function emitLiveState(toolCallId: string) {
 
 function setLiveState(toolCallId: string, state: SubAgentLiveState) {
   subAgentLiveStateMap.set(toolCallId, state);
-  emitLiveState(toolCallId);
+
+  const throttle = subAgentEmitThrottleMap.get(toolCallId);
+  if (state.status !== "running") {
+    if (throttle?.timeoutId) {
+      clearTimeout(throttle.timeoutId);
+    }
+    subAgentEmitThrottleMap.delete(toolCallId);
+    emitLiveState(toolCallId);
+    return;
+  }
+
+  const now = Date.now();
+  if (!throttle || now - throttle.lastEmitAt >= LIVE_STATE_EMIT_INTERVAL_MS) {
+    if (throttle?.timeoutId) {
+      clearTimeout(throttle.timeoutId);
+    }
+    subAgentEmitThrottleMap.set(toolCallId, { lastEmitAt: now, timeoutId: null });
+    emitLiveState(toolCallId);
+    return;
+  }
+
+  throttle.timeoutId ??= setTimeout(
+    () => {
+      throttle.timeoutId = null;
+      throttle.lastEmitAt = Date.now();
+      emitLiveState(toolCallId);
+    },
+    LIVE_STATE_EMIT_INTERVAL_MS - (now - throttle.lastEmitAt),
+  );
 }
 
 function updateLiveState(
@@ -448,14 +481,23 @@ export const createSubAgentTool = (
         pendingApprovalIds: [],
       });
 
-      for await (const value of streamSubAgentRun({
-        task: input.task,
-        maxSteps: input.maxSteps,
-        abortSignal: options.abortSignal,
-        toolCallId: options.toolCallId,
-        context,
-      })) {
-        yield value;
+      try {
+        for await (const value of streamSubAgentRun({
+          task: input.task,
+          maxSteps: input.maxSteps,
+          abortSignal: options.abortSignal,
+          toolCallId: options.toolCallId,
+          context,
+        })) {
+          yield value;
+        }
+      } finally {
+        updateLiveState(options.toolCallId, (state) =>
+          state.status === "completed"
+            ? state
+            : { ...state, status: "completed", pendingApprovalIds: [] },
+        );
+        pruneLiveState(options.toolCallId);
       }
 
       return undefined;
