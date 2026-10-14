@@ -123,6 +123,8 @@ async function highlightCode(code: string, language: string, theme: "dark-plus" 
 }
 
 self.onmessage = async (event: MessageEvent<HighlightRequest>) => {
+  if ((event.data as { type?: string }).type === "init") return;
+
   const { id, code, language, theme } = event.data;
 
   try {

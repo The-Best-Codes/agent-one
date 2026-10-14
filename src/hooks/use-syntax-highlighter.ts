@@ -19,7 +19,20 @@ const useSyntaxHighlighter = () => {
     [],
   );
 
-  return { highlight };
+  const getCachedHighlight = useCallback(
+    (code: string, language: string, theme: "dark-plus" | "light-plus" = "dark-plus") =>
+      highlighterClient.getCached(code, language, theme) ?? null,
+    [],
+  );
+
+  const forgetHighlight = useCallback(
+    (code: string, language: string, theme: "dark-plus" | "light-plus" = "dark-plus") => {
+      highlighterClient.forget(code, language, theme);
+    },
+    [],
+  );
+
+  return { highlight, getCachedHighlight, forgetHighlight };
 };
 
 export default useSyntaxHighlighter;
