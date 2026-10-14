@@ -20,6 +20,7 @@ export const MAX_COMPACTION_THRESHOLD = 95;
 export interface CompactionData {
   status: "compacting" | "done";
   summary?: string;
+  failed?: boolean;
   modelId?: string;
   usage?: MessageTokenUsage;
 }
@@ -229,6 +230,20 @@ export async function summarizeConversation({
   }
 
   return { summary, usage: result.usage };
+}
+
+export function getFailedCompactionSummary({ chatId, error }: { chatId?: string; error: unknown }) {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+
+  const lines = [
+    `The conversation history had to be removed to free up space in the context window, but writing a summary of it failed (${errorMessage}), so no summary is available.`,
+    chatId
+      ? `If the readChat tool is available, use it with chat ID "${chatId}" (this chat) to read through the earlier messages and find out what the user asked for and what you were doing, then continue the work. Read only the parts you need, starting near the end, since the context window is limited. The most recent messages may not be saved yet.`
+      : undefined,
+    `If the readChat tool is not available, tell the user that the conversation couldn't be compacted and you lost the earlier context, and ask them to resend their last request or share the context you need to continue. They can also turn on the Chat History tools in Settings > Tools so you can read the chat yourself next time.`,
+  ];
+
+  return lines.filter(Boolean).join("\n\n");
 }
 
 export function estimateTokens(value: unknown) {

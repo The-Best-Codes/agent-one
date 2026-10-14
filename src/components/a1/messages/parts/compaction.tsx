@@ -74,7 +74,7 @@ export const MessagePartCompaction = ({
                 )}
               />
             </span>
-            Conversation compacted
+            {part.data.failed ? "Couldn't compact conversation" : "Conversation compacted"}
           </span>
           <span aria-hidden className="relative flex-1 self-stretch">
             <span

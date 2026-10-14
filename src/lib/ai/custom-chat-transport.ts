@@ -32,6 +32,7 @@ import {
   estimateTokens,
   getContextTokens,
   getCompactionThreshold,
+  getFailedCompactionSummary,
   getMessagesAfterCompaction,
   getUsageContextTokens,
   shouldCompact,
@@ -221,6 +222,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     const compact = async (
       messagesToSummarize: ModelMessage[],
       writeChunk: (chunk: UIMessageChunk) => void,
+      { fallbackOnError = false }: { fallbackOnError?: boolean } = {},
     ) => {
       const compactionId = generateId();
       writeChunk(createCompactionChunk(compactionId, { status: "compacting" }));
@@ -239,6 +241,20 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
         }
 
         logger.error("Failed to compact conversation:", error);
+
+        if (fallbackOnError) {
+          const summary = getFailedCompactionSummary({ chatId: options.chatId, error });
+          writeChunk(
+            createCompactionChunk(compactionId, {
+              status: "done",
+              summary,
+              failed: true,
+              modelId: modelId ?? undefined,
+            }),
+          );
+          return { compactionId, summary };
+        }
+
         throw new Error(
           `Couldn't compact the conversation: ${error instanceof Error ? error.message : String(error)}\n\nTry lowering the Auto-Compact threshold in the model config, or branch the chat from an earlier message.`,
           { cause: error },
@@ -344,8 +360,10 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
           `Compacting conversation at step ${stepNumber} (${contextTokens} / ${contextWindow} tokens)`,
         );
 
-        const { compactionId, summary } = await compact(stepMessages, (chunk) =>
-          chunkInjector.write(chunk),
+        const { compactionId, summary } = await compact(
+          stepMessages,
+          (chunk) => chunkInjector.write(chunk),
+          { fallbackOnError: true },
         );
 
         activeCompactionId = compactionId;
