@@ -323,7 +323,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   }, [currentChatId, lastStatusChange, evictInactiveMessages]);
 
   const defaultChat = useChat(
-    defaultModelForNewChats?.model ?? null,
+    defaultModelForNewChats?.getLanguageModel() ?? null,
     defaultModelForNewChats?.id ?? null,
     defaultModelForNewChats?.provider ?? null,
     defaultModelConfigForNewChats,
@@ -648,7 +648,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
           <ChatInstance
             key={id}
             chatId={id}
-            model={chatModel.model}
+            model={chatModel.getLanguageModel()}
             modelId={chatModel.id}
             providerName={chatModel.provider}
             modelConfig={chatConfig}

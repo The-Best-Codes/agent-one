@@ -70,7 +70,7 @@ const ChangeTitleForm = ({
       const modelConfig = getModelById(chatMetadata.modelId || "");
       if (modelConfig) {
         const generatedTitle = await generateChatTitleAI(
-          modelConfig.model,
+          modelConfig.getLanguageModel(),
           messages,
           getChatTitleFallback(messages, titleGenerationSettings),
           "none",
