@@ -98,7 +98,7 @@ export function MessagePreviewRail({
   return (
     <div
       className={cn(
-        "pointer-events-none fixed top-1/2 left-2 z-20 hidden w-15 -translate-y-1/2 items-center transition-[margin] duration-200 lg:flex",
+        "pointer-events-none fixed top-1/2 left-2 z-20 hidden w-10 -translate-y-1/2 items-center transition-[margin] duration-200 lg:flex",
         !isSidebarCollapsed && "ml-64",
       )}
     >
@@ -108,7 +108,7 @@ export function MessagePreviewRail({
         onBlur={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget)) setFocusedIndex(null);
         }}
-        className="pointer-events-auto relative grid w-15 shrink-0 content-stretch"
+        className="pointer-events-auto relative grid w-10 shrink-0 content-stretch"
         style={{
           height: `min(${entries.length * 10}px, calc(100svh - 2rem))`,
           gridTemplateRows: `repeat(${entries.length}, minmax(0, 1fr))`,
@@ -118,7 +118,7 @@ export function MessagePreviewRail({
           const { message } = entry;
           const distance =
             displayedIndex == null ? Number.POSITIVE_INFINITY : Math.abs(index - displayedIndex);
-          const scale = distance === 0 ? 1 : distance === 1 ? 0.68 : distance === 2 ? 0.44 : 0.25;
+          const scale = distance === 0 ? 1 : distance === 1 ? 0.75 : distance === 2 ? 0.55 : 0.375;
 
           return (
             <button
@@ -137,12 +137,12 @@ export function MessagePreviewRail({
                 if (event.currentTarget.matches(":focus-visible")) setFocusedIndex(index);
               }}
               onClick={() => onMessageSelect(entry.index)}
-              className="text-muted-foreground/40 focus-visible:ring-ring focus-visible:ring-offset-background relative flex min-h-1 w-15 cursor-pointer items-center justify-start focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+              className="text-muted-foreground/40 focus-visible:ring-ring focus-visible:ring-offset-background relative flex min-h-1 w-10 cursor-pointer items-center justify-start focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
             >
               <span
                 aria-hidden="true"
                 className={cn(
-                  "block h-0.5 w-15 origin-left bg-current transition-transform duration-300 ease-out motion-reduce:transition-none",
+                  "block h-0.5 w-10 origin-left bg-current transition-transform duration-300 ease-out motion-reduce:transition-none",
                   (visibleIndexes.has(entry.index) ||
                     (entry.response && visibleIndexes.has(entry.index + 1)) ||
                     displayedIndex === index) &&
@@ -157,7 +157,7 @@ export function MessagePreviewRail({
         {displayedEntry && displayedIndex != null ? (
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute left-17.5 w-72 -translate-y-1/2"
+            className="pointer-events-none absolute left-12 w-72 -translate-y-1/2"
             style={{ top: `${((displayedIndex + 0.5) / entries.length) * 100}%` }}
           >
             <Card
