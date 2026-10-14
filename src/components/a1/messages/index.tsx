@@ -143,6 +143,8 @@ const MessagePartsInternal = ({
           return <MessagePartStepStart key={key} />;
         case "file":
           return <MessagePartFile key={key} file={part} />;
+        case "custom":
+          return null;
         case "dynamic-tool": {
           let toolLabels: ToolDisplayLabels | null = null;
           for (let j = i - 1; j >= 0; j--) {
@@ -165,7 +167,6 @@ const MessagePartsInternal = ({
             return <MessageToolHandler key={key} part={{ ...part }} />; // Using a spread operator to ensure React.memo will get a new instance of part
           }
 
-          logger.error(`Unknown or unhandled message part type: ${part.type}`);
           return <MessagePartFallback key={key} {...part} />;
       }
     });

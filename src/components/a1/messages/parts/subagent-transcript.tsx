@@ -31,6 +31,8 @@ export function SubagentTranscript({ message }: { message: UIMessage }) {
             return <MessagePartStepStart key={key} />;
           case "file":
             return <MessagePartFile key={key} file={part} />;
+          case "custom":
+            return null;
           case "dynamic-tool":
             return <MessagePartDynamicTool key={key} part={part} labels={null} />;
           default:
