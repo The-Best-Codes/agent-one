@@ -1,7 +1,24 @@
 use tauri::{Listener, Manager};
-use tauri_plugin_log::{FileOpenStrategy, RotationStrategy, Target, TargetKind};
+use tauri_plugin_log::{log::LevelFilter, FileOpenStrategy, RotationStrategy, Target, TargetKind};
 
 const LOG_FILE_NAME: &str = "agent-one-logs";
+const LOG_LEVEL_ENV: &str = "AGENT_ONE_LOG_LEVEL";
+
+fn log_level() -> LevelFilter {
+    let default = if cfg!(debug_assertions) {
+        LevelFilter::Trace
+    } else {
+        LevelFilter::Info
+    };
+
+    match std::env::var(LOG_LEVEL_ENV) {
+        Ok(value) => value.parse().unwrap_or_else(|_| {
+            eprintln!("Invalid {LOG_LEVEL_ENV} value \"{value}\", using {default}");
+            default
+        }),
+        Err(_) => default,
+    }
+}
 
 mod keyring;
 mod mcp_auth;
@@ -150,6 +167,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(
             tauri_plugin_log::Builder::new()
+                .level(log_level())
                 .clear_targets()
                 .target(Target::new(TargetKind::LogDir {
                     file_name: Some(LOG_FILE_NAME.to_string()),
