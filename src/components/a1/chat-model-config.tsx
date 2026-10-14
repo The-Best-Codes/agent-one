@@ -29,7 +29,9 @@ import { Slider } from "@/components/ui/slider";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import {
   DEFAULT_MODEL_CONFIG,
+  getReasoningEffort,
   getToolBehavior,
+  type ReasoningEffort,
   type ToolBehavior,
 } from "@/hooks/ai/use-model-catalog";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
@@ -67,6 +69,22 @@ const TOOL_BEHAVIORS: { value: ToolBehavior; label: string; description: string 
     label: "No tools",
     description: "Do not make any tools available to the model.",
   },
+];
+
+const DEFAULT_REASONING_EFFORT = "default";
+
+const REASONING_EFFORT_OPTIONS: {
+  value: ReasoningEffort | typeof DEFAULT_REASONING_EFFORT;
+  label: string;
+}[] = [
+  { value: DEFAULT_REASONING_EFFORT, label: "Default" },
+  { value: "none", label: "None" },
+  { value: "minimal", label: "Minimal" },
+  { value: "low", label: "Low" },
+  { value: "medium", label: "Medium" },
+  { value: "high", label: "High" },
+  { value: "xhigh", label: "Extra high" },
+  { value: "max", label: "Max" },
 ];
 
 const SliderConfig = ({
@@ -170,6 +188,10 @@ export const ChatModelConfig = ({
   const effectiveOpen = disabled ? false : open;
   const toolBehavior = getToolBehavior(currentModelConfig);
   const selectedBehavior = TOOL_BEHAVIORS.find((behavior) => behavior.value === toolBehavior);
+  const reasoningEffort = getReasoningEffort(currentModelConfig);
+  const selectedReasoningEffort = REASONING_EFFORT_OPTIONS.find(
+    (option) => option.value === (reasoningEffort ?? DEFAULT_REASONING_EFFORT),
+  );
   const [confirmYoloMode, setConfirmYoloMode] = useAtom(settingAtoms.CONFIRM_YOLO_MODE);
   const [yoloDialogOpen, setYoloDialogOpen] = useState(false);
 
@@ -207,6 +229,13 @@ export const ChatModelConfig = ({
   const handleYoloConfirm = (dontShowAgain: boolean) => {
     if (dontShowAgain) setConfirmYoloMode(false);
     setToolBehavior("yolo");
+  };
+
+  const handleReasoningEffortChange = (value: string) => {
+    setModelConfig({
+      ...configRef.current,
+      reasoningEffort: value === DEFAULT_REASONING_EFFORT ? undefined : (value as ReasoningEffort),
+    });
   };
 
   const handleTemperatureChange = (value: number | undefined) => {
@@ -267,6 +296,7 @@ export const ChatModelConfig = ({
       presencePenalty: DEFAULT_MODEL_CONFIG.presencePenalty,
       seed: DEFAULT_MODEL_CONFIG.seed,
       toolBehavior: DEFAULT_MODEL_CONFIG.toolBehavior,
+      reasoningEffort: DEFAULT_MODEL_CONFIG.reasoningEffort,
     });
   };
 
@@ -279,7 +309,8 @@ export const ChatModelConfig = ({
     currentModelConfig.frequencyPenalty === DEFAULT_MODEL_CONFIG.frequencyPenalty &&
     currentModelConfig.presencePenalty === DEFAULT_MODEL_CONFIG.presencePenalty &&
     currentModelConfig.seed === DEFAULT_MODEL_CONFIG.seed &&
-    toolBehavior === DEFAULT_MODEL_CONFIG.toolBehavior;
+    toolBehavior === DEFAULT_MODEL_CONFIG.toolBehavior &&
+    reasoningEffort === DEFAULT_MODEL_CONFIG.reasoningEffort;
 
   const content = (
     <div className="flex flex-col gap-4">
@@ -331,6 +362,38 @@ export const ChatModelConfig = ({
                       {behavior.description}
                     </AdaptiveTooltipContent>
                   </AdaptiveTooltip>
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="reasoningEffort">Reasoning Effort</Label>
+          <AdaptiveTooltip>
+            <AdaptiveTooltipTrigger asChild>
+              <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
+            </AdaptiveTooltipTrigger>
+            <AdaptiveTooltipContent side="right" className="max-w-xs">
+              How much the model thinks before it responds. Higher effort can give better answers
+              but takes longer and uses more tokens. Only applies to models that support reasoning.
+            </AdaptiveTooltipContent>
+          </AdaptiveTooltip>
+        </div>
+        <Select
+          value={reasoningEffort ?? DEFAULT_REASONING_EFFORT}
+          onValueChange={handleReasoningEffortChange}
+        >
+          <SelectTrigger id="reasoningEffort" className="w-full">
+            <SelectValue>{selectedReasoningEffort?.label ?? ""}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {REASONING_EFFORT_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
                 </SelectItem>
               ))}
             </SelectGroup>

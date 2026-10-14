@@ -14,7 +14,12 @@ import {
   wrapLanguageModel,
 } from "ai";
 
-import { getToolBehavior, type ModelConfig, type ToolBehavior } from "@/hooks/ai/use-model-catalog";
+import {
+  getReasoningEffort,
+  getToolBehavior,
+  type ModelConfig,
+  type ToolBehavior,
+} from "@/hooks/ai/use-model-catalog";
 import {
   addMessageTokenUsage,
   createEmptyMessageTokenUsage,
@@ -172,6 +177,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       frequencyPenalty: modelConfig.frequencyPenalty,
       presencePenalty: modelConfig.presencePenalty,
       seed: modelConfig.seed,
+      reasoning: getReasoningEffort(modelConfig),
       messages,
       abortSignal: options.abortSignal,
       tools,

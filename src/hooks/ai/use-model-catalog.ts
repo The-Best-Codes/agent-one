@@ -52,6 +52,18 @@ export interface ModelData {
 
 export type ToolBehavior = "default" | "ask" | "yolo" | "disable";
 
+export const REASONING_EFFORTS = [
+  "none",
+  "minimal",
+  "low",
+  "medium",
+  "high",
+  "xhigh",
+  "max",
+] as const;
+
+export type ReasoningEffort = (typeof REASONING_EFFORTS)[number];
+
 export interface ModelConfig {
   temperature?: number;
   maxTokens?: number;
@@ -62,6 +74,7 @@ export interface ModelConfig {
   presencePenalty?: number;
   seed?: number;
   toolBehavior?: ToolBehavior;
+  reasoningEffort?: ReasoningEffort;
 }
 
 export const DEFAULT_MODEL_CONFIG: ModelConfig = {
@@ -74,10 +87,15 @@ export const DEFAULT_MODEL_CONFIG: ModelConfig = {
   presencePenalty: undefined,
   seed: undefined,
   toolBehavior: "default",
+  reasoningEffort: undefined,
 };
 
 export function getToolBehavior(modelConfig: ModelConfig): ToolBehavior {
   return modelConfig.toolBehavior ?? "default";
+}
+
+export function getReasoningEffort(modelConfig: ModelConfig): ReasoningEffort | undefined {
+  return REASONING_EFFORTS.find((effort) => effort === modelConfig.reasoningEffort);
 }
 
 export const DEFAULT_CHAT_MODEL_ID = "groq-moonshotai/kimi-k2-instruct-0905";

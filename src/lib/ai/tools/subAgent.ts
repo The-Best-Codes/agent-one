@@ -14,7 +14,7 @@ import {
 } from "ai";
 import { z } from "zod";
 
-import type { ModelConfig } from "@/hooks/ai/use-model-catalog";
+import { getReasoningEffort, type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -286,6 +286,7 @@ async function* streamSubAgentRun({
       frequencyPenalty: context.modelConfig.frequencyPenalty,
       presencePenalty: context.modelConfig.presencePenalty,
       seed: context.modelConfig.seed,
+      reasoning: getReasoningEffort(context.modelConfig),
       messages: promptMessages,
       abortSignal,
       tools,
