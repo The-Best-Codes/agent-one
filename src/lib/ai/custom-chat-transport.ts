@@ -256,7 +256,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
         }
 
         throw new Error(
-          `Couldn't compact the conversation: ${error instanceof Error ? error.message : String(error)}\n\nTry lowering the Auto-Compact threshold in the model config, or branch the chat from an earlier message.`,
+          `Couldn't compact the conversation: ${error instanceof Error ? error.message : String(error)}.\n\nTry lowering the Auto-Compact threshold in the model config, or branch the chat from an earlier message.`,
           { cause: error },
         );
       }
