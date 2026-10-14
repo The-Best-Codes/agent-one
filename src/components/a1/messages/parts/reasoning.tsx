@@ -31,6 +31,7 @@ export const MessagePartReasoning = ({
   const maxMessageLength = useAtomValue(settingAtoms.MAX_MESSAGE_LENGTH);
   const markdownRendering = useAtomValue(settingAtoms.MARKDOWN_RENDERING);
   const shouldUsePerformantRenderer = text.length > maxMessageLength;
+  const isEmpty = text.trim().length === 0;
 
   const shouldRenderMarkdown = (() => {
     if (markdownRendering === "both") return true;
@@ -93,10 +94,15 @@ export const MessagePartReasoning = ({
           className={cn(
             "max-h-96 max-w-full overflow-auto p-0 pt-2 text-base",
             shouldRenderMarkdown &&
+              !isEmpty &&
               "prose dark:prose-invert prose-sm prose-neutral prose-quoteless",
           )}
         >
-          {shouldUsePerformantRenderer ? (
+          {isEmpty ? (
+            <p className="text-muted-foreground text-sm italic">
+              {isLoading ? "Thinking..." : "No reasoning content was provided."}
+            </p>
+          ) : shouldUsePerformantRenderer ? (
             <PerformantMarkdown content={text} />
           ) : shouldRenderMarkdown ? (
             <MemoizedMarkdown id={id} content={text} messageRole="assistant" simpleCodeBlocks />
