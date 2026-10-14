@@ -6,6 +6,7 @@ import { ExtensionListStartupSync } from "@/components/a1/extension-list-startup
 import { FileDropGuard } from "@/components/a1/file-drop-guard";
 import { LocalProviderStartupSync } from "@/components/a1/local-provider-startup-sync";
 import { ModelDirectoryStartupSync } from "@/components/a1/model-directory-startup-sync";
+import { OnboardingReminder } from "@/components/a1/onboarding-reminder";
 import { Spinner } from "@/components/ui/spinner";
 import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
 import ChatRoute from "@/routes/chat";
@@ -47,6 +48,7 @@ function App() {
       <FileDropGuard />
       <ReleaseNotesDialog />
       <UpdateAvailableDialog />
+      <OnboardingReminder />
       <Toaster className="pointer-events-auto!" position="top-right" richColors closeButton />
       <Routes>
         <Route element={<AppLayout />}>

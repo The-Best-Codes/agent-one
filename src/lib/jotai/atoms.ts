@@ -21,6 +21,13 @@ export const onboardingCompletedAtom = atomWithStorage(
   { getOnInit: true },
 );
 
+export const onboardingReminderDismissedAtom = atomWithStorage(
+  "agent-one-onboarding-reminder-dismissed",
+  false,
+  undefined,
+  { getOnInit: true },
+);
+
 export const tourActiveAtom = atom(false);
 
 export const syncEnabledAtom = atomWithStorage("agent-one-sync-enabled", true, undefined, {
