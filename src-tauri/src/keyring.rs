@@ -13,6 +13,7 @@ use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use sqlx::Row;
 use sqlx::SqlitePool;
 use tauri::Manager;
+use tokio::sync::OnceCell;
 use tokio::task;
 
 pub const SERVICE_NAME: &str = "dev.agent-one";
@@ -142,16 +143,23 @@ pub fn resolve_agent_db_path(app: &tauri::AppHandle) -> Result<PathBuf, String> 
     Ok(app_config_dir.join("agent-one.db"))
 }
 
-async fn open_db_pool(db_path: &Path) -> Result<SqlitePool, String> {
-    let options = SqliteConnectOptions::new()
-        .filename(db_path)
-        .create_if_missing(true);
+static FALLBACK_DB_POOL: OnceCell<SqlitePool> = OnceCell::const_new();
 
-    SqlitePoolOptions::new()
-        .max_connections(1)
-        .connect_with(options)
+async fn open_db_pool(db_path: &Path) -> Result<SqlitePool, String> {
+    FALLBACK_DB_POOL
+        .get_or_try_init(|| async {
+            let options = SqliteConnectOptions::new()
+                .filename(db_path)
+                .create_if_missing(true);
+
+            SqlitePoolOptions::new()
+                .max_connections(1)
+                .connect_with(options)
+                .await
+                .map_err(|e| format!("Failed to open SQLite database: {}", e))
+        })
         .await
-        .map_err(|e| format!("Failed to open SQLite database: {}", e))
+        .cloned()
 }
 
 async fn get_fallback_record(
