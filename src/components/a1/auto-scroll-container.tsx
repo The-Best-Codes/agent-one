@@ -247,12 +247,16 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
 
     return (
       <div
-        className={cn("relative h-full w-full", className, isOverflowing && overflowingClassName)}
+        className={cn(
+          "@container relative h-full w-full",
+          className,
+          isOverflowing && overflowingClassName,
+        )}
         {...props}
       >
         <div
           ref={parentRef}
-          className="h-full w-full scrollbar-gutter-both overflow-y-auto"
+          className="h-full w-full scrollbar-gutter-stable overflow-y-auto @3xl:scrollbar-gutter-both"
           data-testid="auto-scroll-container-scrollable"
         >
           <div className={cn("min-h-full", scrollableClassName)}>
