@@ -225,7 +225,7 @@ export const SETTINGS = {
     ai: "write",
     label: "Chat Sort Order",
     description:
-      "Sort by creation date, your latest sent message, or recent activity such as opening a chat or changing its settings.",
+      "Sort by creation date, your latest sent message, or recent activity such as new replies or changing a chat's settings.",
     default: "updated-at",
     options: {
       "created-at": "Newest chats first",

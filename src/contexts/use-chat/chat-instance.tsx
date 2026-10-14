@@ -59,6 +59,7 @@ export const ChatInstance = memo(
     const suppressAutoSubmitAfterAbortRef = useRef(false);
     const wasBusyRef = useRef(false);
     const notifiedApprovalIdsRef = useRef(new Set<string>());
+    const lastSavedMessagesRef = useRef(initialMessages);
 
     const sendAutomaticallyWhen = useCallback(({ messages }: { messages: UIMessage[] }) => {
       if (suppressAutoSubmitAfterAbortRef.current) {
@@ -156,7 +157,8 @@ export const ChatInstance = memo(
           return;
         }
 
-        if (chat.status !== "streaming") {
+        if (chat.status !== "streaming" && chat.messages !== lastSavedMessagesRef.current) {
+          lastSavedMessagesRef.current = chat.messages;
           saveChat({ chatId, messages: chat.messages });
         }
 
