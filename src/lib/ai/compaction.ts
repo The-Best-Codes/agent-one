@@ -231,6 +231,18 @@ export async function summarizeConversation({
   return { summary, usage: result.usage };
 }
 
+export function estimateTokens(value: unknown) {
+  const text =
+    typeof value === "string"
+      ? value
+      : JSON.stringify(value, (_key, item: unknown) =>
+          item && typeof item === "object" && ("mediaType" in item || "mimeType" in item)
+            ? undefined
+            : item,
+        );
+  return Math.ceil((text ?? "").length / 4);
+}
+
 export function getUsageContextTokens(usage: MessageTokenUsage | LanguageModelUsage | undefined) {
   return (usage?.inputTokens ?? 0) + (usage?.outputTokens ?? 0);
 }

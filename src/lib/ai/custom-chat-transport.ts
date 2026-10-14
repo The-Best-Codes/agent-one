@@ -29,6 +29,7 @@ import {
 } from "@/lib/ai/chat-usage";
 import {
   createCompactionChunk,
+  estimateTokens,
   getContextTokens,
   getCompactionThreshold,
   getMessagesAfterCompaction,
@@ -268,7 +269,14 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     }
 
     const compactionThreshold = getCompactionThreshold(modelConfig);
-    const initialContextTokens = getContextTokens(options.messages);
+    const lastMessage = options.messages.at(-1);
+    const initialContextTokens =
+      getContextTokens(options.messages) +
+      (lastMessage?.role === "user"
+        ? estimateTokens(
+            lastMessage.parts.map((part) => (part.type === "text" ? part.text : "")).join(""),
+          )
+        : 0);
     const chunkInjector = new UIMessageChunkInjector();
     let lastCompactionStepNumber: number | undefined;
     let canAutoCompact = true;
@@ -292,11 +300,16 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       toolChoice: toolBehavior === "disable" ? "none" : "auto",
       stopWhen: stopWhenCondition,
       instructions,
-      prepareStep: async ({ steps, stepNumber, messages: stepMessages }) => {
+      prepareStep: async ({ steps, stepNumber, messages: stepMessages, responseMessages }) => {
         const lastStep = steps.at(-1);
-        const contextTokens = lastStep
-          ? getUsageContextTokens(lastStep.usage)
-          : initialContextTokens;
+        const usageTokens = lastStep ? getUsageContextTokens(lastStep.usage) : initialContextTokens;
+        const contextTokens =
+          usageTokens +
+          estimateTokens(
+            lastStep
+              ? lastStep.toolResults.map((toolResult) => toolResult.output)
+              : responseMessages,
+          );
 
         const needsCompaction = shouldCompact({
           contextTokens,
@@ -305,7 +318,11 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
         });
 
         if (
-          needsCompaction &&
+          shouldCompact({
+            contextTokens: usageTokens,
+            contextWindow,
+            threshold: compactionThreshold,
+          }) &&
           lastCompactionStepNumber !== undefined &&
           stepNumber === lastCompactionStepNumber + 1
         ) {
