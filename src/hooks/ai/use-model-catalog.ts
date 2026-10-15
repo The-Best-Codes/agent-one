@@ -1,6 +1,7 @@
 import type { LanguageModel } from "ai";
 import { useAtomValue } from "jotai";
 import { atom } from "jotai";
+import { atomFamily } from "jotai-family";
 import { useMemo } from "react";
 
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
@@ -19,6 +20,7 @@ import {
 } from "@/lib/ai/providers/provider-models";
 import {
   getEffectiveApiKey,
+  getProviderById,
   hasApiKey,
   PROVIDER_REGISTRY,
   type ProviderId,
@@ -42,7 +44,7 @@ export interface ModelData {
   name: string;
   provider: string;
   providerId: string;
-  model: LanguageModel;
+  getLanguageModel: () => LanguageModel;
   supportsToolUse: boolean;
   supportsImageInput: boolean;
   supportsAttachments: boolean;
@@ -51,6 +53,18 @@ export interface ModelData {
 }
 
 export type ToolBehavior = "default" | "ask" | "yolo" | "disable";
+
+export const REASONING_EFFORTS = [
+  "none",
+  "minimal",
+  "low",
+  "medium",
+  "high",
+  "xhigh",
+  "max",
+] as const;
+
+export type ReasoningEffort = (typeof REASONING_EFFORTS)[number];
 
 export interface ModelConfig {
   temperature?: number;
@@ -62,6 +76,8 @@ export interface ModelConfig {
   presencePenalty?: number;
   seed?: number;
   toolBehavior?: ToolBehavior;
+  reasoningEffort?: ReasoningEffort;
+  compactionThreshold?: number | "off";
 }
 
 export const DEFAULT_MODEL_CONFIG: ModelConfig = {
@@ -74,10 +90,16 @@ export const DEFAULT_MODEL_CONFIG: ModelConfig = {
   presencePenalty: undefined,
   seed: undefined,
   toolBehavior: "default",
+  reasoningEffort: undefined,
+  compactionThreshold: undefined,
 };
 
 export function getToolBehavior(modelConfig: ModelConfig): ToolBehavior {
   return modelConfig.toolBehavior ?? "default";
+}
+
+export function getReasoningEffort(modelConfig: ModelConfig): ReasoningEffort | undefined {
+  return REASONING_EFFORTS.find((effort) => effort === modelConfig.reasoningEffort);
 }
 
 export const DEFAULT_CHAT_MODEL_ID = "groq-moonshotai/kimi-k2-instruct-0905";
@@ -112,30 +134,23 @@ function getProviderModels(
   return Object.values(provider.models);
 }
 
-function toModelRecord(model: ProviderModelMetadata): ModelRecord {
+interface ModelLists {
+  models: ModelData[];
+  chatModels: ModelData[];
+}
+
+function lazy<T>(create: () => T): () => T {
+  let value: { current: T } | undefined;
+  return () => {
+    value ??= { current: create() };
+    return value.current;
+  };
+}
+
+function toModelLists(entries: { model: ModelData; supportsText?: boolean }[]): ModelLists {
   return {
-    id: model.id,
-    name: model.name,
-    features: {
-      attachment: model.supportsAttachments,
-      reasoning: model.supportsReasoning,
-      tool_call: model.supportsTools,
-    },
-    limit: {
-      context: model.contextWindow,
-      output: model.maxOutputTokens,
-    },
-    modalities: {
-      input: [
-        ...(model.supportsText ? (["text"] as const) : []),
-        ...(model.supportsImageInput ? (["image"] as const) : []),
-        ...(model.supportsAttachments ? (["file"] as const) : []),
-      ],
-      output: [
-        ...(model.supportsText ? (["text"] as const) : []),
-        ...(model.supportsImages ? (["image"] as const) : []),
-      ],
-    },
+    models: entries.map((entry) => entry.model),
+    chatModels: entries.filter((entry) => entry.supportsText).map((entry) => entry.model),
   };
 }
 
@@ -145,8 +160,7 @@ function mapDirectoryModels(
   providerName: string,
   createModel: (modelId: string) => LanguageModel,
   overrides: ProviderModelMetadata[],
-  filter?: (model: ModelRecord) => boolean,
-): ModelData[] {
+): ModelLists {
   const modelMap = new Map(
     getProviderModels(modelDirectoryData, providerId)
       .map(mapDirectoryModelToMetadata)
@@ -167,80 +181,59 @@ function mapDirectoryModels(
     );
   }
 
-  const models = Array.from(modelMap.values());
-  const filteredModels = models.filter(
-    (model) =>
-      (providerId !== "agent-one" || model.id === "agent-one-auto") &&
-      (!filter || filter(toModelRecord(model))),
+  return toModelLists(
+    Array.from(modelMap.values())
+      .filter((model) => providerId !== "agent-one" || model.id === "agent-one-auto")
+      .map((model) => ({
+        supportsText: model.supportsText,
+        model: {
+          id: `${providerId}-${model.id}`,
+          name: providerId === "agent-one" ? "Default" : (model.name ?? model.id),
+          provider: providerName,
+          providerId,
+          getLanguageModel: lazy(() => createModel(model.id)),
+          supportsToolUse: model.supportsTools,
+          supportsImageInput: model.supportsImageInput ?? false,
+          supportsAttachments: model.supportsAttachments ?? false,
+          supportsReasoning: model.supportsReasoning ?? false,
+          contextWindow: model.contextWindow,
+        },
+      })),
   );
-
-  return filteredModels.map((model) => ({
-    id: `${providerId}-${model.id}`,
-    name: providerId === "agent-one" ? "Default" : (model.name ?? model.id),
-    provider: providerName,
-    providerId,
-    model: createModel(model.id),
-    supportsToolUse: model.supportsTools,
-    supportsImageInput: model.supportsImageInput ?? false,
-    supportsAttachments: model.supportsAttachments ?? false,
-    supportsReasoning: model.supportsReasoning ?? false,
-    contextWindow: model.contextWindow,
-  }));
 }
 
-function mapCustomProviderModels(
-  provider: CustomProvider,
-  apiKey: string,
-  filter?: (model: ProviderModelMetadata) => boolean,
-): ModelData[] {
-  const instance = createCustomProvider(provider, apiKey);
-
-  return provider.models
-    .map(normalizeProviderModelMetadata)
-    .filter((model) => (filter ? filter(model) : true))
-    .map((model) => ({
-      id: `custom-${provider.id}-${model.id}`,
-      name: model.name || model.id,
-      provider: provider.name,
-      providerId: provider.id,
-      model: instance.languageModel(model.id),
-      supportsToolUse: model.supportsTools,
-      supportsImageInput: model.supportsImageInput ?? false,
-      supportsAttachments: model.supportsAttachments ?? false,
-      supportsReasoning: model.supportsReasoning ?? false,
-      contextWindow: model.contextWindow,
-    }));
+function mapProviderModels(
+  idPrefix: string,
+  provider: { id: string; name: string; models: ProviderModelMetadata[] },
+  createModel: (modelId: string) => LanguageModel,
+): ModelLists {
+  return toModelLists(
+    provider.models.map(normalizeProviderModelMetadata).map((model) => ({
+      supportsText: model.supportsText,
+      model: {
+        id: `${idPrefix}-${provider.id}-${model.id}`,
+        name: model.name || model.id,
+        provider: provider.name,
+        providerId: provider.id,
+        getLanguageModel: lazy(() => createModel(model.id)),
+        supportsToolUse: model.supportsTools,
+        supportsImageInput: model.supportsImageInput ?? false,
+        supportsAttachments: model.supportsAttachments ?? false,
+        supportsReasoning: model.supportsReasoning ?? false,
+        contextWindow: model.contextWindow,
+      },
+    })),
+  );
 }
 
-function mapLocalProviderModels(
-  provider: LocalProvider,
-  filter?: (model: ProviderModelMetadata) => boolean,
-): ModelData[] {
-  const instance = createLocalProvider(provider);
-
-  return provider.models
-    .map(normalizeProviderModelMetadata)
-    .filter((model) => (filter ? filter(model) : true))
-    .map((model) => ({
-      id: `local-${provider.id}-${model.id}`,
-      name: model.name || model.id,
-      provider: provider.name,
-      providerId: provider.id,
-      model: instance.languageModel(model.id),
-      supportsToolUse: model.supportsTools,
-      supportsImageInput: model.supportsImageInput ?? false,
-      supportsAttachments: model.supportsAttachments ?? false,
-      supportsReasoning: model.supportsReasoning ?? false,
-      contextWindow: model.contextWindow,
-    }));
+function mapCustomProviderModels(provider: CustomProvider, apiKey: string): ModelLists {
+  const getInstance = lazy(() => createCustomProvider(provider, apiKey));
+  return mapProviderModels("custom", provider, (modelId) => getInstance().languageModel(modelId));
 }
 
-function isChatModel(model: ModelRecord) {
-  return (model.modalities?.output ?? []).includes("text");
-}
-
-function isImageModel(model: ModelRecord) {
-  return (model.modalities?.output ?? []).includes("image");
+function mapLocalProviderModels(provider: LocalProvider): ModelLists {
+  const getInstance = lazy(() => createLocalProvider(provider));
+  return mapProviderModels("local", provider, (modelId) => getInstance().languageModel(modelId));
 }
 
 const providerHasApiKeyAtom = atom((get) => {
@@ -258,130 +251,47 @@ const providerIsAvailableAtom = atom((get) => {
   ) as Record<ProviderId, boolean>;
 });
 
-const providerInstancesAtom = atom((get) => {
-  return Object.fromEntries(
-    PROVIDER_REGISTRY.map((provider) => [
-      provider.id,
-      provider.factory(
-        getEffectiveApiKey(provider.id, get(apiKeyAtomFamily(provider.id))),
-        get(providerHeadersAtomFamily(provider.id)),
-      ),
-    ]),
-  ) as Record<ProviderId, ReturnType<(typeof PROVIDER_REGISTRY)[number]["factory"]>>;
-});
+const directoryProviderModelsAtomFamily = atomFamily((providerId: ProviderId) =>
+  atom((get) => {
+    const provider = getProviderById(providerId);
+    const apiKey = getEffectiveApiKey(providerId, get(apiKeyAtomFamily(providerId)));
+    const headers = get(providerHeadersAtomFamily(providerId));
+    const getInstance = lazy(() => provider.factory(apiKey, headers));
 
-const availableModelsAtom = atom((get) => {
-  const localProviders = get(normalizedLocalProvidersAtom);
-  const customProviders = get(normalizedCustomProvidersAtom);
-  const customProviderApiKeys = get(customProviderApiKeysAtom);
-  const modelDirectoryData = get(modelDirectoryDataAtom);
-  const providers = get(providerInstancesAtom);
-
-  const builtInModels = PROVIDER_REGISTRY.flatMap((provider) =>
-    mapDirectoryModels(
-      modelDirectoryData,
+    return mapDirectoryModels(
+      get(modelDirectoryDataAtom),
       provider.id,
       provider.label,
-      providers[provider.id].languageModel,
-      get(providerModelsAtomFamily(provider.id)),
-    ),
-  );
-
-  const customModels = customProviders
-    .filter((provider) => provider.enabled)
-    .flatMap((provider) =>
-      mapCustomProviderModels(provider, customProviderApiKeys[provider.id] ?? ""),
+      (modelId) => getInstance().languageModel(modelId),
+      get(providerModelsAtomFamily(providerId)),
     );
+  }),
+);
 
-  const localModels = localProviders
-    .filter((provider) => provider.enabled)
-    .flatMap((provider) => mapLocalProviderModels(provider));
-
-  return [...builtInModels, ...localModels, ...customModels];
-});
-
-const availableChatModelsAtom = atom((get) => {
-  const localProviders = get(normalizedLocalProvidersAtom);
-  const customProviders = get(normalizedCustomProvidersAtom);
+const availableModelListsAtom = atom((get): ModelLists => {
   const customProviderApiKeys = get(customProviderApiKeysAtom);
-  const modelDirectoryData = get(modelDirectoryDataAtom);
-  const providers = get(providerInstancesAtom);
 
-  const builtInModels = PROVIDER_REGISTRY.flatMap((provider) =>
-    mapDirectoryModels(
-      modelDirectoryData,
-      provider.id,
-      provider.label,
-      providers[provider.id].languageModel,
-      get(providerModelsAtomFamily(provider.id)),
-      isChatModel,
-    ),
-  );
-
-  const customModels = customProviders
-    .filter((provider) => provider.enabled)
-    .flatMap((provider) =>
-      mapCustomProviderModels(
-        provider,
-        customProviderApiKeys[provider.id] ?? "",
-        (model) => model.supportsText,
+  const lists = [
+    ...PROVIDER_REGISTRY.map((provider) => get(directoryProviderModelsAtomFamily(provider.id))),
+    ...get(normalizedLocalProvidersAtom)
+      .filter((provider) => provider.enabled)
+      .map((provider) => mapLocalProviderModels(provider)),
+    ...get(normalizedCustomProvidersAtom)
+      .filter((provider) => provider.enabled)
+      .map((provider) =>
+        mapCustomProviderModels(provider, customProviderApiKeys[provider.id] ?? ""),
       ),
-    );
+  ];
 
-  const localModels = localProviders
-    .filter((provider) => provider.enabled)
-    .flatMap((provider) => mapLocalProviderModels(provider, (model) => model.supportsText));
-
-  return [...builtInModels, ...localModels, ...customModels];
-});
-
-const availableImageModelsAtom = atom((get) => {
-  const localProviders = get(normalizedLocalProvidersAtom);
-  const customProviders = get(normalizedCustomProvidersAtom);
-  const customProviderApiKeys = get(customProviderApiKeysAtom);
-  const modelDirectoryData = get(modelDirectoryDataAtom);
-  const providers = get(providerInstancesAtom);
-
-  const builtInModels = PROVIDER_REGISTRY.filter(
-    (provider) => provider.id === "google" || provider.id === "openrouter",
-  ).flatMap((provider) =>
-    mapDirectoryModels(
-      modelDirectoryData,
-      provider.id,
-      provider.label,
-      providers[provider.id].languageModel,
-      get(providerModelsAtomFamily(provider.id)),
-      isImageModel,
-    ),
-  );
-
-  const customModels = customProviders
-    .filter((provider) => provider.enabled)
-    .flatMap((provider) => {
-      const instance = createCustomProvider(provider, customProviderApiKeys[provider.id] ?? "");
-
-      return provider.models
-        .map(normalizeProviderModelMetadata)
-        .filter((model) => model.supportsImages)
-        .map((model) => ({
-          id: `custom-${provider.id}-${model.id}`,
-          name: model.name || model.id,
-          provider: provider.name,
-          model: instance.languageModel(model.id),
-          supportsToolUse: model.supportsTools,
-        }));
-    });
-
-  const localModels = localProviders
-    .filter((provider) => provider.enabled)
-    .flatMap((provider) => mapLocalProviderModels(provider, (model) => model.supportsImages));
-
-  return [...builtInModels, ...localModels, ...customModels];
+  return {
+    models: lists.flatMap((list) => list.models),
+    chatModels: lists.flatMap((list) => list.chatModels),
+  };
 });
 
 const availableEnabledChatModelsAtom = atom((get) => {
   const hideAgentOneModels = get(hideAgentOneModelsAtom);
-  const availableChatModels = get(availableChatModelsAtom);
+  const availableChatModels = get(availableModelListsAtom).chatModels;
   const providerIsAvailable = get(providerIsAvailableAtom);
   const providerIdByLabel = Object.fromEntries(
     PROVIDER_REGISTRY.map((provider) => [provider.label, provider.id]),
@@ -402,10 +312,8 @@ const availableEnabledChatModelsAtom = atom((get) => {
 });
 
 export function useModelCatalog() {
-  const AVAILABLE_MODELS = useAtomValue(availableModelsAtom);
-  const AVAILABLE_CHAT_MODELS = useAtomValue(availableChatModelsAtom);
+  const { models } = useAtomValue(availableModelListsAtom);
   const baseEnabledChatModels = useAtomValue(availableEnabledChatModelsAtom);
-  const AVAILABLE_IMAGE_MODELS = useAtomValue(availableImageModelsAtom);
   const providerHasApiKey = useAtomValue(providerHasApiKeyAtom);
   const providerIsAvailable = useAtomValue(providerIsAvailableAtom);
   const { isApiKeysLoading } = useApiKeys();
@@ -424,15 +332,15 @@ export function useModelCatalog() {
 
   const hasAvailableModels = AVAILABLE_ENABLED_CHAT_MODELS.length > 0;
 
-  const getModelById = useMemo(
-    () => (id: string) => AVAILABLE_MODELS.find((model) => model.id === id),
-    [AVAILABLE_MODELS],
-  );
+  const getModelById = useMemo(() => {
+    const modelsById = new Map(models.map((model) => [model.id, model]));
+    return (id: string) => modelsById.get(id);
+  }, [models]);
 
-  const getChatModelById = useMemo(
-    () => (id: string) => AVAILABLE_ENABLED_CHAT_MODELS.find((model) => model.id === id),
-    [AVAILABLE_ENABLED_CHAT_MODELS],
-  );
+  const getChatModelById = useMemo(() => {
+    const modelsById = new Map(AVAILABLE_ENABLED_CHAT_MODELS.map((model) => [model.id, model]));
+    return (id: string) => modelsById.get(id);
+  }, [AVAILABLE_ENABLED_CHAT_MODELS]);
 
   const getSmartDefaultChatModel = useMemo(
     () => () => {
@@ -467,10 +375,7 @@ export function useModelCatalog() {
   );
 
   return {
-    AVAILABLE_MODELS,
-    AVAILABLE_CHAT_MODELS,
     AVAILABLE_ENABLED_CHAT_MODELS,
-    AVAILABLE_IMAGE_MODELS,
     getModelById,
     getChatModelById,
     getSmartDefaultChatModel,

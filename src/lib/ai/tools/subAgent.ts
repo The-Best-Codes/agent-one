@@ -2,24 +2,26 @@ import type { Context, Tool, ToolExecutionOptions } from "@ai-sdk/provider-utils
 import {
   convertToModelMessages,
   extractReasoningMiddleware,
+  generateId,
   type LanguageModel,
   readUIMessageStream,
   isStepCount,
   streamText,
   toUIMessageStream,
-  type ModelMessage,
   type ToolSet,
   type UIMessage,
   wrapLanguageModel,
 } from "ai";
 import { z } from "zod";
 
-import type { ModelConfig } from "@/hooks/ai/use-model-catalog";
+import { getReasoningEffort, type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
 
 const SUBAGENT_TOOL_NAME = "subAgent";
+const DEFAULT_SUBAGENT_MAX_STEPS = 20;
+const LIVE_STATE_EMIT_INTERVAL_MS = 100;
 
 export interface SubAgentToolConfig {
   requiresApproval: boolean;
@@ -27,6 +29,7 @@ export interface SubAgentToolConfig {
 
 export interface SubAgentInput {
   task: string;
+  maxSteps?: number;
 }
 
 export interface SubAgentExecutionContext {
@@ -63,6 +66,10 @@ type ApprovalResponse = {
 
 const subAgentLiveStateMap = new Map<string, SubAgentLiveState>();
 const subAgentListenersMap = new Map<string, Set<() => void>>();
+const subAgentEmitThrottleMap = new Map<
+  string,
+  { lastEmitAt: number; timeoutId: ReturnType<typeof setTimeout> | null }
+>();
 const subAgentApprovalWaiters = new Map<
   string,
   {
@@ -92,7 +99,35 @@ function emitLiveState(toolCallId: string) {
 
 function setLiveState(toolCallId: string, state: SubAgentLiveState) {
   subAgentLiveStateMap.set(toolCallId, state);
-  emitLiveState(toolCallId);
+
+  const throttle = subAgentEmitThrottleMap.get(toolCallId);
+  if (state.status !== "running") {
+    if (throttle?.timeoutId) {
+      clearTimeout(throttle.timeoutId);
+    }
+    subAgentEmitThrottleMap.delete(toolCallId);
+    emitLiveState(toolCallId);
+    return;
+  }
+
+  const now = Date.now();
+  if (!throttle || now - throttle.lastEmitAt >= LIVE_STATE_EMIT_INTERVAL_MS) {
+    if (throttle?.timeoutId) {
+      clearTimeout(throttle.timeoutId);
+    }
+    subAgentEmitThrottleMap.set(toolCallId, { lastEmitAt: now, timeoutId: null });
+    emitLiveState(toolCallId);
+    return;
+  }
+
+  throttle.timeoutId ??= setTimeout(
+    () => {
+      throttle.timeoutId = null;
+      throttle.lastEmitAt = Date.now();
+      emitLiveState(toolCallId);
+    },
+    LIVE_STATE_EMIT_INTERVAL_MS - (now - throttle.lastEmitAt),
+  );
 }
 
 function updateLiveState(
@@ -105,6 +140,15 @@ function updateLiveState(
   }
 
   setLiveState(toolCallId, updater(current));
+}
+
+function pruneLiveState(toolCallId: string) {
+  if (
+    subAgentLiveStateMap.get(toolCallId)?.status === "completed" &&
+    !subAgentListenersMap.has(toolCallId)
+  ) {
+    subAgentLiveStateMap.delete(toolCallId);
+  }
 }
 
 export function getSubAgentLiveState(toolCallId: string) {
@@ -125,6 +169,7 @@ export function subscribeSubAgentLiveState(toolCallId: string, listener: () => v
     current.delete(listener);
     if (current.size === 0) {
       subAgentListenersMap.delete(toolCallId);
+      pruneLiveState(toolCallId);
     }
   };
 }
@@ -220,18 +265,29 @@ export function respondToSubAgentApproval(
   subAgentApprovalWaiters.get(approvalId)?.resolve({ approved, reason });
 }
 
+const NO_FINAL_RESPONSE_TEXT = "The subagent finished without writing a final response.";
+
 function extractSummaryText(message: UIMessage | undefined): string {
   if (!message) {
-    return "Subagent finished.";
+    return NO_FINAL_RESPONSE_TEXT;
   }
 
+  const lastStepStart = message.parts.map((part) => part.type).lastIndexOf("step-start");
   const text = message.parts
+    .slice(lastStepStart + 1)
     .filter((part) => part.type === "text")
     .map((part) => part.text)
     .join("\n")
     .trim();
 
-  return text || "Subagent finished.";
+  return text || NO_FINAL_RESPONSE_TEXT;
+}
+
+function getSubAgentMaxSteps(requested: number | undefined, configured: number | undefined) {
+  if (configured === undefined) {
+    return requested ?? DEFAULT_SUBAGENT_MAX_STEPS;
+  }
+  return Math.min(requested ?? configured, configured);
 }
 
 function excludeSubAgentTool(tools: ToolSet): ToolSet {
@@ -240,19 +296,21 @@ function excludeSubAgentTool(tools: ToolSet): ToolSet {
 
 async function* streamSubAgentRun({
   task,
-  messages,
+  maxSteps,
   abortSignal,
   toolCallId,
   context,
 }: {
   task: string;
-  messages: ModelMessage[];
+  maxSteps?: number;
   abortSignal?: AbortSignal;
   toolCallId: string;
   context: SubAgentExecutionContext;
 }): AsyncGenerator<SubAgentOutput, UIMessage | undefined, undefined> {
   const tools = excludeSubAgentTool(await context.getTools());
-  const subAgentMessages: UIMessage[] = [];
+  const subAgentMessages: UIMessage[] = [
+    { id: generateId(), role: "user", parts: [{ type: "text", text: task }] },
+  ];
   let finalMessage: UIMessage | undefined;
 
   const wrappedModel =
@@ -266,16 +324,11 @@ async function* streamSubAgentRun({
   while (true) {
     abortSignal?.throwIfAborted();
 
-    const promptMessages =
-      subAgentMessages.length === 0
-        ? ([
-            ...messages,
-            { role: "user", content: [{ type: "text", text: task }] },
-          ] satisfies ModelMessage[])
-        : await convertToModelMessages(subAgentMessages, {
-            tools,
-            ignoreIncompleteToolCalls: true,
-          });
+    const promptMessages = await convertToModelMessages(subAgentMessages, {
+      tools,
+      ignoreIncompleteToolCalls: true,
+    });
+    const lastMessage = subAgentMessages.at(-1);
 
     const result = streamText({
       model: wrappedModel,
@@ -286,11 +339,12 @@ async function* streamSubAgentRun({
       frequencyPenalty: context.modelConfig.frequencyPenalty,
       presencePenalty: context.modelConfig.presencePenalty,
       seed: context.modelConfig.seed,
+      reasoning: getReasoningEffort(context.modelConfig),
       messages: promptMessages,
       abortSignal,
       tools,
       toolChoice: "auto",
-      stopWhen: isStepCount(context.modelConfig.maxSteps ?? 20),
+      stopWhen: isStepCount(getSubAgentMaxSteps(maxSteps, context.modelConfig.maxSteps)),
       instructions: buildSubAgentInstructions(context.systemPrompt),
     });
 
@@ -298,7 +352,7 @@ async function* streamSubAgentRun({
 
     for await (const message of readUIMessageStream({
       stream: toUIMessageStream({ stream: result.stream, tools }),
-      message: subAgentMessages.at(-1),
+      message: lastMessage?.role === "assistant" ? lastMessage : undefined,
     })) {
       latestMessage = cloneMessage(message);
       setLiveState(toolCallId, {
@@ -317,7 +371,7 @@ async function* streamSubAgentRun({
       break;
     }
 
-    if (subAgentMessages.length > 0 && subAgentMessages.at(-1)?.id === latestMessage.id) {
+    if (lastMessage?.role === "assistant" && lastMessage.id === latestMessage.id) {
       subAgentMessages[subAgentMessages.length - 1] = latestMessage;
     } else {
       subAgentMessages.push(latestMessage);
@@ -383,6 +437,7 @@ async function* streamSubAgentRun({
     message: finalMessage ?? null,
     pendingApprovalIds: [],
   });
+  pruneLiveState(toolCallId);
 
   if (finalMessage) {
     yield {
@@ -400,10 +455,21 @@ export const createSubAgentTool = (
 ) => {
   return {
     description:
-      "Spawn a subagent to work on a focused task. The subagent can use the same tools as you, except it cannot spawn more subagents.",
+      "Spawn a subagent to work on a focused task. The subagent starts fresh and cannot see this conversation, so include all the context it needs in the task. It can use the same tools as you, except it cannot spawn more subagents.",
     needsApproval: config.requiresApproval,
     inputSchema: z.object({
-      task: z.string().min(1).describe("The task for the subagent to complete"),
+      task: z
+        .string()
+        .min(1)
+        .describe("The task for the subagent to complete, with all the context it needs"),
+      maxSteps: z
+        .number()
+        .int()
+        .min(1)
+        .optional()
+        .describe(
+          `The maximum number of steps the subagent can take. Defaults to ${DEFAULT_SUBAGENT_MAX_STEPS}. Raise it for long tasks that need many tool calls.`,
+        ),
     }),
     execute: async function* (input: SubAgentInput, options: ToolExecutionOptions<Context>) {
       logger.verbose("Executing subAgent tool with input:", input);
@@ -415,14 +481,23 @@ export const createSubAgentTool = (
         pendingApprovalIds: [],
       });
 
-      for await (const value of streamSubAgentRun({
-        task: input.task,
-        messages: options.messages,
-        abortSignal: options.abortSignal,
-        toolCallId: options.toolCallId,
-        context,
-      })) {
-        yield value;
+      try {
+        for await (const value of streamSubAgentRun({
+          task: input.task,
+          maxSteps: input.maxSteps,
+          abortSignal: options.abortSignal,
+          toolCallId: options.toolCallId,
+          context,
+        })) {
+          yield value;
+        }
+      } finally {
+        updateLiveState(options.toolCallId, (state) =>
+          state.status === "completed"
+            ? state
+            : { ...state, status: "completed", pendingApprovalIds: [] },
+        );
+        pruneLiveState(options.toolCallId);
       }
 
       return undefined;

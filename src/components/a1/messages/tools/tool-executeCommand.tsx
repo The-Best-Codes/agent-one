@@ -9,7 +9,7 @@ import {
 } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { AnsiHtml } from "fancy-ansi/react";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import {
   AdaptiveTooltip,
@@ -169,8 +169,12 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
   const [showLongRunningStop, setShowLongRunningStop] = useState(false);
 
+  const subscribeLiveState = useCallback(
+    (listener: () => void) => subscribeExecuteCommandLiveState(callId, listener),
+    [callId],
+  );
   const liveState = useSyncExternalStore(
-    (listener) => subscribeExecuteCommandLiveState(callId, listener),
+    subscribeLiveState,
     () => getExecuteCommandLiveState(callId),
     () => getExecuteCommandLiveState(callId),
   );
@@ -314,8 +318,8 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
           <AccordionItem
             value={callId}
             className={cn(
-              "group/exec-accordion border-border rounded-md border-0 transition-[padding] duration-200",
-              isMainAccordionOpen && "border border-b! w-full p-2",
+              "group/exec-accordion border-border w-fit max-w-full rounded-md border-0 transition-[padding] duration-200",
+              isMainAccordionOpen && "w-full border border-b! p-2",
             )}
           >
             <AccordionTrigger
@@ -400,8 +404,8 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
               <AccordionItem
                 value={callId}
                 className={cn(
-                  "group/exec-accordion border-border w-full rounded-md border-0 transition-[padding] duration-200",
-                  isMainAccordionOpen && "border border-b! p-2",
+                  "group/exec-accordion border-border w-fit max-w-full rounded-md border-0 transition-[padding] duration-200",
+                  isMainAccordionOpen && "w-full border border-b! p-2",
                 )}
               >
                 <AccordionTrigger

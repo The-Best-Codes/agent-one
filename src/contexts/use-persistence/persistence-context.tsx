@@ -1,11 +1,11 @@
 import type { UIMessage } from "ai";
 import { generateId } from "ai";
 import { useAtom, useSetAtom } from "jotai";
-import React, { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { DEFAULT_MODEL_CONFIG, type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { chatIdsAtom, chatUpdateTriggerAtom, lastVacuumTimestampAtom } from "@/lib/jotai/atoms";
-import { chatSortAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { type ChatSearchResult, chatStorage } from "@/lib/storage/chat-storage";
 
@@ -63,7 +63,6 @@ export interface PersistenceContextType {
     branchFromMessageId: string;
     messages: UIMessage[];
   }) => string;
-  chatUpdateTrigger: number;
 }
 
 const NEW_CHAT_MODEL_ID_KEY = "new-chat-model-id";
@@ -103,9 +102,9 @@ function touchMetadata(metadata: ChatMetadata): ChatMetadata {
 
 export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const setChatIds = useSetAtom(chatIdsAtom);
-  const [chatUpdateTrigger, setChatUpdateTrigger] = useAtom(chatUpdateTriggerAtom);
+  const setChatUpdateTrigger = useSetAtom(chatUpdateTriggerAtom);
   const [lastVacuumTimestamp, setLastVacuumTimestamp] = useAtom(lastVacuumTimestampAtom);
-  const [chatSort] = useAtom(chatSortAtom);
+  const [chatSort] = useAtom(settingAtoms.CHAT_SORT);
 
   const metadataCacheRef = useRef<Map<string, ChatMetadata>>(new Map());
   const [isMetadataLoaded, setIsMetadataLoaded] = useState(false);
@@ -506,29 +505,52 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     [getMetadata, setMetadata, persistMetadata, persistMessages, setChatIds, setChatUpdateTrigger],
   );
 
-  const contextValue: PersistenceContextType = {
-    isMetadataLoaded,
-    getNewChatModelId,
-    saveNewChatModelId,
-    getNewChatModelConfig,
-    saveNewChatModelConfig,
-    createChat,
-    loadChatMessages,
-    loadChatMetadata,
-    loadFullChatData,
-    saveChat,
-    markChatMessageSent,
-    saveChatModel,
-    saveChatModelConfig,
-    saveChatTitleState,
-    saveChatTitle,
-    deleteChat,
-    bulkDeleteChats,
-    bulkExportChats,
-    searchChats,
-    branchChat,
-    chatUpdateTrigger,
-  };
+  const contextValue = useMemo<PersistenceContextType>(
+    () => ({
+      isMetadataLoaded,
+      getNewChatModelId,
+      saveNewChatModelId,
+      getNewChatModelConfig,
+      saveNewChatModelConfig,
+      createChat,
+      loadChatMessages,
+      loadChatMetadata,
+      loadFullChatData,
+      saveChat,
+      markChatMessageSent,
+      saveChatModel,
+      saveChatModelConfig,
+      saveChatTitleState,
+      saveChatTitle,
+      deleteChat,
+      bulkDeleteChats,
+      bulkExportChats,
+      searchChats,
+      branchChat,
+    }),
+    [
+      isMetadataLoaded,
+      getNewChatModelId,
+      saveNewChatModelId,
+      getNewChatModelConfig,
+      saveNewChatModelConfig,
+      createChat,
+      loadChatMessages,
+      loadChatMetadata,
+      loadFullChatData,
+      saveChat,
+      markChatMessageSent,
+      saveChatModel,
+      saveChatModelConfig,
+      saveChatTitleState,
+      saveChatTitle,
+      deleteChat,
+      bulkDeleteChats,
+      bulkExportChats,
+      searchChats,
+      branchChat,
+    ],
+  );
 
   return <PersistenceContext.Provider value={contextValue}>{children}</PersistenceContext.Provider>;
 };

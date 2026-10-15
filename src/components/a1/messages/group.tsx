@@ -7,16 +7,18 @@ import { MessageActionRow } from "./action-row";
 export const MessageGroup = ({
   children,
   messageRole,
-  contentToCopy,
-  contentToSpeak,
+  getContentToCopy,
+  getContentToSpeak,
+  hasContentToSpeak,
   messageId,
   onEdit,
   onBranch,
 }: {
   children: React.ReactNode;
   messageRole: UIMessage["role"];
-  contentToCopy: string;
-  contentToSpeak: string;
+  getContentToCopy: () => string;
+  getContentToSpeak: () => string;
+  hasContentToSpeak: boolean;
   messageId: UIMessage["id"];
   onEdit?: () => void;
   onBranch?: () => void;
@@ -39,8 +41,9 @@ export const MessageGroup = ({
         {children}
       </div>
       <MessageActionRow
-        contentToCopy={contentToCopy}
-        contentToSpeak={contentToSpeak}
+        getContentToCopy={getContentToCopy}
+        getContentToSpeak={getContentToSpeak}
+        hasContentToSpeak={hasContentToSpeak}
         messageRole={messageRole}
         messageId={messageId}
         onEdit={onEdit}

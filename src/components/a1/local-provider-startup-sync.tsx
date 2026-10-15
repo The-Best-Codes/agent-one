@@ -6,6 +6,9 @@ import {
   normalizedLocalProvidersAtom,
   updateLocalProviderAtom,
 } from "@/lib/jotai/local-provider-atoms";
+import { getLogger } from "@/lib/logger";
+
+const logger = getLogger(import.meta.url);
 
 const store = getDefaultStore();
 
@@ -44,10 +47,11 @@ export function LocalProviderStartupSync() {
           store.set(updateLocalProviderAtom, provider.id, {
             models: [...fetchedModels, ...extraModels],
           });
-        } catch {
+        } catch (error) {
           if (cancelled) {
             return;
           }
+          logger.warn(`Failed to refresh models for local provider ${provider.id}`, error);
         }
       }
     })();

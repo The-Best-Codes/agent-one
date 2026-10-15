@@ -4,7 +4,7 @@ import debounce from "lodash.debounce";
 import { authClient, getAuthToken, SERVER_URL } from "@/lib/auth/auth-client";
 import { syncEnabledAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
-import { DEFAULT_SETTINGS, type DefaultSettings } from "@/lib/settings/types";
+import { DEFAULT_SETTINGS, SETTING_KEYS, type SettingKey } from "@/lib/settings/definitions";
 
 import { SETTING_PREFIX } from "../jotai/settings-atoms";
 
@@ -15,7 +15,6 @@ const DEBOUNCE_MS = 2000;
 const INITIAL_RETRY_MS = 2000;
 const MAX_RETRY_MS = 600_000;
 
-type SettingKey = keyof DefaultSettings;
 type TimestampMap = Partial<Record<SettingKey, number>>;
 type SettingEntry = { value: unknown; updatedAt: number };
 type ServerSettings = Record<string, SettingEntry>;
@@ -102,7 +101,7 @@ class SettingsSyncManager {
   }
 
   private queueModifiedSettings(): void {
-    for (const key of Object.keys(DEFAULT_SETTINGS) as SettingKey[]) {
+    for (const key of SETTING_KEYS) {
       const value = readLocalSetting(key);
       if (
         value === undefined ||

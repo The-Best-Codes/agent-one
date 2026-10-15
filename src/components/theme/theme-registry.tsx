@@ -1,21 +1,24 @@
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { useEffect } from "react";
 
-import { getResolvedTheme } from "@/lib/get-resolved-theme";
 import {
-  colorThemeAtom,
-  fontAtom,
-  roundnessAtom,
-  textScaleAtom,
-  themeAtom,
-  uiTintAtom,
-  uiTintStrengthAtom,
-} from "@/lib/jotai/settings-atoms";
+  activeCustomFontAtom,
+  FONT_CLASSES,
+  loadCustomFontFace,
+  resolveFontSetting,
+} from "@/lib/custom-fonts";
+import { getResolvedTheme } from "@/lib/get-resolved-theme";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { jsonParseCatch } from "@/lib/json-parse-catch";
-import { COLOR_THEME_OPTIONS, UI_TINT_OPTIONS } from "@/lib/settings/types";
+import { getLogger } from "@/lib/logger";
+import { SETTINGS } from "@/lib/settings/definitions";
 
-const PRIMARY_COLOR_THEMES = COLOR_THEME_OPTIONS.filter((option) => option !== "default");
-const UI_TINTS = UI_TINT_OPTIONS.filter((option) => option !== "default");
+const logger = getLogger(import.meta.url);
+
+const PRIMARY_COLOR_THEMES = Object.keys(SETTINGS.COLOR_THEME.options).filter(
+  (option) => option !== "default",
+);
+const UI_TINTS = Object.keys(SETTINGS.UI_TINT.options).filter((option) => option !== "default");
 
 const UI_TINT_STRENGTHS: Record<number, string> = {
   1: "2%",
@@ -31,20 +34,21 @@ const UI_TINT_STRENGTHS: Record<number, string> = {
 };
 
 export function ThemeRegistry() {
-  const [rawTheme] = useAtom(themeAtom);
-  const [rawColorTheme] = useAtom(colorThemeAtom);
-  const [rawUiTint] = useAtom(uiTintAtom);
-  const [rawUiTintStrength] = useAtom(uiTintStrengthAtom);
-  const [rawRoundness] = useAtom(roundnessAtom);
-  const [rawFont] = useAtom(fontAtom);
-  const [rawTextScale] = useAtom(textScaleAtom);
+  const [rawTheme] = useAtom(settingAtoms.THEME);
+  const [rawColorTheme] = useAtom(settingAtoms.COLOR_THEME);
+  const [rawUiTint] = useAtom(settingAtoms.UI_TINT);
+  const [rawUiTintStrength] = useAtom(settingAtoms.UI_TINT_STRENGTH);
+  const [rawRoundness] = useAtom(settingAtoms.ROUNDNESS);
+  const [rawFont] = useAtom(settingAtoms.FONT);
+  const [rawTextScale] = useAtom(settingAtoms.TEXT_SCALE);
+  const activeCustomFont = useAtomValue(activeCustomFontAtom);
 
   const theme = jsonParseCatch(rawTheme);
   const colorTheme = jsonParseCatch(rawColorTheme);
   const uiTint = jsonParseCatch(rawUiTint);
   const uiTintStrength = rawUiTintStrength;
   const roundness = jsonParseCatch(rawRoundness);
-  const font = jsonParseCatch(rawFont);
+  const font = resolveFontSetting(jsonParseCatch(rawFont));
   const textScale = jsonParseCatch(rawTextScale);
 
   useEffect(() => {
@@ -90,22 +94,25 @@ export function ThemeRegistry() {
     root.setAttribute("data-roundness", roundness || "md");
 
     // Handle font
-    root.classList.remove("font-space-grotesk", "font-sans", "font-mono", "font-roboto");
-    if (font === "default") {
-      root.classList.add("font-space-grotesk");
-    } else if (font === "system") {
-      root.classList.add("font-sans");
-    } else if (font === "mono") {
-      root.classList.add("font-mono");
-    } else if (font === "roboto") {
-      root.classList.add("font-roboto");
-    }
-    root.setAttribute("data-font", font || "default");
+    root.classList.remove(...Object.values(FONT_CLASSES), "font-custom");
+    root.classList.add(activeCustomFont ? "font-custom" : FONT_CLASSES[font]);
+    root.setAttribute("data-font", activeCustomFont ? "custom" : font);
 
     root.classList.remove("text-xs", "text-sm", "text-md", "text-lg", "text-xl", "text-2xl");
     root.classList.add(`text-${textScale || "md"}`);
     root.setAttribute("data-text-scale", textScale || "md");
-  }, [theme, colorTheme, uiTint, uiTintStrength, roundness, font, textScale]);
+  }, [theme, colorTheme, uiTint, uiTintStrength, roundness, font, activeCustomFont, textScale]);
+
+  useEffect(() => {
+    if (!activeCustomFont) return;
+
+    const fontFace = loadCustomFontFace(activeCustomFont).catch((error) => {
+      logger.warn("Failed to load custom font", error);
+      return null;
+    });
+    void fontFace.then((face) => face && document.fonts.add(face));
+    return () => void fontFace.then((face) => face && document.fonts.delete(face));
+  }, [activeCustomFont]);
 
   return null;
 }

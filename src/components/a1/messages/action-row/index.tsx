@@ -9,8 +9,7 @@ import {
 } from "@/components/ui/adaptive-tooltip";
 import { isTtsProviderConfigured, normalizeTtsSettings } from "@/lib/ai/tts";
 import { apiKeyAtomFamily } from "@/lib/jotai/api-key-atoms";
-import { showMessageActionRowAtom } from "@/lib/jotai/settings-atoms";
-import { ttsSettingsAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 import { BranchButton } from "./branch-button";
@@ -19,21 +18,23 @@ import { RetryButton } from "./retry-button";
 import { TtsButton } from "./tts-button";
 
 export const MessageActionRow = ({
-  contentToCopy,
-  contentToSpeak,
+  getContentToCopy,
+  getContentToSpeak,
+  hasContentToSpeak,
   messageRole,
   messageId,
   onEdit,
   onBranch,
 }: {
-  contentToCopy: string;
-  contentToSpeak: string;
+  getContentToCopy: () => string;
+  getContentToSpeak: () => string;
+  hasContentToSpeak: boolean;
   messageRole: UIMessage["role"];
   messageId: UIMessage["id"];
   onEdit?: () => void;
   onBranch?: () => void;
 }) => {
-  const [showMessageActionRow] = useAtom(showMessageActionRowAtom);
+  const [showMessageActionRow] = useAtom(settingAtoms.SHOW_MESSAGE_ACTION_ROW);
 
   return (
     <div
@@ -60,7 +61,7 @@ export const MessageActionRow = ({
                   success: "outline",
                   error: "outline",
                 }}
-                text={contentToCopy}
+                text={getContentToCopy}
                 size="icon-sm"
               />
             </div>
@@ -68,8 +69,8 @@ export const MessageActionRow = ({
           <AdaptiveTooltipContent side="bottom">Copy message</AdaptiveTooltipContent>
         </AdaptiveTooltip>
 
-        {messageRole === "assistant" && contentToSpeak.trim() ? (
-          <TtsAction messageId={messageId} text={contentToSpeak} />
+        {messageRole === "assistant" && hasContentToSpeak ? (
+          <TtsAction messageId={messageId} getText={getContentToSpeak} />
         ) : null}
 
         {onBranch && messageRole === "assistant" && (
@@ -107,8 +108,8 @@ export const MessageActionRow = ({
   );
 };
 
-function TtsAction({ messageId, text }: { messageId: string; text: string }) {
-  const rawTtsSettings = useAtomValue(ttsSettingsAtom);
+function TtsAction({ messageId, getText }: { messageId: string; getText: () => string }) {
+  const rawTtsSettings = useAtomValue(settingAtoms.TTS);
   const ttsSettings = normalizeTtsSettings(rawTtsSettings);
   const apiKeys = {
     openai: useAtomValue(apiKeyAtomFamily("tts-openai")),
@@ -125,7 +126,7 @@ function TtsAction({ messageId, text }: { messageId: string; text: string }) {
     <AdaptiveTooltip>
       <AdaptiveTooltipTrigger asChild>
         <div>
-          <TtsButton messageId={messageId} text={text} className="size-6" />
+          <TtsButton messageId={messageId} getText={getText} className="size-6" />
         </div>
       </AdaptiveTooltipTrigger>
       <AdaptiveTooltipContent side="bottom">Read aloud</AdaptiveTooltipContent>

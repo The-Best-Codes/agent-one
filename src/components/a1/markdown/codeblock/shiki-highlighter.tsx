@@ -1,10 +1,12 @@
-import { type FC, useEffect, useState } from "react";
+import { type FC, useEffect, useRef, useState } from "react";
 
 import useSyntaxHighlighter from "@/hooks/use-syntax-highlighter";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
 const logger = getLogger(import.meta.url);
+
+const HIGHLIGHT_THROTTLE_MS = 100;
 
 export type HighlighterProps = {
   code: string;
@@ -20,31 +22,51 @@ export const SyntaxHighlighter: FC<HighlighterProps> = ({
   className,
   ...props
 }) => {
-  const [highlightedHtml, setHighlightedHtml] = useState<string | null>(null);
+  const { highlight, getCachedHighlight, forgetHighlight } = useSyntaxHighlighter();
+  const [highlightedHtml, setHighlightedHtml] = useState<string | null>(() =>
+    getCachedHighlight(code, language, theme),
+  );
   const [error, setError] = useState<string | null>(null);
-  const { highlight } = useSyntaxHighlighter();
+  const lastRequestAtRef = useRef(0);
+  const previousCodeRef = useRef(code);
 
   useEffect(() => {
+    if (previousCodeRef.current !== code) {
+      forgetHighlight(previousCodeRef.current, language, theme);
+      previousCodeRef.current = code;
+    }
+
     let cancelled = false;
-    void highlight(code, language, theme).then((result) => {
-      if (cancelled) return;
+    const delay = Math.max(0, lastRequestAtRef.current + HIGHLIGHT_THROTTLE_MS - Date.now());
 
-      setError(null);
+    const timeoutId = setTimeout(() => {
+      lastRequestAtRef.current = Date.now();
+      void highlight(code, language, theme).then((result) => {
+        if (cancelled) {
+          if (previousCodeRef.current !== code) {
+            forgetHighlight(code, language, theme);
+          }
+          return;
+        }
 
-      if (result.html) {
-        setHighlightedHtml(result.html);
-      }
+        setError(null);
 
-      if (result.error) {
-        setError(result.error);
-        logger.error(`Syntax highlighting failed for ${language}:`, result.error);
-      }
-    });
+        if (result.html) {
+          setHighlightedHtml(result.html);
+        }
+
+        if (result.error) {
+          setError(result.error);
+          logger.error(`Syntax highlighting failed for ${language}:`, result.error);
+        }
+      });
+    }, delay);
 
     return () => {
       cancelled = true;
+      clearTimeout(timeoutId);
     };
-  }, [code, language, theme, highlight]);
+  }, [code, language, theme, highlight, forgetHighlight]);
 
   const BASE_STYLES =
     "[&_pre]:p-2 [&_pre]:bg-[rgb(30,30,30)] [&_pre]:overflow-x-auto [&_pre]:text-sm";

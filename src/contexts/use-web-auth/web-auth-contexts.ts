@@ -64,6 +64,20 @@ export function getActivePaidSubscription(
   );
 }
 
+export function getCreditsSubscription(
+  customerState: CustomerState | null | undefined,
+): Subscription | null {
+  return (
+    getActivePaidSubscription(customerState) ??
+    customerState?.active_subscriptions?.find(
+      (subscription) =>
+        ACTIVE_SUBSCRIPTION_STATUSES.has(subscription.status) &&
+        subscription.product_id === polarProductIds.free,
+    ) ??
+    null
+  );
+}
+
 export function getPlanNameForSubscription(subscription: Subscription | null | undefined): string {
   if (!subscription || subscription.product_id === polarProductIds.free) {
     return "Free";

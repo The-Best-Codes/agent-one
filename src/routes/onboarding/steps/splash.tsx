@@ -164,7 +164,7 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
         ) : (
           <div
             className={cn(
-              "bg-foreground h-12 w-0.75",
+              "bg-primary h-12 w-0.75",
               isMorphing ? "animate-cursor-morph" : "animate-blink",
             )}
           />
@@ -197,7 +197,7 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
             border-radius: 10px;
           }
           100% {
-            width: 100px;
+            width: 100.9px;
             height: 36px;
             border-radius: 10px;
           }

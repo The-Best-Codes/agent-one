@@ -1,9 +1,15 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const MessagePartFallback = ({ ...props }: any) => {
-  return (
-    <div className="bg-destructive flex max-w-full flex-col rounded-md text-white">
-      <span>Unknown message part:</span>
-      <pre className="font-mono">{JSON.stringify(props)}</pre>
-    </div>
-  );
+import { useEffect } from "react";
+
+import { getLogger } from "@/lib/logger";
+
+const logger = getLogger(import.meta.url);
+
+export const MessagePartFallback = (props: { type: string }) => {
+  const details = JSON.stringify(props);
+
+  useEffect(() => {
+    logger.warn(`Unknown or unhandled message part: ${details}`);
+  }, [details]);
+
+  return null;
 };

@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc"],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {},
+  "env": {
+    "builtin": true
+  },
+  "ignorePatterns": [
+    "src/assets/fonts/**/*.ttf",
+    "src/assets/fonts/**/static/*",
+    "src-tauri/gen/android/",
+    "src-tauri/target/",
+    "src-tauri/gen/schemas",
+    "bun.lock",
+    "*.log",
+    ".agents/*",
+    ".entire/*",
+    ".opencode/*",
+    ".claude/*",
+    ".codex/*"
+  ]
+}

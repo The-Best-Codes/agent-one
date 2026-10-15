@@ -10,6 +10,7 @@ import {
 import { memo, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 
+import { MarqueeText } from "@/components/a1/marquee-text";
 import {
   AdaptiveTooltip,
   AdaptiveTooltipContent,
@@ -182,13 +183,14 @@ export const ChatItem = memo(
             "w-full justify-start py-2 pr-1 pl-2 mb-0.5 transition-none",
             isSelected && "border border-border",
           )}
+          data-marquee-trigger
           onClick={() => onSelectionToggle?.(id)}
         >
           <Checkbox checked={isSelected} className="pointer-events-none" />
           <span className="flex min-w-0 items-center gap-1.5 text-sm font-normal">
             {branchOf && <BranchIcon branchOf={branchOf} branchParentTitle={branchParentTitle} />}
             {scheduledAgentTitle && <ScheduledAgentIcon title={scheduledAgentTitle} />}
-            <span className="min-w-0 truncate">{title}</span>
+            <MarqueeText>{title}</MarqueeText>
           </span>
         </Button>
       );
@@ -207,6 +209,7 @@ export const ChatItem = memo(
               )}
               asChild
               draggable={true}
+              data-marquee-trigger
               aria-selected={isSelectedChat}
               onDragStart={(e) => {
                 e.dataTransfer.setData(
@@ -242,7 +245,7 @@ export const ChatItem = memo(
                       <BranchIcon branchOf={branchOf} branchParentTitle={branchParentTitle} />
                     )}
                     {scheduledAgentTitle && <ScheduledAgentIcon title={scheduledAgentTitle} />}
-                    <span className="min-w-0 truncate">{title}</span>
+                    <MarqueeText contentClassName="pe-7">{title}</MarqueeText>
                   </span>
                   {snippet && (
                     <span className="text-muted-foreground [&_mark]:text-foreground mt-0.5 truncate text-xs italic [&_mark]:bg-yellow-500/30">
@@ -252,7 +255,7 @@ export const ChatItem = memo(
                 </div>
                 <div
                   className={cn(
-                    "absolute top-1/2 -translate-y-1/2 right-0 flex size-8 shrink-0 items-center justify-center opacity-0 transition-opacity duration-200 group-hover/chat-item:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100",
+                    "absolute top-1/2 -translate-y-1/2 right-0 flex size-8 shrink-0 items-center justify-center opacity-0 transition-opacity duration-200 will-change-[opacity] group-hover/chat-item:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100",
                     isDropdownOpen ? "opacity-100" : "",
                   )}
                 >

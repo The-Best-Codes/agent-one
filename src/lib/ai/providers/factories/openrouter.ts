@@ -1,5 +1,6 @@
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
+
+import { providerFetch } from "@/lib/ai/providers/provider-fetch";
 
 const OPENROUTER_ATTRIBUTION_HEADERS = {
   "HTTP-Referer": "https://www.agent-one.dev",
@@ -10,7 +11,7 @@ const OPENROUTER_ATTRIBUTION_HEADERS = {
 export function getOpenRouter(apiKey: string, headers?: Record<string, string>) {
   return createOpenRouter({
     apiKey: apiKey || "unset",
-    fetch: tauriFetch,
+    fetch: providerFetch,
     headers: {
       ...OPENROUTER_ATTRIBUTION_HEADERS,
       ...headers,

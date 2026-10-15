@@ -5,7 +5,7 @@ import { EditorView, keymap } from "@codemirror/view";
 import { IconArrowUp, IconPaperclip, IconPlayerStopFilled } from "@tabler/icons-react";
 import CodeMirror from "@uiw/react-codemirror";
 import { useAtomValue, useAtomValueRawSync } from "jotai";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import {
   AdaptiveTooltip,
@@ -25,14 +25,9 @@ import { usePendingToolApproval } from "@/hooks/use-pending-tool-approval";
 import { useTheme } from "@/hooks/use-theme";
 import { loadChatInputDraft, saveChatInputDraft } from "@/lib/chat-input-drafts";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
-import {
-  inputStyleAtom,
-  interruptKeyAtom,
-  markdownHighlightingAtom,
-  submitKeyAtom,
-} from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
-import type { InterruptKeyOption, SubmitKeyOption } from "@/lib/settings/types";
+import type { SettingValue } from "@/lib/settings/definitions";
 import { cn } from "@/lib/utils";
 
 import { ChatModelConfig } from "../chat-model-config";
@@ -45,7 +40,29 @@ import { MainInputProvisioningSection } from "./provisioning-section";
 
 const logger = getLogger(import.meta.url);
 
-function getChatShortcut(key: SubmitKeyOption | InterruptKeyOption) {
+const DRAFT_SAVE_DELAY_MS = 300;
+
+const EDITOR_BASIC_SETUP = {
+  lineNumbers: false,
+  foldGutter: false,
+  highlightActiveLine: false,
+  highlightActiveLineGutter: false,
+  highlightSelectionMatches: false,
+  autocompletion: false,
+  searchKeymap: false,
+  lintKeymap: false,
+  completionKeymap: false,
+};
+
+function isFileDrag(dataTransfer: DataTransfer | null) {
+  return dataTransfer?.types.includes("Files") ?? false;
+}
+
+function isChatDrag(dataTransfer: DataTransfer | null) {
+  return dataTransfer?.types.includes("application/agent-one-chat") ?? false;
+}
+
+function getChatShortcut(key: SettingValue<"SUBMIT_KEY" | "INTERRUPT_KEY">) {
   switch (key) {
     case "enter":
       return "Enter";
@@ -104,10 +121,10 @@ export const MainChatInput = ({
   const { currentModel } = useModel();
   const { hasAvailableModels, isModelCatalogLoading } = useModelCatalog();
   const hasPendingApproval = usePendingToolApproval();
-  const markdownHighlighting = useAtomValue(markdownHighlightingAtom);
-  const submitKey = useAtomValue(submitKeyAtom);
-  const interruptKey = useAtomValue(interruptKeyAtom);
-  const inputStyle = useAtomValue(inputStyleAtom);
+  const markdownHighlighting = useAtomValue(settingAtoms.MARKDOWN_HIGHLIGHTING);
+  const submitKey = useAtomValue(settingAtoms.SUBMIT_KEY);
+  const interruptKey = useAtomValue(settingAtoms.INTERRUPT_KEY);
+  const inputStyle = useAtomValue(settingAtoms.INPUT_STYLE);
   const { loadChatMessages } = usePersistence();
   const chatIds = useAtomValueRawSync(chatIdsAtom);
   const isMobile = useMobileDetection({
@@ -120,16 +137,21 @@ export const MainChatInput = ({
   const [isInterruptSubmitting, setIsInterruptSubmitting] = useState(false);
   const [editorInitialValue] = useState(() => initialValue ?? loadChatInputDraft(draftKey));
   const [files, setFiles] = useState<FileList | undefined>(undefined);
-  const [isDragging, setIsDragging] = useState(false);
+  const [isDraggingFiles, setIsDraggingFiles] = useState(false);
+  const [isDraggingChat, setIsDraggingChat] = useState(false);
+  const [isEditorOverflowing, setIsEditorOverflowing] = useState(false);
 
   const editorViewRef = useRef<EditorView | null>(null);
   const initialValueKeyRef = useRef(initialValueKey);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const dragCounter = useRef(0);
+  const fileDragCounter = useRef(0);
+  const chatDragCounter = useRef(0);
   const isSubmittingRef = useRef(false);
   const hasSentInterruptRef = useRef(false);
   const statusRef = useRef(status);
   const readyResolverRef = useRef<(() => void) | null>(null);
+  const pendingDraftRef = useRef<{ key: string; text: string } | null>(null);
+  const draftSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     statusRef.current = status;
@@ -191,8 +213,30 @@ export const MainChatInput = ({
     }
   });
 
+  const cancelDraftSave = useCallback(() => {
+    if (draftSaveTimeoutRef.current) {
+      clearTimeout(draftSaveTimeoutRef.current);
+      draftSaveTimeoutRef.current = null;
+    }
+    pendingDraftRef.current = null;
+  }, []);
+
+  const flushDraftSave = useCallback(() => {
+    const pendingDraft = pendingDraftRef.current;
+    cancelDraftSave();
+    if (pendingDraft) {
+      saveChatInputDraft(pendingDraft.key, pendingDraft.text);
+    }
+  }, [cancelDraftSave]);
+
+  useEffect(() => flushDraftSave, [draftKey, flushDraftSave]);
+
   const handleEditorChange = (newValue: string) => {
-    saveChatInputDraft(draftKey, newValue);
+    pendingDraftRef.current = { key: draftKey, text: newValue };
+    if (draftSaveTimeoutRef.current) {
+      clearTimeout(draftSaveTimeoutRef.current);
+    }
+    draftSaveTimeoutRef.current = setTimeout(flushDraftSave, DRAFT_SAVE_DELAY_MS);
     const newIsEmpty = !newValue.trim();
     if (newIsEmpty !== isEmpty) {
       setIsEmpty(newIsEmpty);
@@ -249,6 +293,7 @@ export const MainChatInput = ({
       } finally {
         isSubmittingRef.current = false;
       }
+      cancelDraftSave();
       saveChatInputDraft(draftKey, "");
 
       if (editorViewRef.current) {
@@ -361,30 +406,28 @@ export const MainChatInput = ({
   };
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
+    if (!isChatDrag(e.dataTransfer)) return;
     e.preventDefault();
     e.stopPropagation();
-    dragCounter.current++;
-    if (
-      e.dataTransfer.types.includes("Files") ||
-      e.dataTransfer.types.includes("application/agent-one-chat")
-    ) {
-      logger.verbose("Drag enter detected, showing drop zone");
-      setIsDragging(true);
-    }
+    chatDragCounter.current++;
+    logger.verbose("Chat drag enter detected, showing drop zone");
+    setIsDraggingChat(true);
   }, []);
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
+    if (!isChatDrag(e.dataTransfer)) return;
     // TODO: Consider using `relatedTarget` here
     e.preventDefault();
     e.stopPropagation();
-    dragCounter.current--;
-    if (dragCounter.current === 0) {
-      logger.verbose("Drag leave detected, hiding drop zone");
-      setIsDragging(false);
+    chatDragCounter.current--;
+    if (chatDragCounter.current === 0) {
+      logger.verbose("Chat drag leave detected, hiding drop zone");
+      setIsDraggingChat(false);
     }
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
+    if (!isChatDrag(e.dataTransfer)) return;
     e.preventDefault();
     e.stopPropagation();
   }, []);
@@ -405,9 +448,9 @@ export const MainChatInput = ({
         const chatData = {
           id: chatId,
           title,
-          info: "This chat was attached as a file by the user",
-          messages,
-          exportedAt: new Date().toISOString(),
+          info: `The user attached this past chat (ID "${chatId}") for you to reference. Its messages are not included here. If the readChat tool is available, use it with this chat ID to read the chat. If the readChat tool is not available, tell the user you can't read the attached chat, and that they can turn on the Chat History tools in Settings > Tools to let you read it.`,
+          messageCount: messages.length,
+          attachedAt: new Date().toISOString(),
         };
 
         const blob = new Blob([JSON.stringify(chatData, null, 2)], {
@@ -436,40 +479,143 @@ export const MainChatInput = ({
     [loadChatMessages, chatIds, addFiles],
   );
 
-  // Note: In src-tauri/tauri.conf.json, I set app.windows[0].dragDropEnabled to false to allow processing events in the JS here.
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
+      if (!isChatDrag(e.dataTransfer)) return;
       e.preventDefault();
       e.stopPropagation();
-      setIsDragging(false);
-      dragCounter.current = 0;
-      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        logger.verbose("Files dropped", {
-          fileCount: e.dataTransfer.files.length,
-          fileNames: Array.from(e.dataTransfer.files).map((f) => f.name),
-        });
-        addFiles(e.dataTransfer.files);
-        e.dataTransfer.clearData();
-      } else {
-        const chatData = e.dataTransfer.getData("application/agent-one-chat");
-        if (chatData) {
-          try {
-            const { chatId, title } = JSON.parse(chatData);
-            logger.verbose("AgentOne chat dropped", { chatId, title });
-            handleChatDrop(chatId, title);
-            e.dataTransfer.clearData();
-          } catch (error) {
-            logger.error("Failed to parse chat drop data", error);
-          }
-        } else {
-          logger.verbose("Drop event with no files or chat data");
-        }
+      setIsDraggingChat(false);
+      chatDragCounter.current = 0;
+      const chatData = e.dataTransfer.getData("application/agent-one-chat");
+      try {
+        const { chatId, title } = JSON.parse(chatData);
+        logger.verbose("AgentOne chat dropped", { chatId, title });
+        handleChatDrop(chatId, title);
+      } catch (error) {
+        logger.error("Failed to parse chat drop data", error);
       }
     },
-    [addFiles, handleChatDrop],
+    [handleChatDrop],
   );
 
+  // Note: In src-tauri/tauri.conf.json, I set app.windows[0].dragDropEnabled to false to allow processing events in the JS here.
+  useEffect(() => {
+    const handleWindowDragEnter = (e: DragEvent) => {
+      if (!isFileDrag(e.dataTransfer)) return;
+      fileDragCounter.current++;
+      if (fileDragCounter.current === 1) {
+        logger.verbose("File drag enter detected, showing drop zone");
+        setIsDraggingFiles(true);
+      }
+    };
+
+    const handleWindowDragLeave = (e: DragEvent) => {
+      if (!isFileDrag(e.dataTransfer)) return;
+      fileDragCounter.current = Math.max(0, fileDragCounter.current - 1);
+      if (fileDragCounter.current === 0) {
+        logger.verbose("File drag leave detected, hiding drop zone");
+        setIsDraggingFiles(false);
+      }
+    };
+
+    const handleWindowDragOver = (e: DragEvent) => {
+      if (!isFileDrag(e.dataTransfer)) return;
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = "copy";
+    };
+
+    const handleWindowDrop = (e: DragEvent) => {
+      if (!isFileDrag(e.dataTransfer)) return;
+      e.preventDefault();
+      fileDragCounter.current = 0;
+      setIsDraggingFiles(false);
+      const droppedFiles = e.dataTransfer?.files;
+      if (droppedFiles && droppedFiles.length > 0) {
+        logger.verbose("Files dropped", {
+          fileCount: droppedFiles.length,
+          fileNames: Array.from(droppedFiles).map((f) => f.name),
+        });
+        addFiles(droppedFiles);
+      }
+    };
+
+    window.addEventListener("dragenter", handleWindowDragEnter);
+    window.addEventListener("dragleave", handleWindowDragLeave);
+    window.addEventListener("dragover", handleWindowDragOver);
+    window.addEventListener("drop", handleWindowDrop);
+
+    return () => {
+      window.removeEventListener("dragenter", handleWindowDragEnter);
+      window.removeEventListener("dragleave", handleWindowDragLeave);
+      window.removeEventListener("dragover", handleWindowDragOver);
+      window.removeEventListener("drop", handleWindowDrop);
+    };
+  }, [addFiles]);
+
   const isFloating = inputStyle === "floating";
+
+  const chatShortcutKey = showInterruptButton ? interruptKey : submitKey;
+  const editorHandlersRef = useRef({ disabled, isMobile, addFiles, submitMessage });
+  useLayoutEffect(() => {
+    editorHandlersRef.current = { disabled, isMobile, addFiles, submitMessage };
+  });
+
+  const editorExtensions = useMemo(
+    () => [
+      ...(markdownHighlighting ? [markdown({ base: markdownLanguage })] : []),
+      editorTheme,
+      EditorView.lineWrapping,
+      EditorView.updateListener.of((update) => {
+        if (update.geometryChanged) {
+          const { scrollHeight, clientHeight } = update.view.scrollDOM;
+          setIsEditorOverflowing(scrollHeight > clientHeight);
+        }
+      }),
+      EditorView.contentAttributes.of({
+        spellcheck: "true",
+        "aria-label": "Chat message input",
+        "data-testid": "chat-editor",
+      }),
+      // eslint-disable-next-line react-hooks/refs
+      EditorView.domEventHandlers({
+        paste: (event) => {
+          if (editorHandlersRef.current.disabled) {
+            return false;
+          }
+          const pastedFiles = event.clipboardData?.files;
+          if (pastedFiles && pastedFiles.length > 0) {
+            logger.verbose("Files pasted", {
+              fileCount: pastedFiles.length,
+              fileNames: Array.from(pastedFiles).map((f) => f.name),
+            });
+            editorHandlersRef.current.addFiles(pastedFiles);
+            event.preventDefault();
+            return true;
+          }
+          return false;
+        },
+      }),
+      Prec.highest(
+        // eslint-disable-next-line react-hooks/refs
+        keymap.of([
+          {
+            key: getChatShortcut(chatShortcutKey),
+            run: (view) => {
+              if (view.composing) {
+                return false;
+              }
+              if (editorHandlersRef.current.isMobile && chatShortcutKey === "enter") {
+                return false;
+              }
+              void editorHandlersRef.current.submitMessage();
+              return true;
+            },
+          },
+        ]),
+      ),
+    ],
+    [markdownHighlighting, chatShortcutKey],
+  );
 
   return (
     <div className={cn(isFloating ? "px-0 pb-0 md:px-2 md:pb-2" : "px-0 md:px-2")}>
@@ -479,6 +625,7 @@ export const MainChatInput = ({
       <MainInputIncompleteSection onRetry={onScrollNeededAction} />
       <form
         data-testid="chat-form"
+        data-tour="chat-input"
         onSubmit={handleSubmit}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
@@ -491,7 +638,7 @@ export const MainChatInput = ({
             : "rounded-none border-0 border-t md:rounded-md md:rounded-b-none md:border md:border-b-0 md:focus-within:ring-[3px]",
         )}
       >
-        {isDragging && (
+        {(isDraggingFiles || isDraggingChat) && (
           <div
             className={cn(
               "border-primary bg-background/80 absolute inset-0 z-20 flex items-center justify-center border-2 border-dashed backdrop-blur-sm",
@@ -521,57 +668,12 @@ export const MainChatInput = ({
             minHeight="40px"
             maxHeight="160px"
             placeholder="Ask anything..."
-            className="bg-transparent text-sm"
-            extensions={[
-              ...(markdownHighlighting ? [markdown({ base: markdownLanguage })] : []),
-              editorTheme,
-              EditorView.lineWrapping,
-              EditorView.contentAttributes.of({
-                spellcheck: "true",
-                "aria-label": "Chat message input",
-                "data-testid": "chat-editor",
-              }),
-              // eslint-disable-next-line react-hooks/refs
-              EditorView.domEventHandlers({
-                paste: (event) => {
-                  if (disabled) {
-                    return false;
-                  }
-                  const pastedFiles = event.clipboardData?.files;
-                  if (pastedFiles && pastedFiles.length > 0) {
-                    logger.verbose("Files pasted", {
-                      fileCount: pastedFiles.length,
-                      fileNames: Array.from(pastedFiles).map((f) => f.name),
-                    });
-                    addFiles(pastedFiles);
-                    event.preventDefault();
-                    return true;
-                  }
-                  return false;
-                },
-              }),
-              Prec.highest(
-                // eslint-disable-next-line react-hooks/refs
-                keymap.of([
-                  {
-                    key: getChatShortcut(showInterruptButton ? interruptKey : submitKey),
-                    run: (view) => {
-                      if (view.composing) {
-                        return false;
-                      }
-                      if (
-                        isMobile &&
-                        (showInterruptButton ? interruptKey : submitKey) === "enter"
-                      ) {
-                        return false;
-                      }
-                      void submitMessage();
-                      return true;
-                    },
-                  },
-                ]),
-              ),
-            ]}
+            className={cn(
+              "[&_.cm-scroller]:no-scrollbar bg-transparent text-sm",
+              isEditorOverflowing &&
+                "[&_.cm-scroller]:scroll-fade [&_.cm-scroller]:[--scroll-fade-reveal:--spacing(6)]",
+            )}
+            extensions={editorExtensions}
             onChange={handleEditorChange}
             onCreateEditor={(view) => {
               editorViewRef.current = view;
@@ -583,17 +685,7 @@ export const MainChatInput = ({
               setIsEmpty(!view.state.doc.toString().trim());
             }}
             indentWithTab={false}
-            basicSetup={{
-              lineNumbers: false,
-              foldGutter: false,
-              highlightActiveLine: false,
-              highlightActiveLineGutter: false,
-              highlightSelectionMatches: false,
-              autocompletion: false,
-              searchKeymap: false,
-              lintKeymap: false,
-              completionKeymap: false,
-            }}
+            basicSetup={EDITOR_BASIC_SETUP}
           />
         </div>
         <div className="bg-secondary dark:bg-secondary flex items-center justify-between rounded-t-none rounded-b-md p-2 pr-0">
@@ -602,6 +694,7 @@ export const MainChatInput = ({
               <AdaptiveTooltipTrigger asChild>
                 <Button
                   data-testid="attach-button"
+                  data-tour="attach"
                   type="button"
                   disabled={
                     disabled ||
@@ -631,7 +724,7 @@ export const MainChatInput = ({
             </AdaptiveTooltip>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex flex-row">
+            <div className="flex flex-row" data-tour="model-selector">
               <ModelSelector
                 loading={isChatLoading}
                 className="w-40 min-w-0 flex-1 rounded-r-none sm:w-60"

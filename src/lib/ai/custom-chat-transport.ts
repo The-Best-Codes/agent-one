@@ -4,8 +4,10 @@ import {
   type ChatTransport,
   convertToModelMessages,
   extractReasoningMiddleware,
+  generateId,
   type LanguageModel,
   isStepCount,
+  type ModelMessage,
   type StopCondition,
   streamText,
   toUIMessageStream,
@@ -14,12 +16,31 @@ import {
   wrapLanguageModel,
 } from "ai";
 
-import { getToolBehavior, type ModelConfig, type ToolBehavior } from "@/hooks/ai/use-model-catalog";
+import {
+  getReasoningEffort,
+  getToolBehavior,
+  type ModelConfig,
+  type ToolBehavior,
+} from "@/hooks/ai/use-model-catalog";
 import {
   addMessageTokenUsage,
   createEmptyMessageTokenUsage,
   type ChatMessageMetadata,
 } from "@/lib/ai/chat-usage";
+import {
+  createCompactionChunk,
+  estimateTokens,
+  getContextTokens,
+  getCompactionThreshold,
+  getFailedCompactionSummary,
+  getMessagesAfterCompaction,
+  getUsageContextTokens,
+  shouldCompact,
+  summarizeConversation,
+  UIMessageChunkInjector,
+  withCompactionSummary,
+} from "@/lib/ai/compaction";
+import type { ChatToolsContext } from "@/lib/ai/tools/readChat";
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
 import { getLogger } from "@/lib/logger";
 
@@ -30,11 +51,13 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   private modelId: string | null;
   private providerName: string | null;
   private modelConfig: ModelConfig;
+  private contextWindow: number | undefined;
   private extractReasoningEnabled: boolean;
   private mcpAppModelContexts = new Map<string, unknown>();
   private getTools: (options?: {
     subAgentContext?: SubAgentExecutionContext;
     toolBehavior?: ToolBehavior;
+    chatContext?: ChatToolsContext;
   }) => Promise<ToolSet>;
   private getSystemPrompt: () => string;
   private getApiKeysLoadedPromise: () => Promise<void>;
@@ -48,6 +71,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     getTools: (options?: {
       subAgentContext?: SubAgentExecutionContext;
       toolBehavior?: ToolBehavior;
+      chatContext?: ChatToolsContext;
     }) => Promise<ToolSet>,
     getSystemPrompt: () => string,
     getApiKeysLoadedPromise: () => Promise<void>,
@@ -79,6 +103,11 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   updateModelConfig(modelConfig: ModelConfig) {
     this.modelConfig = modelConfig;
     logger.verbose("CustomChatTransport config updated");
+  }
+
+  updateContextWindow(contextWindow: number | undefined) {
+    this.contextWindow = contextWindow;
+    logger.verbose("CustomChatTransport contextWindow updated to:", contextWindow);
   }
 
   updateExtractReasoningEnabled(extractReasoningEnabled: boolean) {
@@ -128,6 +157,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     const modelId = this.modelId;
     const providerName = this.providerName;
     const modelConfig = this.modelConfig;
+    const contextWindow = this.contextWindow;
     const extractReasoningEnabled = this.extractReasoningEnabled;
 
     if (!baseModel) {
@@ -149,19 +179,132 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     const instructions = mcpAppContextInstructions
       ? `${systemPrompt}\n\n${mcpAppContextInstructions}`
       : systemPrompt;
+    const chatContext: ChatToolsContext = { currentChatId: options.chatId };
     const subAgentContext: SubAgentExecutionContext = {
       model: baseModel,
       modelConfig,
       systemPrompt,
       extractReasoningEnabled,
-      getTools: () => this.getTools({ subAgentContext, toolBehavior }),
+      getTools: () => this.getTools({ subAgentContext, toolBehavior, chatContext }),
     };
     const tools =
-      toolBehavior === "disable" ? {} : await this.getTools({ subAgentContext, toolBehavior });
+      toolBehavior === "disable"
+        ? {}
+        : await this.getTools({ subAgentContext, toolBehavior, chatContext });
+
+    const { compaction: existingCompaction, messages: uncompactedMessages } =
+      getMessagesAfterCompaction(options.messages);
+    const convertedMessages = await convertToModelMessages(uncompactedMessages, { tools });
+    const messages = existingCompaction?.data.summary
+      ? withCompactionSummary(existingCompaction.data.summary, convertedMessages)
+      : convertedMessages;
+
+    const formatError = (error: unknown) => {
+      let message = "Unknown error";
+
+      if (typeof error === "string") {
+        message = error;
+      } else if (error instanceof Error) {
+        message = error.message;
+      } else if (error != null) {
+        message = JSON.stringify(error);
+      }
+
+      if (providerName && providerName !== "AgentOne") {
+        return `Error from ${providerName}:\n${message}`;
+      }
+
+      return message;
+    };
+
+    let activeCompactionId = existingCompaction?.id;
+
+    const compact = async (
+      messagesToSummarize: ModelMessage[],
+      writeChunk: (chunk: UIMessageChunk) => void,
+      { fallbackOnError = false }: { fallbackOnError?: boolean } = {},
+    ) => {
+      const compactionId = generateId();
+      writeChunk(createCompactionChunk(compactionId, { status: "compacting" }));
+
+      let result: Awaited<ReturnType<typeof summarizeConversation>>;
+      try {
+        result = await summarizeConversation({
+          model,
+          messages: messagesToSummarize,
+          startsWithSummary: activeCompactionId !== undefined,
+          abortSignal: options.abortSignal,
+        });
+      } catch (error) {
+        if (options.abortSignal?.aborted) {
+          throw error;
+        }
+
+        logger.error("Failed to compact conversation:", error);
+
+        if (fallbackOnError) {
+          const summary = getFailedCompactionSummary({ chatId: options.chatId, error });
+          writeChunk(
+            createCompactionChunk(compactionId, {
+              status: "done",
+              summary,
+              failed: true,
+              modelId: modelId ?? undefined,
+            }),
+          );
+          return { compactionId, summary };
+        }
+
+        throw new Error(
+          `Couldn't compact the conversation: ${error instanceof Error ? error.message : String(error)}.\n\nTry lowering the Auto-Compact threshold in the model config, or branch the chat from an earlier message.`,
+          { cause: error },
+        );
+      }
+
+      writeChunk(
+        createCompactionChunk(compactionId, {
+          status: "done",
+          summary: result.summary,
+          modelId: modelId ?? undefined,
+          usage: result.usage,
+        }),
+      );
+
+      return { compactionId, summary: result.summary };
+    };
+
+    if ((options.body as { compact?: unknown } | undefined)?.compact === true) {
+      return new ReadableStream<UIMessageChunk>({
+        start: async (controller) => {
+          controller.enqueue({ type: "start" });
+          try {
+            await compact(messages, (chunk) => controller.enqueue(chunk));
+            controller.enqueue({ type: "finish" });
+          } catch (error) {
+            if (!options.abortSignal?.aborted) {
+              controller.enqueue({ type: "error", errorText: formatError(error) });
+            }
+          }
+          controller.close();
+        },
+      });
+    }
+
+    const compactionThreshold = getCompactionThreshold(modelConfig);
+    const lastMessage = options.messages.at(-1);
+    const initialContextTokens =
+      getContextTokens(options.messages) +
+      (lastMessage?.role === "user"
+        ? estimateTokens(
+            lastMessage.parts.map((part) => (part.type === "text" ? part.text : "")).join(""),
+          )
+        : 0);
+    const chunkInjector = new UIMessageChunkInjector();
+    let lastCompactionStepNumber: number | undefined;
+    let canAutoCompact = true;
 
     const stopWhenCondition: StopCondition<ToolSet> =
       modelConfig.maxSteps === undefined ? () => false : isStepCount(modelConfig.maxSteps);
-    const messages = await convertToModelMessages(options.messages);
 
     const result = streamText({
       model,
@@ -172,12 +315,62 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       frequencyPenalty: modelConfig.frequencyPenalty,
       presencePenalty: modelConfig.presencePenalty,
       seed: modelConfig.seed,
+      reasoning: getReasoningEffort(modelConfig),
       messages,
       abortSignal: options.abortSignal,
       tools,
       toolChoice: toolBehavior === "disable" ? "none" : "auto",
       stopWhen: stopWhenCondition,
       instructions,
+      prepareStep: async ({ steps, stepNumber, messages: stepMessages, responseMessages }) => {
+        const lastStep = steps.at(-1);
+        const usageTokens = lastStep ? getUsageContextTokens(lastStep.usage) : initialContextTokens;
+        const contextTokens =
+          usageTokens +
+          estimateTokens(
+            lastStep
+              ? lastStep.toolResults.map((toolResult) => toolResult.output)
+              : responseMessages,
+          );
+
+        const needsCompaction = shouldCompact({
+          contextTokens,
+          contextWindow,
+          threshold: compactionThreshold,
+        });
+
+        if (
+          shouldCompact({
+            contextTokens: usageTokens,
+            contextWindow,
+            threshold: compactionThreshold,
+          }) &&
+          lastCompactionStepNumber !== undefined &&
+          stepNumber === lastCompactionStepNumber + 1
+        ) {
+          canAutoCompact = false;
+          logger.warn("Context is still above the compaction threshold after compacting");
+        }
+
+        if (!needsCompaction || !canAutoCompact) {
+          return undefined;
+        }
+
+        logger.verbose(
+          `Compacting conversation at step ${stepNumber} (${contextTokens} / ${contextWindow} tokens)`,
+        );
+
+        const { compactionId, summary } = await compact(
+          stepMessages,
+          (chunk) => chunkInjector.write(chunk),
+          { fallbackOnError: true },
+        );
+
+        activeCompactionId = compactionId;
+        lastCompactionStepNumber = stepNumber;
+
+        return { messages: withCompactionSummary(summary, []) };
+      },
       onError: (error) => {
         logger.error("Error occurred in CustomChatTransport streamText:", error);
       },
@@ -202,30 +395,16 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
           modelId: modelId ?? undefined,
           usage: part.usage,
           totalUsage,
+          compactionId: activeCompactionId,
         };
 
         return metadata;
       },
       onError: (error) => {
         logger.error("Error occurred in CustomChatTransport toUIMessageStream:", error);
-
-        let message = "Unknown error";
-
-        if (typeof error === "string") {
-          message = error;
-        } else if (error instanceof Error) {
-          message = error.message;
-        } else if (error != null) {
-          message = JSON.stringify(error);
-        }
-
-        if (providerName && providerName !== "AgentOne") {
-          return `Error from ${providerName}:\n${message}`;
-        }
-
-        return message;
+        return formatError(error);
       },
-    });
+    }).pipeThrough(chunkInjector.transform);
   }
 
   async reconnectToStream(

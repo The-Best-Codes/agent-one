@@ -17,12 +17,7 @@ import {
   hasMessageTextContent,
 } from "@/lib/ai/title-generator";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
-import {
-  extractReasoningEnabledAtom,
-  notificationSettingAtom,
-  throttleValueAtom,
-  titleGenerationAtom,
-} from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { sendNotificationIfAllowed } from "@/lib/notifications";
 
@@ -37,6 +32,7 @@ export const ChatInstance = memo(
     modelId,
     providerName,
     modelConfig,
+    contextWindow,
     initialMessages,
     onInstanceUpdate,
     onStatusChange,
@@ -46,6 +42,7 @@ export const ChatInstance = memo(
     modelId: string;
     providerName: string;
     modelConfig: ModelConfig;
+    contextWindow: number | undefined;
     initialMessages: UIMessage[];
     onInstanceUpdate: (id: string, instance: ChatInstanceHelpers) => void;
     onStatusChange: (
@@ -54,16 +51,17 @@ export const ChatInstance = memo(
       hasError?: boolean,
     ) => void;
   }) => {
-    const throttleValue = useAtomValue(throttleValueAtom);
-    const titleGenerationSettings = useAtomValue(titleGenerationAtom);
-    const extractReasoningEnabled = useAtomValue(extractReasoningEnabledAtom);
-    const notificationSetting = useAtomValue(notificationSettingAtom);
+    const throttleValue = useAtomValue(settingAtoms.THROTTLE_VALUE);
+    const titleGenerationSettings = useAtomValue(settingAtoms.TITLE_GENERATION);
+    const extractReasoningEnabled = useAtomValue(settingAtoms.EXTRACT_REASONING_ENABLED);
+    const notificationSetting = useAtomValue(settingAtoms.NOTIFICATION_SETTING);
     const { loadChatMetadata, saveChat, markChatMessageSent, saveChatTitleState, saveChatTitle } =
       usePersistence();
     const chatIds = useAtomValueRawSync(chatIdsAtom);
     const suppressAutoSubmitAfterAbortRef = useRef(false);
     const wasBusyRef = useRef(false);
     const notifiedApprovalIdsRef = useRef(new Set<string>());
+    const lastSavedMessagesRef = useRef(initialMessages);
 
     const sendAutomaticallyWhen = useCallback(({ messages }: { messages: UIMessage[] }) => {
       if (suppressAutoSubmitAfterAbortRef.current) {
@@ -80,7 +78,7 @@ export const ChatInstance = memo(
       markChatMessageSent(chatId);
     }, [chatId, markChatMessageSent]);
 
-    const chat = useChat(model, modelId, providerName, modelConfig, {
+    const chat = useChat(model, modelId, providerName, modelConfig, contextWindow, {
       throttle: throttleValue,
       sendAutomaticallyWhen,
       onUserMessageSent,
@@ -108,7 +106,9 @@ export const ChatInstance = memo(
         );
       const shouldNotify =
         notificationSetting === "always" ||
-        (notificationSetting === "when-unfocused" && !document.hasFocus());
+        (notificationSetting === "when-unfocused" && !document.hasFocus()) ||
+        (notificationSetting === "unless-viewing" &&
+          !(document.hasFocus() && window.location.pathname === `/chat/${chatId}`));
 
       if (chat.status === "streaming" || chat.status === "submitted") {
         wasBusyRef.current = true;
@@ -125,6 +125,7 @@ export const ChatInstance = memo(
             truncateMessagePreview(
               getLastTextPart(lastMessage) || "Open AgentOne to keep working.",
             ),
+            chatId,
           );
         }
       }
@@ -135,6 +136,7 @@ export const ChatInstance = memo(
           void sendNotificationIfAllowed(
             `Error in "${title}"`,
             "AgentOne stopped working because of an error.",
+            chatId,
           );
         }
         wasBusyRef.current = false;
@@ -151,6 +153,7 @@ export const ChatInstance = memo(
         void sendNotificationIfAllowed(
           `Approval Required in "${title}"`,
           "AgentOne can't continue until you provide approval.",
+          chatId,
         );
       }
     }, [chat.status, chat.messages, chatId, loadChatMetadata, notificationSetting]);
@@ -161,7 +164,8 @@ export const ChatInstance = memo(
           return;
         }
 
-        if (chat.status !== "streaming") {
+        if (chat.status !== "streaming" && chat.messages !== lastSavedMessagesRef.current) {
+          lastSavedMessagesRef.current = chat.messages;
           saveChat({ chatId, messages: chat.messages });
         }
 
@@ -238,6 +242,7 @@ export const ChatInstance = memo(
       prevProps.model === nextProps.model &&
       prevProps.modelId === nextProps.modelId &&
       prevProps.providerName === nextProps.providerName &&
+      prevProps.contextWindow === nextProps.contextWindow &&
       prevProps.initialMessages === nextProps.initialMessages &&
       prevProps.onInstanceUpdate === nextProps.onInstanceUpdate &&
       prevProps.onStatusChange === nextProps.onStatusChange &&

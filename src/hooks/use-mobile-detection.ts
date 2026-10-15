@@ -10,12 +10,17 @@ interface MobileDetectionOptions {
   match: MatchType;
 }
 
-const useMobileDetection = (options: MobileDetectionOptions): boolean => {
+const useMobileDetection = ({
+  pointerCoarse,
+  anyHover,
+  userAgent,
+  onTouchStart,
+  match,
+}: MobileDetectionOptions): boolean => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
-      const { pointerCoarse, anyHover, userAgent, onTouchStart, match } = options;
       const checks: boolean[] = [];
 
       if (pointerCoarse !== undefined) {
@@ -49,7 +54,7 @@ const useMobileDetection = (options: MobileDetectionOptions): boolean => {
     };
 
     checkMobile();
-  }, [options]);
+  }, [pointerCoarse, anyHover, userAgent, onTouchStart, match]);
 
   return isMobile;
 };

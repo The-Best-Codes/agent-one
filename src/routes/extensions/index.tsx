@@ -351,9 +351,7 @@ export default function ExtensionsRoute() {
             </AlertTitle>
             <AlertDescription>
               If you're connected to the internet, the latest list of extensions{" "}
-              <SettingsLink tab="about" id="setting-extension-list">
-                should be downloading now.
-              </SettingsLink>
+              <SettingsLink id="setting-extension-list">should be downloading now.</SettingsLink>
             </AlertDescription>
           </Alert>
         ) : null}

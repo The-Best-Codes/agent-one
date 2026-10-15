@@ -30,7 +30,7 @@ export const MainInputNoModelSection = () => {
       <div className="flex max-h-24 w-full flex-col items-start overflow-auto">
         <span className="text-lg font-bold">No Models Available</span>
         <span className="text-base">
-          <SettingsLink tab="account" id="setting-hide-agentone-models" className="underline">
+          <SettingsLink id="setting-hide-agentone-models" className="underline">
             Sign in and ensure "Hide AgentOne models" is disabled,
           </SettingsLink>{" "}
           or configure a provider in settings to start chatting.
@@ -38,7 +38,7 @@ export const MainInputNoModelSection = () => {
       </div>
       <div className="flex flex-row items-center gap-2">
         <Button asChild variant="default">
-          <SettingsLink tab="providers" id="setting-built-in-providers" data-icon="inline-start">
+          <SettingsLink id="setting-built-in-providers" data-icon="inline-start">
             <IconKey data-icon="inline-start" />
             Settings
           </SettingsLink>

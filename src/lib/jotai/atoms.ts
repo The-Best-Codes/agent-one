@@ -4,7 +4,7 @@ import { atomWithStorage } from "jotai/utils";
 
 import { sanitizeMemoryEntries } from "@/lib/memory";
 
-import { memoryAtom, systemPromptAppendixAtom, userNameAtom } from "./settings-atoms";
+import { settingAtoms } from "./settings-atoms";
 
 export type ChatStatusIndicator = "loading" | "error" | "unread" | null;
 
@@ -20,6 +20,15 @@ export const onboardingCompletedAtom = atomWithStorage(
   undefined,
   { getOnInit: true },
 );
+
+export const onboardingReminderDismissedAtom = atomWithStorage(
+  "agent-one-onboarding-reminder-dismissed",
+  false,
+  undefined,
+  { getOnInit: true },
+);
+
+export const tourActiveAtom = atom(false);
 
 export const syncEnabledAtom = atomWithStorage("agent-one-sync-enabled", true, undefined, {
   getOnInit: true,
@@ -68,9 +77,9 @@ export const lastModelDirectorySyncTimestampAtom = atomWithStorage<number>(
 );
 
 export const systemPromptAtom = atom((get) => {
-  const userName = get(userNameAtom);
-  const appendix = get(systemPromptAppendixAtom);
-  const memory = get(memoryAtom);
+  const userName = get(settingAtoms.USER_NAME);
+  const appendix = get(settingAtoms.SYSTEM_PROMPT_APPENDIX);
+  const memory = get(settingAtoms.MEMORY);
   const memoryEntries = sanitizeMemoryEntries(memory);
 
   const settings = [
@@ -85,7 +94,7 @@ export const systemPromptAtom = atom((get) => {
 
   return dedent`
     ## Guidelines
-    You are AgentOne, a helpful AI agent. You are currently being accessed via the [AgentOne desktop app](https://www.agent-one.dev/). Documentation for AgentOne can be found at https://docs.agent-one.dev/docs/. To extend your capabilities beyond the tools you already have, the user can install extensions for you to use. They can do so by clicking "Browse Extensions" in the bottom left of the app sidebar (when expanded). There are over 21,000 extensions available.
+    You are AgentOne, a helpful AI agent. You are currently being accessed via the [AgentOne desktop app](https://www.agent-one.dev/). Documentation for AgentOne can be found at https://docs.agent-one.dev/docs/. To extend your capabilities beyond the tools you already have, the user can install extensions for you to use. They can do so by clicking their account in the bottom left of the app sidebar (when expanded) and choosing "Extensions". There are over 21,000 extensions available.
     When the \`describeNextTool\` function is available, you _always_ use it before you use a tool beginning with \`mcp__\`. If you use multiple tools beginning with \`mcp__\` at once, you always use \`describeNextTool\` before each one.
     When the \`memory\` tool is available, you use it to store facts about the user across chats. You always do this when applicable to personalize responses, or when the user asks you to remember something. You don't have to be explicit in your use of the tool - if you update your memory, you don't need to mention it. Prefer small targeted additions, deletions, or edits. Avoid adding duplicates or contradictory entries. Save stable, reusable information that is likely to help in future chats.
     ## Application Usage

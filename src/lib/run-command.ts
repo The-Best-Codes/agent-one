@@ -35,8 +35,8 @@ function buildShellArgs(command: string): { program: string; args: string[] } {
   }
 
   return platform() === "macos"
-    ? { program: "zsh", args: ["-lc", command] }
-    : { program: "sh", args: ["-lc", command] };
+    ? { program: "zsh", args: ["-c", command] }
+    : { program: "sh", args: ["-c", command] };
 }
 
 export function spawnCommand(command: string, options: RunCommandOptions = {}): RunCommandProcess {

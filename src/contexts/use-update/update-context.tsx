@@ -14,7 +14,7 @@ const logger = getLogger(import.meta.url);
 
 export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [updateStatus, setUpdateStatus] = useState<UpdateStatus>("idle");
-  const [updateProgress, setUpdateProgress] = useState(0);
+  const [updateProgress, setUpdateProgress] = useState<number | null>(null);
   const [updateVersion, setUpdateVersion] = useState("");
   const [remindAfter, setRemindAfter] = useAtom(updateRemindAfterAtom);
   const hasCheckedRef = useRef(false);
@@ -64,7 +64,7 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     logger.verbose("Initiating download and install of update.");
     try {
       setUpdateStatus("downloading");
-      setUpdateProgress(0);
+      setUpdateProgress(null);
 
       let managedExternally = false;
       try {
@@ -87,16 +87,20 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       }
       logger.verbose(`Confirmed update version ${update.version} for download.`);
 
+      let contentLength: number | undefined;
+      let downloaded = 0;
       await update.downloadAndInstall((event) => {
         switch (event.event) {
           case "Started":
-            setUpdateProgress(0);
+            contentLength = event.data.contentLength;
+            downloaded = 0;
+            setUpdateProgress(contentLength ? 0 : null);
             break;
           case "Progress":
-            setUpdateProgress((prev) => {
-              const chunkLength = event.data.chunkLength;
-              return Math.min(prev + (chunkLength / 1000) * 100, 100);
-            });
+            downloaded += event.data.chunkLength;
+            if (contentLength) {
+              setUpdateProgress(Math.min((downloaded / contentLength) * 100, 100));
+            }
             break;
           case "Finished":
             setUpdateProgress(100);

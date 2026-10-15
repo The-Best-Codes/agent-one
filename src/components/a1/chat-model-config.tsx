@@ -1,7 +1,14 @@
-import { IconAdjustments, IconInfoCircle, IconRestore } from "@tabler/icons-react";
+import {
+  IconAdjustments,
+  IconArrowsMinimize,
+  IconInfoCircle,
+  IconRestore,
+} from "@tabler/icons-react";
+import { useAtom } from "jotai";
 import debounce from "lodash.debounce";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { YoloModeDialog } from "@/components/a1/yolo-mode-dialog";
 import {
   AdaptivePopover,
   AdaptivePopoverContent,
@@ -24,12 +31,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { useChatFunctions, useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import {
   DEFAULT_MODEL_CONFIG,
+  getReasoningEffort,
   getToolBehavior,
+  type ReasoningEffort,
   type ToolBehavior,
 } from "@/hooks/ai/use-model-catalog";
+import { usePendingToolApproval } from "@/hooks/use-pending-tool-approval";
+import {
+  DEFAULT_COMPACTION_THRESHOLD,
+  getCompactionThreshold,
+  isCompactionPart,
+  MAX_COMPACTION_THRESHOLD,
+  MIN_COMPACTION_THRESHOLD,
+} from "@/lib/ai/compaction";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 interface SliderConfigProps {
@@ -64,6 +84,22 @@ const TOOL_BEHAVIORS: { value: ToolBehavior; label: string; description: string 
     label: "No tools",
     description: "Do not make any tools available to the model.",
   },
+];
+
+const DEFAULT_REASONING_EFFORT = "default";
+
+const REASONING_EFFORT_OPTIONS: {
+  value: ReasoningEffort | typeof DEFAULT_REASONING_EFFORT;
+  label: string;
+}[] = [
+  { value: DEFAULT_REASONING_EFFORT, label: "Default" },
+  { value: "none", label: "None" },
+  { value: "minimal", label: "Minimal" },
+  { value: "low", label: "Low" },
+  { value: "medium", label: "Medium" },
+  { value: "high", label: "High" },
+  { value: "xhigh", label: "Extra high" },
+  { value: "max", label: "Max" },
 ];
 
 const SliderConfig = ({
@@ -155,6 +191,93 @@ const SliderConfig = ({
   );
 };
 
+const CompactNowButton = ({ onCompact }: { onCompact: () => void }) => {
+  const messages = useChatMessages();
+  const { status } = useChatStatus();
+  const { compact } = useChatFunctions();
+  const hasPendingApproval = usePendingToolApproval();
+  const lastMessage = messages.at(-1);
+  const lastPart = lastMessage?.parts.at(-1);
+  const canCompact =
+    (status === "ready" || status === "error") &&
+    lastMessage?.role === "assistant" &&
+    !(lastPart && isCompactionPart(lastPart)) &&
+    !hasPendingApproval;
+
+  return (
+    <Button
+      variant="outline"
+      size="xs"
+      className="w-fit"
+      disabled={!canCompact}
+      onClick={() => {
+        onCompact();
+        void compact();
+      }}
+    >
+      <IconArrowsMinimize data-icon="inline-start" />
+      Compact now
+    </Button>
+  );
+};
+
+const CompactionConfig = ({
+  threshold,
+  onChange,
+  onCompact,
+}: {
+  threshold: number | null;
+  onChange: (value: number | "off") => void;
+  onCompact: () => void;
+}) => {
+  const [draggingValue, setDraggingValue] = useState<number | null>(null);
+  const isEnabled = threshold !== null;
+  const displayValue = draggingValue ?? threshold ?? DEFAULT_COMPACTION_THRESHOLD;
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="autoCompact">Auto-Compact</Label>
+          <AdaptiveTooltip>
+            <AdaptiveTooltipTrigger asChild>
+              <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
+            </AdaptiveTooltipTrigger>
+            <AdaptiveTooltipContent side="right" className="max-w-xs">
+              Automatically summarize earlier parts of the conversation once it uses this much of
+              the model's context window, so long chats can keep going.
+            </AdaptiveTooltipContent>
+          </AdaptiveTooltip>
+        </div>
+        <div className="flex items-center gap-2">
+          {isEnabled && <span className="text-foreground text-sm">{displayValue}%</span>}
+          <Switch
+            id="autoCompact"
+            size="sm"
+            checked={isEnabled}
+            onCheckedChange={(checked) => onChange(checked ? DEFAULT_COMPACTION_THRESHOLD : "off")}
+          />
+        </div>
+      </div>
+      {isEnabled && (
+        <Slider
+          min={MIN_COMPACTION_THRESHOLD}
+          max={MAX_COMPACTION_THRESHOLD}
+          step={1}
+          value={[displayValue]}
+          onValueChange={(values) => setDraggingValue(values[0])}
+          onValueCommit={(values) => {
+            setDraggingValue(null);
+            onChange(values[0]);
+          }}
+          aria-label="Auto-compact threshold"
+        />
+      )}
+      <CompactNowButton onCompact={onCompact} />
+    </div>
+  );
+};
+
 export const ChatModelConfig = ({
   disabled = false,
   triggerClassName,
@@ -167,6 +290,13 @@ export const ChatModelConfig = ({
   const effectiveOpen = disabled ? false : open;
   const toolBehavior = getToolBehavior(currentModelConfig);
   const selectedBehavior = TOOL_BEHAVIORS.find((behavior) => behavior.value === toolBehavior);
+  const reasoningEffort = getReasoningEffort(currentModelConfig);
+  const compactionThreshold = getCompactionThreshold(currentModelConfig);
+  const selectedReasoningEffort = REASONING_EFFORT_OPTIONS.find(
+    (option) => option.value === (reasoningEffort ?? DEFAULT_REASONING_EFFORT),
+  );
+  const [confirmYoloMode, setConfirmYoloMode] = useAtom(settingAtoms.CONFIRM_YOLO_MODE);
+  const [yoloDialogOpen, setYoloDialogOpen] = useState(false);
 
   const [localInputs, setLocalInputs] = useState({
     maxTokens: currentModelConfig.maxTokens,
@@ -186,6 +316,37 @@ export const ChatModelConfig = ({
   );
 
   useEffect(() => () => debouncedSetModelConfig.cancel(), [debouncedSetModelConfig]);
+
+  const setToolBehavior = (value: ToolBehavior) => {
+    setModelConfig({ ...configRef.current, toolBehavior: value });
+  };
+
+  const handleToolBehaviorChange = (value: ToolBehavior) => {
+    if (value === "yolo" && confirmYoloMode !== false) {
+      setYoloDialogOpen(true);
+      return;
+    }
+    setToolBehavior(value);
+  };
+
+  const handleYoloConfirm = (dontShowAgain: boolean) => {
+    if (dontShowAgain) setConfirmYoloMode(false);
+    setToolBehavior("yolo");
+  };
+
+  const handleReasoningEffortChange = (value: string) => {
+    setModelConfig({
+      ...configRef.current,
+      reasoningEffort: value === DEFAULT_REASONING_EFFORT ? undefined : (value as ReasoningEffort),
+    });
+  };
+
+  const handleCompactionThresholdChange = (value: number | "off") => {
+    setModelConfig({
+      ...configRef.current,
+      compactionThreshold: value === DEFAULT_COMPACTION_THRESHOLD ? undefined : value,
+    });
+  };
 
   const handleTemperatureChange = (value: number | undefined) => {
     setModelConfig({ ...configRef.current, temperature: value });
@@ -245,6 +406,8 @@ export const ChatModelConfig = ({
       presencePenalty: DEFAULT_MODEL_CONFIG.presencePenalty,
       seed: DEFAULT_MODEL_CONFIG.seed,
       toolBehavior: DEFAULT_MODEL_CONFIG.toolBehavior,
+      reasoningEffort: DEFAULT_MODEL_CONFIG.reasoningEffort,
+      compactionThreshold: DEFAULT_MODEL_CONFIG.compactionThreshold,
     });
   };
 
@@ -257,7 +420,9 @@ export const ChatModelConfig = ({
     currentModelConfig.frequencyPenalty === DEFAULT_MODEL_CONFIG.frequencyPenalty &&
     currentModelConfig.presencePenalty === DEFAULT_MODEL_CONFIG.presencePenalty &&
     currentModelConfig.seed === DEFAULT_MODEL_CONFIG.seed &&
-    toolBehavior === DEFAULT_MODEL_CONFIG.toolBehavior;
+    toolBehavior === DEFAULT_MODEL_CONFIG.toolBehavior &&
+    reasoningEffort === DEFAULT_MODEL_CONFIG.reasoningEffort &&
+    compactionThreshold === getCompactionThreshold(DEFAULT_MODEL_CONFIG);
 
   const content = (
     <div className="flex flex-col gap-4">
@@ -289,12 +454,7 @@ export const ChatModelConfig = ({
         </div>
         <Select
           value={toolBehavior}
-          onValueChange={(value) => {
-            setModelConfig({
-              ...configRef.current,
-              toolBehavior: value as ToolBehavior,
-            });
-          }}
+          onValueChange={(value) => handleToolBehaviorChange(value as ToolBehavior)}
         >
           <SelectTrigger id="toolBehavior" className="w-full">
             <SelectValue>{selectedBehavior ? selectedBehavior.label : ""}</SelectValue>
@@ -320,6 +480,44 @@ export const ChatModelConfig = ({
           </SelectContent>
         </Select>
       </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="reasoningEffort">Reasoning Effort</Label>
+          <AdaptiveTooltip>
+            <AdaptiveTooltipTrigger asChild>
+              <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
+            </AdaptiveTooltipTrigger>
+            <AdaptiveTooltipContent side="right" className="max-w-xs">
+              How much the model thinks before it responds. Higher effort can give better answers
+              but takes longer and uses more tokens. Only applies to models that support reasoning.
+            </AdaptiveTooltipContent>
+          </AdaptiveTooltip>
+        </div>
+        <Select
+          value={reasoningEffort ?? DEFAULT_REASONING_EFFORT}
+          onValueChange={handleReasoningEffortChange}
+        >
+          <SelectTrigger id="reasoningEffort" className="w-full">
+            <SelectValue>{selectedReasoningEffort?.label ?? ""}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {REASONING_EFFORT_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <CompactionConfig
+        threshold={compactionThreshold}
+        onChange={handleCompactionThresholdChange}
+        onCompact={() => setOpen(false)}
+      />
 
       <SliderConfig
         id="temperature"
@@ -478,14 +676,21 @@ export const ChatModelConfig = ({
   );
 
   return (
-    <AdaptivePopover open={effectiveOpen} onOpenChange={setOpen}>
-      <AdaptivePopoverTrigger asChild>{trigger}</AdaptivePopoverTrigger>
-      <AdaptivePopoverContent
-        title="Model Configuration"
-        className="max-h-80 w-64 overflow-auto p-4"
-      >
-        {content}
-      </AdaptivePopoverContent>
-    </AdaptivePopover>
+    <>
+      <AdaptivePopover open={effectiveOpen} onOpenChange={setOpen}>
+        <AdaptivePopoverTrigger asChild>{trigger}</AdaptivePopoverTrigger>
+        <AdaptivePopoverContent
+          title="Model Configuration"
+          className="max-h-80 w-64 overflow-auto p-4"
+        >
+          {content}
+        </AdaptivePopoverContent>
+      </AdaptivePopover>
+      <YoloModeDialog
+        open={yoloDialogOpen}
+        onOpenChange={setYoloDialogOpen}
+        onConfirm={handleYoloConfirm}
+      />
+    </>
   );
 };

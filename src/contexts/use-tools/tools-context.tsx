@@ -1,6 +1,6 @@
 import type { Tool, ToolSet } from "ai";
 import { useAtom } from "jotai";
-import React, { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { ToolBehavior } from "@/hooks/ai/use-model-catalog";
 import {
@@ -24,6 +24,8 @@ import {
   createDeleteScheduledAgentTool,
   createListScheduledAgentsTool,
   createUpdateScheduledAgentTool,
+  createReadChatTool,
+  createSearchChatsTool,
 } from "@/lib/ai/tools";
 import {
   abortMcpServerLoad,
@@ -36,16 +38,14 @@ import {
   prefixMcpToolNames,
 } from "@/lib/ai/tools/mcp";
 import { clearMcpOAuthCredentials, dismissMcpLoginToasts } from "@/lib/ai/tools/mcp/oauth";
+import type { ChatToolsContext } from "@/lib/ai/tools/readChat";
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom, mcpServersAtom } from "@/lib/jotai/mcp-atoms";
 import type { McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
-import {
-  enabledToolsAtom,
-  mcpParallelLoadLimitAtom,
-  toolConfigsAtom,
-} from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
-import { DEFAULT_SETTINGS, type McpServerConfig } from "@/lib/settings/types";
+import { DEFAULT_SETTINGS } from "@/lib/settings/definitions";
+import type { McpServerConfig } from "@/lib/settings/types";
 
 import { ToolsContext } from "./tools-contexts";
 
@@ -55,6 +55,7 @@ export interface ToolsContextType {
   getTools: (options?: {
     subAgentContext?: SubAgentExecutionContext;
     toolBehavior?: ToolBehavior;
+    chatContext?: ChatToolsContext;
   }) => Promise<ToolSet>;
   isMcpLoading: boolean;
   mcpLoaded: boolean;
@@ -101,10 +102,10 @@ function applyApprovalConfigToTools(
 }
 
 export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
-  const [enabledTools] = useAtom(enabledToolsAtom);
+  const [enabledTools] = useAtom(settingAtoms.ENABLED_TOOLS);
   const [mcpServers] = useAtom(mcpServersAtom);
-  const [parallelLoadLimit] = useAtom(mcpParallelLoadLimitAtom);
-  const [toolConfigs] = useAtom(toolConfigsAtom);
+  const [parallelLoadLimit] = useAtom(settingAtoms.MCP_PARALLEL_LOAD_LIMIT);
+  const [toolConfigs] = useAtom(settingAtoms.TOOL_CONFIGS);
   const [mcpAuthStates, setMcpAuthStates] = useAtom(mcpAuthStatesAtom);
   const [, setMcpServerLoadStates] = useAtom(mcpServerLoadStatesAtom);
 
@@ -332,9 +333,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       });
 
       try {
+        const chunkSize = Math.max(1, Math.floor(parallelLoadLimit) || 1);
         const chunks: McpServerConfig[][] = [];
-        for (let i = 0; i < serversToLoad.length; i += parallelLoadLimit) {
-          chunks.push(serversToLoad.slice(i, i + parallelLoadLimit));
+        for (let i = 0; i < serversToLoad.length; i += chunkSize) {
+          chunks.push(serversToLoad.slice(i, i + chunkSize));
         }
 
         for (const chunk of chunks) {
@@ -475,6 +477,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     async (options?: {
       subAgentContext?: SubAgentExecutionContext;
       toolBehavior?: ToolBehavior;
+      chatContext?: ChatToolsContext;
     }): Promise<ToolSet> => {
       const filteredStaticTools: ToolSet = {};
       const mergedEnabledTools = { ...DEFAULT_SETTINGS.ENABLED_TOOLS, ...enabledTools };
@@ -525,6 +528,8 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
           ...DEFAULT_SETTINGS.TOOL_CONFIGS.deleteScheduledAgent,
           ...toolConfigs.deleteScheduledAgent,
         },
+        searchChats: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.searchChats, ...toolConfigs.searchChats },
+        readChat: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.readChat, ...toolConfigs.readChat },
       };
 
       if (mergedEnabledTools.dateTime) {
@@ -604,6 +609,19 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         );
       }
 
+      if (mergedEnabledTools.searchChats) {
+        filteredStaticTools.searchChats = createSearchChatsTool(
+          mergedToolConfigs.searchChats,
+          options?.chatContext ?? {},
+        );
+      }
+      if (mergedEnabledTools.readChat) {
+        filteredStaticTools.readChat = createReadChatTool(
+          mergedToolConfigs.readChat,
+          options?.chatContext ?? {},
+        );
+      }
+
       if (!mcpLoadedRef.current && loadingPromiseRef.current) {
         await loadingPromiseRef.current;
       }
@@ -625,9 +643,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     [enabledTools, toolConfigs],
   );
 
-  return (
-    <ToolsContext.Provider value={{ getTools, isMcpLoading, mcpLoaded, restartMcpServer }}>
-      {children}
-    </ToolsContext.Provider>
+  const value = useMemo(
+    () => ({ getTools, isMcpLoading, mcpLoaded, restartMcpServer }),
+    [getTools, isMcpLoading, mcpLoaded, restartMcpServer],
   );
+
+  return <ToolsContext.Provider value={value}>{children}</ToolsContext.Provider>;
 };

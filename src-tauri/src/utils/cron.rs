@@ -12,6 +12,8 @@ use uuid::Uuid;
 
 // TODO: Later on, probably migrate this to the kv table that already exists in the AgentOne DB?
 const CRON_STATE_FILE_NAME: &str = "crons.json";
+const DEFAULT_DELAY_CUTOFF_SECONDS: i64 = 300;
+const NEVER_SKIP_DELAY_CUTOFF_SECONDS: i64 = -1;
 static CRON_MUTATION_LOCK: OnceLock<Arc<tokio::sync::Mutex<()>>> = OnceLock::new();
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -229,11 +231,12 @@ pub fn get_cron_invocation(
 
     let delay_seconds = (now - scheduled_at).num_seconds().max(0);
     if let CronKind::ScheduledAgent {
-        delay_cutoff_seconds: Some(cutoff),
+        delay_cutoff_seconds,
         ..
     } = &cron.kind
     {
-        if delay_seconds > *cutoff {
+        let cutoff = delay_cutoff_seconds.unwrap_or(DEFAULT_DELAY_CUTOFF_SECONDS);
+        if cutoff >= 0 && delay_seconds > cutoff {
             return Ok(None);
         }
     }
@@ -259,8 +262,12 @@ pub async fn create_scheduled_agent(
     title: String,
     schedule: String,
     prompt: String,
+    delay_cutoff_seconds: Option<i64>,
 ) -> Result<Cron, String> {
-    run_blocking(move || create_scheduled_agent_blocking(app, title, schedule, prompt)).await
+    run_blocking(move || {
+        create_scheduled_agent_blocking(app, title, schedule, prompt, delay_cutoff_seconds)
+    })
+    .await
 }
 
 fn create_scheduled_agent_blocking(
@@ -268,6 +275,7 @@ fn create_scheduled_agent_blocking(
     title: String,
     schedule: String,
     prompt: String,
+    delay_cutoff_seconds: Option<i64>,
 ) -> Result<Cron, String> {
     let cron = Cron {
         id: Uuid::new_v4().to_string(),
@@ -278,7 +286,9 @@ fn create_scheduled_agent_blocking(
             prompt: normalize_required("Prompt", prompt)?,
             model_id: None,
             model_config: None,
-            delay_cutoff_seconds: None,
+            delay_cutoff_seconds: Some(normalize_delay_cutoff(
+                delay_cutoff_seconds.unwrap_or(DEFAULT_DELAY_CUTOFF_SECONDS),
+            )),
         },
     };
     let mut crons = read_crons(&app)?;
@@ -298,8 +308,12 @@ pub async fn update_scheduled_agent(
     title: String,
     schedule: String,
     prompt: String,
+    delay_cutoff_seconds: Option<i64>,
 ) -> Result<Cron, String> {
-    run_blocking(move || update_scheduled_agent_blocking(app, id, title, schedule, prompt)).await
+    run_blocking(move || {
+        update_scheduled_agent_blocking(app, id, title, schedule, prompt, delay_cutoff_seconds)
+    })
+    .await
 }
 
 fn update_scheduled_agent_blocking(
@@ -308,6 +322,7 @@ fn update_scheduled_agent_blocking(
     title: String,
     schedule: String,
     prompt: String,
+    delay_cutoff_seconds: Option<i64>,
 ) -> Result<Cron, String> {
     let schedule = normalize_schedule(&schedule)?;
     let mut crons = read_crons(&app)?;
@@ -316,7 +331,7 @@ fn update_scheduled_agent_blocking(
     let CronKind::ScheduledAgent {
         model_id,
         model_config,
-        delay_cutoff_seconds,
+        delay_cutoff_seconds: previous_delay_cutoff_seconds,
         ..
     } = &previous.kind
     else {
@@ -331,7 +346,9 @@ fn update_scheduled_agent_blocking(
             prompt: normalize_required("Prompt", prompt)?,
             model_id: model_id.clone(),
             model_config: model_config.clone(),
-            delay_cutoff_seconds: *delay_cutoff_seconds,
+            delay_cutoff_seconds: delay_cutoff_seconds
+                .map(normalize_delay_cutoff)
+                .or(*previous_delay_cutoff_seconds),
         },
     };
     if updated.enabled {
@@ -412,6 +429,10 @@ fn normalize_schedule(value: &str) -> Result<String, String> {
     Ok(schedule)
 }
 
+fn normalize_delay_cutoff(value: i64) -> i64 {
+    value.max(NEVER_SKIP_DELAY_CUTOFF_SECONDS)
+}
+
 fn normalize_message(message: Option<String>) -> Option<String> {
     message.and_then(|message| {
         let message = message.trim().to_string();
@@ -476,59 +497,11 @@ fn write_crons(app: &tauri::AppHandle, crons: &[Cron]) -> Result<(), String> {
     Ok(())
 }
 
-fn opener_command(id: &str) -> Vec<String> {
-    let url = cron_url(id);
-    #[cfg(target_os = "macos")]
-    {
-        vec!["/usr/bin/open".to_string(), url]
-    }
-    #[cfg(target_os = "linux")]
-    {
-        vec![
-            linux_systemd_run().unwrap_or_else(|| "systemd-run".to_string()),
-            "--user".to_string(),
-            "--scope".to_string(),
-            "--".to_string(),
-            linux_opener().unwrap_or_else(|| "xdg-open".to_string()),
-            url,
-        ]
-    }
-    #[cfg(target_os = "windows")]
-    {
-        vec![
-            "powershell".to_string(),
-            "-NoProfile".to_string(),
-            "-Command".to_string(),
-            format!("Start-Process '{}'", url),
-        ]
-    }
-}
-
-// TODO: Remove this fallback later, as it doesn't even work. xdg-open gets killed by systemd later, closing the app, which is why we should stick with systemd-run.
-#[cfg(target_os = "linux")]
-fn linux_opener() -> Option<String> {
-    for candidate in ["/usr/bin/xdg-open", "/bin/xdg-open"] {
-        if std::fs::metadata(candidate).is_ok() {
-            return Some(candidate.to_string());
-        }
-    }
-    None
-}
-
-#[cfg(target_os = "linux")]
-fn linux_systemd_run() -> Option<String> {
-    for candidate in ["/usr/bin/systemd-run", "/bin/systemd-run"] {
-        if std::fs::metadata(candidate).is_ok() {
-            return Some(candidate.to_string());
-        }
-    }
-    None
-}
-
 fn cron_url(id: &str) -> String {
     format!("agent-one://cron?v=1&id={id}")
 }
 
+#[cfg(target_os = "linux")]
 fn gui_env() -> Vec<(String, String)> {
     [
         "DISPLAY",
@@ -548,19 +521,21 @@ fn gui_env() -> Vec<(String, String)> {
 }
 
 fn build_options(cron: &Cron) -> Result<native_cron::CronOptions, String> {
-    let mut options = native_cron::CronOptions::new(
+    // `open_url` picks a per-platform opener that doesn't flash a console
+    // window on Windows and doesn't get AgentOne killed on Linux when the
+    // job's systemd service exits.
+    let options = native_cron::CronOptions::open_url(
         cron.id.clone(),
         cron.schedule.clone(),
-        opener_command(&cron.id),
+        cron_url(&cron.id),
     )
     .overwrite(true);
-    for (key, value) in gui_env() {
-        options = options.env(key, value);
-    }
-    #[cfg(target_os = "windows")]
-    {
-        options = options.windows(native_cron::WindowsOptions { visible: true });
-    }
+    // Env vars would bring back the PowerShell wrapper on Windows, and
+    // nothing outside Linux needs them.
+    #[cfg(target_os = "linux")]
+    let options = gui_env()
+        .into_iter()
+        .fold(options, |options, (key, value)| options.env(key, value));
     Ok(options)
 }
 
@@ -573,18 +548,10 @@ fn install_cron(cron: &Cron) -> Result<(), String> {
 }
 
 fn disable_cron(id: &str) -> Result<(), String> {
-    match native_cron::job(id) {
-        Ok(job) => job.disable().map_err(|error| error.to_string())?,
-        Err(error) => {
-            let message = error.to_string();
-            if !message.to_lowercase().contains("not registered")
-                && !matches!(error, native_cron::Error::NotRegistered(_))
-            {
-                return Err(message);
-            }
-        }
-    }
-    Ok(())
+    // Disabling a job that isn't registered is a no-op in native-cron.
+    native_cron::job(id)
+        .and_then(|job| job.disable())
+        .map_err(|error| error.to_string())
 }
 
 fn remove_cron(id: &str) -> Result<(), String> {

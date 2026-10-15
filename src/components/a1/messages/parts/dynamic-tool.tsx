@@ -34,7 +34,7 @@ import { useGetChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import type { ToolDisplayLabels } from "@/lib/ai/tools/describeNextTool";
 import { getToolDisplayName } from "@/lib/ai/tools/mcp";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
-import { maxToolResultCharsAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 import { MessagePartMcpApp } from "./mcp-app";
@@ -61,7 +61,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
   const callId = part.toolCallId;
   const toolName = getToolDisplayName(part.toolName, part.title);
-  const maxToolResultChars = useAtomValue(maxToolResultCharsAtom);
+  const maxToolResultChars = useAtomValue(settingAtoms.MAX_TOOL_RESULT_CHARS);
   const getChatFunctions = useGetChatFunctions();
 
   switch (part.state) {

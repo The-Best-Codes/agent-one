@@ -1,0 +1,824 @@
+import {
+  IconArrowBackUp,
+  IconCheck,
+  IconCircleX,
+  IconPlus,
+  IconRobot,
+  IconSettings,
+  IconSparkles,
+  IconTrash,
+} from "@tabler/icons-react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import fuzzysort from "fuzzysort";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
+
+import { SearchInput } from "@/components/a1/search-input";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { Switch } from "@/components/ui/switch";
+import {
+  fetchProviderModels,
+  type OpenAIModelsResponse,
+} from "@/lib/ai/providers/custom-provider-factory";
+import {
+  getProviderModelName,
+  type ProviderModelMetadata,
+} from "@/lib/ai/providers/provider-models";
+import { getLogger } from "@/lib/logger";
+
+const logger = getLogger(import.meta.url);
+
+interface ModelListProps {
+  models: ProviderModelMetadata[];
+  builtInModels?: ProviderModelMetadata[];
+  baseUrl?: string;
+  apiKey?: string;
+  headers?: Record<string, string>;
+  autoFetchOnMount?: boolean;
+  addButtonLabel?: string;
+  emptyTitle?: string;
+  emptyDescription?: string;
+  onChange: (models: ProviderModelMetadata[]) => void;
+}
+
+interface AddModelFormProps {
+  existingIds: string[];
+  builtInModelIds: Set<string>;
+  onAdd: (model: ProviderModelMetadata) => void;
+  onCancel: () => void;
+}
+
+interface AddModelDialogProps extends Omit<AddModelFormProps, "onCancel"> {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+interface ModelConfigDialogProps {
+  model: ProviderModelMetadata;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onChange: (model: ProviderModelMetadata) => void;
+}
+
+type ModelSource = "built-in" | "overridden" | "custom";
+
+interface DisplayModel {
+  model: ProviderModelMetadata;
+  source: ModelSource;
+}
+
+interface ModelRowProps {
+  model: ProviderModelMetadata;
+  source: ModelSource;
+  showSourceBadge: boolean;
+  onChange: (model: ProviderModelMetadata) => void;
+  onDelete: (modelId: string) => void;
+}
+
+const MODEL_METADATA_KEYS = [
+  "name",
+  "supportsText",
+  "supportsTools",
+  "supportsImages",
+  "supportsImageInput",
+  "supportsAttachments",
+  "supportsReasoning",
+  "contextWindow",
+  "maxOutputTokens",
+] as const satisfies (keyof ProviderModelMetadata)[];
+
+function isSameModelMetadata(left: ProviderModelMetadata, right: ProviderModelMetadata) {
+  return MODEL_METADATA_KEYS.every((key) => left[key] === right[key]);
+}
+
+function mergeModelOverride(
+  builtInModel: ProviderModelMetadata,
+  override: ProviderModelMetadata,
+): ProviderModelMetadata {
+  return {
+    ...builtInModel,
+    ...override,
+    supportsImageInput: override.supportsImageInput ?? builtInModel.supportsImageInput,
+    supportsAttachments: override.supportsAttachments ?? builtInModel.supportsAttachments,
+    supportsReasoning: override.supportsReasoning ?? builtInModel.supportsReasoning,
+  };
+}
+
+function normalizeOptionalNumber(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  const parsed = Number(trimmed);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return null;
+  }
+
+  return Math.floor(parsed);
+}
+
+function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddModelFormProps) {
+  const [id, setId] = useState("");
+  const [name, setName] = useState("");
+  const [supportsText, setSupportsText] = useState(true);
+  const [supportsTools, setSupportsTools] = useState(true);
+  const [supportsImages, setSupportsImages] = useState(false);
+  const [supportsAttachments, setSupportsAttachments] = useState(false);
+  const [contextWindow, setContextWindow] = useState("");
+  const [maxOutputTokens, setMaxOutputTokens] = useState("");
+
+  const trimmedId = id.trim();
+  const trimmedName = name.trim();
+  const isDuplicate = existingIds.includes(trimmedId);
+  const overridesBuiltIn = trimmedId !== "" && builtInModelIds.has(trimmedId);
+  const parsedContextWindow = normalizeOptionalNumber(contextWindow);
+  const parsedMaxOutputTokens = normalizeOptionalNumber(maxOutputTokens);
+  const hasInvalidNumber = parsedContextWindow === null || parsedMaxOutputTokens === null;
+  const isValid = trimmedId !== "" && !isDuplicate && !hasInvalidNumber;
+
+  const handleAdd = () => {
+    if (!isValid) {
+      return;
+    }
+
+    onAdd({
+      id: trimmedId,
+      name: trimmedName || undefined,
+      supportsText,
+      supportsTools,
+      supportsImages,
+      supportsAttachments,
+      contextWindow: parsedContextWindow ?? undefined,
+      maxOutputTokens: parsedMaxOutputTokens ?? undefined,
+    });
+  };
+
+  return (
+    <>
+      <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor="new-model-id">Model ID</FieldLabel>
+            <Input
+              id="new-model-id"
+              value={id}
+              onChange={(event) => setId(event.target.value)}
+              placeholder="e.g. gpt-5"
+              aria-invalid={isDuplicate}
+            />
+
+            {isDuplicate ? (
+              <FieldDescription className="text-destructive">
+                Model ID already exists.
+              </FieldDescription>
+            ) : overridesBuiltIn ? (
+              <FieldDescription>
+                This matches a built-in model and will override its metadata.
+              </FieldDescription>
+            ) : (
+              <FieldDescription>Use the provider's raw model identifier.</FieldDescription>
+            )}
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="new-model-name">Display Name</FieldLabel>
+            <Input
+              id="new-model-name"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              placeholder="Optional label shown in the model picker"
+            />
+          </Field>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field data-invalid={parsedContextWindow === null || undefined}>
+              <FieldLabel htmlFor="new-model-context-window">Context Window</FieldLabel>
+              <Input
+                id="new-model-context-window"
+                value={contextWindow}
+                onChange={(event) => setContextWindow(event.target.value)}
+                placeholder="e.g. 200000"
+                inputMode="numeric"
+                aria-invalid={parsedContextWindow === null}
+              />
+
+              <FieldDescription>
+                {parsedContextWindow === null
+                  ? "Enter a non-negative number."
+                  : "Optional token limit used in the app UI."}
+              </FieldDescription>
+            </Field>
+
+            <Field data-invalid={parsedMaxOutputTokens === null || undefined}>
+              <FieldLabel htmlFor="new-model-max-output">Max Output Tokens</FieldLabel>
+              <Input
+                id="new-model-max-output"
+                value={maxOutputTokens}
+                onChange={(event) => setMaxOutputTokens(event.target.value)}
+                placeholder="e.g. 8192"
+                inputMode="numeric"
+                aria-invalid={parsedMaxOutputTokens === null}
+              />
+
+              <FieldDescription>
+                {parsedMaxOutputTokens === null
+                  ? "Enter a non-negative number."
+                  : "Optional max output token metadata override."}
+              </FieldDescription>
+            </Field>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor="new-model-supports-text">Supports Text</FieldLabel>
+              <Switch
+                id="new-model-supports-text"
+                checked={supportsText}
+                onCheckedChange={setSupportsText}
+              />
+            </Field>
+
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor="new-model-supports-tools">Supports Tools</FieldLabel>
+              <Switch
+                id="new-model-supports-tools"
+                checked={supportsTools}
+                onCheckedChange={setSupportsTools}
+              />
+            </Field>
+
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor="new-model-supports-images">Supports Images</FieldLabel>
+              <Switch
+                id="new-model-supports-images"
+                checked={supportsImages}
+                onCheckedChange={setSupportsImages}
+              />
+            </Field>
+
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor="new-model-supports-attachments">Supports Attachments</FieldLabel>
+              <Switch
+                id="new-model-supports-attachments"
+                checked={supportsAttachments}
+                onCheckedChange={setSupportsAttachments}
+              />
+            </Field>
+          </div>
+        </FieldGroup>
+      </div>
+
+      <DialogFooter>
+        <Button variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button onClick={handleAdd} disabled={!isValid}>
+          Add Model
+        </Button>
+      </DialogFooter>
+    </>
+  );
+}
+
+function AddModelDialog({ open, onOpenChange, ...formProps }: AddModelDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Model</DialogTitle>
+          <DialogDescription>
+            Register a model and the metadata AgentOne should use.
+          </DialogDescription>
+        </DialogHeader>
+
+        <AddModelForm {...formProps} onCancel={() => onOpenChange(false)} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigDialogProps) {
+  const [draft, setDraft] = useState(model);
+  const [contextWindowValue, setContextWindowValue] = useState(
+    model.contextWindow?.toString() ?? "",
+  );
+  const [maxOutputTokensValue, setMaxOutputTokensValue] = useState(
+    model.maxOutputTokens?.toString() ?? "",
+  );
+
+  const parsedContextWindow = normalizeOptionalNumber(contextWindowValue);
+  const parsedMaxOutputTokens = normalizeOptionalNumber(maxOutputTokensValue);
+  const isContextWindowInvalid = parsedContextWindow === null;
+  const isMaxOutputTokensInvalid = parsedMaxOutputTokens === null;
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      onChange(draft);
+    }
+
+    onOpenChange(nextOpen);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{getProviderModelName(draft)}</DialogTitle>
+        </DialogHeader>
+
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor={`model-name-${model.id}`}>Display Name</FieldLabel>
+            <Input
+              id={`model-name-${model.id}`}
+              value={draft.name ?? ""}
+              onChange={(event) =>
+                setDraft({
+                  ...draft,
+                  name: event.target.value.trim() || undefined,
+                })
+              }
+              placeholder="Optional label shown in the model picker"
+            />
+          </Field>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field data-invalid={isContextWindowInvalid || undefined}>
+              <FieldLabel htmlFor={`model-context-window-${model.id}`}>Context Window</FieldLabel>
+              <Input
+                id={`model-context-window-${model.id}`}
+                value={contextWindowValue}
+                onChange={(event) => {
+                  const nextValue = event.target.value;
+                  setContextWindowValue(nextValue);
+
+                  const parsed = normalizeOptionalNumber(nextValue);
+                  if (parsed !== null) {
+                    setDraft({
+                      ...draft,
+                      contextWindow: parsed ?? undefined,
+                    });
+                  }
+                }}
+                inputMode="numeric"
+                placeholder="Optional"
+                aria-invalid={isContextWindowInvalid}
+              />
+
+              <FieldDescription>
+                {isContextWindowInvalid ? "Enter a non-negative number." : "Shown in usage status."}
+              </FieldDescription>
+            </Field>
+
+            <Field data-invalid={isMaxOutputTokensInvalid || undefined}>
+              <FieldLabel htmlFor={`model-max-output-${model.id}`}>Max Output Tokens</FieldLabel>
+              <Input
+                id={`model-max-output-${model.id}`}
+                value={maxOutputTokensValue}
+                onChange={(event) => {
+                  const nextValue = event.target.value;
+                  setMaxOutputTokensValue(nextValue);
+
+                  const parsed = normalizeOptionalNumber(nextValue);
+                  if (parsed !== null) {
+                    setDraft({
+                      ...draft,
+                      maxOutputTokens: parsed ?? undefined,
+                    });
+                  }
+                }}
+                inputMode="numeric"
+                placeholder="Optional"
+                aria-invalid={isMaxOutputTokensInvalid}
+              />
+
+              <FieldDescription>
+                {isMaxOutputTokensInvalid
+                  ? "Enter a non-negative number."
+                  : "Used when you want to override the built-in output limit."}
+              </FieldDescription>
+            </Field>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor={`model-supports-text-${model.id}`}>Supports Text</FieldLabel>
+              <Switch
+                id={`model-supports-text-${model.id}`}
+                checked={draft.supportsText}
+                onCheckedChange={(checked) => setDraft({ ...draft, supportsText: checked })}
+              />
+            </Field>
+
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor={`model-supports-tools-${model.id}`}>Supports Tools</FieldLabel>
+              <Switch
+                id={`model-supports-tools-${model.id}`}
+                checked={draft.supportsTools}
+                onCheckedChange={(checked) => setDraft({ ...draft, supportsTools: checked })}
+              />
+            </Field>
+
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor={`model-supports-images-${model.id}`}>Supports Images</FieldLabel>
+              <Switch
+                id={`model-supports-images-${model.id}`}
+                checked={draft.supportsImages}
+                onCheckedChange={(checked) => setDraft({ ...draft, supportsImages: checked })}
+              />
+            </Field>
+
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor={`model-supports-attachments-${model.id}`}>
+                Supports Attachments
+              </FieldLabel>
+              <Switch
+                id={`model-supports-attachments-${model.id}`}
+                checked={draft.supportsAttachments ?? false}
+                onCheckedChange={(checked) => setDraft({ ...draft, supportsAttachments: checked })}
+              />
+            </Field>
+          </div>
+        </FieldGroup>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+const ModelRow = memo(function ModelRow({
+  model,
+  source,
+  showSourceBadge,
+  onChange,
+  onDelete,
+}: ModelRowProps) {
+  const [configOpen, setConfigOpen] = useState(false);
+
+  return (
+    <>
+      <div className="flex h-10 items-center gap-2 border-b px-1 last:border-b-0">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <span className="truncate text-sm font-medium">{getProviderModelName(model)}</span>
+          {model.name ? (
+            <span className="text-muted-foreground truncate text-xs">{model.id}</span>
+          ) : null}
+          {showSourceBadge && source !== "built-in" ? (
+            <Badge variant="secondary">{source === "overridden" ? "Overridden" : "Custom"}</Badge>
+          ) : null}
+        </div>
+
+        <div className="flex shrink-0 items-center gap-1">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="size-8"
+            onClick={() => {
+              setConfigOpen(true);
+            }}
+            aria-label={source === "built-in" ? "Override model" : "Configure model"}
+          >
+            <IconSettings />
+          </Button>
+          {source === "overridden" ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="size-8"
+              onClick={() => {
+                onDelete(model.id);
+              }}
+              aria-label="Reset model override"
+            >
+              <IconArrowBackUp />
+            </Button>
+          ) : source === "custom" ? (
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              className="text-destructive hover:text-destructive size-8"
+              onClick={() => {
+                onDelete(model.id);
+              }}
+              aria-label="Delete model"
+            >
+              <IconTrash />
+            </Button>
+          ) : null}
+        </div>
+      </div>
+
+      {configOpen ? (
+        <ModelConfigDialog
+          key={`${model.id}-${model.name ?? ""}-${model.contextWindow ?? ""}-${model.maxOutputTokens ?? ""}-${model.supportsText}-${model.supportsTools}-${model.supportsImages}-${model.supportsAttachments}`}
+          model={model}
+          open={configOpen}
+          onOpenChange={setConfigOpen}
+          onChange={onChange}
+        />
+      ) : null}
+    </>
+  );
+});
+
+export function ModelList({
+  models,
+  builtInModels = [],
+  baseUrl,
+  apiKey = "",
+  headers = {},
+  autoFetchOnMount = false,
+  addButtonLabel,
+  emptyTitle,
+  emptyDescription,
+  onChange,
+}: ModelListProps) {
+  const resolvedAddButtonLabel = addButtonLabel ?? "Add Model";
+  const resolvedEmptyTitle = emptyTitle ?? "No models configured";
+  const resolvedEmptyDescription =
+    emptyDescription ?? "Add a model to make it available in the model picker.";
+  const [isAdding, setIsAdding] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [fetchState, setFetchState] = useState<"idle" | "fetching" | "success" | "error">("idle");
+  const fetchResetTimeoutRef = useRef<number | null>(null);
+  const hasAutoFetchedRef = useRef(false);
+  const parentRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (fetchResetTimeoutRef.current !== null) {
+        window.clearTimeout(fetchResetTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const builtInModelIds = useMemo(
+    () => new Set(builtInModels.map((model) => model.id)),
+    [builtInModels],
+  );
+
+  const displayModels = useMemo<DisplayModel[]>(() => {
+    const overridesById = new Map(models.map((model) => [model.id, model]));
+    const merged: DisplayModel[] = builtInModels.map((builtInModel) => {
+      const override = overridesById.get(builtInModel.id);
+      return override
+        ? { model: mergeModelOverride(builtInModel, override), source: "overridden" }
+        : { model: builtInModel, source: "built-in" };
+    });
+
+    for (const model of models) {
+      if (!builtInModelIds.has(model.id)) {
+        merged.push({ model, source: "custom" });
+      }
+    }
+
+    return merged.sort((left, right) =>
+      getProviderModelName(left.model).localeCompare(getProviderModelName(right.model)),
+    );
+  }, [builtInModelIds, builtInModels, models]);
+
+  const sortedModels = useMemo(() => {
+    const query = searchQuery.trim();
+    if (!query) {
+      return displayModels;
+    }
+
+    return fuzzysort
+      .go(query, displayModels, {
+        keys: [(entry) => getProviderModelName(entry.model), (entry) => entry.model.id],
+      })
+      .map((result) => result.obj);
+  }, [displayModels, searchQuery]);
+
+  const hasBuiltInModels = builtInModels.length > 0;
+
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const virtualizer = useVirtualizer({
+    count: sortedModels.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 40,
+    getItemKey: (index) => sortedModels[index]?.model.id ?? index,
+    overscan: 8,
+  });
+
+  const setFetchStateWithReset = (state: "success" | "error") => {
+    setFetchState(state);
+
+    if (fetchResetTimeoutRef.current !== null) {
+      window.clearTimeout(fetchResetTimeoutRef.current);
+    }
+
+    fetchResetTimeoutRef.current = window.setTimeout(() => {
+      setFetchState("idle");
+      fetchResetTimeoutRef.current = null;
+    }, 2000);
+  };
+
+  const handleAddModel = (model: ProviderModelMetadata) => {
+    onChange([model, ...models]);
+    setIsAdding(false);
+  };
+
+  const handleUpdateModel = (nextModel: ProviderModelMetadata) => {
+    const currentModel = displayModels.find((entry) => entry.model.id === nextModel.id)?.model;
+    if (currentModel && isSameModelMetadata(currentModel, nextModel)) {
+      return;
+    }
+
+    if (models.some((model) => model.id === nextModel.id)) {
+      onChange(models.map((model) => (model.id === nextModel.id ? nextModel : model)));
+    } else {
+      onChange([nextModel, ...models]);
+    }
+  };
+
+  const handleDeleteModel = (modelId: string) => {
+    onChange(models.filter((model) => model.id !== modelId));
+  };
+
+  const handleFetchModels = async () => {
+    if (!baseUrl || fetchState !== "idle") {
+      return;
+    }
+
+    setFetchState("fetching");
+
+    try {
+      const response: OpenAIModelsResponse = await fetchProviderModels(baseUrl, apiKey, headers);
+      const existingIds = new Set(models.map((model) => model.id));
+      const fetchedModels = response.data
+        .filter((model) => !existingIds.has(model.id))
+        .map((model): ProviderModelMetadata => ({
+          id: model.id,
+          supportsText: true,
+          supportsTools: true,
+          supportsImages: false,
+          supportsAttachments: false,
+        }));
+
+      if (fetchedModels.length > 0) {
+        onChange([...fetchedModels, ...models]);
+      }
+
+      setFetchStateWithReset("success");
+    } catch (error) {
+      logger.error(`Failed to fetch models from ${baseUrl}`, error);
+      setFetchStateWithReset("error");
+    }
+  };
+
+  useEffect(() => {
+    if (!autoFetchOnMount || !baseUrl || hasAutoFetchedRef.current) {
+      return;
+    }
+
+    hasAutoFetchedRef.current = true;
+    void handleFetchModels();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const fetchIcon =
+    fetchState === "fetching" ? (
+      <Spinner />
+    ) : fetchState === "success" ? (
+      <IconCheck />
+    ) : fetchState === "error" ? (
+      <IconCircleX />
+    ) : (
+      <IconSparkles />
+    );
+
+  return (
+    <div className="rounded-md border p-3">
+      <div className="flex items-center justify-between gap-2">
+        <div className="text-sm font-medium">Models</div>
+
+        <div className="flex gap-2">
+          {baseUrl ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleFetchModels}
+              disabled={fetchState !== "idle"}
+            >
+              {fetchIcon}
+              Auto
+            </Button>
+          ) : null}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setIsAdding(true);
+            }}
+          >
+            <IconPlus data-icon="inline-start" />
+            {resolvedAddButtonLabel}
+          </Button>
+        </div>
+      </div>
+
+      <AddModelDialog
+        open={isAdding}
+        onOpenChange={setIsAdding}
+        existingIds={models.map((model) => model.id)}
+        builtInModelIds={builtInModelIds}
+        onAdd={handleAddModel}
+      />
+
+      {displayModels.length > 0 ? (
+        <SearchInput
+          containerClassName="mt-3"
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder="Search models..."
+          aria-label="Search models"
+        />
+      ) : null}
+
+      {sortedModels.length > 0 ? (
+        <div ref={parentRef} className="mt-3 max-h-80 overflow-y-auto">
+          <div
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              width: "100%",
+              position: "relative",
+            }}
+          >
+            {virtualizer.getVirtualItems().map((virtualItem) => {
+              const { model, source } = sortedModels[virtualItem.index];
+
+              return (
+                <div
+                  key={model.id}
+                  className="absolute top-0 left-0 w-full"
+                  style={{
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                >
+                  <ModelRow
+                    model={model}
+                    source={source}
+                    showSourceBadge={hasBuiltInModels}
+                    onChange={handleUpdateModel}
+                    onDelete={handleDeleteModel}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : displayModels.length > 0 ? (
+        <p className="text-muted-foreground mt-3 text-center text-sm">No models found.</p>
+      ) : (
+        <div className="mt-4">
+          <Empty className="bg-muted/20 border">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <IconRobot />
+              </EmptyMedia>
+              <EmptyTitle>{resolvedEmptyTitle}</EmptyTitle>
+              <EmptyDescription>{resolvedEmptyDescription}</EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsAdding(true);
+                }}
+              >
+                <IconPlus data-icon="inline-start" />
+                {resolvedAddButtonLabel}
+              </Button>
+            </EmptyContent>
+          </Empty>
+        </div>
+      )}
+    </div>
+  );
+}

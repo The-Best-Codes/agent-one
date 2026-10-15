@@ -1,10 +1,11 @@
 import { createCohere } from "@ai-sdk/cohere";
-import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
+
+import { providerFetch } from "@/lib/ai/providers/provider-fetch";
 
 export function getCohere(apiKey: string, headers?: Record<string, string>) {
   return createCohere({
     apiKey: apiKey || "unset",
-    fetch: tauriFetch,
+    fetch: providerFetch,
     headers,
   });
 }

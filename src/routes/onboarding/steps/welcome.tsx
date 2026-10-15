@@ -1,7 +1,6 @@
-import { IconBook, IconExternalLink, IconRocket, IconSchool } from "@tabler/icons-react";
+import { IconBook, IconExternalLink, IconMap } from "@tabler/icons-react";
 import { useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AGENT_ONE_DOCS_URL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -9,16 +8,15 @@ import { cn } from "@/lib/utils";
 interface WelcomeStepProps {
   name: string;
   onComplete: () => void;
+  onStartTour: () => void;
 }
 
-export function WelcomeStep({ name, onComplete }: WelcomeStepProps) {
+export function WelcomeStep({ name, onComplete, onStartTour }: WelcomeStepProps) {
   const [isExiting, setIsExiting] = useState(false);
 
-  const handleLaunch = () => {
+  const exitThen = (callback: () => void) => {
     setIsExiting(true);
-    setTimeout(() => {
-      onComplete();
-    }, 500);
+    setTimeout(callback, 500);
   };
 
   return (
@@ -39,21 +37,11 @@ export function WelcomeStep({ name, onComplete }: WelcomeStepProps) {
         <Button
           size="lg"
           className="h-14 justify-start px-6 text-lg"
-          onClick={handleLaunch}
+          onClick={() => exitThen(onStartTour)}
           disabled={isExiting}
         >
-          <IconRocket data-icon="inline-start" />
-          Launch AgentOne
-        </Button>
-        <Button
-          variant="outline"
-          size="lg"
-          className="relative h-14 justify-start px-6 text-lg"
-          disabled={true}
-        >
-          <Badge className="absolute -top-2 -right-2">Coming Soon!</Badge>
-          <IconSchool data-icon="inline-start" />
-          Take the Tutorial
+          <IconMap data-icon="inline-start" />
+          Take the Tour
         </Button>
         <Button asChild variant="outline" size="lg" className="h-14 justify-between px-6 text-lg">
           <a href={AGENT_ONE_DOCS_URL} target="_blank" rel="noreferrer">
@@ -63,6 +51,9 @@ export function WelcomeStep({ name, onComplete }: WelcomeStepProps) {
             </div>
             <IconExternalLink className="size-5" />
           </a>
+        </Button>
+        <Button variant="link" onClick={() => exitThen(onComplete)} disabled={isExiting}>
+          Skip and launch AgentOne
         </Button>
       </div>
     </div>

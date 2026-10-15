@@ -31,9 +31,9 @@ import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import { useOverflow } from "@/hooks/use-overflow";
 import { listScheduledAgents, SCHEDULED_AGENTS_CHANGED_EVENT } from "@/lib/cron";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
-import { chatSortAtom, sidebarChatTimeGroupingAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
-import type { ChatSortOption } from "@/lib/settings/types";
+import type { SettingValue } from "@/lib/settings/definitions";
 import type { ChatSearchResult } from "@/lib/storage/chat-storage";
 import { cn } from "@/lib/utils";
 
@@ -60,7 +60,7 @@ type ChatListRow =
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-function getChatSortTimestamp(chat: ChatListItem, chatSort: ChatSortOption): number {
+function getChatSortTimestamp(chat: ChatListItem, chatSort: SettingValue<"CHAT_SORT">): number {
   if (chatSort === "updated-at") {
     return chat.lastMessageAt ?? chat.createdAt ?? 0;
   }
@@ -127,8 +127,8 @@ export const VirtualizedChatList = ({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const latestSearchQueryRef = useRef("");
   const chatIds = useAtomValueRawSync(chatIdsAtom);
-  const [chatSort] = useAtom(chatSortAtom);
-  const [sidebarChatTimeGrouping] = useAtom(sidebarChatTimeGroupingAtom);
+  const [chatSort] = useAtom(settingAtoms.CHAT_SORT);
+  const [sidebarChatTimeGrouping] = useAtom(settingAtoms.SIDEBAR_CHAT_TIME_GROUPING);
 
   useKeyboardShortcut("focusChatSearch", () => {
     searchInputRef.current?.focus();
@@ -145,7 +145,7 @@ export const VirtualizedChatList = ({
             Object.fromEntries(agents.map((agent) => [agent.id, agent.title])),
           ),
         )
-        .catch(() => {});
+        .catch((error) => logger.warn("Failed to load scheduled agent titles", error));
     };
     refresh();
     window.addEventListener(SCHEDULED_AGENTS_CHANGED_EVENT, refresh);
@@ -470,9 +470,6 @@ export const VirtualizedChatList = ({
               placeholder={searchContent ? "Search chats..." : "Search titles..."}
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
-              autoCorrect="off"
-              autoCapitalize="off"
-              spellCheck="false"
             />
 
             <DropdownMenu>
@@ -520,7 +517,7 @@ export const VirtualizedChatList = ({
         className={cn(
           "flex-1",
           showList ? "overflow-y-auto" : "overflow-hidden",
-          isOverflowing && showList && "scroll-fade pr-2",
+          isOverflowing && showList && "scroll-fade pr-2 [--scroll-fade-reveal:--spacing(12)]",
         )}
       >
         {!isMetadataLoaded ? (

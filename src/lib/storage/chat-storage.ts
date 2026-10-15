@@ -3,7 +3,7 @@ import type { UIMessage } from "ai";
 
 import type { ChatMetadata } from "@/contexts/use-persistence/persistence-context";
 import { getLogger } from "@/lib/logger";
-import type { ChatSortOption } from "@/lib/settings/types";
+import type { SettingValue } from "@/lib/settings/definitions";
 
 export interface ChatSearchResult {
   chatId: string;
@@ -191,7 +191,7 @@ export const chatStorage = {
     );
   },
 
-  async listChats(sortBy: ChatSortOption): Promise<StoredChat[]> {
+  async listChats(sortBy: SettingValue<"CHAT_SORT">): Promise<StoredChat[]> {
     const d = await getDb();
     const sortColumn =
       sortBy === "updated-at"
@@ -245,6 +245,19 @@ export const chatStorage = {
     );
     if (rows.length === 0) return null;
     return JSON.parse(rows[0].messages);
+  },
+
+  async getChatMessageCounts(ids: string[]): Promise<Map<string, number>> {
+    if (ids.length === 0) return new Map();
+    const d = await getDb();
+    const placeholders = ids.map((_, i) => `$${i + 1}`).join(", ");
+    const rows = await d.select<{ id: string; count: number | null }[]>(
+      `SELECT id, CASE WHEN json_valid(messages) THEN json_array_length(messages) END AS count
+       FROM chat_messages
+       WHERE id IN (${placeholders})`,
+      ids,
+    );
+    return new Map(rows.map((row) => [row.id, row.count ?? 0]));
   },
 
   async setChatMessages(id: string, messages: UIMessage[]): Promise<void> {
@@ -427,9 +440,9 @@ export const chatStorage = {
             row.title,
             content,
           ]);
-        } catch {
+        } catch (error) {
           malformedEntries += 1;
-          // skip malformed entries
+          logger.warn(`Skipping malformed chat ${row.id} while rebuilding search index`, error);
         }
       }
 

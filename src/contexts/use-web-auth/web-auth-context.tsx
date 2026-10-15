@@ -114,12 +114,14 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
         if (cancelled) return;
 
         if (error) {
+          logger.error("Failed to load billing information", error);
           setBillingError("Unable to load billing information.");
           return;
         }
 
         setCustomerState(data ?? null);
-      } catch {
+      } catch (error) {
+        logger.error("Failed to load billing information", error);
         if (!cancelled) {
           setBillingError("Unable to load billing information.");
         }

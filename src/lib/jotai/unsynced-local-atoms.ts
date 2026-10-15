@@ -1,3 +1,5 @@
+// This file is for atoms that don't sync across app windows, not settings that don't sync across devices when signed in
+
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 
 function createNoSyncStorage<T>() {

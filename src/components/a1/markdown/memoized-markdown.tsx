@@ -1,7 +1,7 @@
 import type { UIMessage } from "ai";
 import { useAtomValue } from "jotai";
-import { marked } from "marked";
-import { memo, useMemo } from "react";
+import { marked, type Token, type Tokens } from "marked";
+import { memo, useMemo, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { Link } from "react-router";
 import remarkBreaks from "remark-breaks";
@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { remendEnabledAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 
 import { CodeBlock } from "./codeblock";
 
@@ -26,26 +26,65 @@ type MarkdownBlock = {
   lang?: string;
 };
 
-function parseMarkdownIntoBlocks(markdown: string, remendEnabled: boolean): MarkdownBlock[] {
-  const completedMarkdown = remendEnabled ? remend(markdown) : markdown;
-  const tokens = marked.lexer(completedMarkdown);
-  const blocks: MarkdownBlock[] = [];
+type ParsedMarkdown = {
+  remendEnabled: boolean;
+  stableSource: string;
+  stableBlocks: MarkdownBlock[];
+  blocks: MarkdownBlock[];
+};
 
-  for (const token of tokens) {
-    if (token.type === "code") {
-      blocks.push({
-        type: "code",
-        content: token.text,
-        lang: token.lang,
-      });
-    } else {
-      blocks.push({
-        type: token.type,
-        content: token.raw,
-      });
-    }
+const UNSTABLE_TAIL_TOKEN_COUNT = 2;
+
+function tokenToBlock(token: Token): MarkdownBlock {
+  if (token.type === "code") {
+    return {
+      type: "code",
+      content: (token as Tokens.Code).text,
+      lang: (token as Tokens.Code).lang,
+    };
   }
-  return blocks;
+
+  return {
+    type: token.type,
+    content: token.raw,
+  };
+}
+
+function parseMarkdownIntoBlocks(
+  markdown: string,
+  remendEnabled: boolean,
+  previous: ParsedMarkdown | null,
+): ParsedMarkdown {
+  const canReuse =
+    previous !== null &&
+    previous.remendEnabled === remendEnabled &&
+    markdown.startsWith(previous.stableSource);
+  const stableSource = canReuse ? previous.stableSource : "";
+  const stableBlocks = canReuse ? previous.stableBlocks : [];
+
+  const tail = markdown.slice(stableSource.length);
+  const tokens = marked.lexer(remendEnabled ? remend(tail) : tail);
+  const tailBlocks = tokens.map(tokenToBlock);
+
+  let settledLength = 0;
+  let settledCount = 0;
+  while (settledCount < tokens.length - UNSTABLE_TAIL_TOKEN_COUNT) {
+    const raw = tokens[settledCount].raw;
+    if (!tail.startsWith(raw, settledLength)) {
+      break;
+    }
+    settledLength += raw.length;
+    settledCount++;
+  }
+
+  return {
+    remendEnabled,
+    stableSource:
+      settledCount > 0 ? markdown.slice(0, stableSource.length + settledLength) : stableSource,
+    stableBlocks:
+      settledCount > 0 ? [...stableBlocks, ...tailBlocks.slice(0, settledCount)] : stableBlocks,
+    blocks: [...stableBlocks, ...tailBlocks],
+  };
 }
 
 const MemoizedMarkdownBlock = memo(
@@ -91,7 +130,7 @@ const MemoizedMarkdownBlock = memo(
             table({ ...props }) {
               return (
                 <Table
-                  containerClassName="rounded-md border border-border"
+                  containerClassName="my-4 rounded-md border border-border first:mt-0 last:mb-0"
                   className="not-prose"
                   {...props}
                 />
@@ -147,11 +186,13 @@ export const MemoizedMarkdown = memo(
     messageRole: UIMessage["role"];
     simpleCodeBlocks?: boolean;
   }) => {
-    const remendEnabled = useAtomValue(remendEnabledAtom);
-    const blocks = useMemo(
-      () => parseMarkdownIntoBlocks(content, remendEnabled),
-      [content, remendEnabled],
-    );
+    const remendEnabled = useAtomValue(settingAtoms.REMEND_ENABLED);
+    const parsedRef = useRef<ParsedMarkdown | null>(null);
+    const blocks = useMemo(() => {
+      const parsed = parseMarkdownIntoBlocks(content, remendEnabled, parsedRef.current);
+      parsedRef.current = parsed;
+      return parsed.blocks;
+    }, [content, remendEnabled]);
 
     return blocks.map((block, index) => (
       <MemoizedMarkdownBlock

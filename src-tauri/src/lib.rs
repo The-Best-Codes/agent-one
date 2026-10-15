@@ -1,17 +1,37 @@
 use tauri::{Listener, Manager};
-use tauri_plugin_log::{FileOpenStrategy, RotationStrategy, Target, TargetKind};
+use tauri_plugin_log::{log::LevelFilter, FileOpenStrategy, RotationStrategy, Target, TargetKind};
 
 const LOG_FILE_NAME: &str = "agent-one-logs";
+const LOG_LEVEL_ENV: &str = "AGENT_ONE_LOG_LEVEL";
+
+fn log_level() -> LevelFilter {
+    let default = if cfg!(debug_assertions) {
+        LevelFilter::Trace
+    } else {
+        LevelFilter::Info
+    };
+
+    match std::env::var(LOG_LEVEL_ENV) {
+        Ok(value) => value.parse().unwrap_or_else(|_| {
+            eprintln!("Invalid {LOG_LEVEL_ENV} value \"{value}\", using {default}");
+            default
+        }),
+        Err(_) => default,
+    }
+}
 
 mod keyring;
 mod mcp_auth;
-#[cfg(target_os = "linux")]
-mod notifications;
 mod tools;
 mod utils;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    if let Err(error) = fix_path_env::fix() {
+        eprintln!("Failed to initialize executable PATH: {error}");
+    }
+
     let mut builder = tauri::Builder::default();
 
     // Single instance plugin should be the first plugin registered
@@ -145,6 +165,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(
             tauri_plugin_log::Builder::new()
+                .level(log_level())
                 .clear_targets()
                 .target(Target::new(TargetKind::LogDir {
                     file_name: Some(LOG_FILE_NAME.to_string()),
@@ -158,12 +179,6 @@ pub fn run() {
             use tauri_plugin_deep_link::DeepLinkExt;
 
             keyring::initialize_keyring_store()?;
-
-            #[cfg(target_os = "linux")]
-            app.manage(notifications::NotificationState {
-                appname: app.config().identifier.clone(),
-                handles: std::sync::Arc::new(std::sync::Mutex::new(Vec::new())),
-            });
 
             #[cfg(any(target_os = "linux", windows))]
             {
@@ -233,8 +248,6 @@ pub fn run() {
                     mcp_auth::mcp_get_token,
                     mcp_auth::mcp_logout,
                     mcp_auth::mcp_check_oauth_support,
-                    #[cfg(target_os = "linux")]
-                    notifications::send_notification,
                 ]
             }
             #[cfg(any(target_os = "android", target_os = "ios"))]

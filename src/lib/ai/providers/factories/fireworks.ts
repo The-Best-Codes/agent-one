@@ -1,10 +1,11 @@
 import { createFireworks } from "@ai-sdk/fireworks";
-import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
+
+import { providerFetch } from "@/lib/ai/providers/provider-fetch";
 
 export function getFireworks(apiKey: string, headers?: Record<string, string>) {
   return createFireworks({
     apiKey: apiKey || "unset",
-    fetch: tauriFetch,
+    fetch: providerFetch,
     headers,
   });
 }

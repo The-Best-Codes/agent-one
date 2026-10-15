@@ -3,8 +3,10 @@ import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import { Toaster } from "sonner";
 
 import { ExtensionListStartupSync } from "@/components/a1/extension-list-startup-sync";
+import { FileDropGuard } from "@/components/a1/file-drop-guard";
 import { LocalProviderStartupSync } from "@/components/a1/local-provider-startup-sync";
 import { ModelDirectoryStartupSync } from "@/components/a1/model-directory-startup-sync";
+import { OnboardingReminder } from "@/components/a1/onboarding-reminder";
 import { Spinner } from "@/components/ui/spinner";
 import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
 import ChatRoute from "@/routes/chat";
@@ -25,11 +27,13 @@ import { ReleaseNotesDialog } from "./components/a1/release-notes-dialog";
 import { UpdateAvailableDialog } from "./components/a1/update-available-dialog";
 import { DeepLinkHandler } from "./deep-link-handler";
 import { KbdRegistry } from "./kbd-shortcuts";
+import { NotificationClickHandler } from "./notification-click-handler";
 
 function AppLayout() {
   return (
     <MultiChatProvider>
       <DeepLinkHandler />
+      <NotificationClickHandler />
       {/* This essentially lets MultiChatProvider wrap all the <Route> components while being a child of <Routes> */}
       <Outlet />
     </MultiChatProvider>
@@ -43,8 +47,10 @@ function App() {
       <ExtensionListStartupSync />
       <LocalProviderStartupSync />
       <KbdRegistry />
+      <FileDropGuard />
       <ReleaseNotesDialog />
       <UpdateAvailableDialog />
+      <OnboardingReminder />
       <Toaster className="pointer-events-auto!" position="top-right" richColors closeButton />
       <Routes>
         <Route element={<AppLayout />}>

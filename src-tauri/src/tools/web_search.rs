@@ -3,6 +3,7 @@ use super::constants::{DEFAULT_TIMEOUT_SECONDS, MAX_TIMEOUT_SECONDS};
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 use crate::utils::headless_webview::fetch_url_with_webview;
 
+use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -11,6 +12,24 @@ use tokio::sync::Semaphore;
 use tokio::time::{timeout, Duration};
 use wreq::Client;
 use wreq_util::Emulation;
+
+static VQD_REGEX: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r#"<input[^>]*name="vqd"[^>]*value="([^"]+)"[^>]*/?\s*>"#).unwrap());
+static VQD_REGEX_ALT: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r#"<input[^>]*value="([^"]+)"[^>]*name="vqd"[^>]*/?\s*>"#).unwrap());
+static RESULT_REGEX: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r#"(?s)<div[^>]*class="[^"]*result[^"]*results_links[^"]*web-result[^"]*"[^>]*>(.*?)</div>\s*</div>"#).unwrap()
+});
+static TITLE_REGEX: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r#"(?s)<h2[^>]*class="[^"]*result__title[^"]*"[^>]*>.*?<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]*)"[^>]*>(.*?)</a>"#).unwrap()
+});
+static DISPLAY_URL_REGEX: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r#"<a[^>]*class="[^"]*result__url[^"]*"[^>]*>([^<]*)</a>"#).unwrap());
+static SNIPPET_REGEX: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r#"(?s)<a[^>]*class="[^"]*result__snippet[^"]*"[^>]*>(.*?)</a>"#).unwrap()
+});
+static TAG_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"<[^>]*>").unwrap());
+static WHITESPACE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\s+").unwrap());
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SearchResult {
@@ -250,16 +269,11 @@ pub async fn web_search(
 }
 
 fn extract_vqd(html: &str) -> Option<String> {
-    let vqd_regex = Regex::new(r#"<input[^>]*name="vqd"[^>]*value="([^"]+)"[^>]*/?\s*>"#).ok()?;
-
-    if let Some(captures) = vqd_regex.captures(html) {
+    if let Some(captures) = VQD_REGEX.captures(html) {
         return Some(captures.get(1)?.as_str().to_string());
     }
 
-    let vqd_regex_alt =
-        Regex::new(r#"<input[^>]*value="([^"]+)"[^>]*name="vqd"[^>]*/?\s*>"#).ok()?;
-
-    if let Some(captures) = vqd_regex_alt.captures(html) {
+    if let Some(captures) = VQD_REGEX_ALT.captures(html) {
         return Some(captures.get(1)?.as_str().to_string());
     }
 
@@ -269,27 +283,14 @@ fn extract_vqd(html: &str) -> Option<String> {
 fn parse_search_results(html: &str, max_results: usize) -> Result<Vec<SearchResult>, String> {
     let mut results = Vec::new();
 
-    let result_regex = Regex::new(r#"(?s)<div[^>]*class="[^"]*result[^"]*results_links[^"]*web-result[^"]*"[^>]*>(.*?)</div>\s*</div>"#)
-        .map_err(|e| format!("Failed to compile result regex: {}", e))?;
-
-    let title_regex = Regex::new(r#"(?s)<h2[^>]*class="[^"]*result__title[^"]*"[^>]*>.*?<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]*)"[^>]*>(.*?)</a>"#)
-        .map_err(|e| format!("Failed to compile title regex: {}", e))?;
-
-    let display_url_regex = Regex::new(r#"<a[^>]*class="[^"]*result__url[^"]*"[^>]*>([^<]*)</a>"#)
-        .map_err(|e| format!("Failed to compile display URL regex: {}", e))?;
-
-    let snippet_regex =
-        Regex::new(r#"(?s)<a[^>]*class="[^"]*result__snippet[^"]*"[^>]*>(.*?)</a>"#)
-            .map_err(|e| format!("Failed to compile snippet regex: {}", e))?;
-
-    for result_match in result_regex.captures_iter(html) {
+    for result_match in RESULT_REGEX.captures_iter(html) {
         if results.len() >= max_results {
             break;
         }
 
         let result_html = result_match.get(1).unwrap().as_str();
 
-        let (title, url) = if let Some(title_match) = title_regex.captures(result_html) {
+        let (title, url) = if let Some(title_match) = TITLE_REGEX.captures(result_html) {
             let raw_url = title_match.get(1).unwrap().as_str();
             let raw_title = title_match.get(2).unwrap().as_str();
 
@@ -301,13 +302,13 @@ fn parse_search_results(html: &str, max_results: usize) -> Result<Vec<SearchResu
             continue;
         };
 
-        let display_url = if let Some(display_match) = display_url_regex.captures(result_html) {
+        let display_url = if let Some(display_match) = DISPLAY_URL_REGEX.captures(result_html) {
             clean_html_text(display_match.get(1).unwrap().as_str())
         } else {
             url.clone()
         };
 
-        let snippet = if let Some(snippet_match) = snippet_regex.captures(result_html) {
+        let snippet = if let Some(snippet_match) = SNIPPET_REGEX.captures(result_html) {
             clean_html_text(snippet_match.get(1).unwrap().as_str())
         } else {
             String::new()
@@ -345,8 +346,7 @@ fn extract_actual_url(ddg_url: &str) -> String {
 }
 
 fn clean_html_text(text: &str) -> String {
-    let tag_regex = Regex::new(r"<[^>]*>").unwrap();
-    let no_tags = tag_regex.replace_all(text, "");
+    let no_tags = TAG_REGEX.replace_all(text, "");
 
     let mut result = no_tags.to_string();
     result = result.replace("&amp;", "&");
@@ -357,8 +357,7 @@ fn clean_html_text(text: &str) -> String {
     result = result.replace("&nbsp;", " ");
     result = result.replace("&#92;", "\\");
 
-    let whitespace_regex = Regex::new(r"\s+").unwrap();
-    whitespace_regex
+    WHITESPACE_REGEX
         .replace_all(&result, " ")
         .trim()
         .to_string()

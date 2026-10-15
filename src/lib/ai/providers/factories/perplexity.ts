@@ -1,10 +1,11 @@
 import { createPerplexity } from "@ai-sdk/perplexity";
-import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
+
+import { providerFetch } from "@/lib/ai/providers/provider-fetch";
 
 export function getPerplexity(apiKey: string, headers?: Record<string, string>) {
   return createPerplexity({
     apiKey: apiKey || "unset",
-    fetch: tauriFetch,
+    fetch: providerFetch,
     headers,
   });
 }

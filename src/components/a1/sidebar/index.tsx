@@ -1,14 +1,7 @@
-import {
-  IconLayoutSidebar,
-  IconPlus,
-  IconClock,
-  IconPuzzle,
-  IconSearch,
-  IconSettings,
-} from "@tabler/icons-react";
+import { IconLayoutSidebar, IconPlus, IconSearch } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useCallback, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 
 import {
@@ -27,12 +20,12 @@ import {
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useSettingsPath } from "@/hooks/use-settings-path";
-import { collapsedSidebarLayoutAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { debugModeEnabledAtom, sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
-import { SettingsLink } from "../settings-link";
+import { AccountMenu } from "./account-menu";
 import { ChatList } from "./chat-list";
 import { SearchModal } from "./search-modal";
 
@@ -52,7 +45,7 @@ const SidebarContent = ({
   onChatClick?: (id: string) => void;
 }) => {
   const navigate = useNavigate();
-  const debugSettingsPath = useSettingsPath({ tab: "about", id: "setting-debug" });
+  const debugSettingsPath = useSettingsPath({ id: "setting-debug" });
   const [debugMode, setDebugMode] = useAtom(debugModeEnabledAtom);
   const clickTimestamps = useRef<number[]>([]);
 
@@ -91,7 +84,7 @@ const SidebarContent = ({
           AgentOne
         </span>
       </div>
-      <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex min-h-0 flex-1 flex-col" data-tour="chat-list">
         <ChatList
           activeChatId={activeChatId}
           handleNewChat={handleNewChat}
@@ -99,25 +92,8 @@ const SidebarContent = ({
         />
       </div>
 
-      <div className="border-sidebar-border flex flex-col gap-2 pt-2">
-        <Button variant="outline" className="w-full justify-start" asChild>
-          <Link to={`/extensions${activeChatId ? `?chatId=${activeChatId}` : ""}`}>
-            <IconPuzzle data-icon="inline-start" />
-            Browse Extensions
-          </Link>
-        </Button>
-        <Button variant="outline" className="w-full justify-start" asChild>
-          <Link to={`/scheduled-agents${activeChatId ? `?chatId=${activeChatId}` : ""}`}>
-            <IconClock data-icon="inline-start" />
-            Scheduled Agents
-          </Link>
-        </Button>
-        <Button variant="outline" className="w-full justify-start" asChild>
-          <SettingsLink data-icon="inline-start">
-            <IconSettings data-icon="inline-start" />
-            Configure AgentOne
-          </SettingsLink>
-        </Button>
+      <div className="pt-2" data-tour="account-menu">
+        <AccountMenu activeChatId={activeChatId} />
       </div>
     </div>
   );
@@ -125,7 +101,7 @@ const SidebarContent = ({
 
 export const Sidebar = ({ className }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useAtom(sidebarCollapsedAtom);
-  const [collapsedLayout] = useAtom(collapsedSidebarLayoutAtom);
+  const [collapsedLayout] = useAtom(settingAtoms.COLLAPSED_SIDEBAR_LAYOUT);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -176,6 +152,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           size="icon-sm"
           onClick={() => setIsCollapsed(!isCollapsed)}
           aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
+          data-tour="sidebar-toggle"
           className="size-6"
         >
           <IconLayoutSidebar data-icon="inline-start" />
@@ -188,7 +165,13 @@ export const Sidebar = ({ className }: SidebarProps) => {
       <AdaptiveTooltip>
         <AdaptiveTooltipTrigger asChild>
           <DrawerTrigger asChild>
-            <Button variant="outline" size="icon-sm" aria-label={toggleTooltip} className="size-6">
+            <Button
+              variant="outline"
+              size="icon-sm"
+              aria-label={toggleTooltip}
+              className="size-6"
+              data-tour="sidebar-toggle"
+            >
               <IconLayoutSidebar />
             </Button>
           </DrawerTrigger>

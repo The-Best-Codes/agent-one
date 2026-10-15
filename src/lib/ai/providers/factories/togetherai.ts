@@ -1,10 +1,11 @@
 import { createTogetherAI } from "@ai-sdk/togetherai";
-import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
+
+import { providerFetch } from "@/lib/ai/providers/provider-fetch";
 
 export function getTogetherAI(apiKey: string, headers?: Record<string, string>) {
   return createTogetherAI({
     apiKey: apiKey || "unset",
-    fetch: tauriFetch,
+    fetch: providerFetch,
     headers,
   });
 }

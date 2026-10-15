@@ -1,7 +1,7 @@
 import { useAtomValue } from "jotai";
 import { useState } from "react";
 
-import { userNameAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 
 const GREETINGS = [
   "What's on your mind?",
@@ -20,13 +20,13 @@ const GREETINGS = [
 ] as const;
 
 export const NoMessagesGreeting = () => {
-  const userName = useAtomValue(userNameAtom);
+  const userName = useAtomValue(settingAtoms.USER_NAME);
   const [greeting] = useState(() => GREETINGS[Math.floor(Math.random() * GREETINGS.length)]);
   const currentPhrase = userName ? greeting.replace(/[?.!]$/, `, ${userName}$&`) : greeting;
 
   return (
     <div className="flex h-full items-center justify-center">
-      <h1 className="text-foreground animate-in slide-in-from-bottom fade-in-0 pl-2 text-center text-2xl select-none">
+      <h1 className="text-foreground animate-in slide-in-from-bottom fade-in-0 pl-4 text-center text-2xl select-none md:pl-6">
         {currentPhrase}
       </h1>
     </div>

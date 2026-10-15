@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
 import { ChatApprovalHandlerContext } from "@/contexts/use-chat/chat-contexts";
-import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
+import { useChatApprovalHandler, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import {
   getSubAgentLiveState,
   respondToSubAgentApproval,
@@ -50,11 +50,16 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
   const callId = part.toolCallId;
   const input = part.input as SubAgentInput | undefined;
   const approvalHandler = useChatApprovalHandler();
+  const { status: chatStatus } = useChatStatus();
   const [isAccordionOpen, setIsAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
+  const subscribeLiveState = useCallback(
+    (listener: () => void) => subscribeSubAgentLiveState(callId, listener),
+    [callId],
+  );
   const liveState = useSyncExternalStore(
-    (listener) => subscribeSubAgentLiveState(callId, listener),
+    subscribeLiveState,
     () => getSubAgentLiveState(callId),
     () => getSubAgentLiveState(callId),
   );
@@ -67,7 +72,8 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
   const pendingApprovals = liveState?.pendingApprovalIds ?? [];
   const hasPendingApprovals = pendingApprovals.length > 0;
   const isExpanded = Boolean(isAccordionOpen || hasPendingApprovals);
-  const showSpinnerIcon = isStreaming;
+  const isChatBusy = chatStatus === "streaming" || chatStatus === "submitted";
+  const showSpinnerIcon = isChatBusy && (isStreaming || liveState?.status === "running");
   const nestedApprovalHandler = useCallback(
     async ({ id, approved, reason }: { id: string; approved: boolean; reason?: string }) => {
       respondToSubAgentApproval(callId, id, approved, reason);

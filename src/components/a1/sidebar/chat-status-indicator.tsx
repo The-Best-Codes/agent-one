@@ -1,13 +1,14 @@
 import { IconBell, IconExclamationCircle } from "@tabler/icons-react";
 import { useAtomValue } from "jotai";
-import { useEffect, useRef, useState } from "react";
+import { selectAtom } from "jotai/utils";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Spinner } from "@/components/ui/spinner";
 import {
   type ChatStatusIndicator as ChatStatusIndicatorType,
   chatStatusIndicatorsAtom,
 } from "@/lib/jotai/atoms";
-import { showChatStatusIndicatorAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 const DEBOUNCE_MS = 150;
@@ -43,9 +44,13 @@ const StatusIcon = ({ status }: { status: ChatStatusIndicatorType }) => {
 };
 
 export const ChatStatusIndicator = ({ chatId }: { chatId: string }) => {
-  const showStatusIndicator = useAtomValue(showChatStatusIndicatorAtom);
-  const chatStatusIndicators = useAtomValue(chatStatusIndicatorsAtom);
-  const rawStatus = showStatusIndicator ? chatStatusIndicators[chatId] : null;
+  const showStatusIndicator = useAtomValue(settingAtoms.SHOW_CHAT_STATUS_INDICATOR);
+  const chatStatusAtom = useMemo(
+    () => selectAtom(chatStatusIndicatorsAtom, (indicators) => indicators[chatId] ?? null),
+    [chatId],
+  );
+  const chatStatus = useAtomValue(chatStatusAtom);
+  const rawStatus = showStatusIndicator ? chatStatus : null;
 
   const [displayedStatus, setDisplayedStatus] = useState<ChatStatusIndicatorType>(
     rawStatus ?? null,

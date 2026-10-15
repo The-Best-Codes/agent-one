@@ -6,6 +6,7 @@ import { AutoScrollContainer, type AutoScrollHandle } from "@/components/a1/auto
 import { ChatMessageLoading } from "@/components/a1/chat-message-loading";
 import { ChatUsageStatus } from "@/components/a1/chat-usage-status";
 import { NoMessagesGreeting } from "@/components/a1/empty-states/no-messages";
+import { GuidedTour } from "@/components/a1/guided-tour";
 import { MainChatInput } from "@/components/a1/input/main-chat-input";
 import { MessagePreviewRail } from "@/components/a1/message-preview-rail";
 import { MessageParts } from "@/components/a1/messages";
@@ -18,12 +19,7 @@ import {
   clearEditingMessagesAtom,
   editingMessageIdsAtom,
 } from "@/lib/jotai/chat-message-editing-atoms";
-import {
-  chatBackgroundAtom,
-  chatVirtualizationModeAtom,
-  chatVirtualizationThresholdAtom,
-  showMessagePreviewRailAtom,
-} from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
@@ -36,10 +32,10 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
   const [delayPassed, setDelayPassed] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const editingMessageIds = useAtomValue(editingMessageIdsAtom);
-  const chatBackground = useAtomValue(chatBackgroundAtom);
-  const chatVirtualizationMode = useAtomValue(chatVirtualizationModeAtom);
-  const chatVirtualizationThreshold = useAtomValue(chatVirtualizationThresholdAtom);
-  const showMessagePreviewRail = useAtomValue(showMessagePreviewRailAtom);
+  const chatBackground = useAtomValue(settingAtoms.CHAT_BACKGROUND);
+  const chatVirtualizationMode = useAtomValue(settingAtoms.CHAT_VIRTUALIZATION_MODE);
+  const chatVirtualizationThreshold = useAtomValue(settingAtoms.CHAT_VIRTUALIZATION_THRESHOLD);
+  const showMessagePreviewRail = useAtomValue(settingAtoms.SHOW_MESSAGE_PREVIEW_RAIL);
   const clearEditingMessages = useSetAtom(clearEditingMessagesAtom);
 
   useEffect(() => {
@@ -130,13 +126,13 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
           style={{ opacity: chatBackgroundShade / 100 }}
         />
       )}
-      <div className="relative flex h-full w-full max-w-3xl flex-1 flex-col">
+      <div className="relative flex h-full w-full flex-1 flex-col items-center">
         {isChatLoading && showSpinner ? (
           <div className="flex flex-1 items-center justify-center">
             <Spinner className="text-muted-foreground size-8" />
           </div>
         ) : (
-          <div className="relative min-h-0 flex-1">
+          <div className="relative min-h-0 w-full flex-1">
             <AutoScrollContainer
               ref={scrollRef}
               className="max-h-full min-h-0 pt-2 pr-0 pb-2"
@@ -165,8 +161,7 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
               }
               getItemKey={shouldVirtualizeMessages ? (index) => messages[index]!.id : undefined}
               keepMountedIndexes={shouldVirtualizeMessages ? keepMountedIndexes : undefined}
-              overflowingClassName="md:pr-2"
-              scrollableClassName={cn("h-full pr-2")}
+              scrollableClassName="mx-auto h-full w-full max-w-3xl pr-2"
               behavior="instant"
               buttonScrollBehavior={status === "streaming" ? "instant" : "smooth"}
             >
@@ -199,16 +194,18 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
             ) : null}
           </div>
         )}
-        <MainChatInput
-          key={chatId || "new-chat"}
-          draftKey={chatId || "new-chat"}
-          initialValue={initialInputValue}
-          initialValueKey={chatId ? undefined : location.key}
-          disabled={isChatLoading}
-          onScrollNeededAction={() => {
-            scrollRef.current?.scrollToBottom();
-          }}
-        />
+        <div className="w-full max-w-3xl">
+          <MainChatInput
+            key={chatId || "new-chat"}
+            draftKey={chatId || "new-chat"}
+            initialValue={initialInputValue}
+            initialValueKey={chatId ? undefined : location.key}
+            disabled={isChatLoading}
+            onScrollNeededAction={() => {
+              scrollRef.current?.scrollToBottom();
+            }}
+          />
+        </div>
       </div>
     </div>
   );
@@ -219,6 +216,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => (
     <Sidebar />
     {chatId && <ChatUsageStatus />}
     <ChatContent chatId={chatId} />
+    <GuidedTour />
   </main>
 );
 

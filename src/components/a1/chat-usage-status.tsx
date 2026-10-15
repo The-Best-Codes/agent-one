@@ -1,9 +1,8 @@
 import NumberFlow from "@number-flow/react";
-import { IconChevronLeft, IconCoins } from "@tabler/icons-react";
+import { IconChevronLeft } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 
-import { SettingsLink } from "@/components/a1/settings-link";
 import {
   AdaptiveTooltip,
   AdaptiveTooltipContent,
@@ -13,9 +12,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useChatLoading, useChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { calculateChatUsageFromMessages, getLastAssistantUsage } from "@/lib/ai/chat-usage";
+import { calculateChatUsageFromMessages } from "@/lib/ai/chat-usage";
+import { getContextTokens } from "@/lib/ai/compaction";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
-import { collapsedSidebarLayoutAtom } from "@/lib/jotai/settings-atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { cn } from "@/lib/utils";
 
@@ -73,7 +73,7 @@ export const ChatUsageStatus = () => {
   const isChatLoading = useChatLoading();
   const { currentModel } = useModel();
   const [isSidebarCollapsed] = useAtom(sidebarCollapsedAtom);
-  const [collapsedLayout] = useAtom(collapsedSidebarLayoutAtom);
+  const [collapsedLayout] = useAtom(settingAtoms.COLLAPSED_SIDEBAR_LAYOUT);
   const [delayPassed, setDelayPassed] = useState(false);
   const currentUsage = useMemo(() => calculateChatUsageFromMessages(messages), [messages]);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -99,13 +99,10 @@ export const ChatUsageStatus = () => {
   }, [isChatLoading]);
 
   const showSkeleton = isChatLoading && delayPassed;
-  const lastUsage = getLastAssistantUsage(messages);
+  const totalTokens = useMemo(() => getContextTokens(messages), [messages]);
 
   const totalCostUsd = currentUsage.totalCostUsd;
   const hasUnknownCost = currentUsage.hasUnknownCost;
-  const contextInputTokens = lastUsage.inputTokens;
-  const contextOutputTokens = lastUsage.outputTokens;
-  const totalTokens = contextInputTokens + contextOutputTokens;
   const maxTokens = currentModel?.contextWindow;
   const isExceeded = maxTokens !== undefined && totalTokens > maxTokens;
   const contextUsagePercent = maxTokens ? Math.round((totalTokens / maxTokens) * 100) : null;
@@ -129,7 +126,7 @@ export const ChatUsageStatus = () => {
               {showSkeleton ? (
                 <>
                   <Skeleton className="size-5 rounded-full" />
-                  <Skeleton className={isAgentOneModel ? "size-5 rounded-full" : "h-5 w-12"} />
+                  {!isAgentOneModel && <Skeleton className="h-5 w-12" />}
                 </>
               ) : (
                 <>
@@ -156,44 +153,15 @@ export const ChatUsageStatus = () => {
                     <AdaptiveTooltipContent className="max-w-xs">
                       {isAgentOneModel
                         ? contextUsagePercent === null
-                          ? "The maximum conversation length for this model is unavailable."
-                          : `This chat is using ${contextUsagePercent}% of the model's conversation capacity.`
+                          ? "The context window size for this model is unavailable."
+                          : `This chat is using ${contextUsagePercent}% of the model's context window.`
                         : maxTokens !== undefined
                           ? `This chat is currently ${totalTokens} tokens long. The model you're using supports up to ${maxTokens.toLocaleString()} tokens.`
                           : `This chat is currently ${totalTokens} tokens long. The model you're using supports an unknown number of tokens.`}
                     </AdaptiveTooltipContent>
                   </AdaptiveTooltip>
 
-                  {isAgentOneModel ? (
-                    <AdaptiveTooltip>
-                      <AdaptiveTooltipTrigger
-                        className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-help rounded outline-none focus-visible:ring-[3px]"
-                        tabIndex={isCollapsed ? -1 : 0}
-                        asChild
-                      >
-                        <SettingsLink
-                          tab="account"
-                          id="setting-credits-used"
-                          aria-label="View AgentOne credit usage in Settings"
-                        >
-                          <IconCoins className="text--muted-foreground size-5" />
-                        </SettingsLink>
-                      </AdaptiveTooltipTrigger>
-                      <AdaptiveTooltipContent className="max-w-xs whitespace-normal">
-                        <span>
-                          AgentOne usage consumes credits.{" "}
-                          <SettingsLink
-                            tab="account"
-                            id="setting-credits-used"
-                            className="underline underline-offset-2"
-                          >
-                            View credit usage in Settings
-                          </SettingsLink>
-                          .
-                        </span>
-                      </AdaptiveTooltipContent>
-                    </AdaptiveTooltip>
-                  ) : (
+                  {!isAgentOneModel && (
                     <AdaptiveTooltip>
                       <AdaptiveTooltipTrigger
                         className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-help rounded outline-none focus-visible:ring-[3px]"

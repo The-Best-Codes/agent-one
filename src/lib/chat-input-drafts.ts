@@ -42,7 +42,7 @@ export const saveChatInputDraft = (chatId: string, text: string) => {
   if (text) drafts[chatId] = { text, savedAt: Date.now() };
   else delete drafts[chatId];
 
-  while (new Blob([JSON.stringify(drafts)]).size > MAX_STORAGE_BYTES) {
+  while (JSON.stringify(drafts).length > MAX_STORAGE_BYTES) {
     const oldestKey = Object.entries(drafts).sort(
       ([, first], [, second]) => first.savedAt - second.savedAt,
     )[0]?.[0];

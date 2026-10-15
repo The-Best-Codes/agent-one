@@ -2,9 +2,9 @@ import { createElevenLabs, type ElevenLabsSpeechModelOptions } from "@ai-sdk/ele
 import { createGoogle } from "@ai-sdk/google";
 import { createHume, type HumeSpeechModelOptions } from "@ai-sdk/hume";
 import { createOpenAI, type OpenAISpeechModelOptions } from "@ai-sdk/openai";
-import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { generateSpeech } from "ai";
 
+import { providerFetch } from "@/lib/ai/providers/provider-fetch";
 import type { TtsProviderId, TtsSettings } from "@/lib/settings/types";
 
 type LegacyTtsSettings = Partial<TtsSettings> & {
@@ -207,7 +207,7 @@ export async function generateTtsAudio(
     case "openai": {
       const provider = createOpenAI({
         apiKey: apiKeys.openai || "unset",
-        fetch: tauriFetch,
+        fetch: providerFetch,
       });
 
       const result = await generateSpeech({
@@ -234,7 +234,7 @@ export async function generateTtsAudio(
     case "elevenlabs": {
       const provider = createElevenLabs({
         apiKey: apiKeys.elevenlabs || "unset",
-        fetch: tauriFetch,
+        fetch: providerFetch,
       });
 
       const result = await generateSpeech({
@@ -266,7 +266,7 @@ export async function generateTtsAudio(
     case "hume": {
       const provider = createHume({
         apiKey: apiKeys.hume || "unset",
-        fetch: tauriFetch,
+        fetch: providerFetch,
       });
 
       const result = await generateSpeech({
@@ -290,7 +290,7 @@ export async function generateTtsAudio(
     case "google": {
       const provider = createGoogle({
         apiKey: apiKeys.google || "unset",
-        fetch: tauriFetch,
+        fetch: providerFetch,
       });
 
       const result = await generateSpeech({

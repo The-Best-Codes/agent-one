@@ -1,4 +1,4 @@
-import { IconExternalLink, IconUser } from "@tabler/icons-react";
+import { IconExternalLink, IconLogout, IconUser } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 
 import { CopyButton } from "@/components/a1/copy-button";
@@ -40,7 +40,7 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
     return (
       <StatusRow
         className={className}
-        icon={<Spinner className="text-primary" data-icon="inline-start" />}
+        icon={<Spinner className="text-foreground" data-icon="inline-start" />}
         title="Signing in..."
         description="Getting you signed in..."
         action={
@@ -56,7 +56,7 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
     return (
       <StatusRow
         className={className}
-        icon={<Spinner className="text-primary" data-icon="inline-start" />}
+        icon={<Spinner className="text-foreground" data-icon="inline-start" />}
         title="Link your account"
         description={
           <a
@@ -102,8 +102,12 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
         user={user}
         action={
           signedInAction ?? (
-            <Button variant="secondary" size="sm" onClick={signOut} disabled={isSigningOut}>
-              {isSigningOut && <Spinner data-icon="inline-start" />}
+            <Button variant="destructive" size="sm" onClick={signOut} disabled={isSigningOut}>
+              {isSigningOut ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <IconLogout data-icon="inline-start" />
+              )}
               Sign out
             </Button>
           )
@@ -117,7 +121,7 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
       className={className}
       icon={<IconUser className="text-muted-foreground size-5" />}
       title="Not signed in"
-      description="Sign in to synchronize your data"
+      description="Sign in to sync data & more"
       action={
         <Button onClick={startSignIn} size="sm">
           Sign in

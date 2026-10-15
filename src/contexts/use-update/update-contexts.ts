@@ -12,7 +12,7 @@ export type UpdateStatus =
 
 export interface UpdateContextType {
   updateStatus: UpdateStatus;
-  updateProgress: number;
+  updateProgress: number | null;
   updateVersion: string;
   checkForUpdates: () => Promise<void>;
   downloadAndInstallUpdate: () => Promise<void>;
