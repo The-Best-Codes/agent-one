@@ -1,11 +1,9 @@
-import { invoke } from "@tauri-apps/api/core";
 import {
   isPermissionGranted,
   requestPermission,
   sendNotification,
   Visibility,
 } from "@tauri-apps/plugin-notification";
-import { platform } from "@tauri-apps/plugin-os";
 
 import { getLogger } from "@/lib/logger";
 
@@ -30,29 +28,31 @@ export async function requestNotificationPermission(): Promise<boolean> {
   }
 }
 
-export async function sendNotificationIfAllowed(title: string, body: string): Promise<boolean> {
+export async function sendNotificationIfAllowed(
+  title: string,
+  body: string,
+  chatId?: string,
+): Promise<boolean> {
   try {
-    let permissionGranted = await isPermissionGranted();
+    // TODO: Desktop always reports the permission as granted. Restore these checks if we target mobile.
+    // let permissionGranted = await isPermissionGranted();
+    //
+    // if (!permissionGranted) {
+    //   permissionGranted = await requestNotificationPermission();
+    // }
+    //
+    // if (!permissionGranted) {
+    //   return false;
+    // }
 
-    if (!permissionGranted) {
-      permissionGranted = await requestNotificationPermission();
-    }
-
-    if (permissionGranted) {
-      if (platform() === "linux") {
-        await invoke("send_notification", { title, body });
-      } else {
-        sendNotification({
-          title,
-          body,
-          silent: false,
-          visibility: Visibility.Public,
-        });
-      }
-      return true;
-    }
-
-    return false;
+    sendNotification({
+      title,
+      body,
+      silent: false,
+      visibility: Visibility.Public,
+      extra: chatId ? { chatId } : undefined,
+    });
+    return true;
   } catch (error) {
     logger.error("Failed to send notification:", error);
     return false;

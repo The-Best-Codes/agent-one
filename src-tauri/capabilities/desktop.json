@@ -2,5 +2,12 @@
   "identifier": "desktop-capability",
   "platforms": ["macOS", "windows", "linux"],
   "windows": ["main"],
-  "permissions": ["updater:default", "window-state:default", "global-shortcut:default"]
+  "permissions": [
+    "updater:default",
+    "window-state:default",
+    "global-shortcut:default",
+    "core:window:allow-unminimize",
+    "core:window:allow-show",
+    "core:window:allow-set-focus"
+  ]
 }

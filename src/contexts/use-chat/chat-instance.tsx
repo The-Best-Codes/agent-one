@@ -106,7 +106,9 @@ export const ChatInstance = memo(
         );
       const shouldNotify =
         notificationSetting === "always" ||
-        (notificationSetting === "when-unfocused" && !document.hasFocus());
+        (notificationSetting === "when-unfocused" && !document.hasFocus()) ||
+        (notificationSetting === "unless-viewing" &&
+          !(document.hasFocus() && window.location.pathname === `/chat/${chatId}`));
 
       if (chat.status === "streaming" || chat.status === "submitted") {
         wasBusyRef.current = true;
@@ -123,6 +125,7 @@ export const ChatInstance = memo(
             truncateMessagePreview(
               getLastTextPart(lastMessage) || "Open AgentOne to keep working.",
             ),
+            chatId,
           );
         }
       }
@@ -133,6 +136,7 @@ export const ChatInstance = memo(
           void sendNotificationIfAllowed(
             `Error in "${title}"`,
             "AgentOne stopped working because of an error.",
+            chatId,
           );
         }
         wasBusyRef.current = false;
@@ -149,6 +153,7 @@ export const ChatInstance = memo(
         void sendNotificationIfAllowed(
           `Approval Required in "${title}"`,
           "AgentOne can't continue until you provide approval.",
+          chatId,
         );
       }
     }, [chat.status, chat.messages, chatId, loadChatMetadata, notificationSetting]);

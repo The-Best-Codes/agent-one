@@ -22,8 +22,6 @@ fn log_level() -> LevelFilter {
 
 mod keyring;
 mod mcp_auth;
-#[cfg(target_os = "linux")]
-mod notifications;
 mod tools;
 mod utils;
 
@@ -182,12 +180,6 @@ pub fn run() {
 
             keyring::initialize_keyring_store()?;
 
-            #[cfg(target_os = "linux")]
-            app.manage(notifications::NotificationState {
-                appname: app.config().identifier.clone(),
-                handles: std::sync::Arc::new(std::sync::Mutex::new(Vec::new())),
-            });
-
             #[cfg(any(target_os = "linux", windows))]
             {
                 // On Linux and Windows, register at runtime for development
@@ -256,8 +248,6 @@ pub fn run() {
                     mcp_auth::mcp_get_token,
                     mcp_auth::mcp_logout,
                     mcp_auth::mcp_check_oauth_support,
-                    #[cfg(target_os = "linux")]
-                    notifications::send_notification,
                 ]
             }
             #[cfg(any(target_os = "android", target_os = "ios"))]

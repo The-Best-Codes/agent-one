@@ -27,11 +27,13 @@ import { ReleaseNotesDialog } from "./components/a1/release-notes-dialog";
 import { UpdateAvailableDialog } from "./components/a1/update-available-dialog";
 import { DeepLinkHandler } from "./deep-link-handler";
 import { KbdRegistry } from "./kbd-shortcuts";
+import { NotificationClickHandler } from "./notification-click-handler";
 
 function AppLayout() {
   return (
     <MultiChatProvider>
       <DeepLinkHandler />
+      <NotificationClickHandler />
       {/* This essentially lets MultiChatProvider wrap all the <Route> components while being a child of <Routes> */}
       <Outlet />
     </MultiChatProvider>

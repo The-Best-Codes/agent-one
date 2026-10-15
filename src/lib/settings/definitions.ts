@@ -268,7 +268,12 @@ export const SETTINGS = {
     label: "Agent Notifications",
     description: "Show a notification when AgentOne responds or needs your attention.",
     default: "when-unfocused",
-    options: { always: "Always", "when-unfocused": "When window unfocused", never: "Never" },
+    options: {
+      always: "Always",
+      "when-unfocused": "When window unfocused",
+      "unless-viewing": "Unless viewing the chat",
+      never: "Never",
+    },
   }),
   SHOW_MESSAGE_ACTION_ROW: select({
     keywords: ["copy", "edit", "buttons", "toolbar", "hover", "actions", "retry"],

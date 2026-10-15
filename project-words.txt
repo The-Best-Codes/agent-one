@@ -339,3 +339,4 @@ Dont
 xhigh
 uncompacted
 defaultmaxchars
+unminimize
