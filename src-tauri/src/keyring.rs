@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex, OnceLock};
 
 use base64::engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD};
 use base64::Engine as _;
@@ -13,6 +13,8 @@ use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use sqlx::Row;
 use sqlx::SqlitePool;
 use tauri::Manager;
+#[cfg(target_os = "linux")]
+use tauri_plugin_log::log;
 use tokio::sync::OnceCell;
 use tokio::task;
 
@@ -20,7 +22,10 @@ pub const SERVICE_NAME: &str = "dev.agent-one";
 const LEGACY_SERVICE_NAME: &str = "com.agentone.app";
 const FALLBACK_MARKER_PREFIX: &str = "__agentone_secret_fallback_v1__:";
 
-pub fn initialize_keyring_store() -> Result<(), String> {
+static SECRETS_FILE: OnceLock<Mutex<PathBuf>> = OnceLock::new();
+
+#[cfg_attr(not(target_os = "linux"), allow(unused_variables))]
+pub fn initialize_keyring_store(app: &tauri::AppHandle) -> Result<(), String> {
     let store: Arc<CredentialStore> = {
         #[cfg(target_os = "macos")]
         {
@@ -50,8 +55,19 @@ pub fn initialize_keyring_store() -> Result<(), String> {
             ))
         ))]
         {
-            zbus_secret_service_keyring_store::Store::new()
-                .map_err(|e| format!("Failed to initialize Secret Service store: {}", e))?
+            match zbus_secret_service_keyring_store::Store::new() {
+                Ok(store) => store,
+                Err(e) => {
+                    let path = resolve_agent_db_path(app)?.with_file_name("secrets.json");
+                    log::warn!(
+                        "Failed to initialize Secret Service store: {}. Storing secrets in {} instead.",
+                        e,
+                        path.display()
+                    );
+                    let _ = SECRETS_FILE.set(Mutex::new(path));
+                    return Ok(());
+                }
+            }
         }
 
         #[cfg(not(any(
@@ -68,6 +84,31 @@ pub fn initialize_keyring_store() -> Result<(), String> {
 
     keyring_core::set_default_store(store);
     migrate_legacy_service_entries()?;
+
+    #[cfg(target_os = "linux")]
+    {
+        let path = resolve_agent_db_path(app)?.with_file_name("secrets.json");
+        if let Err(e) = migrate_secrets_file(&path) {
+            log::warn!("{}", e);
+        }
+    }
+
+    Ok(())
+}
+
+#[cfg(target_os = "linux")]
+fn migrate_secrets_file(path: &Path) -> Result<(), String> {
+    let secrets = read_secrets_file(path)?;
+    for (key, value) in &secrets {
+        Entry::new(SERVICE_NAME, key)
+            .and_then(|entry| entry.set_password(value))
+            .map_err(|e| format!("Failed to migrate secret to keyring: {}", e))?;
+    }
+
+    if path.exists() {
+        std::fs::remove_file(path).map_err(|e| format!("Failed to remove secrets file: {}", e))?;
+    }
+
     Ok(())
 }
 
@@ -117,6 +158,34 @@ fn migrate_legacy_service_entries() -> Result<(), String> {
     }
 
     Ok(())
+}
+
+fn read_secrets_file(path: &Path) -> Result<HashMap<String, String>, String> {
+    match std::fs::read_to_string(path) {
+        Ok(json) => {
+            serde_json::from_str(&json).map_err(|e| format!("Failed to parse secrets file: {}", e))
+        }
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(HashMap::new()),
+        Err(e) => Err(format!("Failed to read secrets file: {}", e)),
+    }
+}
+
+fn write_secrets_file(path: &Path, secrets: &HashMap<String, String>) -> Result<(), String> {
+    let json = serde_json::to_string(secrets)
+        .map_err(|e| format!("Failed to serialize secrets file: {}", e))?;
+    let tmp_path = path.with_extension("json.tmp");
+    let mut options = std::fs::OpenOptions::new();
+    options.write(true).create(true).truncate(true);
+    #[cfg(unix)]
+    std::os::unix::fs::OpenOptionsExt::mode(&mut options, 0o600);
+    options
+        .open(&tmp_path)
+        .and_then(|mut file| {
+            std::io::Write::write_all(&mut file, json.as_bytes())?;
+            file.sync_all()
+        })
+        .and_then(|_| std::fs::rename(&tmp_path, path))
+        .map_err(|e| format!("Failed to write secrets file: {}", e))
 }
 
 struct EncryptedFallbackRecord {
@@ -314,6 +383,11 @@ fn is_length_limit_error(message: &str) -> bool {
 async fn get_keyring_password_only(key: &str) -> Result<Option<String>, String> {
     let key = key.to_string();
     task::spawn_blocking(move || {
+        if let Some(path) = SECRETS_FILE.get() {
+            let path = path.lock().map_err(|e| e.to_string())?;
+            return Ok(read_secrets_file(&path)?.remove(&key));
+        }
+
         let entry =
             Entry::new(SERVICE_NAME, &key).map_err(|e| format!("Failed to create entry: {}", e))?;
 
@@ -331,6 +405,13 @@ async fn set_keyring_password_only(key: &str, value: &str) -> Result<(), String>
     let key = key.to_string();
     let value = value.to_string();
     task::spawn_blocking(move || {
+        if let Some(path) = SECRETS_FILE.get() {
+            let path = path.lock().map_err(|e| e.to_string())?;
+            let mut secrets = read_secrets_file(&path)?;
+            secrets.insert(key, value);
+            return write_secrets_file(&path, &secrets);
+        }
+
         let entry =
             Entry::new(SERVICE_NAME, &key).map_err(|e| format!("Failed to create entry: {}", e))?;
 
@@ -347,6 +428,16 @@ async fn set_keyring_password_only(key: &str, value: &str) -> Result<(), String>
 async fn delete_keyring_password_only(key: &str) -> Result<bool, String> {
     let key = key.to_string();
     task::spawn_blocking(move || {
+        if let Some(path) = SECRETS_FILE.get() {
+            let path = path.lock().map_err(|e| e.to_string())?;
+            let mut secrets = read_secrets_file(&path)?;
+            if secrets.remove(&key).is_none() {
+                return Ok(false);
+            }
+            write_secrets_file(&path, &secrets)?;
+            return Ok(true);
+        }
+
         let entry =
             Entry::new(SERVICE_NAME, &key).map_err(|e| format!("Failed to create entry: {}", e))?;
 
