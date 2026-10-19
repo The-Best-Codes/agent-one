@@ -4,16 +4,11 @@ import remend from "remend";
 
 import { autolinkExtension, softBreaksExtension } from "./extensions";
 
-export type MarkdownBlock = {
-  node: BlockNode;
-  key: string;
-};
-
 export type ParsedMarkdown = {
   remendEnabled: boolean;
   stableSource: string;
-  stableBlocks: MarkdownBlock[];
-  blocks: MarkdownBlock[];
+  stableSegments: string[];
+  tailBlocks: BlockNode[];
 };
 
 export const markdownParseOptions: ParseOptions = {
@@ -58,11 +53,7 @@ function findSafeCuts(source: string, from: number) {
   return cuts;
 }
 
-const toBlocks = (source: string) =>
-  parseMarkdown(source, markdownParseOptions).children.map((node) => ({
-    node,
-    key: JSON.stringify(node),
-  }));
+export const toBlocks = (source: string) => parseMarkdown(source, markdownParseOptions).children;
 
 export function parseMarkdownIntoBlocks(
   markdown: string,
@@ -74,7 +65,7 @@ export function parseMarkdownIntoBlocks(
     previous.remendEnabled === remendEnabled &&
     markdown.startsWith(previous.stableSource);
   const stableSource = canReuse ? previous.stableSource : "";
-  const stableBlocks = canReuse ? [...previous.stableBlocks] : [];
+  const stableSegments = canReuse ? [...previous.stableSegments] : [];
 
   const boundaries = [
     stableSource.length,
@@ -82,12 +73,12 @@ export function parseMarkdownIntoBlocks(
     markdown.length,
   ];
   const settledIndex = Math.max(0, boundaries.length - 1 - UNSTABLE_TAIL_BLOCK_COUNT);
-  const tailBlocks: MarkdownBlock[] = [];
+  const tailBlocks: BlockNode[] = [];
 
   for (let i = 0; i < boundaries.length - 1; i++) {
     const segment = markdown.slice(boundaries[i], boundaries[i + 1]);
     if (i < settledIndex) {
-      stableBlocks.push(...toBlocks(segment));
+      stableSegments.push(segment);
     } else {
       tailBlocks.push(...toBlocks(remendEnabled ? remend(segment) : segment));
     }
@@ -96,7 +87,7 @@ export function parseMarkdownIntoBlocks(
   return {
     remendEnabled,
     stableSource: markdown.slice(0, boundaries[settledIndex]),
-    stableBlocks,
-    blocks: [...stableBlocks, ...tailBlocks],
+    stableSegments,
+    tailBlocks,
   };
 }

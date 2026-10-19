@@ -1,3 +1,4 @@
+import type { BlockNode } from "@tanstack/markdown";
 import { type MarkdownComponents, renderBlockReact } from "@tanstack/markdown/react";
 import type { UIMessage } from "ai";
 import { useAtomValue } from "jotai";
@@ -22,7 +23,7 @@ import {
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 
 import { CodeBlock } from "./codeblock";
-import { markdownParseOptions, type MarkdownBlock, parseMarkdownIntoBlocks } from "./parse-blocks";
+import { markdownParseOptions, parseMarkdownIntoBlocks, toBlocks } from "./parse-blocks";
 import type { ParsedMarkdown } from "./parse-blocks";
 
 type ComponentOptions = {
@@ -85,13 +86,26 @@ function createComponents({
 }
 
 const MemoizedMarkdownBlock = memo(
-  ({ block, components }: { block: MarkdownBlock; components: MarkdownComponents }) =>
-    renderBlockReact(block.node, { ...markdownParseOptions, components }),
+  ({ block, components }: { block: BlockNode; components: MarkdownComponents }) =>
+    renderBlockReact(block, { ...markdownParseOptions, components }),
   (prevProps, nextProps) =>
-    prevProps.block.key === nextProps.block.key && prevProps.components === nextProps.components,
+    prevProps.components === nextProps.components &&
+    (prevProps.block === nextProps.block ||
+      JSON.stringify(prevProps.block) === JSON.stringify(nextProps.block)),
 );
 
 MemoizedMarkdownBlock.displayName = "MemoizedMarkdownBlock";
+
+const MemoizedMarkdownSegment = memo(
+  ({ source, components }: { source: string; components: MarkdownComponents }) =>
+    toBlocks(source).map((node, index) =>
+      renderBlockReact(node, { ...markdownParseOptions, components }, `${index}`),
+    ),
+  (prevProps, nextProps) =>
+    prevProps.source === nextProps.source && prevProps.components === nextProps.components,
+);
+
+MemoizedMarkdownSegment.displayName = "MemoizedMarkdownSegment";
 
 export const MemoizedMarkdown = memo(
   ({
@@ -109,19 +123,34 @@ export const MemoizedMarkdown = memo(
   }) => {
     const remendEnabled = useAtomValue(settingAtoms.REMEND_ENABLED);
     const parsedRef = useRef<ParsedMarkdown | null>(null);
-    const blocks = useMemo(() => {
-      const parsed = parseMarkdownIntoBlocks(content, remendEnabled, parsedRef.current);
-      parsedRef.current = parsed;
-      return parsed.blocks;
+    const parsed = useMemo(() => {
+      const next = parseMarkdownIntoBlocks(content, remendEnabled, parsedRef.current);
+      parsedRef.current = next;
+      return next;
     }, [content, remendEnabled]);
     const components = useMemo(
       () => createComponents({ allowInternalLinks, messageRole, simpleCodeBlocks }),
       [allowInternalLinks, messageRole, simpleCodeBlocks],
     );
 
-    return blocks.map((block, index) => (
-      <MemoizedMarkdownBlock block={block} components={components} key={`${id}-block_${index}`} />
-    ));
+    return (
+      <>
+        {parsed.stableSegments.map((source, index) => (
+          <MemoizedMarkdownSegment
+            source={source}
+            components={components}
+            key={`${id}-segment_${index}`}
+          />
+        ))}
+        {parsed.tailBlocks.map((block, index) => (
+          <MemoizedMarkdownBlock
+            block={block}
+            components={components}
+            key={`${id}-tail_${index}`}
+          />
+        ))}
+      </>
+    );
   },
 );
 
