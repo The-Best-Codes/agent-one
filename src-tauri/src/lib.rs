@@ -20,6 +20,8 @@ fn log_level() -> LevelFilter {
     }
 }
 
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+mod computer_use;
 mod keyring;
 mod mcp_auth;
 mod tools;
@@ -239,6 +241,11 @@ pub fn run() {
                     utils::delete_scheduled_agent,
                     utils::list_webviews,
                     utils::force_close_webview,
+                    computer_use::computer_use_permissions,
+                    computer_use::computer_use_request_permission,
+                    computer_use::computer_use_list_apps,
+                    computer_use::computer_use_get_state,
+                    computer_use::computer_use_act,
                     keyring::storage_get_item,
                     keyring::storage_set_item,
                     keyring::storage_remove_item,

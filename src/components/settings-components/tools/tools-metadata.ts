@@ -114,12 +114,23 @@ export const TOOL_INFO: Record<ToolId, ToolInfo> = {
     description: "Read the messages of a past conversation",
     anchor: "read-chat",
   },
+  computerObserve: {
+    name: "See apps",
+    description: "Look at the apps open on your computer and read what is on screen",
+    anchor: "see-apps",
+  },
+  computerAct: {
+    name: "Use apps",
+    description: "Click, type, and scroll in the apps open on your computer",
+    anchor: "use-apps",
+  },
 };
 
 export interface ToolGroup {
   title: string;
   description: string;
   toolIds: ToolId[];
+  desktopOnly?: boolean;
 }
 
 export const TOOL_GROUPS: ToolGroup[] = [
@@ -162,6 +173,13 @@ export const TOOL_GROUPS: ToolGroup[] = [
     title: "Chat History",
     description: "Let AgentOne look through and read your past conversations.",
     toolIds: ["searchChats", "readChat"],
+  },
+  {
+    title: "Computer Use",
+    description:
+      "Let AgentOne see and use the other apps on your computer, like a person at the keyboard.",
+    toolIds: ["computerObserve", "computerAct"],
+    desktopOnly: true,
   },
 ];
 

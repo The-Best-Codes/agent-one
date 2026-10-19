@@ -25,6 +25,8 @@ import {
   createListScheduledAgentsTool,
   createUpdateScheduledAgentTool,
   createReadChatTool,
+  createComputerObserveTool,
+  createComputerActTool,
   createSearchChatsTool,
 } from "@/lib/ai/tools";
 import {
@@ -40,6 +42,7 @@ import {
 import { clearMcpOAuthCredentials, dismissMcpLoginToasts } from "@/lib/ai/tools/mcp/oauth";
 import type { ChatToolsContext } from "@/lib/ai/tools/readChat";
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
+import { isComputerUseSupported } from "@/lib/computer-use";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom, mcpServersAtom } from "@/lib/jotai/mcp-atoms";
 import type { McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
@@ -530,6 +533,11 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         },
         searchChats: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.searchChats, ...toolConfigs.searchChats },
         readChat: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.readChat, ...toolConfigs.readChat },
+        computerObserve: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.computerObserve,
+          ...toolConfigs.computerObserve,
+        },
+        computerAct: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.computerAct, ...toolConfigs.computerAct },
       };
 
       if (mergedEnabledTools.dateTime) {
@@ -620,6 +628,17 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
           mergedToolConfigs.readChat,
           options?.chatContext ?? {},
         );
+      }
+
+      if (isComputerUseSupported()) {
+        if (mergedEnabledTools.computerObserve) {
+          filteredStaticTools.computerObserve = createComputerObserveTool(
+            mergedToolConfigs.computerObserve,
+          );
+        }
+        if (mergedEnabledTools.computerAct) {
+          filteredStaticTools.computerAct = createComputerActTool(mergedToolConfigs.computerAct);
+        }
       }
 
       if (!mcpLoadedRef.current && loadingPromiseRef.current) {

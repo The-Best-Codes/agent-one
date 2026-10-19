@@ -104,7 +104,11 @@ const DEFAULT_TOOL_CONFIGS: ToolConfigs = {
   deleteScheduledAgent: { requiresApproval: true },
   searchChats: { requiresApproval: true, defaultMaxResults: 10 },
   readChat: { requiresApproval: true, defaultMaxChars: 25000, maxChars: 50000 },
+  computerObserve: { requiresApproval: false, includeScreenshots: true },
+  computerAct: { requiresApproval: true },
 };
+
+const TOOLS_DISABLED_BY_DEFAULT: ToolId[] = ["computerObserve", "computerAct"];
 
 export const SETTINGS = {
   THEME: select({
@@ -481,7 +485,10 @@ export const SETTINGS = {
   KEYBOARD_SHORTCUTS: data<KeyboardShortcutSettings>({ default: defaultKeyboardShortcuts }),
   ENABLED_TOOLS: data<Record<ToolId, boolean>>({
     default: Object.fromEntries(
-      Object.keys(DEFAULT_TOOL_CONFIGS).map((toolId) => [toolId, true]),
+      Object.keys(DEFAULT_TOOL_CONFIGS).map((toolId) => [
+        toolId,
+        !TOOLS_DISABLED_BY_DEFAULT.includes(toolId as ToolId),
+      ]),
     ) as Record<ToolId, boolean>,
   }),
   TOOL_CONFIGS: data<ToolConfigs>({ default: DEFAULT_TOOL_CONFIGS }),
