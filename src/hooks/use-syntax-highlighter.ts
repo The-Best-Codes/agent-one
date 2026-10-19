@@ -1,38 +1,57 @@
-import { useCallback } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
-import { highlighterClient } from "@/lib/syntax-highlighter/worker-client";
+import { getLogger } from "@/lib/logger";
+import type { HighlightTheme } from "@/lib/syntax-highlighter/types";
+import { type HighlightedCode, highlighterClient } from "@/lib/syntax-highlighter/worker-client";
 
-export interface HighlightResult {
-  html: string | null;
-  error: string | null;
-}
+const logger = getLogger(import.meta.url);
 
-const useSyntaxHighlighter = () => {
-  const highlight = useCallback(
-    (
-      code: string,
-      language: string,
-      theme: "dark-plus" | "light-plus" = "dark-plus",
-    ): Promise<HighlightResult> => {
-      return highlighterClient.highlight(code, language, theme);
-    },
-    [],
+const HIGHLIGHT_THROTTLE_MS = 100;
+
+const useSyntaxHighlighter = (
+  code: string,
+  language: string,
+  theme: HighlightTheme = "dark-plus",
+): HighlightedCode | null => {
+  const sessionId = useId();
+  const [highlighted, setHighlighted] = useState<HighlightedCode | null>(null);
+  const cached = useMemo(
+    () => highlighterClient.peekCached(code, language, theme),
+    [code, language, theme],
   );
+  const lastRequestAtRef = useRef(0);
 
-  const getCachedHighlight = useCallback(
-    (code: string, language: string, theme: "dark-plus" | "light-plus" = "dark-plus") =>
-      highlighterClient.getCached(code, language, theme) ?? null,
-    [],
-  );
+  useEffect(() => {
+    return () => highlighterClient.dispose(sessionId);
+  }, [sessionId]);
 
-  const forgetHighlight = useCallback(
-    (code: string, language: string, theme: "dark-plus" | "light-plus" = "dark-plus") => {
-      highlighterClient.forget(code, language, theme);
-    },
-    [],
-  );
+  useEffect(() => {
+    if (highlighterClient.getCached(code, language, theme)) {
+      return;
+    }
 
-  return { highlight, getCachedHighlight, forgetHighlight };
+    let cancelled = false;
+    const delay = Math.max(0, lastRequestAtRef.current + HIGHLIGHT_THROTTLE_MS - Date.now());
+
+    const timeoutId = setTimeout(() => {
+      lastRequestAtRef.current = Date.now();
+      void highlighterClient.highlight(sessionId, code, language, theme).then((result) => {
+        if (result.error) {
+          logger.error(`Syntax highlighting failed for ${language}:`, result.error);
+        }
+        if (!cancelled) {
+          setHighlighted(result.highlighted);
+        }
+      });
+    }, delay);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [sessionId, code, language, theme]);
+
+  return cached ?? highlighted;
 };
 
 export default useSyntaxHighlighter;

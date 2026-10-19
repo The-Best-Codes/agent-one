@@ -1,10 +1,21 @@
 import themeDarkPlus from "@shikijs/themes/dark-plus";
 import themeLightPlus from "@shikijs/themes/light-plus";
-import { createHighlighterCore, type HighlighterCore } from "shiki/core";
+import {
+  createHighlighterCore,
+  type GrammarState,
+  type HighlighterCore,
+  type ThemedToken,
+} from "shiki/core";
 import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
 
 import { getLogger } from "../lib/logger";
-import type { HighlightRequest, HighlightResponse } from "../lib/syntax-highlighter/types";
+import type {
+  HighlightLine,
+  HighlightRequest,
+  HighlightResponse,
+  HighlightTheme,
+  WorkerRequest,
+} from "../lib/syntax-highlighter/types";
 
 let highlighter: HighlighterCore | null = null;
 
@@ -98,53 +109,128 @@ async function loadLanguage(lang: string) {
   }
 }
 
-async function highlightCode(code: string, language: string, theme: "dark-plus" | "light-plus") {
+type HighlightSession = {
+  language: string;
+  theme: HighlightTheme;
+  source: string;
+  lineCount: number;
+  grammarState: GrammarState | undefined;
+};
+
+const sessions = new Map<string, HighlightSession>();
+
+const toLine = (tokens: ThemedToken[]): HighlightLine =>
+  tokens.map(({ content, color, fontStyle }) => ({
+    content,
+    color,
+    ...(fontStyle ? { fontStyle } : {}),
+  }));
+
+async function highlightCode(request: HighlightRequest): Promise<HighlightResponse> {
   if (!highlighter) {
     throw new Error("Highlighter not initialized");
   }
 
-  const normalizedLang = language.toLowerCase();
+  const { id, sessionId, code, theme } = request;
+  const normalizedLang = request.language.toLowerCase();
   const resolvedLang = langAliases[normalizedLang] || normalizedLang;
 
   try {
     await loadLanguage(resolvedLang);
 
-    const html = highlighter.codeToHtml(code, {
-      lang: resolvedLang,
-      theme,
-    });
+    let session = sessions.get(sessionId);
+    if (
+      !session ||
+      request.reset ||
+      session.language !== resolvedLang ||
+      session.theme !== theme ||
+      !code.startsWith(session.source)
+    ) {
+      session = {
+        language: resolvedLang,
+        theme,
+        source: "",
+        lineCount: 0,
+        grammarState: undefined,
+      };
+      sessions.set(sessionId, session);
+    }
 
-    return html;
+    const startLine = session.lineCount;
+    const rest = code.slice(session.source.length);
+    const lastNewline = rest.lastIndexOf("\n");
+    const lines: HighlightLine[] = [];
+    let fg: string | undefined;
+
+    if (lastNewline !== -1) {
+      const complete = rest.slice(0, lastNewline);
+      const result = highlighter.codeToTokens(complete, {
+        lang: resolvedLang,
+        theme,
+        grammarState: session.grammarState,
+      });
+      const lineTexts = complete.split("\n");
+      for (let i = 0; i < lineTexts.length; i++) {
+        lines.push(result.tokens[i] ? toLine(result.tokens[i]) : [{ content: lineTexts[i] }]);
+      }
+      fg = result.fg;
+      session.grammarState =
+        result.grammarState ??
+        highlighter.getLastGrammarState(complete, {
+          lang: resolvedLang,
+          theme,
+          grammarState: session.grammarState,
+        });
+      session.source += rest.slice(0, lastNewline + 1);
+      session.lineCount += lineTexts.length;
+    }
+
+    const tail = code.slice(session.source.length);
+    let partial: HighlightLine | null = null;
+    if (tail) {
+      const result = highlighter.codeToTokens(tail, {
+        lang: resolvedLang,
+        theme,
+        grammarState: session.grammarState,
+      });
+      partial = toLine(result.tokens[0] ?? []);
+      fg ??= result.fg;
+    }
+
+    return { id, startLine, lines, partial, fg };
   } catch (error) {
+    sessions.delete(sessionId);
     throw new Error(`Failed to highlight code: ${String(error)}`, {
       cause: error,
     });
   }
 }
 
-self.onmessage = async (event: MessageEvent<HighlightRequest>) => {
-  if ((event.data as { type?: string }).type === "init") return;
+let queue: Promise<void> = Promise.resolve();
 
-  const { id, code, language, theme } = event.data;
+self.onmessage = (event: MessageEvent<WorkerRequest>) => {
+  const request = event.data;
 
-  try {
-    await initializeHighlighter();
-
-    const html = await highlightCode(code, language, theme);
-
-    const response: HighlightResponse = { id, html };
-    self.postMessage(response);
-  } catch (error) {
-    const response: HighlightResponse = {
-      id,
-      error: error instanceof Error ? error.message : String(error),
-    };
-    self.postMessage(response);
-  }
-};
-
-self.addEventListener("message", (event) => {
-  if (event.data.type === "init") {
+  if (request.type === "init") {
     initializeHighlighter().catch(logger.error);
+    return;
   }
-});
+
+  queue = queue.then(async () => {
+    if (request.type === "dispose") {
+      sessions.delete(request.sessionId);
+      return;
+    }
+
+    try {
+      await initializeHighlighter();
+      self.postMessage(await highlightCode(request));
+    } catch (error) {
+      const response: HighlightResponse = {
+        id: request.id,
+        error: error instanceof Error ? error.message : String(error),
+      };
+      self.postMessage(response);
+    }
+  });
+};
