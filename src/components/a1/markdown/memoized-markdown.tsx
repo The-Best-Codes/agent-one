@@ -119,6 +119,7 @@ const MemoizedMarkdownBlock = memo(
             disableParsingRawHTML: true,
             forceBlock: true,
             wrapper: null,
+            slugify: () => undefined as unknown as string,
             renderRule(next, node) {
               if (node.type === RuleType.text && node.text.includes("\n")) {
                 return node.text
@@ -131,6 +132,10 @@ const MemoizedMarkdownBlock = memo(
               a(props: ComponentProps<"a">) {
                 if (allowInternalLinks && props.href?.startsWith("/")) {
                   return <Link to={props.href} {...props} />;
+                }
+
+                if (props.href?.startsWith("#")) {
+                  return <a {...props} />;
                 }
 
                 return <a {...props} target="_blank" rel="noopener noreferrer" />;
