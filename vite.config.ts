@@ -40,7 +40,7 @@ const vendorManualChunks = {
   ],
   codemirrorReact: ["@uiw/react-codemirror"],
   codemirrorLangs: ["@codemirror/lang-markdown"],
-  markdown: ["react-markdown", "remark-breaks", "remark-gfm", "marked"],
+  markdown: ["markdown-to-jsx", "marked"],
   radixUi: [
     "@radix-ui/react-toggle-group",
     "@radix-ui/react-roving-focus",
