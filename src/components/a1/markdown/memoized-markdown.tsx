@@ -1,11 +1,20 @@
+import {
+  type Icon,
+  IconAlertOctagon,
+  IconAlertTriangle,
+  IconBulb,
+  IconInfoCircle,
+  IconMessageReport,
+} from "@tabler/icons-react";
 import type { UIMessage } from "ai";
 import { useAtomValue } from "jotai";
 import Markdown, { type MarkdownToJSX, RuleType } from "markdown-to-jsx";
 import { marked, type Token, type Tokens } from "marked";
-import { type ComponentProps, createElement, memo, useMemo, useRef } from "react";
+import { type ComponentProps, memo, useMemo, useRef } from "react";
 import { Link } from "react-router";
 import remend from "remend";
 
+import { Alert, AlertTitle } from "@/components/ui/alert";
 import {
   Table,
   TableBody,
@@ -85,11 +94,26 @@ function parseMarkdownIntoBlocks(
   };
 }
 
-function createMarkdownOptions(allowInternalLinks: boolean): MarkdownToJSX.Options {
+const ALERTS: Record<string, { title: string; icon: Icon; variant?: "destructive" }> = {
+  NOTE: { title: "Note", icon: IconInfoCircle },
+  TIP: { title: "Tip", icon: IconBulb },
+  IMPORTANT: { title: "Important", icon: IconMessageReport },
+  WARNING: { title: "Warning", icon: IconAlertTriangle },
+  CAUTION: { title: "Caution", icon: IconAlertOctagon, variant: "destructive" },
+};
+
+function createMarkdownOptions(
+  allowInternalLinks: boolean,
+  idPrefix: string,
+): MarkdownToJSX.Options {
   return {
     disableParsingRawHTML: true,
     forceBlock: true,
     wrapper: null,
+    slugify(input, defaultSlugify) {
+      const slug = defaultSlugify(input);
+      return slug && `${idPrefix}-${slug}`;
+    },
     renderRule(next, node, renderChildren, state) {
       if (node.type === RuleType.text && node.text.includes("\n")) {
         return node.text
@@ -98,11 +122,17 @@ function createMarkdownOptions(allowInternalLinks: boolean): MarkdownToJSX.Optio
             index ? [<br key={`${state.key}-${index}`} />, part] : [part],
           );
       }
-      if (node.type === RuleType.heading) {
-        return createElement(
-          `h${node.level}`,
-          { key: state.key },
-          renderChildren(node.children, state),
+      if (node.type === RuleType.blockQuote && node.alert) {
+        const alert = ALERTS[node.alert] ?? {
+          title: node.alert.charAt(0) + node.alert.slice(1).toLowerCase(),
+          icon: IconInfoCircle,
+        };
+        return (
+          <Alert key={state.key} variant={alert.variant} className="my-4 first:mt-0 last:mb-0">
+            <alert.icon />
+            <AlertTitle>{alert.title}</AlertTitle>
+            <div className="*:first:mt-0 *:last:mb-0">{renderChildren(node.children, state)}</div>
+          </Alert>
         );
       }
       return next();
@@ -114,7 +144,8 @@ function createMarkdownOptions(allowInternalLinks: boolean): MarkdownToJSX.Optio
         }
 
         if (props.href?.startsWith("#")) {
-          return <a {...props} />;
+          const target = props.href.slice(1);
+          return <a {...props} href={target ? `#${idPrefix}-${target}` : props.href} />;
         }
 
         return <a {...props} target="_blank" rel="noopener noreferrer" />;
@@ -150,19 +181,16 @@ function createMarkdownOptions(allowInternalLinks: boolean): MarkdownToJSX.Optio
   };
 }
 
-const markdownOptions = createMarkdownOptions(false);
-const internalLinkMarkdownOptions = createMarkdownOptions(true);
-
 const MemoizedMarkdownBlock = memo(
   ({
-    allowInternalLinks,
     block,
+    markdownOptions,
     messageRole,
     remendEnabled,
     simpleCodeBlocks,
   }: {
-    allowInternalLinks?: boolean;
     block: MarkdownBlock;
+    markdownOptions: MarkdownToJSX.Options;
     messageRole: UIMessage["role"];
     remendEnabled: boolean;
     simpleCodeBlocks?: boolean;
@@ -181,11 +209,7 @@ const MemoizedMarkdownBlock = memo(
       return <CodeBlock content={content} lang={lang} messageRole={messageRole} />;
     } else {
       const completedContent = remendEnabled ? remend(content) : content;
-      return (
-        <Markdown options={allowInternalLinks ? internalLinkMarkdownOptions : markdownOptions}>
-          {completedContent}
-        </Markdown>
-      );
+      return <Markdown options={markdownOptions}>{completedContent}</Markdown>;
     }
   },
   (prevProps, nextProps) => {
@@ -193,7 +217,7 @@ const MemoizedMarkdownBlock = memo(
       prevProps.block.type === nextProps.block.type &&
       prevProps.block.content === nextProps.block.content &&
       prevProps.block.lang === nextProps.block.lang &&
-      prevProps.allowInternalLinks === nextProps.allowInternalLinks &&
+      prevProps.markdownOptions === nextProps.markdownOptions &&
       prevProps.remendEnabled === nextProps.remendEnabled &&
       prevProps.simpleCodeBlocks === nextProps.simpleCodeBlocks
     );
@@ -223,11 +247,15 @@ export const MemoizedMarkdown = memo(
       parsedRef.current = parsed;
       return parsed.blocks;
     }, [content, remendEnabled]);
+    const markdownOptions = useMemo(
+      () => createMarkdownOptions(allowInternalLinks ?? false, id),
+      [allowInternalLinks, id],
+    );
 
     return blocks.map((block, index) => (
       <MemoizedMarkdownBlock
-        allowInternalLinks={allowInternalLinks}
         block={block}
+        markdownOptions={markdownOptions}
         messageRole={messageRole}
         remendEnabled={remendEnabled}
         simpleCodeBlocks={simpleCodeBlocks}
