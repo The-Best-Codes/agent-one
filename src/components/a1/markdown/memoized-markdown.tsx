@@ -138,9 +138,9 @@ const MemoizedMarkdownBlock = memo(
               table(props: ComponentProps<"table">) {
                 return (
                   <Table
+                    {...props}
                     containerClassName="my-4 rounded-md border border-border first:mt-0 last:mb-0"
                     className="not-prose"
-                    {...props}
                   />
                 );
               },
