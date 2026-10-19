@@ -1,8 +1,8 @@
 import type { UIMessage } from "ai";
 import { useAtomValue } from "jotai";
-import Markdown, { RuleType } from "markdown-to-jsx";
+import Markdown, { type MarkdownToJSX, RuleType } from "markdown-to-jsx";
 import { marked, type Token, type Tokens } from "marked";
-import { type ComponentProps, memo, useMemo, useRef } from "react";
+import { type ComponentProps, createElement, memo, useMemo, useRef } from "react";
 import { Link } from "react-router";
 import remend from "remend";
 
@@ -85,6 +85,74 @@ function parseMarkdownIntoBlocks(
   };
 }
 
+function createMarkdownOptions(allowInternalLinks: boolean): MarkdownToJSX.Options {
+  return {
+    disableParsingRawHTML: true,
+    forceBlock: true,
+    wrapper: null,
+    renderRule(next, node, renderChildren, state) {
+      if (node.type === RuleType.text && node.text.includes("\n")) {
+        return node.text
+          .split("\n")
+          .flatMap((part, index) =>
+            index ? [<br key={`${state.key}-${index}`} />, part] : [part],
+          );
+      }
+      if (node.type === RuleType.heading) {
+        return createElement(
+          `h${node.level}`,
+          { key: state.key },
+          renderChildren(node.children, state),
+        );
+      }
+      return next();
+    },
+    overrides: {
+      a(props: ComponentProps<"a">) {
+        if (allowInternalLinks && props.href?.startsWith("/")) {
+          return <Link to={props.href} {...props} />;
+        }
+
+        if (props.href?.startsWith("#")) {
+          return <a {...props} />;
+        }
+
+        return <a {...props} target="_blank" rel="noopener noreferrer" />;
+      },
+      table(props: ComponentProps<"table">) {
+        return (
+          <Table
+            {...props}
+            containerClassName="my-4 rounded-md border border-border first:mt-0 last:mb-0"
+            className="not-prose"
+          />
+        );
+      },
+      thead(props: ComponentProps<"thead">) {
+        return <TableHeader {...props} />;
+      },
+      tbody(props: ComponentProps<"tbody">) {
+        return <TableBody {...props} />;
+      },
+      tr(props: ComponentProps<"tr">) {
+        return <TableRow {...props} />;
+      },
+      th(props: ComponentProps<"th">) {
+        return <TableHead {...props} />;
+      },
+      td(props: ComponentProps<"td">) {
+        return <TableCell {...props} />;
+      },
+      input(props: ComponentProps<"input">) {
+        return <input {...props} disabled />;
+      },
+    },
+  };
+}
+
+const markdownOptions = createMarkdownOptions(false);
+const internalLinkMarkdownOptions = createMarkdownOptions(true);
+
 const MemoizedMarkdownBlock = memo(
   ({
     allowInternalLinks,
@@ -114,62 +182,7 @@ const MemoizedMarkdownBlock = memo(
     } else {
       const completedContent = remendEnabled ? remend(content) : content;
       return (
-        <Markdown
-          options={{
-            disableParsingRawHTML: true,
-            forceBlock: true,
-            wrapper: null,
-            slugify: () => undefined as unknown as string,
-            renderRule(next, node) {
-              if (node.type === RuleType.text && node.text.includes("\n")) {
-                return node.text
-                  .split("\n")
-                  .flatMap((part, index) => (index ? [<br key={index} />, part] : [part]));
-              }
-              return next();
-            },
-            overrides: {
-              a(props: ComponentProps<"a">) {
-                if (allowInternalLinks && props.href?.startsWith("/")) {
-                  return <Link to={props.href} {...props} />;
-                }
-
-                if (props.href?.startsWith("#")) {
-                  return <a {...props} />;
-                }
-
-                return <a {...props} target="_blank" rel="noopener noreferrer" />;
-              },
-              table(props: ComponentProps<"table">) {
-                return (
-                  <Table
-                    {...props}
-                    containerClassName="my-4 rounded-md border border-border first:mt-0 last:mb-0"
-                    className="not-prose"
-                  />
-                );
-              },
-              thead(props: ComponentProps<"thead">) {
-                return <TableHeader {...props} />;
-              },
-              tbody(props: ComponentProps<"tbody">) {
-                return <TableBody {...props} />;
-              },
-              tr(props: ComponentProps<"tr">) {
-                return <TableRow {...props} />;
-              },
-              th(props: ComponentProps<"th">) {
-                return <TableHead {...props} />;
-              },
-              td(props: ComponentProps<"td">) {
-                return <TableCell {...props} />;
-              },
-              input(props: ComponentProps<"input">) {
-                return <input {...props} disabled />;
-              },
-            },
-          }}
-        >
+        <Markdown options={allowInternalLinks ? internalLinkMarkdownOptions : markdownOptions}>
           {completedContent}
         </Markdown>
       );
