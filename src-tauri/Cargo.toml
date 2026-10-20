@@ -82,4 +82,5 @@ windows-sys = { version = "0.61.2", features = [
 ] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
+zbus = { version = "5.19.0", default-features = false, features = ["blocking-api", "async-io"] }
 zbus-secret-service-keyring-store = { version = "1.0.1", features = ["rt-async-io-crypto-rust"] }

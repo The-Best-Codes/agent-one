@@ -12,7 +12,7 @@ use std::time::Duration;
 use xa11y::{Element, Error};
 
 use actions::ComputerAction;
-use apps::{InstalledApp, RunningApp};
+use apps::{InstalledApp, RunningApps};
 use observe::{AppState, ObserveOptions};
 use permissions::PermissionStatus;
 
@@ -58,7 +58,7 @@ pub fn computer_use_request_permission(permission: String) -> Result<(), String>
 }
 
 #[tauri::command]
-pub async fn computer_use_list_apps() -> Result<Vec<RunningApp>, String> {
+pub async fn computer_use_list_apps() -> Result<RunningApps, String> {
     run_blocking(apps::list_running).await
 }
 

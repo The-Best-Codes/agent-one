@@ -62,7 +62,7 @@ import type { SettingKey } from "@/lib/settings/definitions";
 
 const computerUseSupportedAtom = atom(() => isComputerUseSupported());
 
-const computerUsePermissionsVisibleAtom = atom(() => platform() === "macos");
+const computerUsePermissionsVisibleAtom = atom(() => ["macos", "linux"].includes(platform()));
 
 const isVirtualizationEnabledAtom = atom(
   (get) => get(settingAtoms.CHAT_VIRTUALIZATION_MODE) !== "off",
@@ -473,7 +473,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
                 {
                   id: "computer-use-permissions",
                   label: "Computer use permissions",
-                  description: "Allow AgentOne to see and control other apps on your Mac.",
+                  description: "Allow AgentOne to see and control other apps on your computer.",
                   keywords: ["accessibility", "screen recording", "permission", "privacy"],
                   visible: computerUsePermissionsVisibleAtom,
                   render: ComputerUsePermissions,

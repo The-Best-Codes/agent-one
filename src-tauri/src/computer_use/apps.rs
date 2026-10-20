@@ -23,6 +23,14 @@ pub struct RunningApp {
     windows: Vec<String>,
 }
 
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RunningApps {
+    apps: Vec<RunningApp>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    hint: Option<String>,
+}
+
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InstalledApp {
@@ -66,11 +74,11 @@ pub fn find_running(query: &str) -> Result<App, String> {
     Ok(app)
 }
 
-pub fn list_running() -> Result<Vec<RunningApp>, String> {
+pub fn list_running() -> Result<RunningApps, String> {
     permissions::ensure_granted()?;
     let own_pid = std::process::id();
     let apps = App::list().map_err(describe_error)?;
-    Ok(apps
+    let apps = apps
         .into_iter()
         .filter(|app| app.pid != Some(own_pid))
         .map(|app| {
@@ -87,7 +95,11 @@ pub fn list_running() -> Result<Vec<RunningApp>, String> {
                 windows,
             }
         })
-        .collect())
+        .collect();
+    Ok(RunningApps {
+        apps,
+        hint: permissions::linux_accessibility_hint(),
+    })
 }
 
 const INSTALLED_CACHE_TTL: Duration = Duration::from_secs(60);
@@ -158,14 +170,21 @@ fn launch(path: &Path) -> Result<(), String> {
             .status()
             .is_ok_and(|status| status.success())
     };
-    if quiet(Command::new("gio").arg("launch").arg(path)) {
+    let command = |program: &str| {
+        let mut command = Command::new(program);
+        command
+            .env("ACCESSIBILITY_ENABLED", "1")
+            .env("QT_ACCESSIBILITY", "1");
+        command
+    };
+    if quiet(command("gio").arg("launch").arg(path)) {
         return Ok(());
     }
     let id = path
         .file_name()
         .map(|n| n.to_string_lossy().into_owned())
         .unwrap_or_default();
-    if quiet(Command::new("gtk-launch").arg(&id)) {
+    if quiet(command("gtk-launch").arg(&id)) {
         return Ok(());
     }
     Err(format!(

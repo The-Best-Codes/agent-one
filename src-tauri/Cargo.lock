@@ -81,6 +81,7 @@ dependencies = [
  "wreq",
  "wreq-util",
  "xa11y",
+ "zbus",
  "zbus-secret-service-keyring-store",
 ]
 
