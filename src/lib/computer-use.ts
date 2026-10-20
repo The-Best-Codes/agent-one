@@ -2,9 +2,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { platform } from "@tauri-apps/plugin-os";
 
 export interface ComputerUsePermissions {
-  accessibility?: boolean;
-  screenRecording?: boolean;
-  supported: boolean;
+  accessibility: boolean;
+  screenRecording: boolean;
 }
 
 export type ComputerUsePermission = "accessibility" | "screenRecording";
@@ -13,11 +12,6 @@ export interface ComputerUseAppInfo {
   name: string;
   pid?: number;
   windows: string[];
-}
-
-export interface ComputerUseRunningApps {
-  apps: ComputerUseAppInfo[];
-  hint?: string;
 }
 
 export interface ComputerUseInstalledApp {
@@ -67,7 +61,7 @@ export type ComputerUseAction =
   | { type: "setValue"; elementIndex: number; value: string }
   | { type: "performAction"; elementIndex: number; action: string };
 
-export const isComputerUseSupported = () => !["android", "ios"].includes(platform());
+export const isComputerUseSupported = () => ["macos", "windows"].includes(platform());
 
 export const getComputerUsePermissions = () =>
   invoke<ComputerUsePermissions>("computer_use_permissions");
@@ -75,7 +69,7 @@ export const getComputerUsePermissions = () =>
 export const requestComputerUsePermission = (permission: ComputerUsePermission) =>
   invoke<void>("computer_use_request_permission", { permission });
 
-export const listComputerUseApps = () => invoke<ComputerUseRunningApps>("computer_use_list_apps");
+export const listComputerUseApps = () => invoke<ComputerUseAppInfo[]>("computer_use_list_apps");
 
 export const searchComputerUseInstalledApps = (query?: string) =>
   invoke<ComputerUseInstalledApp[]>("computer_use_search_installed_apps", { query });

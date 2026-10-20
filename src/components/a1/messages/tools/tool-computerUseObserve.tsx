@@ -59,9 +59,6 @@ function ObserveDetails({ output }: { output: ComputerUseObserveOutput }) {
               ) : null}
             </div>
           ))}
-          {output.hint ? (
-            <span className="text-muted-foreground text-xs">{output.hint}</span>
-          ) : null}
         </div>
       );
     case "installed":

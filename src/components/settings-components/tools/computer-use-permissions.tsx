@@ -1,5 +1,4 @@
 import { IconCircleCheck } from "@tabler/icons-react";
-import { platform } from "@tauri-apps/plugin-os";
 import { useCallback, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -18,18 +17,10 @@ const logger = getLogger(import.meta.url);
 const POLL_INTERVAL_MS = 2000;
 
 const PERMISSION_INFO: Record<ComputerUsePermission, { name: string; description: string }> = {
-  accessibility:
-    platform() === "linux"
-      ? {
-          name: "Accessibility support",
-          description:
-            "Turns on your desktop's accessibility support so more apps show their buttons and text to AgentOne. Reopen any apps that were already open.",
-        }
-      : {
-          name: "Accessibility",
-          description:
-            "Lets AgentOne read buttons and text in other apps, and click and type in them.",
-        },
+  accessibility: {
+    name: "Accessibility",
+    description: "Lets AgentOne read buttons and text in other apps, and click and type in them.",
+  },
   screenRecording: {
     name: "Screen Recording",
     description:
@@ -48,7 +39,7 @@ export function ComputerUsePermissions() {
       });
   }, []);
 
-  const allGranted = permissions?.accessibility !== false && permissions?.screenRecording !== false;
+  const allGranted = permissions?.accessibility && permissions.screenRecording;
 
   useEffect(() => {
     refresh();
@@ -68,7 +59,6 @@ export function ComputerUsePermissions() {
       {(Object.keys(PERMISSION_INFO) as ComputerUsePermission[]).map((permission) => {
         const info = PERMISSION_INFO[permission];
         const granted = permissions[permission];
-        if (granted === undefined) return null;
         return (
           <div
             key={permission}

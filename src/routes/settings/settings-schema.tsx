@@ -62,7 +62,9 @@ import type { SettingKey } from "@/lib/settings/definitions";
 
 const computerUseSupportedAtom = atom(() => isComputerUseSupported());
 
-const computerUsePermissionsVisibleAtom = atom(() => ["macos", "linux"].includes(platform()));
+const isLinuxAtom = atom(() => platform() === "linux");
+
+const computerUsePermissionsVisibleAtom = atom(() => platform() === "macos");
 
 const isVirtualizationEnabledAtom = atom(
   (get) => get(settingAtoms.CHAT_VIRTUALIZATION_MODE) !== "off",
@@ -466,14 +468,22 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
       ...TOOL_GROUPS.map((group) => ({
         title: group.title,
         description: group.description,
-        visible: group.desktopOnly ? computerUseSupportedAtom : undefined,
+        visible: group.desktopOnly
+          ? atom((get) => get(computerUseSupportedAtom) || get(isLinuxAtom))
+          : undefined,
         items: [
           ...(group.desktopOnly
             ? [
                 {
+                  id: "computer-use-unsupported",
+                  label: "Not available on Linux yet",
+                  description: "Computer use works on macOS and Windows for now.",
+                  visible: isLinuxAtom,
+                },
+                {
                   id: "computer-use-permissions",
                   label: "Computer use permissions",
-                  description: "Allow AgentOne to see and control other apps on your computer.",
+                  description: "Allow AgentOne to see and control other apps on your Mac.",
                   keywords: ["accessibility", "screen recording", "permission", "privacy"],
                   visible: computerUsePermissionsVisibleAtom,
                   render: ComputerUsePermissions,
@@ -485,6 +495,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
             label: TOOL_INFO[toolId].name,
             description: TOOL_INFO[toolId].description,
             keywords: ["tool"],
+            visible: group.desktopOnly ? computerUseSupportedAtom : undefined,
             render: () => <ToolRow toolId={toolId} />,
           })),
         ],

@@ -3,11 +3,8 @@ use serde::Serialize;
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PermissionStatus {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub accessibility: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub screen_recording: Option<bool>,
-    pub supported: bool,
+    pub accessibility: bool,
+    pub screen_recording: bool,
 }
 
 #[cfg(target_os = "macos")]
@@ -82,95 +79,31 @@ mod macos {
     }
 }
 
-#[cfg(target_os = "linux")]
-mod linux {
-    use zbus::blocking::{Connection, Proxy};
-
-    fn status_proxy(connection: &Connection) -> zbus::Result<Proxy<'_>> {
-        Proxy::new(
-            connection,
-            "org.a11y.Bus",
-            "/org/a11y/bus",
-            "org.a11y.Status",
-        )
-    }
-
-    pub fn accessibility() -> bool {
-        let Ok(connection) = Connection::session() else {
-            return false;
-        };
-        let Ok(proxy) = status_proxy(&connection) else {
-            return false;
-        };
-        proxy.get_property::<bool>("IsEnabled").unwrap_or(false)
-    }
-
-    pub fn request_accessibility() -> Result<(), String> {
-        let connection = Connection::session().map_err(|e| e.to_string())?;
-        let proxy = status_proxy(&connection).map_err(|e| e.to_string())?;
-        proxy
-            .set_property("IsEnabled", true)
-            .map_err(|e| format!("Could not turn on accessibility support: {e}"))
-    }
-}
-
 pub fn status() -> PermissionStatus {
     #[cfg(target_os = "macos")]
     {
         PermissionStatus {
-            accessibility: Some(macos::accessibility()),
-            screen_recording: Some(macos::screen_recording()),
-            supported: true,
-        }
-    }
-    #[cfg(target_os = "linux")]
-    {
-        PermissionStatus {
-            accessibility: Some(linux::accessibility()),
-            screen_recording: None,
-            supported: true,
+            accessibility: macos::accessibility(),
+            screen_recording: macos::screen_recording(),
         }
     }
     #[cfg(target_os = "windows")]
     {
         PermissionStatus {
-            accessibility: None,
-            screen_recording: None,
-            supported: true,
+            accessibility: true,
+            screen_recording: true,
         }
     }
-    #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "linux")))]
-    {
-        PermissionStatus {
-            accessibility: None,
-            screen_recording: None,
-            supported: false,
-        }
-    }
-}
-
-pub fn linux_accessibility_hint() -> Option<String> {
-    #[cfg(target_os = "linux")]
-    if !linux::accessibility() {
-        return Some("Accessibility support is off on this computer, so some apps are hidden. Ask the user to allow it in AgentOne Settings → Tools → Computer Use, then reopen the apps they want to use.".to_string());
-    }
-    None
 }
 
 // xa11y caches permission errors until restart, so check before calling it.
 pub fn ensure_granted() -> Result<(), String> {
     let status = status();
-    if !status.supported {
-        return Err("Computer use is not supported on this platform.".to_string());
+    if !status.accessibility {
+        return Err("AgentOne does not have Accessibility permission. Ask the user to grant it in AgentOne Settings → Tools → Computer Use.".to_string());
     }
-    #[cfg(target_os = "macos")]
-    {
-        if status.accessibility == Some(false) {
-            return Err("AgentOne does not have Accessibility permission. Ask the user to grant it in AgentOne Settings → Tools → Computer Use.".to_string());
-        }
-        if status.screen_recording == Some(false) {
-            return Err("AgentOne does not have Screen Recording permission. Ask the user to grant it in AgentOne Settings → Tools → Computer Use.".to_string());
-        }
+    if !status.screen_recording {
+        return Err("AgentOne does not have Screen Recording permission. Ask the user to grant it in AgentOne Settings → Tools → Computer Use.".to_string());
     }
     Ok(())
 }
@@ -191,14 +124,7 @@ pub fn request(permission: &str) -> Result<(), String> {
         }
         Ok(())
     }
-    #[cfg(target_os = "linux")]
-    {
-        match permission {
-            "accessibility" => linux::request_accessibility(),
-            other => Err(format!("Unknown permission: {other}")),
-        }
-    }
-    #[cfg(not(any(target_os = "macos", target_os = "linux")))]
+    #[cfg(not(target_os = "macos"))]
     {
         let _ = permission;
         Ok(())
