@@ -9,7 +9,7 @@ mod tree;
 use std::thread::sleep;
 use std::time::Duration;
 
-use xa11y::{Element, Error};
+use xa11y::{App, AppExt, Element, Error};
 
 use actions::ComputerAction;
 use apps::{InstalledApp, RunningApp};
@@ -29,12 +29,19 @@ fn describe_error(error: Error) -> String {
     }
 }
 
-fn activate(window: Option<&Element>) {
-    if let Some(window) = window {
-        if window.activate().is_ok() {
-            sleep(ACTIVATE_DELAY);
-        }
+fn activate(window: Option<&Element>, pid: u32) -> Result<(), String> {
+    let not_front = || {
+        "The app's window could not be brought to the front, so no input was sent. Observe the app again."
+            .to_string()
+    };
+    let window = window.ok_or_else(not_front)?;
+    window.activate().map_err(|_| not_front())?;
+    sleep(ACTIVATE_DELAY);
+    let foreground = App::foreground(Duration::ZERO).map_err(describe_error)?;
+    if foreground.pid != Some(pid) {
+        return Err(not_front());
     }
+    Ok(())
 }
 
 async fn run_blocking<T, F>(task: F) -> Result<T, String>

@@ -124,7 +124,7 @@ pub fn act(query: &str, action: ComputerAction) -> Result<String, String> {
 
             if !pressed {
                 let point = snapshot.target_point(element_index, x, y)?;
-                activate(window);
+                activate(window, pid)?;
                 input()?
                     .mouse()
                     .click_with(
@@ -151,7 +151,7 @@ pub fn act(query: &str, action: ComputerAction) -> Result<String, String> {
                 None => false,
             };
             if !typed {
-                activate(window);
+                activate(window, pid)?;
                 input()?
                     .keyboard()
                     .type_text(&text)
@@ -161,7 +161,7 @@ pub fn act(query: &str, action: ComputerAction) -> Result<String, String> {
         }
         ComputerAction::PressKey { key } => {
             let chord = keys::parse_chord(&key)?;
-            activate(window);
+            activate(window, pid)?;
             let sim = input()?;
             let keyboard = sim.keyboard();
             if chord.held.is_empty() {
@@ -189,7 +189,7 @@ pub fn act(query: &str, action: ComputerAction) -> Result<String, String> {
                 (Some(index), _, _) => visible_center(snapshot.element(index)?, window)?,
                 _ => snapshot.target_point(element_index, x, y)?,
             };
-            activate(window);
+            activate(window, pid)?;
             input()?
                 .mouse()
                 .scroll(point, delta)
@@ -204,7 +204,7 @@ pub fn act(query: &str, action: ComputerAction) -> Result<String, String> {
         } => {
             let from = snapshot.screenshot_point(from_x, from_y)?;
             let to = snapshot.screenshot_point(to_x, to_y)?;
-            activate(window);
+            activate(window, pid)?;
             input()?.mouse().drag(from, to).map_err(describe_error)?;
             format!("Dragged from ({from_x}, {from_y}) to ({to_x}, {to_y}).")
         }

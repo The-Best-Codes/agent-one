@@ -196,6 +196,10 @@ pub fn build_tree(
 
     let mut window_number = 0;
     for root in roots {
+        if walker.elements.len() >= walker.max_elements {
+            walker.truncated = true;
+            break;
+        }
         if is_window(root) {
             let label = format!(" window={window_number}");
             window_number += 1;

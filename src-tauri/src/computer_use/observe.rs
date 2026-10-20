@@ -79,7 +79,7 @@ pub fn get_state(query: &str, options: ObserveOptions) -> Result<AppState, Strin
             .filter(|e| tree::is_window(e))
             .cloned()
             .collect();
-        activate(tree::pick_window(&windows, window_query));
+        let _ = activate(tree::pick_window(&windows, window_query), pid);
     }
 
     let tree = tree::build_tree(
