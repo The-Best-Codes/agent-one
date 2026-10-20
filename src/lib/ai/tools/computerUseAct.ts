@@ -1,12 +1,13 @@
 import { tool } from "ai";
 import { z } from "zod";
 
-import { COMPUTER_USE_GUIDANCE } from "@/lib/ai/tools/computerObserve";
+import { COMPUTER_USE_GUIDANCE } from "@/lib/ai/tools/computerUseObserve";
 import { raceWithAbort } from "@/lib/ai/tools/utils/abort";
 import { type ComputerUseAction, performComputerUseAction } from "@/lib/computer-use";
-import type { ComputerActToolConfig } from "@/lib/settings/types";
+import type { ComputerUseActToolConfig } from "@/lib/settings/types";
 
 const actionSchema = z.enum([
+  "openApp",
   "click",
   "typeText",
   "pressKey",
@@ -17,7 +18,11 @@ const actionSchema = z.enum([
 ]);
 
 const inputSchema = z.object({
-  app: z.string().describe("App name or process ID, the same one used with computerObserve."),
+  app: z
+    .string()
+    .describe(
+      "App name or process ID, the same one used with computerUseObserve. For openApp, the installed app's name.",
+    ),
   summary: z
     .string()
     .describe(
@@ -25,6 +30,7 @@ const inputSchema = z.object({
     ),
   action: actionSchema.describe(
     [
+      "openApp: open an installed app by name, then observe it.",
       "click: click an element (elementIndex) or a screenshot point (x, y).",
       "typeText: type text into the focused element, or into elementIndex.",
       "pressKey: press a key or chord, like Return, Escape, Tab, cmd+c, ctrl+shift+t.",
@@ -39,7 +45,7 @@ const inputSchema = z.object({
     .int()
     .min(0)
     .optional()
-    .describe("Element index from the latest computerObserve result for this app."),
+    .describe("Element index from the latest computerUseObserve result for this app."),
   x: z.number().int().optional().describe("X pixel in the latest screenshot."),
   y: z.number().int().optional().describe("Y pixel in the latest screenshot."),
   toX: z.number().int().optional().describe("Drag end X pixel in the latest screenshot."),
@@ -63,9 +69,9 @@ const inputSchema = z.object({
     .describe("Scroll distance in wheel steps. Defaults to 5."),
 });
 
-type ComputerActInput = z.infer<typeof inputSchema>;
+type ComputerUseActInput = z.infer<typeof inputSchema>;
 
-export interface ComputerActOutput {
+export interface ComputerUseActOutput {
   message: string;
 }
 
@@ -76,9 +82,11 @@ function required<T>(value: T | undefined, name: string, action: string): T {
   return value;
 }
 
-function toAction(input: ComputerActInput): ComputerUseAction {
+function toAction(input: ComputerUseActInput): ComputerUseAction {
   const { action } = input;
   switch (action) {
+    case "openApp":
+      return { type: "openApp" };
     case "click":
       return {
         type: "click",
@@ -128,14 +136,14 @@ function toAction(input: ComputerActInput): ComputerUseAction {
   }
 }
 
-export const createComputerActTool = (config: ComputerActToolConfig) =>
+export const createComputerUseActTool = (config: ComputerUseActToolConfig) =>
   tool({
-    description: `Use an app on the user's computer: click, type, press keys, scroll, drag, set values, or run element actions. Observe the app with computerObserve first, and again afterwards to see the result.
+    description: `Use an app on the user's computer: open it, click, type, press keys, scroll, drag, set values, or run element actions. Observe the app with computerUseObserve before acting on it, and again afterwards to see the result.
 
 ${COMPUTER_USE_GUIDANCE}`,
     needsApproval: config.requiresApproval,
     inputSchema,
-    execute: async (input, { abortSignal }): Promise<ComputerActOutput> => {
+    execute: async (input, { abortSignal }): Promise<ComputerUseActOutput> => {
       abortSignal?.throwIfAborted();
       const message = await raceWithAbort(
         performComputerUseAction(input.app, toAction(input)),

@@ -1,17 +1,10 @@
 use std::fmt::Write as _;
 
-use xa11y::{Element, Role, Screenshot, Toggled};
+use xa11y::{Element, Role, Toggled};
 
 const MAX_DEPTH: usize = 64;
 const MAX_TEXT_CHARS: usize = 300;
 const NOISE_ACTIONS: &[&str] = &["scroll_to_visible", "scroll_into_view"];
-
-pub struct Snapshot {
-    pub app_name: String,
-    pub elements: Vec<Element>,
-    pub window: Option<Element>,
-    pub screenshot: Option<Screenshot>,
-}
 
 pub struct TreeOutput {
     pub text: String,
@@ -178,8 +171,6 @@ pub fn pick_window<'a>(windows: &'a [Element], query: Option<&str>) -> Option<&'
         .or_else(|| windows.first())
 }
 
-/// Formats the app's accessibility tree, fully expanding only the target
-/// window so the output stays small enough for a model to read.
 pub fn build_tree(
     roots: &[Element],
     window_query: Option<&str>,

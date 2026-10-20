@@ -107,8 +107,7 @@ pub fn status() -> PermissionStatus {
     }
 }
 
-/// xa11y memoizes provider construction errors for the life of the process,
-/// so it must not be touched until the permissions it checks are granted.
+// xa11y caches permission errors until restart, so check before calling it.
 pub fn ensure_granted() -> Result<(), String> {
     let status = status();
     if !status.supported {

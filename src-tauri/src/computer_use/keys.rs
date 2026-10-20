@@ -90,7 +90,6 @@ fn trim_side(name: &str) -> &str {
         .unwrap_or(name)
 }
 
-/// Parses chords like `Return`, `cmd+shift+t` or `Control_L+a`.
 pub fn parse_chord(input: &str) -> Result<KeyChord, String> {
     let parts: Vec<&str> = input
         .split('+')

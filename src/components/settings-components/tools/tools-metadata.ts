@@ -114,14 +114,14 @@ export const TOOL_INFO: Record<ToolId, ToolInfo> = {
     description: "Read the messages of a past conversation",
     anchor: "read-chat",
   },
-  computerObserve: {
+  computerUseObserve: {
     name: "See apps",
-    description: "Look at the apps open on your computer and read what is on screen",
+    description: "Find your open and installed apps, and read what is on screen in them",
     anchor: "see-apps",
   },
-  computerAct: {
+  computerUseAct: {
     name: "Use apps",
-    description: "Click, type, and scroll in the apps open on your computer",
+    description: "Open apps, and click, type, and scroll in them",
     anchor: "use-apps",
   },
 };
@@ -178,7 +178,7 @@ export const TOOL_GROUPS: ToolGroup[] = [
     title: "Computer Use",
     description:
       "Let AgentOne see and use the other apps on your computer, like a person at the keyboard.",
-    toolIds: ["computerObserve", "computerAct"],
+    toolIds: ["computerUseObserve", "computerUseAct"],
     desktopOnly: true,
   },
 ];

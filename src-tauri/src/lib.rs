@@ -244,6 +244,7 @@ pub fn run() {
                     computer_use::computer_use_permissions,
                     computer_use::computer_use_request_permission,
                     computer_use::computer_use_list_apps,
+                    computer_use::computer_use_search_installed_apps,
                     computer_use::computer_use_get_state,
                     computer_use::computer_use_act,
                     keyring::storage_get_item,

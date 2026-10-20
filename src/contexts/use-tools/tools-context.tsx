@@ -25,8 +25,8 @@ import {
   createListScheduledAgentsTool,
   createUpdateScheduledAgentTool,
   createReadChatTool,
-  createComputerObserveTool,
-  createComputerActTool,
+  createComputerUseObserveTool,
+  createComputerUseActTool,
   createSearchChatsTool,
 } from "@/lib/ai/tools";
 import {
@@ -533,11 +533,14 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         },
         searchChats: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.searchChats, ...toolConfigs.searchChats },
         readChat: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.readChat, ...toolConfigs.readChat },
-        computerObserve: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.computerObserve,
-          ...toolConfigs.computerObserve,
+        computerUseObserve: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.computerUseObserve,
+          ...toolConfigs.computerUseObserve,
         },
-        computerAct: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.computerAct, ...toolConfigs.computerAct },
+        computerUseAct: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.computerUseAct,
+          ...toolConfigs.computerUseAct,
+        },
       };
 
       if (mergedEnabledTools.dateTime) {
@@ -631,13 +634,15 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       }
 
       if (isComputerUseSupported()) {
-        if (mergedEnabledTools.computerObserve) {
-          filteredStaticTools.computerObserve = createComputerObserveTool(
-            mergedToolConfigs.computerObserve,
+        if (mergedEnabledTools.computerUseObserve) {
+          filteredStaticTools.computerUseObserve = createComputerUseObserveTool(
+            mergedToolConfigs.computerUseObserve,
           );
         }
-        if (mergedEnabledTools.computerAct) {
-          filteredStaticTools.computerAct = createComputerActTool(mergedToolConfigs.computerAct);
+        if (mergedEnabledTools.computerUseAct) {
+          filteredStaticTools.computerUseAct = createComputerUseActTool(
+            mergedToolConfigs.computerUseAct,
+          );
         }
       }
 

@@ -6,8 +6,8 @@ import { getLogger } from "@/lib/logger";
 
 import { MessagePartFallback } from "./parts/fallback";
 import { MessagePartToolCall } from "./tools/tool-call";
-import { MessagePartToolComputerAct } from "./tools/tool-computerAct";
-import { MessagePartToolComputerObserve } from "./tools/tool-computerObserve";
+import { MessagePartToolComputerUseAct } from "./tools/tool-computerUseAct";
+import { MessagePartToolComputerUseObserve } from "./tools/tool-computerUseObserve";
 import { MessagePartToolCreateFile } from "./tools/tool-createFile";
 import { MessagePartToolCreateScheduledAgent } from "./tools/tool-createScheduledAgent";
 import { MessagePartToolDateTime } from "./tools/tool-dateTime";
@@ -88,10 +88,10 @@ export const MessageToolHandler = memo(
         return <MessagePartToolSearchChats part={part} />;
       case "tool-readChat":
         return <MessagePartToolReadChat part={part} />;
-      case "tool-computerObserve":
-        return <MessagePartToolComputerObserve part={part} />;
-      case "tool-computerAct":
-        return <MessagePartToolComputerAct part={part} />;
+      case "tool-computerUseObserve":
+        return <MessagePartToolComputerUseObserve part={part} />;
+      case "tool-computerUseAct":
+        return <MessagePartToolComputerUseAct part={part} />;
       default:
         return <MessagePartToolCall part={part as ToolUIPart} />;
     }

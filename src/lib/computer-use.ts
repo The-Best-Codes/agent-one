@@ -15,6 +15,11 @@ export interface ComputerUseAppInfo {
   windows: string[];
 }
 
+export interface ComputerUseInstalledApp {
+  name: string;
+  path: string;
+}
+
 export interface ComputerUseScreenshot {
   data: string;
   mediaType: string;
@@ -34,6 +39,7 @@ export interface ComputerUseAppState {
 }
 
 export type ComputerUseAction =
+  | { type: "openApp" }
   | {
       type: "click";
       elementIndex?: number;
@@ -65,6 +71,9 @@ export const requestComputerUsePermission = (permission: ComputerUsePermission) 
   invoke<void>("computer_use_request_permission", { permission });
 
 export const listComputerUseApps = () => invoke<ComputerUseAppInfo[]>("computer_use_list_apps");
+
+export const searchComputerUseInstalledApps = (query?: string) =>
+  invoke<ComputerUseInstalledApp[]>("computer_use_search_installed_apps", { query });
 
 export const getComputerUseAppState = (options: {
   app: string;
