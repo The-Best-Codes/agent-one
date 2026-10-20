@@ -20,6 +20,8 @@ fn log_level() -> LevelFilter {
     }
 }
 
+#[cfg(any(target_os = "macos", target_os = "windows"))]
+mod computer_use;
 mod keyring;
 mod mcp_auth;
 mod tools;
@@ -239,6 +241,18 @@ pub fn run() {
                     utils::delete_scheduled_agent,
                     utils::list_webviews,
                     utils::force_close_webview,
+                    #[cfg(any(target_os = "macos", target_os = "windows"))]
+                    computer_use::computer_use_permissions,
+                    #[cfg(any(target_os = "macos", target_os = "windows"))]
+                    computer_use::computer_use_request_permission,
+                    #[cfg(any(target_os = "macos", target_os = "windows"))]
+                    computer_use::computer_use_list_apps,
+                    #[cfg(any(target_os = "macos", target_os = "windows"))]
+                    computer_use::computer_use_search_installed_apps,
+                    #[cfg(any(target_os = "macos", target_os = "windows"))]
+                    computer_use::computer_use_get_state,
+                    #[cfg(any(target_os = "macos", target_os = "windows"))]
+                    computer_use::computer_use_act,
                     keyring::storage_get_item,
                     keyring::storage_set_item,
                     keyring::storage_remove_item,
