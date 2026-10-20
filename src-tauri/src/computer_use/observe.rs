@@ -110,7 +110,7 @@ pub fn get_state(query: &str, options: ObserveOptions) -> Result<AppState, Strin
     );
     let element_count = tree.elements.len();
 
-    snapshots()?.insert(
+    snapshots().insert(
         pid,
         Snapshot {
             app_name: app.name.clone(),

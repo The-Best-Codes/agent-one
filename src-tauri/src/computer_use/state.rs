@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::sync::{Mutex, MutexGuard};
+use std::sync::{Mutex, MutexGuard, PoisonError};
 
 use once_cell::sync::Lazy;
 use xa11y::{anchor_point, Anchor, Element, Point, Screenshot};
@@ -15,10 +15,8 @@ pub struct Snapshot {
 
 static SNAPSHOTS: Lazy<Mutex<HashMap<u32, Snapshot>>> = Lazy::new(|| Mutex::new(HashMap::new()));
 
-pub fn snapshots() -> Result<MutexGuard<'static, HashMap<u32, Snapshot>>, String> {
-    SNAPSHOTS
-        .lock()
-        .map_err(|_| "Computer use state is unavailable.".to_string())
+pub fn snapshots() -> MutexGuard<'static, HashMap<u32, Snapshot>> {
+    SNAPSHOTS.lock().unwrap_or_else(PoisonError::into_inner)
 }
 
 impl Snapshot {

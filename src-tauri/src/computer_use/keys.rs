@@ -33,13 +33,22 @@ fn parse_symbol(name: &str) -> Option<char> {
     Some(c)
 }
 
+fn hold_shift(held: &mut Vec<Key>) {
+    if !held.contains(&Key::Shift) {
+        held.push(Key::Shift);
+    }
+}
+
 fn parse_key(raw: &str, held: &mut Vec<Key>) -> Result<Key, String> {
+    if raw == "+" || raw.eq_ignore_ascii_case("plus") {
+        hold_shift(held);
+        return Ok(Key::Char('='));
+    }
+
     let mut chars = raw.chars();
     if let (Some(c), None) = (chars.next(), chars.next()) {
         if c.is_ascii_uppercase() {
-            if !held.contains(&Key::Shift) {
-                held.push(Key::Shift);
-            }
+            hold_shift(held);
             return Ok(Key::Char(c.to_ascii_lowercase()));
         }
         return Ok(Key::Char(c));
@@ -91,11 +100,19 @@ fn trim_side(name: &str) -> &str {
 }
 
 pub fn parse_chord(input: &str) -> Result<KeyChord, String> {
-    let parts: Vec<&str> = input
+    let input = input.trim();
+    let (input, plus) = match input.strip_suffix('+') {
+        Some(rest) if rest.is_empty() || rest.trim_end().ends_with('+') => (rest, true),
+        _ => (input, false),
+    };
+    let mut parts: Vec<&str> = input
         .split('+')
         .map(str::trim)
         .filter(|p| !p.is_empty())
         .collect();
+    if plus {
+        parts.push("+");
+    }
     let Some((last, modifiers)) = parts.split_last() else {
         return Err("Key must not be empty".to_string());
     };

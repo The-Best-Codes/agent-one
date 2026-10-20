@@ -2,12 +2,13 @@ use std::thread::sleep;
 use std::time::Duration;
 
 use serde::Deserialize;
-use xa11y::{ClickOptions, ClickTarget, MouseButton, ScrollDelta};
+use xa11y::{ClickOptions, ClickTarget, Error, MouseButton, ScrollDelta};
 
 use super::state::{element_center, snapshots};
 use super::{activate, apps, describe_error, keys};
 
 const SETTLE_DELAY: Duration = Duration::from_millis(200);
+const AX_ERROR_CANNOT_COMPLETE: i64 = -25204;
 
 #[derive(Debug, Deserialize)]
 #[serde(
@@ -82,7 +83,7 @@ pub fn act(query: &str, action: ComputerAction) -> Result<String, String> {
     let pid = app
         .pid
         .ok_or_else(|| "The app has no process id.".to_string())?;
-    let snapshots = snapshots()?;
+    let snapshots = snapshots();
     let snapshot = snapshots.get(&pid).ok_or_else(|| {
         format!(
             "Observe \"{}\" before acting on it so element indexes are known.",
@@ -107,7 +108,13 @@ pub fn act(query: &str, action: ComputerAction) -> Result<String, String> {
             let pressed = match element_index {
                 Some(index) if button == MouseButton::Left && count == 1 => {
                     let element = snapshot.element(index)?;
-                    element.actions.iter().any(|a| a == "press") && element.press().is_ok()
+                    element.actions.iter().any(|a| a == "press")
+                        && match element.press() {
+                            Ok(()) => true,
+                            // The app is still handling the press (e.g. it opened a modal).
+                            Err(Error::Platform { code, .. }) => code == AX_ERROR_CANNOT_COMPLETE,
+                            Err(_) => false,
+                        }
                 }
                 _ => false,
             };
@@ -134,13 +141,13 @@ pub fn act(query: &str, action: ComputerAction) -> Result<String, String> {
             element_index,
         } => {
             let typed = match element_index {
-                Some(index) => snapshot.element(index)?.type_text(&text).is_ok(),
+                Some(index) => {
+                    let element = snapshot.element(index)?;
+                    element.focus().is_ok() && element.type_text(&text).is_ok()
+                }
                 None => false,
             };
             if !typed {
-                if let Some(index) = element_index {
-                    let _ = snapshot.element(index)?.focus();
-                }
                 activate(window);
                 input()?
                     .keyboard()
