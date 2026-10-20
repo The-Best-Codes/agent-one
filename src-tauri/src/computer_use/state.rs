@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::sync::{Mutex, MutexGuard, PoisonError};
 
 use once_cell::sync::Lazy;
-use xa11y::{anchor_point, Anchor, Element, Point, Screenshot};
+use xa11y::{anchor_point, Anchor, Element, Point, Rect, Screenshot};
 
 use super::describe_error;
 
@@ -66,4 +66,28 @@ pub fn element_center(element: &Element) -> Result<Point, String> {
         .bounds
         .map(|rect| anchor_point(&rect, Anchor::Center))
         .ok_or_else(|| "The element has no on-screen position.".to_string())
+}
+
+fn intersect(a: &Rect, b: &Rect) -> Option<Rect> {
+    let left = a.x.max(b.x);
+    let top = a.y.max(b.y);
+    let right = (a.x + a.width as i32).min(b.x + b.width as i32);
+    let bottom = (a.y + a.height as i32).min(b.y + b.height as i32);
+    (right > left && bottom > top).then(|| Rect {
+        x: left,
+        y: top,
+        width: (right - left) as u32,
+        height: (bottom - top) as u32,
+    })
+}
+
+pub fn visible_center(element: &Element, window: Option<&Element>) -> Result<Point, String> {
+    let bounds = element
+        .bounds
+        .ok_or_else(|| "The element has no on-screen position.".to_string())?;
+    let visible = window
+        .and_then(|w| w.bounds)
+        .and_then(|w| intersect(&bounds, &w))
+        .unwrap_or(bounds);
+    Ok(anchor_point(&visible, Anchor::Center))
 }

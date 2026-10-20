@@ -4,7 +4,7 @@ use std::time::Duration;
 use serde::Deserialize;
 use xa11y::{ClickOptions, ClickTarget, Error, MouseButton, ScrollDelta};
 
-use super::state::{element_center, snapshots};
+use super::state::{element_center, snapshots, visible_center};
 use super::{activate, apps, describe_error, keys};
 
 const SETTLE_DELAY: Duration = Duration::from_millis(200);
@@ -64,12 +64,15 @@ fn parse_button(button: Option<&str>) -> Result<MouseButton, String> {
     }
 }
 
+// xa11y's horizontal scroll axis points left on macOS and right on Windows.
+const SCROLL_RIGHT: i32 = if cfg!(target_os = "macos") { -1 } else { 1 };
+
 fn scroll_delta(direction: &str, amount: i32) -> Result<ScrollDelta, String> {
     match direction.to_ascii_lowercase().as_str() {
-        "up" | "u" => Ok(ScrollDelta::vertical(-amount)),
-        "down" | "d" => Ok(ScrollDelta::vertical(amount)),
-        "left" | "l" => Ok(ScrollDelta::horizontal(-amount)),
-        "right" | "r" => Ok(ScrollDelta::horizontal(amount)),
+        "up" | "u" => Ok(ScrollDelta::vertical(amount)),
+        "down" | "d" => Ok(ScrollDelta::vertical(-amount)),
+        "left" | "l" => Ok(ScrollDelta::horizontal(-amount * SCROLL_RIGHT)),
+        "right" | "r" => Ok(ScrollDelta::horizontal(amount * SCROLL_RIGHT)),
         other => Err(format!("Unknown scroll direction \"{other}\"")),
     }
 }
@@ -183,6 +186,7 @@ pub fn act(query: &str, action: ComputerAction) -> Result<String, String> {
                 (None, None, None) => {
                     element_center(window.ok_or("The app has no window to scroll.")?)?
                 }
+                (Some(index), _, _) => visible_center(snapshot.element(index)?, window)?,
                 _ => snapshot.target_point(element_index, x, y)?,
             };
             activate(window);
