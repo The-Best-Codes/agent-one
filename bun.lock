@@ -79,6 +79,7 @@
         "lodash.debounce": "^4.0.8",
         "markdown-to-jsx": "^9.10.3",
         "marked": "^18.1.1",
+        "pele": "^1.7.0",
         "radix-ui": "^1.8.1",
         "react": "^19.3.1",
         "react-dom": "^19.3.1",
@@ -1598,6 +1599,8 @@
     "path-scurry": ["path-scurry@2.0.2", "", { "dependencies": { "lru-cache": "^11.0.0", "minipass": "^7.1.2" } }, "sha512-3O/iVVsJAPsOnpwWIeD+d6z/7PmqApyQePUtCndjatj/9I5LylHvt5qluFaBT3I5h3r1ejfR056c+FCv+NnNXg=="],
 
     "path-to-regexp": ["path-to-regexp@8.4.2", "", {}, "sha512-qRcuIdP69NPm4qbACK+aDogI5CBDMi1jKe0ry5rSQJz8JVLsC7jV8XpiJjGRLLol3N+R5ihGYcrPLTno6pAdBA=="],
+
+    "pele": ["pele@1.7.0", "", {}, "sha512-nkYb5VnxsTgwD4NThF6j4pJEC4AhGLJ9ptiL4q/vIzGr9q6ZtoRE3hFr94LgHpZ/xy56d1pw42UAQGaZkjM5XA=="],
 
     "picocolors": ["picocolors@1.1.1", "", {}, "sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA=="],
 

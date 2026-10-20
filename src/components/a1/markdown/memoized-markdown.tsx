@@ -31,6 +31,7 @@ type MarkdownBlock = {
   type: string;
   content: string;
   lang?: string;
+  complete?: boolean;
 };
 
 type ParsedMarkdown = {
@@ -41,6 +42,7 @@ type ParsedMarkdown = {
 };
 
 const UNSTABLE_TAIL_TOKEN_COUNT = 2;
+const CLOSING_FENCE = /\n {0,3}(`{3,}|~{3,})[ \t]*$/;
 
 function tokenToBlock(token: Token): MarkdownBlock {
   if (token.type === "code") {
@@ -48,6 +50,7 @@ function tokenToBlock(token: Token): MarkdownBlock {
       type: "code",
       content: (token as Tokens.Code).text,
       lang: (token as Tokens.Code).lang,
+      complete: CLOSING_FENCE.test(token.raw.trimEnd()),
     };
   }
 
@@ -184,12 +187,14 @@ function createMarkdownOptions(
 const MemoizedMarkdownBlock = memo(
   ({
     block,
+    complete,
     markdownOptions,
     messageRole,
     remendEnabled,
     simpleCodeBlocks,
   }: {
     block: MarkdownBlock;
+    complete?: boolean;
     markdownOptions: MarkdownToJSX.Options;
     messageRole: UIMessage["role"];
     remendEnabled: boolean;
@@ -206,7 +211,9 @@ const MemoizedMarkdownBlock = memo(
         );
       }
 
-      return <CodeBlock content={content} lang={lang} messageRole={messageRole} />;
+      return (
+        <CodeBlock content={content} lang={lang} complete={complete} messageRole={messageRole} />
+      );
     } else {
       const completedContent = remendEnabled ? remend(content) : content;
       return <Markdown options={markdownOptions}>{completedContent}</Markdown>;
@@ -217,6 +224,7 @@ const MemoizedMarkdownBlock = memo(
       prevProps.block.type === nextProps.block.type &&
       prevProps.block.content === nextProps.block.content &&
       prevProps.block.lang === nextProps.block.lang &&
+      prevProps.complete === nextProps.complete &&
       prevProps.markdownOptions === nextProps.markdownOptions &&
       prevProps.remendEnabled === nextProps.remendEnabled &&
       prevProps.simpleCodeBlocks === nextProps.simpleCodeBlocks
@@ -233,12 +241,14 @@ export const MemoizedMarkdown = memo(
     id,
     messageRole,
     simpleCodeBlocks,
+    streaming = false,
   }: {
     allowInternalLinks?: boolean;
     content: string;
     id: string;
     messageRole: UIMessage["role"];
     simpleCodeBlocks?: boolean;
+    streaming?: boolean;
   }) => {
     const remendEnabled = useAtomValue(settingAtoms.REMEND_ENABLED);
     const parsedRef = useRef<ParsedMarkdown | null>(null);
@@ -255,6 +265,7 @@ export const MemoizedMarkdown = memo(
     return blocks.map((block, index) => (
       <MemoizedMarkdownBlock
         block={block}
+        complete={block.type === "code" ? block.complete || !streaming : undefined}
         markdownOptions={markdownOptions}
         messageRole={messageRole}
         remendEnabled={remendEnabled}

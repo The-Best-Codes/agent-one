@@ -131,6 +131,7 @@ const MessagePartsInternal = ({
               id={message.id}
               text={part.text}
               messageRole={message.role}
+              isBusy={isLastMessage && part.state === "streaming"}
             />
           );
         case "reasoning":

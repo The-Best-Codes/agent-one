@@ -3,6 +3,7 @@ import { useAtomValue } from "jotai";
 
 import { MemoizedMarkdown } from "@/components/a1/markdown/memoized-markdown";
 import { PerformantMarkdown } from "@/components/a1/markdown/performant-markdown";
+import { useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
@@ -10,11 +11,15 @@ export const MessagePartText = ({
   id,
   text,
   messageRole,
+  isBusy,
 }: {
   id: string;
   text: TextUIPart["text"];
   messageRole: UIMessage["role"];
+  isBusy?: boolean;
 }) => {
+  const { status } = useChatStatus();
+  const isStreaming = !!isBusy && (status === "streaming" || status === "submitted");
   const maxMessageLength = useAtomValue(settingAtoms.MAX_MESSAGE_LENGTH);
   const markdownRendering = useAtomValue(settingAtoms.MARKDOWN_RENDERING);
   const shouldUsePerformantRenderer = text.length > maxMessageLength;
@@ -42,7 +47,12 @@ export const MessagePartText = ({
           <PerformantMarkdown content={text} />
         </>
       ) : shouldRenderMarkdown ? (
-        <MemoizedMarkdown id={id} content={text} messageRole={messageRole} />
+        <MemoizedMarkdown
+          id={id}
+          content={text}
+          messageRole={messageRole}
+          streaming={isStreaming}
+        />
       ) : (
         <pre
           className="text-base wrap-break-word whitespace-pre-wrap"

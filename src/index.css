@@ -973,3 +973,16 @@
     }
   }
 }
+
+.mermaid-preview .pele {
+  --pele-bg: var(--background);
+  --pele-fg: var(--foreground);
+  --pele-muted: var(--muted-foreground);
+  --pele-line: var(--foreground);
+  --pele-surface: var(--muted);
+  --pele-surface-alt: var(--accent);
+  --pele-border: var(--ring);
+  --pele-accent: var(--primary);
+  --pele-critical: var(--destructive);
+  --pele-error: var(--destructive);
+}

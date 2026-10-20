@@ -50,6 +50,7 @@ const shikiLangsMap = {
   dockerfile: () => import("@shikijs/langs/dockerfile"),
   markdown: () => import("@shikijs/langs/markdown"),
   diff: () => import("@shikijs/langs/diff"),
+  mermaid: () => import("@shikijs/langs/mermaid"),
 };
 
 // Language aliases
@@ -64,6 +65,7 @@ const langAliases: Record<string, keyof typeof shikiLangsMap> = {
   mdx: "markdown",
   yml: "yaml",
   rs: "rust",
+  mmd: "mermaid",
 };
 
 async function initializeHighlighter() {
