@@ -47,23 +47,26 @@ fn match_name<T>(items: &[T], query: &str, name: impl Fn(&T) -> &str) -> Option<
 pub fn find_running(query: &str) -> Result<App, String> {
     permissions::ensure_granted()?;
     let query = query.trim();
-    let mut apps = App::list().map_err(describe_error)?;
+    let own_pid = Some(std::process::id());
+    let (own, mut apps): (Vec<App>, Vec<App>) = App::list()
+        .map_err(describe_error)?
+        .into_iter()
+        .partition(|a| a.pid == own_pid);
 
-    let position = match query.parse::<u32>() {
+    let find = |apps: &[App]| match query.parse::<u32>() {
         Ok(pid) => apps.iter().position(|a| a.pid == Some(pid)),
-        Err(_) => match_name(&apps, query, |a| a.name.as_str()),
+        Err(_) => match_name(apps, query, |a| a.name.as_str()),
     };
 
-    let app = position.map(|i| apps.swap_remove(i)).ok_or_else(|| {
-        format!(
+    let Some(position) = find(&apps) else {
+        if find(&own).is_some() {
+            return Err("AgentOne cannot control its own window.".to_string());
+        }
+        return Err(format!(
             "No running app matched \"{query}\". List running apps, or search installed apps and open it first."
-        )
-    })?;
-
-    if app.pid == Some(std::process::id()) {
-        return Err("AgentOne cannot control its own window.".to_string());
-    }
-    Ok(app)
+        ));
+    };
+    Ok(apps.swap_remove(position))
 }
 
 pub fn list_running() -> Result<Vec<RunningApp>, String> {
