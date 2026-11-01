@@ -1,4 +1,3 @@
-import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onAction } from "@tauri-apps/plugin-notification";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
@@ -21,15 +20,6 @@ export function NotificationClickHandler() {
 
     onAction((event) => {
       if (event.actionId !== "tap") return;
-
-      const window = getCurrentWindow();
-      void window
-        .unminimize()
-        .then(() => window.show())
-        .then(() => window.setFocus())
-        .catch((error) => {
-          logger.warn("Failed to focus window from notification:", error);
-        });
 
       const chatId = event.notification?.extra?.chatId;
       if (typeof chatId === "string") {

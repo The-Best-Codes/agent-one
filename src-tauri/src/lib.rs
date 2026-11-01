@@ -27,6 +27,15 @@ mod mcp_auth;
 mod tools;
 mod utils;
 
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+fn focus_main_window<R: tauri::Runtime>(app: &tauri::AppHandle<R>) {
+    if let Some(main_window) = app.get_webview_window("main") {
+        let _ = main_window.unminimize();
+        let _ = main_window.show();
+        let _ = main_window.set_focus();
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
@@ -48,20 +57,12 @@ pub fn run() {
                 let deep_link = &args[1];
                 if deep_link.starts_with("agent-one://") {
                     println!("Deep link detected: {}", deep_link);
-                    if let Some(main_window) = app.get_webview_window("main") {
-                        let _ = main_window.unminimize();
-                        let _ = main_window.show();
-                        let _ = main_window.set_focus();
-                    }
+                    focus_main_window(app);
                     return;
                 }
             }
 
-            if let Some(main_window) = app.get_webview_window("main") {
-                let _ = main_window.unminimize();
-                let _ = main_window.show();
-                let _ = main_window.set_focus();
-            }
+            focus_main_window(app);
         }));
     }
 
@@ -194,6 +195,18 @@ pub fn run() {
             app.deep_link().on_open_url(|event| {
                 println!("Deep link opened: {:?}", event.urls());
             });
+
+            #[cfg(not(any(target_os = "android", target_os = "ios")))]
+            {
+                use tauri_plugin_notification::NotificationExt;
+
+                let handle = app.handle().clone();
+                app.notification().on_action(move |action| {
+                    if action.action_id() == "tap" {
+                        focus_main_window(&handle);
+                    }
+                })?;
+            }
 
             app.manage(mcp_auth::AuthCancellationState(std::sync::Arc::new(
                 tokio::sync::Mutex::new(std::collections::HashMap::new()),
