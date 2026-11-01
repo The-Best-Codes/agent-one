@@ -1,5 +1,5 @@
 import {
-  experimental_MCPAppRenderer as MCPAppRenderer,
+  MCPAppRenderer,
   type MCPAppBridgeHandlers,
   type MCPAppMetadata,
   type MCPAppSandboxConfig,
