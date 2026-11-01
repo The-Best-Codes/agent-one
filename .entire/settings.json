@@ -1,15 +1,15 @@
 {
   "enabled": true,
+  "strategy_options": {
+    "checkpoint_remote": {
+      "provider": "github",
+      "repo": "The-Best-Codes/entire-checkpoints-private"
+    }
+  },
   "telemetry": false,
   "checkpoints": {
     "primary": {
       "type": "git-refs"
     }
-  },
-  "strategy_options": {
-      "checkpoint_remote": {
-        "provider": "github",
-        "repo": "The-Best-Codes/entire-checkpoints-private"
-      }
-    }
+  }
 }
