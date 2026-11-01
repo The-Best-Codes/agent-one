@@ -44,3 +44,6 @@ tsconfig.node.tsbuildinfo
 
 # snapcraft
 *.snap
+
+# CLAUDE.md - use AGENTS.md instead
+CLAUDE.md
