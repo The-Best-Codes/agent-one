@@ -50,7 +50,6 @@ If you are an AI agent, please follow the instructions in this file to ensure yo
 - If you run ESLint and it returns warnings or errors that mention documentation URLs, ALWAYS fetch the documentation URLs first before attempting to resolve the issue so that you resolve it in alignment with the latest documentation.
 
 <!-- entire-agent:begin -->
-
 Read .entire/agent-guide.md for this repository's workflow, source inspection, and verification guidance.
 @.entire/agent-guide.md
 <!-- entire-agent:end -->
