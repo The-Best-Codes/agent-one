@@ -15,6 +15,7 @@
     ".entire/*",
     ".opencode/*",
     ".claude/*",
-    ".codex/*"
+    ".codex/*",
+    "AGENTS.md"
   ]
 }

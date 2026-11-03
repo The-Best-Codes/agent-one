@@ -328,6 +328,8 @@
 - [SEP-2596: Specification Feature Lifecycle and Deprecation Policy](https://modelcontextprotocol.io/seps/2596-spec-feature-lifecycle-and-deprecation.md): Specification Feature Lifecycle and Deprecation Policy
 - [SEP-2640: Skills Extension](https://modelcontextprotocol.io/seps/2640-skills-extension.md): Skills Extension
 - [SEP-2663: Tasks Extension](https://modelcontextprotocol.io/seps/2663-tasks-extension.md): Tasks Extension
+- [SEP-3392: Extension Lifecycle](https://modelcontextprotocol.io/seps/3392-extension-lifecycle.md): Extension Lifecycle
+- [SEP-3398: Release Cycle Updates](https://modelcontextprotocol.io/seps/3398-release-cycle-updates.md): Release Cycle Updates
 - [Contributing to MCP](https://modelcontextprotocol.io/community/contributing.md): How to contribute to the Model Context Protocol project
 - [Contributor Communication](https://modelcontextprotocol.io/community/communication.md): Communication strategy and framework for the Model Context Protocol community
 - [Working and Interest Groups](https://modelcontextprotocol.io/community/working-interest-groups.md): Governance rules for the two forms of collaborative groups within the Model Context Protocol community — Working Groups and Interest Groups.
@@ -341,7 +343,6 @@
 - [SDK Tiering System](https://modelcontextprotocol.io/community/sdk-tiers.md): Feature completeness, protocol support, and maintenance commitment levels for Model Context Protocol SDKs
 - [Security Policy](https://modelcontextprotocol.io/community/security.md): How to report security vulnerabilities in the Model Context Protocol specification and SDKs, what is in and out of scope, and how SDK maintainers coordinate disclosure.
 - [Antitrust Policy](https://modelcontextprotocol.io/community/antitrust.md): MCP Project Antitrust Policy for participants and contributors
-- [Agents Charter](https://modelcontextprotocol.io/community/working-groups/agents.md): Charter for the MCP Agents Working Group.
 - [File Uploads Charter](https://modelcontextprotocol.io/community/working-groups/file-uploads.md): Charter for the MCP File Uploads Working Group.
 - [Filesystems Charter](https://modelcontextprotocol.io/community/working-groups/filesystems.md): Charter for the MCP Filesystems Working Group.
 - [Governance Working Group Charter](https://modelcontextprotocol.io/community/working-groups/governance.md): Charter for the MCP Governance Working Group.
@@ -353,8 +354,9 @@
 - [SDK Working Group Charter](https://modelcontextprotocol.io/community/working-groups/sdk.md): Charter for the MCP SDK Working Group.
 - [Server Card Charter](https://modelcontextprotocol.io/community/working-groups/server-card.md): Charter for the MCP Server Card Working Group.
 - [Skills Over MCP Charter](https://modelcontextprotocol.io/community/working-groups/skills-over-mcp.md): Charter for the MCP Skills Over MCP Working Group.
+- [Tasks and Events Charter](https://modelcontextprotocol.io/community/working-groups/tasks-events.md): Charter for the MCP Tasks and Events Working Group.
 - [Transports Charter](https://modelcontextprotocol.io/community/working-groups/transports.md): Charter for the MCP Transports Working Group.
-- [Triggers and Events Charter](https://modelcontextprotocol.io/community/working-groups/triggers-events.md): Charter for the MCP Triggers and Events Working Group.
+- [Agents Charter](https://modelcontextprotocol.io/community/interest-groups/agents.md): Charter for the MCP Agents Interest Group.
 - [Authorization Charter](https://modelcontextprotocol.io/community/interest-groups/auth.md): Charter for the MCP Authorization Interest Group.
 - [Enterprise Interest Group Charter](https://modelcontextprotocol.io/community/interest-groups/enterprise.md): Charter for the MCP Enterprise Interest Group.
 - [Enterprise-Managed Authorization Charter](https://modelcontextprotocol.io/community/interest-groups/enterprise-managed-authorization.md): Charter for the MCP Enterprise-Managed Authorization Interest Group.

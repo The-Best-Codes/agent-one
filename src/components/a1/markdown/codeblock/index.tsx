@@ -13,6 +13,7 @@ import { SyntaxHighlighter } from "./shiki-highlighter";
 type CodeBlockProps = {
   content: string;
   lang?: string;
+  complete?: boolean;
   messageRole?: UIMessage["role"];
 };
 
@@ -36,7 +37,7 @@ const BestHighlighter = ({
   }
 };
 
-export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
+export const CodeBlock = ({ content, lang, complete = true, messageRole }: CodeBlockProps) => {
   const maxCodeblockChars = useAtomValue(settingAtoms.MAX_CODEBLOCK_CHARS);
   const {
     isPreviewMode,
@@ -82,7 +83,7 @@ export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
       </div>
       <div className="shiki-container overflow-auto rounded-b-md">
         {isPreviewMode && PreviewComponent ? (
-          <PreviewComponent content={content} />
+          <PreviewComponent content={content} complete={complete} />
         ) : (
           <BestHighlighter lang={lang || "text"} content={content} maxChars={maxCodeblockChars} />
         )}

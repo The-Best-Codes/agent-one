@@ -20,3 +20,5 @@ export { createListScheduledAgentsTool } from "./listScheduledAgents";
 export { createUpdateScheduledAgentTool } from "./updateScheduledAgent";
 export { createReadChatTool } from "./readChat";
 export { createSearchChatsTool } from "./searchChats";
+export { createComputerUseObserveTool } from "./computerUseObserve";
+export { createComputerUseActTool } from "./computerUseAct";

@@ -100,9 +100,7 @@ contribute by improving the [user](/docs/category/for-users) and
 ### Community support
 
 You can contribute to the community by helping other users, answering
-questions, providing feedback, and sharing tips and tutorials on
-[Flathub Discourse](https://discourse.flathub.org/). You can also
-provide community support through the
+questions, providing feedback, and sharing tips and tutorials in the
 [Matrix channel](https://matrix.to/#/#flathub:matrix.org).
 
 ### Submission reviews
@@ -228,9 +226,9 @@ Criteria:
 
 ### Build Moderation Team
 
-Members of the Build Moderation Team are responsible for reviewing build
-and moderation requests, approving or denying them as appropriate, and
-providing clarification or follow-up when developers raise questions.
+The Build Moderation Team reviews build and moderation requests,
+including [pull request permissions](/docs/for-team-members/review#permission-review),
+approves or rejects them, and answers developers' questions.
 
 Criteria:
 

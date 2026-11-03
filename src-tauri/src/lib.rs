@@ -20,10 +20,21 @@ fn log_level() -> LevelFilter {
     }
 }
 
+#[cfg(any(target_os = "macos", target_os = "windows"))]
+mod computer_use;
 mod keyring;
 mod mcp_auth;
 mod tools;
 mod utils;
+
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+fn focus_main_window<R: tauri::Runtime>(app: &tauri::AppHandle<R>) {
+    if let Some(main_window) = app.get_webview_window("main") {
+        let _ = main_window.unminimize();
+        let _ = main_window.show();
+        let _ = main_window.set_focus();
+    }
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -46,20 +57,12 @@ pub fn run() {
                 let deep_link = &args[1];
                 if deep_link.starts_with("agent-one://") {
                     println!("Deep link detected: {}", deep_link);
-                    if let Some(main_window) = app.get_webview_window("main") {
-                        let _ = main_window.unminimize();
-                        let _ = main_window.show();
-                        let _ = main_window.set_focus();
-                    }
+                    focus_main_window(app);
                     return;
                 }
             }
 
-            if let Some(main_window) = app.get_webview_window("main") {
-                let _ = main_window.unminimize();
-                let _ = main_window.show();
-                let _ = main_window.set_focus();
-            }
+            focus_main_window(app);
         }));
     }
 
@@ -178,7 +181,7 @@ pub fn run() {
         .setup(|app| {
             use tauri_plugin_deep_link::DeepLinkExt;
 
-            keyring::initialize_keyring_store()?;
+            keyring::initialize_keyring_store(app.handle())?;
 
             #[cfg(any(target_os = "linux", windows))]
             {
@@ -192,6 +195,18 @@ pub fn run() {
             app.deep_link().on_open_url(|event| {
                 println!("Deep link opened: {:?}", event.urls());
             });
+
+            #[cfg(not(any(target_os = "android", target_os = "ios")))]
+            {
+                use tauri_plugin_notification::NotificationExt;
+
+                let handle = app.handle().clone();
+                app.notification().on_action(move |action| {
+                    if action.action_id() == "tap" {
+                        focus_main_window(&handle);
+                    }
+                })?;
+            }
 
             app.manage(mcp_auth::AuthCancellationState(std::sync::Arc::new(
                 tokio::sync::Mutex::new(std::collections::HashMap::new()),
@@ -239,6 +254,18 @@ pub fn run() {
                     utils::delete_scheduled_agent,
                     utils::list_webviews,
                     utils::force_close_webview,
+                    #[cfg(any(target_os = "macos", target_os = "windows"))]
+                    computer_use::computer_use_permissions,
+                    #[cfg(any(target_os = "macos", target_os = "windows"))]
+                    computer_use::computer_use_request_permission,
+                    #[cfg(any(target_os = "macos", target_os = "windows"))]
+                    computer_use::computer_use_list_apps,
+                    #[cfg(any(target_os = "macos", target_os = "windows"))]
+                    computer_use::computer_use_search_installed_apps,
+                    #[cfg(any(target_os = "macos", target_os = "windows"))]
+                    computer_use::computer_use_get_state,
+                    #[cfg(any(target_os = "macos", target_os = "windows"))]
+                    computer_use::computer_use_act,
                     keyring::storage_get_item,
                     keyring::storage_set_item,
                     keyring::storage_remove_item,

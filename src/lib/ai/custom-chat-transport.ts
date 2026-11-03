@@ -210,12 +210,13 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
         message = JSON.stringify(error);
       }
 
-      if (providerName && providerName !== "AgentOne") {
-        return `Error from ${providerName}:\n${message}`;
-      }
-
       return message;
     };
+
+    const withProviderPrefix = (message: string) =>
+      providerName && providerName !== "AgentOne"
+        ? `Error from ${providerName}:\n${message}`
+        : message;
 
     let activeCompactionId = existingCompaction?.id;
 
@@ -282,7 +283,10 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
             controller.enqueue({ type: "finish" });
           } catch (error) {
             if (!options.abortSignal?.aborted) {
-              controller.enqueue({ type: "error", errorText: formatError(error) });
+              controller.enqueue({
+                type: "error",
+                errorText: withProviderPrefix(formatError(error)),
+              });
             }
           }
           controller.close();
@@ -404,7 +408,18 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
         logger.error("Error occurred in CustomChatTransport toUIMessageStream:", error);
         return formatError(error);
       },
-    }).pipeThrough(chunkInjector.transform);
+    })
+      .pipeThrough(
+        new TransformStream<UIMessageChunk, UIMessageChunk>({
+          transform: (chunk, controller) =>
+            controller.enqueue(
+              chunk.type === "error"
+                ? { ...chunk, errorText: withProviderPrefix(chunk.errorText) }
+                : chunk,
+            ),
+        }),
+      )
+      .pipeThrough(chunkInjector.transform);
   }
 
   async reconnectToStream(

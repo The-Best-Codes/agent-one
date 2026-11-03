@@ -1,13 +1,20 @@
+import {
+  type Icon,
+  IconAlertOctagon,
+  IconAlertTriangle,
+  IconBulb,
+  IconInfoCircle,
+  IconMessageReport,
+} from "@tabler/icons-react";
 import type { UIMessage } from "ai";
 import { useAtomValue } from "jotai";
+import Markdown, { type MarkdownToJSX, RuleType } from "markdown-to-jsx";
 import { marked, type Token, type Tokens } from "marked";
-import { memo, useMemo, useRef } from "react";
-import ReactMarkdown from "react-markdown";
+import { type ComponentProps, memo, useMemo, useRef } from "react";
 import { Link } from "react-router";
-import remarkBreaks from "remark-breaks";
-import remarkGfm from "remark-gfm";
 import remend from "remend";
 
+import { Alert, AlertTitle } from "@/components/ui/alert";
 import {
   Table,
   TableBody,
@@ -24,6 +31,7 @@ type MarkdownBlock = {
   type: string;
   content: string;
   lang?: string;
+  complete?: boolean;
 };
 
 type ParsedMarkdown = {
@@ -34,6 +42,7 @@ type ParsedMarkdown = {
 };
 
 const UNSTABLE_TAIL_TOKEN_COUNT = 2;
+const CLOSING_FENCE = /\n {0,3}(`{3,}|~{3,})[ \t]*$/;
 
 function tokenToBlock(token: Token): MarkdownBlock {
   if (token.type === "code") {
@@ -41,6 +50,7 @@ function tokenToBlock(token: Token): MarkdownBlock {
       type: "code",
       content: (token as Tokens.Code).text,
       lang: (token as Tokens.Code).lang,
+      complete: CLOSING_FENCE.test(token.raw.trimEnd()),
     };
   }
 
@@ -87,16 +97,105 @@ function parseMarkdownIntoBlocks(
   };
 }
 
+const ALERTS: Record<string, { title: string; icon: Icon; variant?: "destructive" }> = {
+  NOTE: { title: "Note", icon: IconInfoCircle },
+  TIP: { title: "Tip", icon: IconBulb },
+  IMPORTANT: { title: "Important", icon: IconMessageReport },
+  WARNING: { title: "Warning", icon: IconAlertTriangle },
+  CAUTION: { title: "Caution", icon: IconAlertOctagon, variant: "destructive" },
+};
+
+function createMarkdownOptions(
+  allowInternalLinks: boolean,
+  idPrefix: string,
+): MarkdownToJSX.Options {
+  return {
+    disableParsingRawHTML: true,
+    forceBlock: true,
+    wrapper: null,
+    slugify(input, defaultSlugify) {
+      const slug = defaultSlugify(input);
+      return slug && `${idPrefix}-${slug}`;
+    },
+    renderRule(next, node, renderChildren, state) {
+      if (node.type === RuleType.text && node.text.includes("\n")) {
+        return node.text
+          .split("\n")
+          .flatMap((part, index) =>
+            index ? [<br key={`${state.key}-${index}`} />, part] : [part],
+          );
+      }
+      if (node.type === RuleType.blockQuote && node.alert) {
+        const alert = ALERTS[node.alert] ?? {
+          title: node.alert.charAt(0) + node.alert.slice(1).toLowerCase(),
+          icon: IconInfoCircle,
+        };
+        return (
+          <Alert key={state.key} variant={alert.variant} className="my-4 first:mt-0 last:mb-0">
+            <alert.icon />
+            <AlertTitle>{alert.title}</AlertTitle>
+            <div className="*:first:mt-0 *:last:mb-0">{renderChildren(node.children, state)}</div>
+          </Alert>
+        );
+      }
+      return next();
+    },
+    overrides: {
+      a(props: ComponentProps<"a">) {
+        if (allowInternalLinks && props.href?.startsWith("/")) {
+          return <Link to={props.href} {...props} />;
+        }
+
+        if (props.href?.startsWith("#")) {
+          const target = props.href.slice(1);
+          return <a {...props} href={target ? `#${idPrefix}-${target}` : props.href} />;
+        }
+
+        return <a {...props} target="_blank" rel="noopener noreferrer" />;
+      },
+      table(props: ComponentProps<"table">) {
+        return (
+          <Table
+            {...props}
+            containerClassName="my-4 rounded-md border border-border first:mt-0 last:mb-0"
+            className="not-prose"
+          />
+        );
+      },
+      thead(props: ComponentProps<"thead">) {
+        return <TableHeader {...props} />;
+      },
+      tbody(props: ComponentProps<"tbody">) {
+        return <TableBody {...props} />;
+      },
+      tr(props: ComponentProps<"tr">) {
+        return <TableRow {...props} />;
+      },
+      th(props: ComponentProps<"th">) {
+        return <TableHead {...props} />;
+      },
+      td(props: ComponentProps<"td">) {
+        return <TableCell {...props} />;
+      },
+      input(props: ComponentProps<"input">) {
+        return <input {...props} disabled />;
+      },
+    },
+  };
+}
+
 const MemoizedMarkdownBlock = memo(
   ({
-    allowInternalLinks,
     block,
+    complete,
+    markdownOptions,
     messageRole,
     remendEnabled,
     simpleCodeBlocks,
   }: {
-    allowInternalLinks?: boolean;
     block: MarkdownBlock;
+    complete?: boolean;
+    markdownOptions: MarkdownToJSX.Options;
     messageRole: UIMessage["role"];
     remendEnabled: boolean;
     simpleCodeBlocks?: boolean;
@@ -112,50 +211,12 @@ const MemoizedMarkdownBlock = memo(
         );
       }
 
-      return <CodeBlock content={content} lang={lang} messageRole={messageRole} />;
+      return (
+        <CodeBlock content={content} lang={lang} complete={complete} messageRole={messageRole} />
+      );
     } else {
       const completedContent = remendEnabled ? remend(content) : content;
-      return (
-        <ReactMarkdown
-          remarkPlugins={[remarkBreaks, remarkGfm]}
-          components={{
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            a({ node, ...props }) {
-              if (allowInternalLinks && props.href?.startsWith("/")) {
-                return <Link to={props.href} {...props} />;
-              }
-
-              return <a {...props} target="_blank" rel="noopener noreferrer" />;
-            },
-            table({ ...props }) {
-              return (
-                <Table
-                  containerClassName="my-4 rounded-md border border-border first:mt-0 last:mb-0"
-                  className="not-prose"
-                  {...props}
-                />
-              );
-            },
-            thead({ ...props }) {
-              return <TableHeader {...props} />;
-            },
-            tbody({ ...props }) {
-              return <TableBody {...props} />;
-            },
-            tr({ ...props }) {
-              return <TableRow {...props} />;
-            },
-            th({ ...props }) {
-              return <TableHead {...props} />;
-            },
-            td({ ...props }) {
-              return <TableCell {...props} />;
-            },
-          }}
-        >
-          {completedContent}
-        </ReactMarkdown>
-      );
+      return <Markdown options={markdownOptions}>{completedContent}</Markdown>;
     }
   },
   (prevProps, nextProps) => {
@@ -163,7 +224,8 @@ const MemoizedMarkdownBlock = memo(
       prevProps.block.type === nextProps.block.type &&
       prevProps.block.content === nextProps.block.content &&
       prevProps.block.lang === nextProps.block.lang &&
-      prevProps.allowInternalLinks === nextProps.allowInternalLinks &&
+      prevProps.complete === nextProps.complete &&
+      prevProps.markdownOptions === nextProps.markdownOptions &&
       prevProps.remendEnabled === nextProps.remendEnabled &&
       prevProps.simpleCodeBlocks === nextProps.simpleCodeBlocks
     );
@@ -179,12 +241,14 @@ export const MemoizedMarkdown = memo(
     id,
     messageRole,
     simpleCodeBlocks,
+    streaming = false,
   }: {
     allowInternalLinks?: boolean;
     content: string;
     id: string;
     messageRole: UIMessage["role"];
     simpleCodeBlocks?: boolean;
+    streaming?: boolean;
   }) => {
     const remendEnabled = useAtomValue(settingAtoms.REMEND_ENABLED);
     const parsedRef = useRef<ParsedMarkdown | null>(null);
@@ -193,11 +257,16 @@ export const MemoizedMarkdown = memo(
       parsedRef.current = parsed;
       return parsed.blocks;
     }, [content, remendEnabled]);
+    const markdownOptions = useMemo(
+      () => createMarkdownOptions(allowInternalLinks ?? false, id),
+      [allowInternalLinks, id],
+    );
 
     return blocks.map((block, index) => (
       <MemoizedMarkdownBlock
-        allowInternalLinks={allowInternalLinks}
         block={block}
+        complete={block.type === "code" ? block.complete || !streaming : undefined}
+        markdownOptions={markdownOptions}
         messageRole={messageRole}
         remendEnabled={remendEnabled}
         simpleCodeBlocks={simpleCodeBlocks}

@@ -71,8 +71,7 @@ Current and prospective maintainers on Flathub are expected to:
   be no expectation of prioritized support or work.
 
 - Stay engaged with the Flathub community through available channels,
-  including the [Flathub Discourse](https://discourse.flathub.org/), the
-  [Flathub blog](https://docs.flathub.org/blog), and the
+  including the [Flathub blog](https://docs.flathub.org/blog) and the
   [Flathub Matrix channel](https://matrix.to/#/#flathub:matrix.org).
 
 ## The repository
@@ -450,6 +449,19 @@ so that the actual stable installation remains unaffected.
 Test builds can also be manually started by commenting `bot, build` in
 the pull request.
 
+## Permission review on pull requests
+
+Flathub assesses the permissions of the built pull request candidate.
+The result is reported as `flathub/permissions`, separately from the
+`flathub/build` result.
+
+When a pull request changes permissions, explain why the application
+needs the exact access in the pull request. The bot posts the permission
+diff and any moderator rationale on the pull request.
+
+Approval from a GitHub code review does not approve permissions.
+Flathub moderators make permission decisions through Flathub.
+
 ## Official builds
 
 An _official_ build will be started on every merge or push to the
@@ -488,14 +500,13 @@ app. The steps are mentioned in detail in the [submission documentation](/docs/f
 
 ## Build moderation
 
-Whenever an _official build_ from a merge commit or push is built, if
-any [permission](/docs/for-app-authors/requirements#permissions) is
-changed or any critical [Appstream field](/docs/for-app-authors/metainfo-guidelines/)
-changes value, the build will be held for moderation.
+An _official build_ can be held for moderation if its
+[permissions](/docs/for-app-authors/requirements#permissions) still need
+approval or critical [Appstream fields](/docs/for-app-authors/metainfo-guidelines/)
+change value.
 
-Moderators will manually review the build and the permission change
-and can approve or reject the change if it is wrong or ask for more
-information.
+Moderators will manually review a held build and can approve or reject
+it or ask for more information.
 
 If it is rejected [flathubbot](https://github.com/flathubbot) will open
 an issue in the app repository with a comment from the moderator. The
@@ -698,8 +709,8 @@ EOL, the following process should be followed:
 
 * A notice period of one month should be provided to allow upstream
   maintainers or Flatpak maintainers or contributors to respond. This
-  should preferably be done through issues or discourse posts to keep a
-  record but if it is not possible any other contact methods can be
+  should preferably be done through issues to keep a record but if it is not
+  possible any other contact methods can be
   used.
 
 * If no response is received within the notice period or there is no one
@@ -845,5 +856,4 @@ cases.
 ## Getting Help
 
 If anything is not working or there is some behaviour you don’t
-understand, come to the [Matrix channel](https://matrix.to/#/#flatpak:matrix.org)
-or start a discussion on the [Flathub forum](https://discourse.flathub.org/).
+understand, come to the [Matrix channel](https://matrix.to/#/#flatpak:matrix.org).

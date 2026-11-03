@@ -1,3 +1,4 @@
+import { platform } from "@tauri-apps/plugin-os";
 import { atom, type Atom } from "jotai";
 import type { ComponentType } from "react";
 
@@ -47,15 +48,23 @@ import {
   TtsProviders,
 } from "@/components/settings-components/providers/provider-cards";
 import type { SettingsLayout } from "@/components/settings-components/setting-controls";
+import { ComputerUsePermissions } from "@/components/settings-components/tools/computer-use-permissions";
 import { ToolRow } from "@/components/settings-components/tools/tool-row";
 import { ToolsIntro } from "@/components/settings-components/tools/tools-intro";
 import { TOOL_GROUPS, TOOL_INFO } from "@/components/settings-components/tools/tools-metadata";
 import { PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
 import { TTS_PROVIDER_OPTIONS } from "@/lib/ai/tts";
+import { isComputerUseSupported } from "@/lib/computer-use";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { debugModeEnabledAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { keyboardShortcutDefinitions } from "@/lib/kbd-registry";
 import type { SettingKey } from "@/lib/settings/definitions";
+
+const computerUseSupportedAtom = atom(() => isComputerUseSupported());
+
+const isLinuxAtom = atom(() => platform() === "linux");
+
+const computerUsePermissionsVisibleAtom = atom(() => platform() === "macos");
 
 const isVirtualizationEnabledAtom = atom(
   (get) => get(settingAtoms.CHAT_VIRTUALIZATION_MODE) !== "off",
@@ -459,13 +468,37 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
       ...TOOL_GROUPS.map((group) => ({
         title: group.title,
         description: group.description,
-        items: group.toolIds.map((toolId) => ({
-          id: `tool-${TOOL_INFO[toolId].anchor}`,
-          label: TOOL_INFO[toolId].name,
-          description: TOOL_INFO[toolId].description,
-          keywords: ["tool"],
-          render: () => <ToolRow toolId={toolId} />,
-        })),
+        visible: group.desktopOnly
+          ? atom((get) => get(computerUseSupportedAtom) || get(isLinuxAtom))
+          : undefined,
+        items: [
+          ...(group.desktopOnly
+            ? [
+                {
+                  id: "computer-use-unsupported",
+                  label: "Not available on Linux yet",
+                  description: "Computer use works on macOS and Windows for now.",
+                  visible: isLinuxAtom,
+                },
+                {
+                  id: "computer-use-permissions",
+                  label: "Computer use permissions",
+                  description: "Allow AgentOne to see and control other apps on your Mac.",
+                  keywords: ["accessibility", "screen recording", "permission", "privacy"],
+                  visible: computerUsePermissionsVisibleAtom,
+                  render: ComputerUsePermissions,
+                },
+              ]
+            : []),
+          ...group.toolIds.map((toolId) => ({
+            id: `tool-${TOOL_INFO[toolId].anchor}`,
+            label: TOOL_INFO[toolId].name,
+            description: TOOL_INFO[toolId].description,
+            keywords: ["tool"],
+            visible: group.desktopOnly ? computerUseSupportedAtom : undefined,
+            render: () => <ToolRow toolId={toolId} />,
+          })),
+        ],
       })),
     ],
   },

@@ -104,6 +104,8 @@ const DEFAULT_TOOL_CONFIGS: ToolConfigs = {
   deleteScheduledAgent: { requiresApproval: true },
   searchChats: { requiresApproval: true, defaultMaxResults: 10 },
   readChat: { requiresApproval: true, defaultMaxChars: 25000, maxChars: 50000 },
+  computerUseObserve: { requiresApproval: true, includeScreenshots: true },
+  computerUseAct: { requiresApproval: true },
 };
 
 export const SETTINGS = {

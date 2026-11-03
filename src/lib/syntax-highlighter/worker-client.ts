@@ -1,13 +1,33 @@
 import { getLogger } from "@/lib/logger";
 
-import type { HighlightRequest, HighlightResponse } from "./types";
+import type {
+  HighlightLine,
+  HighlightRequest,
+  HighlightResponse,
+  HighlightTheme,
+  WorkerRequest,
+} from "./types";
 
 const logger = getLogger(import.meta.url);
 
 const MAX_CACHE_ENTRIES = 200;
-const MAX_CACHE_HTML_LENGTH = 5_000_000;
+const MAX_CACHE_CODE_LENGTH = 2_000_000;
 
-type HighlightTheme = "dark-plus" | "light-plus";
+export interface HighlightedCode {
+  lines: HighlightLine[];
+  fg?: string;
+}
+
+export interface HighlightResult {
+  highlighted: HighlightedCode | null;
+  error: string | null;
+}
+
+type ClientSession = {
+  lines: HighlightLine[];
+  fg?: string;
+  cacheKey?: string;
+};
 
 const getCacheKey = (code: string, language: string, theme: HighlightTheme) =>
   `${theme}\u0000${language}\u0000${code}`;
@@ -16,9 +36,9 @@ class WorkerClient {
   private worker: Worker;
   private pendingRequests = new Map<string, (response: HighlightResponse) => void>();
   private requestIdCounter = 0;
-  private isInitialized = false;
-  private cache = new Map<string, string>();
-  private cacheHtmlLength = 0;
+  private sessions = new Map<string, ClientSession>();
+  private cache = new Map<string, HighlightedCode>();
+  private cacheCodeLength = 0;
 
   constructor() {
     this.worker = new Worker(
@@ -41,76 +61,102 @@ class WorkerClient {
         callback({ id, error: "Worker error occurred" });
       });
       this.pendingRequests.clear();
+      this.sessions.clear();
     };
 
-    this.worker.postMessage({ type: "init" });
-    this.isInitialized = true;
+    this.post({ type: "init" });
+  }
+
+  private post(request: WorkerRequest) {
+    this.worker.postMessage(request);
+  }
+
+  public peekCached(code: string, language: string, theme: HighlightTheme = "dark-plus") {
+    return this.cache.get(getCacheKey(code, language, theme));
   }
 
   public getCached(code: string, language: string, theme: HighlightTheme = "dark-plus") {
     const key = getCacheKey(code, language, theme);
-    const html = this.cache.get(key);
-    if (html !== undefined) {
+    const highlighted = this.cache.get(key);
+    if (highlighted !== undefined) {
       this.cache.delete(key);
-      this.cache.set(key, html);
+      this.cache.set(key, highlighted);
     }
-    return html;
+    return highlighted;
   }
 
-  public forget(code: string, language: string, theme: HighlightTheme = "dark-plus") {
-    const key = getCacheKey(code, language, theme);
-    const html = this.cache.get(key);
-    if (html !== undefined) {
-      this.cache.delete(key);
-      this.cacheHtmlLength -= html.length;
+  private forgetKey(key: string) {
+    if (this.cache.delete(key)) {
+      this.cacheCodeLength -= key.length;
     }
   }
 
-  private setCached(code: string, language: string, theme: HighlightTheme, html: string) {
-    this.forget(code, language, theme);
-    this.cache.set(getCacheKey(code, language, theme), html);
-    this.cacheHtmlLength += html.length;
+  private setCached(key: string, highlighted: HighlightedCode) {
+    this.forgetKey(key);
+    this.cache.set(key, highlighted);
+    this.cacheCodeLength += key.length;
 
     while (
       this.cache.size > MAX_CACHE_ENTRIES ||
-      (this.cacheHtmlLength > MAX_CACHE_HTML_LENGTH && this.cache.size > 1)
+      (this.cacheCodeLength > MAX_CACHE_CODE_LENGTH && this.cache.size > 1)
     ) {
-      const oldest = this.cache.entries().next().value;
-      if (!oldest) break;
-      this.cache.delete(oldest[0]);
-      this.cacheHtmlLength -= oldest[1].length;
+      const oldest = this.cache.keys().next().value;
+      if (oldest === undefined) break;
+      this.forgetKey(oldest);
+    }
+  }
+
+  public dispose(sessionId: string) {
+    if (this.sessions.delete(sessionId)) {
+      this.post({ type: "dispose", sessionId });
     }
   }
 
   public highlight(
+    sessionId: string,
     code: string,
     language: string,
     theme: HighlightTheme = "dark-plus",
-  ): Promise<{ html: string | null; error: string | null }> {
-    const cachedHtml = this.getCached(code, language, theme);
-    if (cachedHtml !== undefined) {
-      return Promise.resolve({ html: cachedHtml, error: null });
-    }
+  ): Promise<HighlightResult> {
+    const existing = this.sessions.get(sessionId);
+    const reset = !existing;
+    const session: ClientSession = existing ?? { lines: [] };
+    this.sessions.set(sessionId, session);
 
     return new Promise((resolve) => {
-      if (!this.isInitialized) {
-        resolve({ html: null, error: "Worker not initialized" });
-        return;
-      }
-
       const id = `highlight-${++this.requestIdCounter}`;
       this.pendingRequests.set(id, (response) => {
-        if (response.html) {
-          this.setCached(code, language, theme, response.html);
+        if (response.error || !response.lines || response.startLine === undefined) {
+          if (this.sessions.get(sessionId) === session) this.sessions.delete(sessionId);
+          resolve({ highlighted: null, error: response.error ?? "Invalid highlight response" });
+          return;
         }
-        resolve({
-          html: response.html || null,
-          error: response.error || null,
-        });
+
+        session.lines = [...session.lines.slice(0, response.startLine), ...response.lines];
+        session.fg = response.fg ?? session.fg;
+
+        const highlighted: HighlightedCode = {
+          lines: response.partial ? [...session.lines, response.partial] : session.lines,
+          fg: session.fg,
+        };
+
+        if (session.cacheKey) this.forgetKey(session.cacheKey);
+        session.cacheKey = getCacheKey(code, language, theme);
+        this.setCached(session.cacheKey, highlighted);
+
+        resolve({ highlighted, error: null });
       });
 
-      const request: HighlightRequest = { id, code, language, theme };
-      this.worker.postMessage(request);
+      const request: HighlightRequest = {
+        type: "highlight",
+        id,
+        sessionId,
+        reset,
+        code,
+        language,
+        theme,
+      };
+      this.post(request);
     });
   }
 }

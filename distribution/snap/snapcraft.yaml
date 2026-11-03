@@ -4,8 +4,8 @@
 # and metadata will be ignored
 
 name: agent-one
-base: core22
-version: "1.1.2"
+base: core24
+version: "1.1.3"
 summary: Free AI agent and deep researcher
 description: |
   AgentOne is a powerful AI agent that gives you freedom to choose your
@@ -14,8 +14,8 @@ grade: stable
 confinement: strict
 
 layout:
-  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/webkit2gtk-4.1:
-    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/webkit2gtk-4.1
+  /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/webkit2gtk-4.1:
+    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/webkit2gtk-4.1
 
 apps:
   agent-one:
@@ -41,13 +41,6 @@ plugs:
     bus: session
     name: org.dev_agent_one.SingleInstance
 
-package-repositories:
-  - type: apt
-    components: [main]
-    suites: [noble]
-    key-id: 78E1918602959B9C59103100F1831DDAFC42E99D
-    url: http://ppa.launchpad.net/snappy-dev/snapcraft-daily/ubuntu
-
 parts:
   agent-one:
     plugin: dump
@@ -60,10 +53,9 @@ parts:
         echo "ERROR: No .deb file found" >&2
         exit 1
       fi
-      dpkg -x "$DEB_FILE" $SNAPCRAFT_PART_INSTALL/
+      dpkg -x "$DEB_FILE" $CRAFT_PART_INSTALL/
       # Fix desktop file icon path for snap
       sed -i -e "s|Icon=agent-one|Icon=/usr/share/icons/hicolor/32x32/apps/agent-one.png|g" \
-        $SNAPCRAFT_PART_INSTALL/usr/share/applications/AgentOne.desktop 2>/dev/null || true
+        $CRAFT_PART_INSTALL/usr/share/applications/AgentOne.desktop 2>/dev/null || true
     stage-packages:
       - libwebkit2gtk-4.1-0
-      - libayatana-appindicator3-1

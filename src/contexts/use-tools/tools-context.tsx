@@ -25,6 +25,8 @@ import {
   createListScheduledAgentsTool,
   createUpdateScheduledAgentTool,
   createReadChatTool,
+  createComputerUseObserveTool,
+  createComputerUseActTool,
   createSearchChatsTool,
 } from "@/lib/ai/tools";
 import {
@@ -40,6 +42,7 @@ import {
 import { clearMcpOAuthCredentials, dismissMcpLoginToasts } from "@/lib/ai/tools/mcp/oauth";
 import type { ChatToolsContext } from "@/lib/ai/tools/readChat";
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
+import { isComputerUseSupported } from "@/lib/computer-use";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom, mcpServersAtom } from "@/lib/jotai/mcp-atoms";
 import type { McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
@@ -530,6 +533,14 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         },
         searchChats: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.searchChats, ...toolConfigs.searchChats },
         readChat: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.readChat, ...toolConfigs.readChat },
+        computerUseObserve: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.computerUseObserve,
+          ...toolConfigs.computerUseObserve,
+        },
+        computerUseAct: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.computerUseAct,
+          ...toolConfigs.computerUseAct,
+        },
       };
 
       if (mergedEnabledTools.dateTime) {
@@ -620,6 +631,19 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
           mergedToolConfigs.readChat,
           options?.chatContext ?? {},
         );
+      }
+
+      if (isComputerUseSupported()) {
+        if (mergedEnabledTools.computerUseObserve) {
+          filteredStaticTools.computerUseObserve = createComputerUseObserveTool(
+            mergedToolConfigs.computerUseObserve,
+          );
+        }
+        if (mergedEnabledTools.computerUseAct) {
+          filteredStaticTools.computerUseAct = createComputerUseActTool(
+            mergedToolConfigs.computerUseAct,
+          );
+        }
       }
 
       if (!mcpLoadedRef.current && loadingPromiseRef.current) {
