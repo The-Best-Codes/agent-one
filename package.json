@@ -70,7 +70,7 @@
     "@types/lodash.debounce": "^4.0.9",
     "@uiw/react-codemirror": "^4.25.12",
     "ai": "^7.0.159",
-    "better-auth": "^1.7.15",
+    "better-auth": "^1.7.16",
     "boring-avatars": "^2.0.4",
     "class-variance-authority": "^0.7.1",
     "cmdk": "^1.1.1",
