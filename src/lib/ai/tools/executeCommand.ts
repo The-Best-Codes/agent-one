@@ -122,7 +122,7 @@ export const stopExecuteCommand = (toolCallId: string) => {
   executeCommandWakeMap.get(toolCallId)?.();
 };
 
-export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
+export const createExecuteCommandTool = (config: ExecuteCommandToolConfig, cwd?: string) =>
   tool({
     description:
       "Execute a terminal command and return its output. Works on Windows, macOS, and Linux. Use this for running shell commands, scripts, build tools, git operations, and any other command-line tasks.",
@@ -239,6 +239,7 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
       })();
 
       const { handle, result } = spawnCommand(input.command, {
+        cwd,
         signal: combinedSignal,
         onStdout: (data) => {
           queueUpdate("stdout", data);

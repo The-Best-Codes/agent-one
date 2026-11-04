@@ -9,7 +9,7 @@ import type { DeleteFileToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
-export const createDeleteFileTool = (config: DeleteFileToolConfig) =>
+export const createDeleteFileTool = (config: DeleteFileToolConfig, baseDir?: string) =>
   tool({
     description: "Delete a file from the filesystem.",
     needsApproval: config.requiresApproval,
@@ -23,7 +23,7 @@ export const createDeleteFileTool = (config: DeleteFileToolConfig) =>
 
       abortSignal?.throwIfAborted();
 
-      const filePath = await raceWithAbort(resolvePath(input.filePath), abortSignal);
+      const filePath = await raceWithAbort(resolvePath(input.filePath, baseDir), abortSignal);
 
       abortSignal?.throwIfAborted();
 

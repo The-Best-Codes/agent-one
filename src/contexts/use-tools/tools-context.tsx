@@ -483,6 +483,8 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       chatContext?: ChatToolsContext;
     }): Promise<ToolSet> => {
       const filteredStaticTools: ToolSet = {};
+      const chatContext = options?.chatContext ?? {};
+      const projectFolder = chatContext.project?.folder;
       const mergedEnabledTools = { ...DEFAULT_SETTINGS.ENABLED_TOOLS, ...enabledTools };
       const mergedToolConfigs = {
         dateTime: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.dateTime, ...toolConfigs.dateTime },
@@ -563,23 +565,36 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         filteredStaticTools.wikipedia = createWikipediaTool(mergedToolConfigs.wikipedia);
       }
       if (mergedEnabledTools.memory) {
-        filteredStaticTools.memory = createMemoryTool(mergedToolConfigs.memory);
+        filteredStaticTools.memory = createMemoryTool(mergedToolConfigs.memory, chatContext);
       }
       if (mergedEnabledTools.editFile) {
-        filteredStaticTools.editFile = createEditFileTool(mergedToolConfigs.editFile);
+        filteredStaticTools.editFile = createEditFileTool(
+          mergedToolConfigs.editFile,
+          projectFolder,
+        );
       }
       if (mergedEnabledTools.createFile) {
-        filteredStaticTools.createFile = createCreateFileTool(mergedToolConfigs.createFile);
+        filteredStaticTools.createFile = createCreateFileTool(
+          mergedToolConfigs.createFile,
+          projectFolder,
+        );
       }
       if (mergedEnabledTools.deleteFile) {
-        filteredStaticTools.deleteFile = createDeleteFileTool(mergedToolConfigs.deleteFile);
+        filteredStaticTools.deleteFile = createDeleteFileTool(
+          mergedToolConfigs.deleteFile,
+          projectFolder,
+        );
       }
       if (mergedEnabledTools.viewFile) {
-        filteredStaticTools.viewFile = createViewFileTool(mergedToolConfigs.viewFile);
+        filteredStaticTools.viewFile = createViewFileTool(
+          mergedToolConfigs.viewFile,
+          projectFolder,
+        );
       }
       if (mergedEnabledTools.executeCommand) {
         filteredStaticTools.executeCommand = createExecuteCommandTool(
           mergedToolConfigs.executeCommand,
+          projectFolder,
         );
       }
       if (mergedEnabledTools.subAgent && options?.subAgentContext) {
@@ -623,14 +638,11 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       if (mergedEnabledTools.searchChats) {
         filteredStaticTools.searchChats = createSearchChatsTool(
           mergedToolConfigs.searchChats,
-          options?.chatContext ?? {},
+          chatContext,
         );
       }
       if (mergedEnabledTools.readChat) {
-        filteredStaticTools.readChat = createReadChatTool(
-          mergedToolConfigs.readChat,
-          options?.chatContext ?? {},
-        );
+        filteredStaticTools.readChat = createReadChatTool(mergedToolConfigs.readChat, chatContext);
       }
 
       if (isComputerUseSupported()) {

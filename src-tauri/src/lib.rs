@@ -152,6 +152,12 @@ pub fn run() {
                             ),
                             kind: tauri_plugin_sql::MigrationKind::Up,
                         },
+                        tauri_plugin_sql::Migration {
+                            version: 9,
+                            description: "add_projects",
+                            sql: include_str!("../migrations/0009_add_projects.sql"),
+                            kind: tauri_plugin_sql::MigrationKind::Up,
+                        },
                     ],
                 )
                 .add_migrations(

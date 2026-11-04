@@ -2,6 +2,7 @@ import { tool } from "ai";
 import { getDefaultStore } from "jotai";
 import { z } from "zod";
 
+import type { ChatToolsContext } from "@/lib/ai/tools/readChat";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import {
@@ -10,6 +11,7 @@ import {
   sanitizeMemoryEntries,
   sanitizeMemoryEntry,
 } from "@/lib/memory";
+import { getProject, updateProject } from "@/lib/projects";
 import type { MemoryToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
@@ -27,7 +29,22 @@ function getMemorySummary(entries: string[]) {
     : `${entries.length} memory entr${entries.length === 1 ? "y" : "ies"}.`;
 }
 
-export const createMemoryTool = (config: MemoryToolConfig) =>
+function getMemoryStore(context: ChatToolsContext) {
+  const projectId = context.project?.separateMemory ? context.project.id : undefined;
+  const store = getDefaultStore();
+  return {
+    get: () => (projectId ? (getProject(projectId)?.memory ?? []) : store.get(settingAtoms.MEMORY)),
+    set: (memory: string[]) => {
+      if (projectId) {
+        updateProject(projectId, { memory });
+      } else {
+        store.set(settingAtoms.MEMORY, memory);
+      }
+    },
+  };
+}
+
+export const createMemoryTool = (config: MemoryToolConfig, context: ChatToolsContext) =>
   tool({
     description:
       "Store long-term memory. Use this to add, remove, or replace concise memory entries that you can reference in later conversations. Keep entries short, stable, non-duplicative, and free of contradictions.",
@@ -36,8 +53,8 @@ export const createMemoryTool = (config: MemoryToolConfig) =>
     execute: async (input) => {
       logger.verbose("Executing memory tool with input:", input);
 
-      const store = getDefaultStore();
-      let entries = sanitizeMemoryEntries(store.get(settingAtoms.MEMORY));
+      const memoryStore = getMemoryStore(context);
+      let entries = sanitizeMemoryEntries(memoryStore.get());
 
       if (input.operation === "add") {
         const added: string[] = [];
@@ -50,7 +67,7 @@ export const createMemoryTool = (config: MemoryToolConfig) =>
         }
 
         const nextMemory = entries;
-        store.set(settingAtoms.MEMORY, nextMemory);
+        memoryStore.set(nextMemory);
 
         return {
           action: "add",
@@ -65,7 +82,7 @@ export const createMemoryTool = (config: MemoryToolConfig) =>
         const nextEntries = sanitizeMemoryEntries(removeMemoryEntries(entries, normalizedEntries));
         const removed = entries.filter((entry) => !hasMemoryEntry(nextEntries, entry));
         const nextMemory = nextEntries;
-        store.set(settingAtoms.MEMORY, nextMemory);
+        memoryStore.set(nextMemory);
 
         return {
           action: "remove",
@@ -83,7 +100,7 @@ export const createMemoryTool = (config: MemoryToolConfig) =>
         newEntry && !hasMemoryEntry(withoutOld, newEntry) ? [...withoutOld, newEntry] : withoutOld,
       );
       const nextMemory = nextEntries;
-      store.set(settingAtoms.MEMORY, nextMemory);
+      memoryStore.set(nextMemory);
 
       return {
         action: "replace",

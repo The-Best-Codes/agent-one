@@ -9,6 +9,7 @@ export interface ChatSearchResult {
   chatId: string;
   title: string;
   snippet: string;
+  projectId?: string;
 }
 
 export interface StoredChat {
@@ -22,7 +23,7 @@ let db: Database | null = null;
 let dbPromise: Promise<Database> | null = null;
 let writeQueue: Promise<void> = Promise.resolve();
 
-async function getDb(): Promise<Database> {
+export async function getDb(): Promise<Database> {
   if (db) {
     return db;
   }
@@ -43,7 +44,7 @@ async function getDb(): Promise<Database> {
   return dbPromise;
 }
 
-async function enqueueWrite<T>(operation: (database: Database) => Promise<T>): Promise<T> {
+export async function enqueueWrite<T>(operation: (database: Database) => Promise<T>): Promise<T> {
   const next = writeQueue.then(async () => operation(await getDb()));
   writeQueue = next.then(
     () => undefined,
@@ -120,12 +121,13 @@ export const chatStorage = {
         branch_of: string | null;
         scheduled_agent_id: string | null;
         scheduled_agent_title: string | null;
+        project_id: string | null;
         created_at: number | null;
         updated_at: number | null;
         last_message_at: number | null;
       }[]
     >(
-      `SELECT title, title_state, model_id, model_config, branch_of, scheduled_agent_id, scheduled_agent_title, created_at, updated_at, last_message_at
+      `SELECT title, title_state, model_id, model_config, branch_of, scheduled_agent_id, scheduled_agent_title, project_id, created_at, updated_at, last_message_at
        FROM chat_metadata
        WHERE id = $1`,
       [id],
@@ -140,6 +142,7 @@ export const chatStorage = {
       branchOf: row.branch_of ?? undefined,
       scheduledAgentId: row.scheduled_agent_id ?? undefined,
       scheduledAgentTitle: row.scheduled_agent_title ?? undefined,
+      projectId: row.project_id ?? undefined,
       createdAt: row.created_at ?? undefined,
       updatedAt: row.updated_at ?? undefined,
       lastMessageAt: row.last_message_at ?? undefined,
@@ -158,11 +161,12 @@ export const chatStorage = {
            branch_of,
            scheduled_agent_id,
            scheduled_agent_title,
+           project_id,
            created_at,
            updated_at,
            last_message_at
          )
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
          ON CONFLICT(id) DO UPDATE SET
             title = $2,
             title_state = $3,
@@ -171,6 +175,7 @@ export const chatStorage = {
             branch_of = $6,
             scheduled_agent_id = $7,
             scheduled_agent_title = $8,
+            project_id = $9,
             created_at = COALESCE(chat_metadata.created_at, excluded.created_at),
             updated_at = COALESCE(excluded.updated_at, chat_metadata.updated_at),
             last_message_at = COALESCE(excluded.last_message_at, chat_metadata.last_message_at)`,
@@ -183,6 +188,7 @@ export const chatStorage = {
           metadata.branchOf ?? null,
           metadata.scheduledAgentId ?? null,
           metadata.scheduledAgentTitle ?? null,
+          metadata.projectId ?? null,
           metadata.createdAt ?? null,
           metadata.updatedAt ?? null,
           metadata.lastMessageAt ?? null,
@@ -209,12 +215,13 @@ export const chatStorage = {
         branch_of: string | null;
         scheduled_agent_id: string | null;
         scheduled_agent_title: string | null;
+        project_id: string | null;
         created_at: number | null;
         updated_at: number | null;
         last_message_at: number | null;
       }[]
     >(
-      `SELECT id, title, title_state, model_id, model_config, branch_of, scheduled_agent_id, scheduled_agent_title, created_at, updated_at, last_message_at
+      `SELECT id, title, title_state, model_id, model_config, branch_of, scheduled_agent_id, scheduled_agent_title, project_id, created_at, updated_at, last_message_at
        FROM chat_metadata
        ORDER BY ${sortColumn} DESC, id DESC`,
       [],
@@ -230,6 +237,7 @@ export const chatStorage = {
         branchOf: row.branch_of ?? undefined,
         scheduledAgentId: row.scheduled_agent_id ?? undefined,
         scheduledAgentTitle: row.scheduled_agent_title ?? undefined,
+        projectId: row.project_id ?? undefined,
         createdAt: row.created_at ?? undefined,
         updatedAt: row.updated_at ?? undefined,
         lastMessageAt: row.last_message_at ?? undefined,
@@ -400,10 +408,13 @@ export const chatStorage = {
         .join(" ");
     }
     if (!ftsQuery) return [];
-    const rows = await d.select<{ chat_id: string; title: string; snippet: string }[]>(
+    const rows = await d.select<
+      { chat_id: string; title: string; snippet: string; project_id: string | null }[]
+    >(
       `SELECT
          chat_fts.chat_id,
          chat_metadata.title,
+         chat_metadata.project_id,
          snippet(chat_fts, 2, '<mark>', '</mark>', '…', 12) AS snippet
        FROM chat_fts
        JOIN chat_metadata ON chat_metadata.id = chat_fts.chat_id
@@ -417,7 +428,12 @@ export const chatStorage = {
     for (const r of rows) {
       if (seen.has(r.chat_id)) continue;
       seen.add(r.chat_id);
-      results.push({ chatId: r.chat_id, title: r.title, snippet: trimSnippetLeft(r.snippet, 2) });
+      results.push({
+        chatId: r.chat_id,
+        title: r.title,
+        snippet: trimSnippetLeft(r.snippet, 2),
+        projectId: r.project_id ?? undefined,
+      });
     }
     return results;
   },

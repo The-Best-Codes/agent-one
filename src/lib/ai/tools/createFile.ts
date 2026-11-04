@@ -10,7 +10,7 @@ import type { CreateFileToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
-export const createCreateFileTool = (config: CreateFileToolConfig) =>
+export const createCreateFileTool = (config: CreateFileToolConfig, baseDir?: string) =>
   tool({
     description:
       "Create a new file or overwrite an existing file with the given content. Prefer this tool over shell `cat`/`echo`/heredoc redirection for writing files.",
@@ -38,7 +38,7 @@ export const createCreateFileTool = (config: CreateFileToolConfig) =>
 
       abortSignal?.throwIfAborted();
 
-      const filePath = await raceWithAbort(resolvePath(input.filePath), abortSignal);
+      const filePath = await raceWithAbort(resolvePath(input.filePath, baseDir), abortSignal);
 
       abortSignal?.throwIfAborted();
 

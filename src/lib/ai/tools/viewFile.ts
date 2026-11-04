@@ -9,7 +9,7 @@ import type { ViewFileToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
-export const createViewFileTool = (config: ViewFileToolConfig) =>
+export const createViewFileTool = (config: ViewFileToolConfig, baseDir?: string) =>
   tool({
     description:
       "View the contents of a file. Supports reading specific line ranges and automatically truncates large files to avoid excessive output. Prefer this tool over shell commands like `cat` for simple file reads.",
@@ -30,7 +30,7 @@ export const createViewFileTool = (config: ViewFileToolConfig) =>
 
       abortSignal?.throwIfAborted();
 
-      const filePath = await raceWithAbort(resolvePath(input.filePath), abortSignal);
+      const filePath = await raceWithAbort(resolvePath(input.filePath, baseDir), abortSignal);
 
       abortSignal?.throwIfAborted();
 

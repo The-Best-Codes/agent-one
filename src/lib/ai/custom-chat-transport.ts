@@ -43,6 +43,7 @@ import {
 import type { ChatToolsContext } from "@/lib/ai/tools/readChat";
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
 import { getLogger } from "@/lib/logger";
+import { type Project, readProjectAgentsFile } from "@/lib/projects";
 
 const logger = getLogger(import.meta.url);
 
@@ -59,7 +60,8 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     toolBehavior?: ToolBehavior;
     chatContext?: ChatToolsContext;
   }) => Promise<ToolSet>;
-  private getSystemPrompt: () => string;
+  private getSystemPrompt: (project?: Project) => string;
+  private getChatProject: (chatId: string) => Project | undefined;
   private getApiKeysLoadedPromise: () => Promise<void>;
 
   constructor(
@@ -73,7 +75,8 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       toolBehavior?: ToolBehavior;
       chatContext?: ChatToolsContext;
     }) => Promise<ToolSet>,
-    getSystemPrompt: () => string,
+    getSystemPrompt: (project?: Project) => string,
+    getChatProject: (chatId: string) => Project | undefined,
     getApiKeysLoadedPromise: () => Promise<void>,
   ) {
     this.model = model;
@@ -83,6 +86,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     this.extractReasoningEnabled = extractReasoningEnabled;
     this.getTools = getTools;
     this.getSystemPrompt = getSystemPrompt;
+    this.getChatProject = getChatProject;
     this.getApiKeysLoadedPromise = getApiKeysLoadedPromise;
   }
 
@@ -118,7 +122,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     );
   }
 
-  updateSystemPrompt(getSystemPrompt: () => string) {
+  updateSystemPrompt(getSystemPrompt: (project?: Project) => string) {
     this.getSystemPrompt = getSystemPrompt;
     logger.verbose("CustomChatTransport system prompt updated");
   }
@@ -173,13 +177,18 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
         : baseModel;
 
     await this.getApiKeysLoadedPromise();
-    const systemPrompt = this.getSystemPrompt();
+    const project = this.getChatProject(options.chatId);
+    const agentsFile = project ? await readProjectAgentsFile(project) : undefined;
+    const basePrompt = this.getSystemPrompt(project);
+    const systemPrompt = agentsFile
+      ? `${basePrompt}\n\n### AGENTS.md\nThe project folder has an AGENTS.md file with instructions for working in it:\n${agentsFile}`
+      : basePrompt;
     const toolBehavior = getToolBehavior(modelConfig);
     const mcpAppContextInstructions = this.getMcpAppModelContextInstructions();
     const instructions = mcpAppContextInstructions
       ? `${systemPrompt}\n\n${mcpAppContextInstructions}`
       : systemPrompt;
-    const chatContext: ChatToolsContext = { currentChatId: options.chatId };
+    const chatContext: ChatToolsContext = { currentChatId: options.chatId, project };
     const subAgentContext: SubAgentExecutionContext = {
       model: baseModel,
       modelConfig,

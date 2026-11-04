@@ -1,6 +1,6 @@
 import { type UseChatHelpers } from "@ai-sdk/react";
 import { type UIMessage, type UITool, type UIToolInvocation } from "ai";
-import { useAtomValueRawSync, useSetAtom } from "jotai";
+import { useAtomValue, useAtomValueRawSync, useSetAtom } from "jotai";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 
@@ -15,6 +15,7 @@ import { isCompactionPart } from "@/lib/ai/compaction";
 import { TOOL_CANCELLED_BY_USER_SYMBOL, TOOL_INTERRUPTED_BY_ERROR_TEXT } from "@/lib/constants";
 import { chatIdsAtom, chatStatusIndicatorsAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
+import { projectsAtom } from "@/lib/projects";
 
 import {
   ChatApprovalHandlerContext,
@@ -65,6 +66,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const [updateKey, setUpdateKey] = useState(0);
   const forceUpdate = useCallback(() => setUpdateKey((k) => k + 1), []);
   const chatIds = useAtomValueRawSync(chatIdsAtom);
+  const projects = useAtomValue(projectsAtom);
   const setChatStatusIndicators = useSetAtom(chatStatusIndicatorsAtom);
   const { getModelById, getChatModelById, isModelCatalogLoading } = useModelCatalog();
 
@@ -351,7 +353,11 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       options?: Parameters<typeof defaultChat.sendMessage>[1],
     ) => {
       if (!focusedModel) return Promise.resolve();
-      const newChatId = createChat(focusedModel.id, focusedModelConfig);
+      const requestedProjectId = new URLSearchParams(location.search).get("project");
+      const projectId = projects.some((project) => project.id === requestedProjectId)
+        ? (requestedProjectId ?? undefined)
+        : undefined;
+      const newChatId = createChat(focusedModel.id, focusedModelConfig, { projectId });
       loadedMessagesRef.current.set(newChatId, []);
       setChatMessagesLoaded((prev) => {
         const next = new Set(prev);
@@ -365,7 +371,14 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       return Promise.resolve();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [navigate, defaultChat.sendMessage, focusedModel?.id, focusedModelConfig],
+    [
+      navigate,
+      defaultChat.sendMessage,
+      focusedModel?.id,
+      focusedModelConfig,
+      location.search,
+      projects,
+    ],
   );
 
   const createProgrammaticChat = useCallback(

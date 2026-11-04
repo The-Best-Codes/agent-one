@@ -9,7 +9,7 @@ import type { EditFileToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
-export const createEditFileTool = (config: EditFileToolConfig) =>
+export const createEditFileTool = (config: EditFileToolConfig, baseDir?: string) =>
   tool({
     description:
       "Edit a file by applying a text replacement. Provide the file path, the old text to find, and the new text to replace it with.",
@@ -26,7 +26,7 @@ export const createEditFileTool = (config: EditFileToolConfig) =>
 
       abortSignal?.throwIfAborted();
 
-      const filePath = await raceWithAbort(resolvePath(input.filePath), abortSignal);
+      const filePath = await raceWithAbort(resolvePath(input.filePath, baseDir), abortSignal);
 
       abortSignal?.throwIfAborted();
 
