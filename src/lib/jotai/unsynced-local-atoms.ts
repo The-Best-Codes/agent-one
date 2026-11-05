@@ -22,6 +22,13 @@ export const debugModeEnabledAtom = atomWithStorage<boolean>(
   { getOnInit: true },
 );
 
+export const globalAgentsFilesAtom = atomWithStorage<string[]>(
+  "agent-one-agents-files",
+  ["~/AGENTS.md"],
+  createNoSyncStorage<string[]>(),
+  { getOnInit: true },
+);
+
 export const collapsedProjectIdsAtom = atomWithStorage<string[]>(
   "agent-one-collapsed-project-ids",
   [],

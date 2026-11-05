@@ -1,8 +1,10 @@
 import { IconFolder, IconX } from "@tabler/icons-react";
 import { open } from "@tauri-apps/plugin-dialog";
+import { useAtomValue } from "jotai";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
+import { AgentsFilesEditor } from "@/components/a1/agents-files-editor";
 import { MemoryEditor } from "@/components/settings-components/account";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,9 +19,15 @@ import { Field, FieldContent, FieldDescription, FieldLabel } from "@/components/
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { globalAgentsFilesAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
 import { sanitizeMemoryEntries } from "@/lib/memory";
-import { createProject, type Project, updateProject } from "@/lib/projects";
+import {
+  createProject,
+  getDefaultProjectAgentsFiles,
+  type Project,
+  updateProject,
+} from "@/lib/projects";
 
 const logger = getLogger(import.meta.url);
 
@@ -35,7 +43,11 @@ const ProjectForm = ({ project, onClose }: { project?: Project; onClose: () => v
   const [instructions, setInstructions] = useState(project?.instructions ?? "");
   const [folder, setFolder] = useState(project?.folder);
   const [separateMemory, setSeparateMemory] = useState(project?.separateMemory ?? false);
-  const [memory, setMemory] = useState(project?.memory ?? []);
+  const globalAgentsFiles = useAtomValue(globalAgentsFilesAtom);
+  const [customAgentsFiles, setCustomAgentsFiles] = useState(project?.agentsFiles);
+  const agentsFiles = customAgentsFiles ?? getDefaultProjectAgentsFiles(globalAgentsFiles, folder);
+  const [initialMemory] = useState(project?.memory ?? []);
+  const [memory, setMemory] = useState(initialMemory);
 
   const chooseFolder = async () => {
     try {
@@ -54,9 +66,13 @@ const ProjectForm = ({ project, onClose }: { project?: Project; onClose: () => v
       instructions: instructions.trim(),
       folder,
       separateMemory,
+      agentsFiles: customAgentsFiles,
     };
     if (project) {
-      updateProject(project.id, { ...details, memory: sanitizeMemoryEntries(memory) });
+      updateProject(project.id, {
+        ...details,
+        ...(memory !== initialMemory && { memory: sanitizeMemoryEntries(memory) }),
+      });
     } else {
       const created = createProject(details);
       void navigate(`/chat?project=${created.id}`);
@@ -120,6 +136,31 @@ const ProjectForm = ({ project, onClose }: { project?: Project; onClose: () => v
             )}
           </div>
           <FieldDescription>Chats in this project work inside this folder.</FieldDescription>
+        </Field>
+        <Field>
+          <FieldLabel>AGENTS.md files</FieldLabel>
+          <FieldDescription>
+            {customAgentsFiles
+              ? "This project uses its own list."
+              : "Same as your AGENTS.md settings, plus the one in the project folder."}
+          </FieldDescription>
+          <AgentsFilesEditor
+            files={agentsFiles}
+            setFiles={(update) => setCustomAgentsFiles(update(agentsFiles))}
+            folder={folder}
+            action={
+              customAgentsFiles && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setCustomAgentsFiles(undefined)}
+                >
+                  Reset
+                </Button>
+              )
+            }
+          />
         </Field>
         <Field orientation="horizontal" className="has-[>[data-slot=field-content]]:items-center">
           <FieldContent>

@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS projects (
   folder TEXT,
   separate_memory INTEGER NOT NULL DEFAULT 0,
   memory TEXT NOT NULL DEFAULT '[]',
+  agents_files TEXT,
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL
 );

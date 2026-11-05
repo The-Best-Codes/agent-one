@@ -43,7 +43,7 @@ import {
 import type { ChatToolsContext } from "@/lib/ai/tools/readChat";
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
 import { getLogger } from "@/lib/logger";
-import { type Project, readProjectAgentsFile } from "@/lib/projects";
+import { getAgentsFilesPromptSection, type Project } from "@/lib/projects";
 
 const logger = getLogger(import.meta.url);
 
@@ -178,11 +178,9 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
 
     await this.getApiKeysLoadedPromise();
     const project = this.getChatProject(options.chatId);
-    const agentsFile = project ? await readProjectAgentsFile(project) : undefined;
+    const agentsSection = await getAgentsFilesPromptSection(project);
     const basePrompt = this.getSystemPrompt(project);
-    const systemPrompt = agentsFile
-      ? `${basePrompt}\n\n### AGENTS.md\nThe project folder has an AGENTS.md file with instructions for working in it:\n${agentsFile}`
-      : basePrompt;
+    const systemPrompt = agentsSection ? `${basePrompt}\n\n${agentsSection}` : basePrompt;
     const toolBehavior = getToolBehavior(modelConfig);
     const mcpAppContextInstructions = this.getMcpAppModelContextInstructions();
     const instructions = mcpAppContextInstructions

@@ -2,7 +2,7 @@ import { isToolUIPart, tool, type UIMessage } from "ai";
 import { z } from "zod";
 
 import formatBytes from "@/lib/format-bytes";
-import { canAccessChat, type Project } from "@/lib/projects";
+import { canAccessChat, getChatAccessScope, type Project } from "@/lib/projects";
 import type { ReadChatToolConfig } from "@/lib/settings/types";
 import { chatStorage } from "@/lib/storage/chat-storage";
 
@@ -70,7 +70,7 @@ export const createReadChatTool = (config: ReadChatToolConfig, context: ChatTool
 
       if (
         (!metadata && messages === null) ||
-        !canAccessChat(metadata?.projectId, context.project)
+        !canAccessChat(metadata?.projectId, getChatAccessScope(context.project))
       ) {
         throw new Error(`No chat found with ID "${chatId}".`);
       }

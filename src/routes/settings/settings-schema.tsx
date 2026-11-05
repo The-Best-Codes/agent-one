@@ -4,6 +4,7 @@ import type { ComponentType } from "react";
 
 import {
   AccountStatus,
+  GlobalAgentsFilesControl,
   HideAgentOneModelsControl,
   MemoryControl,
   SyncControl,
@@ -187,6 +188,15 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
           {
             id: "ai-instructions",
             key: "SYSTEM_PROMPT_APPENDIX",
+          },
+          {
+            id: "global-agents-files",
+            label: "AGENTS.md files",
+            description:
+              "AgentOne follows the instructions in these files in every chat. Projects can use a different list.",
+            keywords: ["agents.md", "instructions", "rules", "system prompt", "file"],
+            layout: "stacked",
+            control: GlobalAgentsFilesControl,
           },
           { id: "memory", key: "MEMORY", layout: "stacked", control: MemoryControl },
         ],

@@ -66,7 +66,7 @@ interface ChatListItem {
 
 type ChatListRow =
   | { type: "header"; id: string; label: string }
-  | { type: "project"; project: Project; chatCount: number; collapsed: boolean }
+  | { type: "project"; project: Project; collapsed: boolean }
   | { type: "show-more"; projectId: string; hiddenCount: number; expanded: boolean }
   | { type: "empty-project"; projectId: string }
   | { type: "chat"; chat: ChatListItem; nested?: boolean; showProject?: boolean };
@@ -386,7 +386,7 @@ export const VirtualizedChatList = ({
       for (const project of projects) {
         const projectChats = chatsByProject.get(project.id) ?? [];
         const collapsed = collapsedProjectIds.includes(project.id);
-        rows.push({ type: "project", project, chatCount: projectChats.length, collapsed });
+        rows.push({ type: "project", project, collapsed });
         if (collapsed) {
           const activeChat = projectChats.find((chat) => chat.id === activeChatId);
           if (activeChat) rows.push({ type: "chat", chat: activeChat, nested: true });
@@ -400,6 +400,10 @@ export const VirtualizedChatList = ({
         const visibleChats = expanded
           ? projectChats
           : projectChats.slice(0, PROJECT_CHAT_PREVIEW_COUNT);
+        if (!visibleChats.some((chat) => chat.id === activeChatId)) {
+          const activeChat = projectChats.find((chat) => chat.id === activeChatId);
+          if (activeChat) visibleChats.push(activeChat);
+        }
         for (const chat of visibleChats) {
           rows.push({ type: "chat", chat, nested: true });
         }
@@ -407,7 +411,8 @@ export const VirtualizedChatList = ({
           rows.push({
             type: "show-more",
             projectId: project.id,
-            hiddenCount: projectChats.length - PROJECT_CHAT_PREVIEW_COUNT,
+            hiddenCount:
+              projectChats.length - (expanded ? PROJECT_CHAT_PREVIEW_COUNT : visibleChats.length),
             expanded,
           });
         }
@@ -709,7 +714,6 @@ export const VirtualizedChatList = ({
                   ) : row.type === "project" ? (
                     <ProjectItem
                       project={row.project}
-                      chatCount={row.chatCount}
                       collapsed={row.collapsed}
                       onToggle={toggleProject}
                       selectionMode={selectionMode}

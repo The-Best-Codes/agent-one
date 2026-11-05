@@ -3,6 +3,7 @@ import type { UIMessage } from "ai";
 
 import type { ChatMetadata } from "@/contexts/use-persistence/persistence-context";
 import { getLogger } from "@/lib/logger";
+import type { ChatAccessScope } from "@/lib/projects";
 import type { SettingValue } from "@/lib/settings/definitions";
 
 export interface ChatSearchResult {
@@ -394,7 +395,11 @@ export const chatStorage = {
     logger.verbose("Finished rebuilding inconsistent chat search index");
   },
 
-  async searchChats(query: string, rawOperators = false): Promise<ChatSearchResult[]> {
+  async searchChats(
+    query: string,
+    rawOperators = false,
+    scope?: ChatAccessScope,
+  ): Promise<ChatSearchResult[]> {
     const d = await getDb();
     let ftsQuery: string;
     if (rawOperators) {
@@ -408,6 +413,18 @@ export const chatStorage = {
         .join(" ");
     }
     if (!ftsQuery) return [];
+    const params: string[] = [ftsQuery];
+    let scopeFilter = "";
+    if (scope?.projectId) {
+      params.push(scope.projectId);
+      scopeFilter = "AND chat_metadata.project_id = $2";
+    } else if (scope && scope.hiddenProjectIds.length > 0) {
+      const placeholders = scope.hiddenProjectIds.map((id) => {
+        params.push(id);
+        return `$${params.length}`;
+      });
+      scopeFilter = `AND (chat_metadata.project_id IS NULL OR chat_metadata.project_id NOT IN (${placeholders.join(", ")}))`;
+    }
     const rows = await d.select<
       { chat_id: string; title: string; snippet: string; project_id: string | null }[]
     >(
@@ -418,10 +435,10 @@ export const chatStorage = {
          snippet(chat_fts, 2, '<mark>', '</mark>', '…', 12) AS snippet
        FROM chat_fts
        JOIN chat_metadata ON chat_metadata.id = chat_fts.chat_id
-       WHERE chat_fts MATCH $1
+       WHERE chat_fts MATCH $1 ${scopeFilter}
        ORDER BY bm25(chat_fts, 0, 10.0, 1.0)
        LIMIT 50`,
-      [ftsQuery],
+      params,
     );
     const seen = new Set<string>();
     const results: ChatSearchResult[] = [];

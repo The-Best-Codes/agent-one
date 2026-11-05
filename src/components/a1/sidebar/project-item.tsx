@@ -42,7 +42,6 @@ const CHAT_DRAG_TYPE = "application/agent-one-chat";
 
 interface ProjectItemProps {
   project: Project;
-  chatCount: number;
   collapsed: boolean;
   onToggle: (projectId: string) => void;
   onNewChat?: () => void;
@@ -50,7 +49,7 @@ interface ProjectItemProps {
 }
 
 export const ProjectItem = memo(
-  ({ project, chatCount, collapsed, onToggle, onNewChat, selectionMode }: ProjectItemProps) => {
+  ({ project, collapsed, onToggle, onNewChat, selectionMode }: ProjectItemProps) => {
     const { setChatsProject } = usePersistence();
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -103,11 +102,6 @@ export const ProjectItem = memo(
                     <IconFolderOpen className="text-muted-foreground size-4 shrink-0" />
                   )}
                   <span className="truncate">{project.name}</span>
-                  {collapsed && chatCount > 0 && (
-                    <span className="text-muted-foreground shrink-0 text-xs font-normal">
-                      {chatCount}
-                    </span>
-                  )}
                 </button>
                 <div
                   className={cn(

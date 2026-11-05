@@ -2,7 +2,7 @@ import { tool } from "ai";
 import { z } from "zod";
 
 import type { ChatToolsContext } from "@/lib/ai/tools/readChat";
-import { canAccessChat } from "@/lib/projects";
+import { canAccessChat, getChatAccessScope } from "@/lib/projects";
 import type { SearchChatsToolConfig } from "@/lib/settings/types";
 import { chatStorage } from "@/lib/storage/chat-storage";
 
@@ -32,11 +32,12 @@ export const createSearchChatsTool = (config: SearchChatsToolConfig, context: Ch
     }),
     execute: async ({ query, rawSyntax, limit }) => {
       const maxResults = limit ?? config.defaultMaxResults;
+      const scope = getChatAccessScope(context.project);
       const trimmedQuery = query?.trim();
 
       if (!trimmedQuery) {
         const chats = (await chatStorage.listChats("updated-at"))
-          .filter((chat) => canAccessChat(chat.metadata.projectId, context.project))
+          .filter((chat) => canAccessChat(chat.metadata.projectId, scope))
           .slice(0, maxResults);
         const messageCounts = await chatStorage.getChatMessageCounts(chats.map((chat) => chat.id));
         return {
@@ -52,9 +53,10 @@ export const createSearchChatsTool = (config: SearchChatsToolConfig, context: Ch
         };
       }
 
-      const results = (await chatStorage.searchChats(trimmedQuery, rawSyntax))
-        .filter((result) => canAccessChat(result.projectId, context.project))
-        .slice(0, maxResults);
+      const results = (await chatStorage.searchChats(trimmedQuery, rawSyntax, scope)).slice(
+        0,
+        maxResults,
+      );
       const messageCounts = await chatStorage.getChatMessageCounts(
         results.map((result) => result.chatId),
       );

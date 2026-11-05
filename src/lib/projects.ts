@@ -1,8 +1,10 @@
-import { join } from "@tauri-apps/api/path";
+import { isAbsolute } from "@tauri-apps/api/path";
 import { exists, readTextFile } from "@tauri-apps/plugin-fs";
 import { generateId } from "ai";
 import { atom, getDefaultStore } from "jotai";
 
+import { resolvePath } from "@/lib/ai/tools/utils/path";
+import { globalAgentsFilesAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
 import { type Project, projectStorage } from "@/lib/storage/project-storage";
 
@@ -47,7 +49,7 @@ export function getProject(id: string | undefined): Project | undefined {
 }
 
 export function createProject(
-  details: Pick<Project, "name" | "instructions" | "folder" | "separateMemory">,
+  details: Pick<Project, "name" | "instructions" | "folder" | "separateMemory" | "agentsFiles">,
 ): Project {
   const now = Date.now();
   const project: Project = {
@@ -83,13 +85,25 @@ export function deleteProject(id: string) {
   });
 }
 
-export function canAccessChat(
-  chatProjectId: string | undefined,
-  currentProject: Project | undefined,
-): boolean {
-  if (currentProject?.separateMemory) return chatProjectId === currentProject.id;
-  if (!chatProjectId || chatProjectId === currentProject?.id) return true;
-  return !getProject(chatProjectId)?.separateMemory;
+export interface ChatAccessScope {
+  projectId?: string;
+  hiddenProjectIds: string[];
+}
+
+export function getChatAccessScope(currentProject: Project | undefined): ChatAccessScope {
+  if (currentProject?.separateMemory) {
+    return { projectId: currentProject.id, hiddenProjectIds: [] };
+  }
+  const hiddenProjectIds = getDefaultStore()
+    .get(projectsAtom)
+    .filter((project) => project.separateMemory && project.id !== currentProject?.id)
+    .map((project) => project.id);
+  return { hiddenProjectIds };
+}
+
+export function canAccessChat(chatProjectId: string | undefined, scope: ChatAccessScope): boolean {
+  if (scope.projectId) return chatProjectId === scope.projectId;
+  return !chatProjectId || !scope.hiddenProjectIds.includes(chatProjectId);
 }
 
 export function getProjectPromptSection(project: Project): string {
@@ -113,10 +127,8 @@ export function getProjectPromptSection(project: Project): string {
   return sections.join("\n");
 }
 
-export async function readProjectAgentsFile(project: Project): Promise<string | undefined> {
-  if (!project.folder) return undefined;
+async function readAgentsFile(path: string): Promise<string | undefined> {
   try {
-    const path = await join(project.folder, "AGENTS.md");
     if (!(await exists(path))) return undefined;
     const content = (await readTextFile(path)).trim();
     if (!content) return undefined;
@@ -124,7 +136,41 @@ export async function readProjectAgentsFile(project: Project): Promise<string | 
       ? `${content.slice(0, MAX_AGENTS_FILE_CHARS)}\n[AGENTS.md was cut off because it is too long]`
       : content;
   } catch (error) {
-    logger.warn(`Failed to read AGENTS.md for project ${project.id}`, error);
+    logger.warn(`Failed to read AGENTS.md at ${path}`, error);
     return undefined;
   }
+}
+
+export const PROJECT_FOLDER_AGENTS_FILE = "AGENTS.md";
+
+export function getDefaultProjectAgentsFiles(globalFiles: string[], folder?: string): string[] {
+  return folder ? [...globalFiles, PROJECT_FOLDER_AGENTS_FILE] : globalFiles;
+}
+
+function getAgentsFiles(project: Project | undefined): string[] {
+  const globalFiles = getDefaultStore().get(globalAgentsFilesAtom);
+  if (!project) return globalFiles;
+  return project.agentsFiles ?? getDefaultProjectAgentsFiles(globalFiles, project.folder);
+}
+
+export async function getAgentsFilesPromptSection(project: Project | undefined): Promise<string> {
+  const resolvedPaths = await Promise.all(
+    getAgentsFiles(project).map((entry) => resolvePath(entry, project?.folder)),
+  );
+  const files = await Promise.all(
+    [...new Set(resolvedPaths)].map(async (path) => ({
+      path,
+      content: (await isAbsolute(path)) ? await readAgentsFile(path) : undefined,
+    })),
+  );
+  const loaded = files.filter((file) => file.content);
+  if (loaded.length === 0) return "";
+  const intro =
+    loaded.length === 1
+      ? "The user has an AGENTS.md file with instructions for you. Follow it."
+      : "The user has AGENTS.md files with instructions for you. Follow them. Where they conflict, follow the later file.";
+  return [
+    `## AGENTS.md\n${intro}`,
+    ...loaded.map((file) => `### \`${file.path}\`\n${file.content}`),
+  ].join("\n\n");
 }
