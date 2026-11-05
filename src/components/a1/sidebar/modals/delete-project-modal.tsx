@@ -64,7 +64,7 @@ export const DeleteProjectModal = ({ isOpen, onClose, project }: DeleteProjectMo
           <DialogDescription>
             {deleteChats
               ? `Are you sure you want to delete "${project.name}" and its chats? This action cannot be undone.`
-              : `Are you sure you want to delete "${project.name}"? Its chats will be kept and moved out of the project.`}
+              : `Are you sure you want to delete "${project.name}"? Its chats will be kept and moved out of the project.${project.separateMemory ? " Its memory will be deleted, and your other chats will be able to see these chats." : ""}`}
           </DialogDescription>
         </DialogHeader>
         {projectChatIds.length > 0 && (

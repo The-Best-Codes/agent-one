@@ -15,7 +15,7 @@ import { isCompactionPart } from "@/lib/ai/compaction";
 import { TOOL_CANCELLED_BY_USER_SYMBOL, TOOL_INTERRUPTED_BY_ERROR_TEXT } from "@/lib/constants";
 import { chatIdsAtom, chatStatusIndicatorsAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
-import { projectsAtom } from "@/lib/projects";
+import { projectsAtom, projectsLoadedAtom } from "@/lib/projects";
 
 import {
   ChatApprovalHandlerContext,
@@ -67,6 +67,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const forceUpdate = useCallback(() => setUpdateKey((k) => k + 1), []);
   const chatIds = useAtomValueRawSync(chatIdsAtom);
   const projects = useAtomValue(projectsAtom);
+  const projectsLoaded = useAtomValue(projectsLoadedAtom);
   const setChatStatusIndicators = useSetAtom(chatStatusIndicatorsAtom);
   const { getModelById, getChatModelById, isModelCatalogLoading } = useModelCatalog();
 
@@ -354,9 +355,10 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     ) => {
       if (!focusedModel) return Promise.resolve();
       const requestedProjectId = new URLSearchParams(location.search).get("project");
-      const projectId = projects.some((project) => project.id === requestedProjectId)
-        ? (requestedProjectId ?? undefined)
-        : undefined;
+      const projectId =
+        !projectsLoaded || projects.some((project) => project.id === requestedProjectId)
+          ? (requestedProjectId ?? undefined)
+          : undefined;
       const newChatId = createChat(focusedModel.id, focusedModelConfig, { projectId });
       loadedMessagesRef.current.set(newChatId, []);
       setChatMessagesLoaded((prev) => {
@@ -378,6 +380,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       focusedModelConfig,
       location.search,
       projects,
+      projectsLoaded,
     ],
   );
 
