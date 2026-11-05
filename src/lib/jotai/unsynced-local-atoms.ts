@@ -21,3 +21,17 @@ export const debugModeEnabledAtom = atomWithStorage<boolean>(
   createJSONStorage(() => sessionStorage),
   { getOnInit: true },
 );
+
+export const globalAgentsFilesAtom = atomWithStorage<string[]>(
+  "agent-one-agents-files",
+  ["~/AGENTS.md"],
+  createNoSyncStorage<string[]>(),
+  { getOnInit: true },
+);
+
+export const collapsedProjectIdsAtom = atomWithStorage<string[]>(
+  "agent-one-collapsed-project-ids",
+  [],
+  createNoSyncStorage<string[]>(),
+  { getOnInit: true },
+);

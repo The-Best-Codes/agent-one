@@ -3,13 +3,13 @@ import { tool } from "ai";
 import { z } from "zod";
 
 import { raceWithAbort } from "@/lib/ai/tools/utils/abort";
-import { resolvePath } from "@/lib/ai/tools/utils/path";
+import { resolveToolPath } from "@/lib/ai/tools/utils/path";
 import { getLogger } from "@/lib/logger";
 import type { ViewFileToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
-export const createViewFileTool = (config: ViewFileToolConfig) =>
+export const createViewFileTool = (config: ViewFileToolConfig, baseDir?: string) =>
   tool({
     description:
       "View the contents of a file. Supports reading specific line ranges and automatically truncates large files to avoid excessive output. Prefer this tool over shell commands like `cat` for simple file reads.",
@@ -30,7 +30,7 @@ export const createViewFileTool = (config: ViewFileToolConfig) =>
 
       abortSignal?.throwIfAborted();
 
-      const filePath = await raceWithAbort(resolvePath(input.filePath), abortSignal);
+      const filePath = await raceWithAbort(resolveToolPath(input.filePath, baseDir), abortSignal);
 
       abortSignal?.throwIfAborted();
 

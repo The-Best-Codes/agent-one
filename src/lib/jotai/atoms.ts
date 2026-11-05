@@ -4,6 +4,7 @@ import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
 import { sanitizeMemoryEntries } from "@/lib/memory";
+import { getProjectPromptSection, type Project } from "@/lib/projects";
 
 import { settingAtoms } from "./settings-atoms";
 
@@ -87,8 +88,7 @@ export const systemPromptAtom = atom((get) => {
 
   const userName = get(settingAtoms.USER_NAME);
   const appendix = get(settingAtoms.SYSTEM_PROMPT_APPENDIX);
-  const memory = get(settingAtoms.MEMORY);
-  const memoryEntries = sanitizeMemoryEntries(memory);
+  const userMemory = get(settingAtoms.MEMORY);
 
   const settings = [
     userName && `- Name: ${userName}`,
@@ -97,10 +97,15 @@ export const systemPromptAtom = atom((get) => {
     .filter(Boolean)
     .join("\n");
 
-  const memorySection =
-    memoryEntries.length > 0 ? memoryEntries.map((entry) => `- ${entry}`).join("\n") : "";
+  return (project?: Project) => {
+    const memoryEntries = sanitizeMemoryEntries(
+      project?.separateMemory ? project.memory : userMemory,
+    );
+    const memorySection =
+      memoryEntries.length > 0 ? memoryEntries.map((entry) => `- ${entry}`).join("\n") : "";
+    const memoryHeading = project?.separateMemory ? "Project memory" : "User memory";
 
-  return dedent`
+    return dedent`
     ## Guidelines
     You are AgentOne, a helpful AI agent. You are currently being accessed via the [AgentOne desktop app](https://www.agent-one.dev/). Documentation for AgentOne can be found at https://docs.agent-one.dev/docs/. To extend your capabilities beyond the tools you already have, the user can install extensions for you to use. They can do so by clicking their account in the bottom left of the app sidebar (when expanded) and choosing "Extensions". There are over 21,000 extensions available.
     When the \`describeNextTool\` function is available, you _always_ use it before you use a tool beginning with \`mcp__\`. If you use multiple tools beginning with \`mcp__\` at once, you always use \`describeNextTool\` before each one.
@@ -113,6 +118,8 @@ export const systemPromptAtom = atom((get) => {
     When scheduled-agent tools are available, use them for requests to run a task repeatedly. Each time a scheduled agent runs, it will appear as a new chat in the application sidebar. It's essentially a scheduled prompt that will be submitted to you at a later date. Use a standard five-field cron expression, choose a concise but informative title, and write a prompt describing what the agent should do. Always list scheduled agents before creating, updating, or deleting them.
     Don't be too specific in your prompt. Write the prompt the same way that the user would ask you to do a task. For example, "Summarize the unread emails in my inbox." is a good prompt, but "Every morning, use the gmail_read tool to list emails. Tell the user..." is a bad prompt. Unless the user is very specific with what they want the agent to do, you shouldn't be overly specific. You also shouldn't mention the schedule (e.g., "Every day") in the prompt.
     ${settings ? `\n## User settings:\n${settings}` : ""}
-    ${memorySection ? `\n## User memory:\n${memorySection}` : ""}
+    ${project ? `\n${getProjectPromptSection(project)}` : ""}
+    ${memorySection ? `\n## ${memoryHeading}:\n${memorySection}` : ""}
   `.trim();
+  };
 });

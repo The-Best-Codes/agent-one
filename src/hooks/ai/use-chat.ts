@@ -4,12 +4,14 @@ import { useAtomValue } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
+import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useTools } from "@/contexts/use-tools/tools-hooks";
 import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { CustomChatTransport } from "@/lib/ai/custom-chat-transport";
 import { systemPromptAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
+import { getProject } from "@/lib/projects";
 
 const logger = getLogger(import.meta.url);
 
@@ -37,10 +39,14 @@ export function useChat(
   options?: CustomChatOptions,
 ) {
   const extractReasoningEnabled = useAtomValue(settingAtoms.EXTRACT_REASONING_ENABLED);
-  const systemPrompt = useAtomValue(systemPromptAtom);
+  const getSystemPrompt = useAtomValue(systemPromptAtom);
   const { getApiKeysLoadedPromise } = useApiKeys();
   const { getTools } = useTools();
-  const getSystemPrompt = useCallback(() => systemPrompt, [systemPrompt]);
+  const { loadChatMetadata } = usePersistence();
+  const getChatProject = useCallback(
+    (chatId: string) => getProject(loadChatMetadata(chatId).projectId),
+    [loadChatMetadata],
+  );
   const [transport] = useState(
     () =>
       new CustomChatTransport(
@@ -51,6 +57,7 @@ export function useChat(
         extractReasoningEnabled,
         getTools,
         getSystemPrompt,
+        getChatProject,
         getApiKeysLoadedPromise,
       ),
   );

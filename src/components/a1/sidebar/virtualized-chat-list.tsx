@@ -2,6 +2,7 @@ import {
   IconChevronDown,
   IconDeselect,
   IconDownload,
+  IconFolderPlus,
   IconInbox,
   IconPlus,
   IconSelectAll,
@@ -9,11 +10,16 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useAtom, useAtomValueRawSync } from "jotai";
+import { useAtom, useAtomValue, useAtomValueRawSync } from "jotai";
 import debounce from "lodash.debounce";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { SearchInput } from "@/components/a1/search-input";
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -32,13 +38,16 @@ import { useOverflow } from "@/hooks/use-overflow";
 import { listScheduledAgents, SCHEDULED_AGENTS_CHANGED_EVENT } from "@/lib/cron";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
+import { collapsedProjectIdsAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
+import { type Project, projectsAtom } from "@/lib/projects";
 import type { SettingValue } from "@/lib/settings/definitions";
 import type { ChatSearchResult } from "@/lib/storage/chat-storage";
 import { cn } from "@/lib/utils";
 
 import { ChatItem } from "./chat-item";
-import { BulkDeleteModal, BulkExportModal } from "./modals";
+import { BulkDeleteModal, BulkExportModal, ProjectModal } from "./modals";
+import { ProjectItem } from "./project-item";
 
 const logger = getLogger(import.meta.url);
 
@@ -48,6 +57,7 @@ interface ChatListItem {
   branchOf?: string;
   scheduledAgentId?: string;
   scheduledAgentTitle?: string;
+  projectId?: string;
   snippet?: string;
   createdAt?: number;
   updatedAt?: number;
@@ -56,9 +66,29 @@ interface ChatListItem {
 
 type ChatListRow =
   | { type: "header"; id: string; label: string }
-  | { type: "chat"; chat: ChatListItem };
+  | { type: "project"; project: Project; collapsed: boolean }
+  | { type: "show-more"; projectId: string; hiddenCount: number; expanded: boolean }
+  | { type: "empty-project"; projectId: string }
+  | { type: "chat"; chat: ChatListItem; nested?: boolean; showProject?: boolean };
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
+const PROJECT_CHAT_PREVIEW_COUNT = 5;
+
+function getRowKey(row: ChatListRow): string {
+  if (row.type === "header") return `header-${row.id}`;
+  if (row.type === "project") return `project-${row.project.id}`;
+  if (row.type === "show-more") return `show-more-${row.projectId}`;
+  if (row.type === "empty-project") return `empty-project-${row.projectId}`;
+  return `chat-${row.chat.id}`;
+}
+
+function getRowSize(row: ChatListRow | undefined): number {
+  if (!row) return 34;
+  if (row.type === "header") return 32;
+  if (row.type === "show-more" || row.type === "empty-project") return 28;
+  if (row.type === "project") return 34;
+  return row.chat.snippet || row.showProject ? 48 : 34;
+}
 
 function getChatSortTimestamp(chat: ChatListItem, chatSort: SettingValue<"CHAT_SORT">): number {
   if (chatSort === "updated-at") {
@@ -136,6 +166,11 @@ export const VirtualizedChatList = ({
   const [chatUpdateTrigger] = useAtom(chatUpdateTriggerAtom);
   const { loadChatMetadata, isMetadataLoaded, searchChats } = usePersistence();
   const [scheduledAgentTitles, setScheduledAgentTitles] = useState<Record<string, string>>({});
+  const projects = useAtomValue(projectsAtom);
+  const [collapsedProjectIds, setCollapsedProjectIds] = useAtom(collapsedProjectIdsAtom);
+  const [expandedProjectIds, setExpandedProjectIds] = useState<Set<string>>(new Set());
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+  const showProjects = showNewChatButton;
 
   useEffect(() => {
     const refresh = () => {
@@ -165,6 +200,7 @@ export const VirtualizedChatList = ({
             branchOf: chatMetadata?.branchOf,
             scheduledAgentId: chatMetadata?.scheduledAgentId,
             scheduledAgentTitle: chatMetadata?.scheduledAgentTitle,
+            projectId: chatMetadata?.projectId,
             createdAt: chatMetadata?.createdAt,
             updatedAt: chatMetadata?.updatedAt,
             lastMessageAt: chatMetadata?.lastMessageAt,
@@ -177,6 +213,7 @@ export const VirtualizedChatList = ({
             branchOf: undefined,
             scheduledAgentId: undefined,
             scheduledAgentTitle: undefined,
+            projectId: undefined,
             createdAt: undefined,
             updatedAt: undefined,
             lastMessageAt: undefined,
@@ -271,7 +308,7 @@ export const VirtualizedChatList = ({
     });
   }, [chatIds]);
 
-  const filteredChats = useMemo(() => {
+  const filteredChats = useMemo<ChatListItem[]>(() => {
     const sortedChats = [...chats].sort((a, b) => {
       const left = getChatSortTimestamp(a, chatSort);
       const right = getChatSortTimestamp(b, chatSort);
@@ -292,6 +329,7 @@ export const VirtualizedChatList = ({
           id: r.chatId,
           title: r.title,
           branchOf: metadataMap.get(r.chatId)?.branchOf,
+          projectId: metadataMap.get(r.chatId)?.projectId,
           snippet: r.snippet,
           createdAt: metadataMap.get(r.chatId)?.createdAt,
           updatedAt: metadataMap.get(r.chatId)?.updatedAt,
@@ -303,43 +341,126 @@ export const VirtualizedChatList = ({
     );
   }, [chats, chatSort, searchQuery, searchResults, chatIds, searchContent]);
 
+  const toggleProject = useCallback(
+    (projectId: string) => {
+      setCollapsedProjectIds((prev) =>
+        prev.includes(projectId) ? prev.filter((id) => id !== projectId) : [...prev, projectId],
+      );
+    },
+    [setCollapsedProjectIds],
+  );
+
+  const toggleProjectShowAll = useCallback((projectId: string) => {
+    setExpandedProjectIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(projectId)) {
+        next.delete(projectId);
+      } else {
+        next.add(projectId);
+      }
+      return next;
+    });
+  }, []);
+
   const listRows = useMemo<ChatListRow[]>(() => {
-    const shouldGroup = sidebarChatTimeGrouping && !searchQuery.trim();
-    if (!shouldGroup) {
-      return filteredChats.map((chat) => ({ type: "chat", chat }));
+    const isSearchActive = Boolean(searchQuery.trim());
+    const groupByProject = showProjects && !isSearchActive && projects.length > 0;
+    const rows: ChatListRow[] = [];
+    let otherChats = filteredChats;
+
+    if (groupByProject) {
+      const projectIds = new Set(projects.map((project) => project.id));
+      const chatsByProject = new Map<string, ChatListItem[]>();
+      otherChats = [];
+      for (const chat of filteredChats) {
+        if (chat.projectId && projectIds.has(chat.projectId)) {
+          const projectChats = chatsByProject.get(chat.projectId) ?? [];
+          projectChats.push(chat);
+          chatsByProject.set(chat.projectId, projectChats);
+        } else {
+          otherChats.push(chat);
+        }
+      }
+
+      rows.push({ type: "header", id: "projects", label: "Projects" });
+      for (const project of projects) {
+        const projectChats = chatsByProject.get(project.id) ?? [];
+        const collapsed = collapsedProjectIds.includes(project.id);
+        rows.push({ type: "project", project, collapsed });
+        if (collapsed) {
+          const activeChat = projectChats.find((chat) => chat.id === activeChatId);
+          if (activeChat) rows.push({ type: "chat", chat: activeChat, nested: true });
+          continue;
+        }
+        if (projectChats.length === 0) {
+          rows.push({ type: "empty-project", projectId: project.id });
+          continue;
+        }
+        const expanded = expandedProjectIds.has(project.id);
+        const visibleChats = expanded
+          ? projectChats
+          : projectChats.slice(0, PROJECT_CHAT_PREVIEW_COUNT);
+        if (!visibleChats.some((chat) => chat.id === activeChatId)) {
+          const activeChat = projectChats.find((chat) => chat.id === activeChatId);
+          if (activeChat) visibleChats.push(activeChat);
+        }
+        for (const chat of visibleChats) {
+          rows.push({ type: "chat", chat, nested: true });
+        }
+        if (projectChats.length > PROJECT_CHAT_PREVIEW_COUNT) {
+          rows.push({
+            type: "show-more",
+            projectId: project.id,
+            hiddenCount:
+              projectChats.length - (expanded ? PROJECT_CHAT_PREVIEW_COUNT : visibleChats.length),
+            expanded,
+          });
+        }
+      }
+
+      if (!sidebarChatTimeGrouping && otherChats.length > 0) {
+        rows.push({ type: "header", id: "chats", label: "Chats" });
+      }
+    }
+
+    if (!sidebarChatTimeGrouping || isSearchActive) {
+      for (const chat of otherChats) {
+        rows.push({ type: "chat", chat, showProject: isSearchActive });
+      }
+      return rows;
     }
 
     const now = Date.now();
     let previousGroupId: string | undefined;
-    return filteredChats.flatMap((chat) => {
+    for (const chat of otherChats) {
       const group = getChatTimeGroup(getChatSortTimestamp(chat, chatSort), now);
-      const rows: ChatListRow[] = [];
       if (group.id !== previousGroupId) {
         rows.push({ type: "header", ...group });
         previousGroupId = group.id;
       }
       rows.push({ type: "chat", chat });
-      return rows;
-    });
-  }, [chatSort, filteredChats, searchQuery, sidebarChatTimeGrouping]);
+    }
+    return rows;
+  }, [
+    activeChatId,
+    chatSort,
+    collapsedProjectIds,
+    expandedProjectIds,
+    filteredChats,
+    projects,
+    searchQuery,
+    showProjects,
+    sidebarChatTimeGrouping,
+  ]);
 
-  const getItemKey = useCallback(
-    (index: number) => {
-      const row = listRows[index];
-      return row.type === "header" ? `header-${row.id}` : `chat-${row.chat.id}`;
-    },
-    [listRows],
-  );
+  const getItemKey = useCallback((index: number) => getRowKey(listRows[index]), [listRows]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: listRows.length,
     getItemKey,
     getScrollElement: () => parentRef.current,
-    estimateSize: (index) => {
-      const row = listRows[index];
-      return row?.type === "header" ? 28 : row?.chat.snippet ? 48 : 34;
-    },
+    estimateSize: (index) => getRowSize(listRows[index]),
     measureElement: (el) => el.getBoundingClientRect().height,
     overscan: 5,
   });
@@ -391,7 +512,8 @@ export const VirtualizedChatList = ({
     setSelectedChatIds(new Set(initialIds));
   }, []);
 
-  const showNoChatsPlaceholder = isMetadataLoaded && chats.length === 0;
+  const showNoChatsPlaceholder =
+    isMetadataLoaded && chats.length === 0 && (!showProjects || projects.length === 0);
   const showSearchLoading =
     isSearching &&
     searchContent &&
@@ -408,14 +530,29 @@ export const VirtualizedChatList = ({
     <div className={cn("flex h-full flex-col", className)}>
       <div className={cn("pb-2", showNewChatButton && "flex flex-col gap-2")}>
         {showNewChatButton && !selectionMode && (
-          <Button
-            onClick={() => handleNewChat && handleNewChat()}
-            className="w-full justify-start"
-            variant="outline"
-          >
-            <IconPlus data-icon="inline-start" />
-            New Chat
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => handleNewChat && handleNewChat()}
+              className="min-w-0 flex-1 justify-start"
+              variant="outline"
+            >
+              <IconPlus data-icon="inline-start" />
+              New Chat
+            </Button>
+            <AdaptiveTooltip>
+              <AdaptiveTooltipTrigger asChild>
+                <Button
+                  onClick={() => setShowNewProjectModal(true)}
+                  variant="outline"
+                  size="icon"
+                  aria-label="New project"
+                >
+                  <IconFolderPlus />
+                </Button>
+              </AdaptiveTooltipTrigger>
+              <AdaptiveTooltipContent>New project</AdaptiveTooltipContent>
+            </AdaptiveTooltip>
+          </div>
         )}
         {selectionMode ? (
           <div className="flex flex-col gap-1.5">
@@ -566,33 +703,70 @@ export const VirtualizedChatList = ({
                   }}
                 >
                   {row.type === "header" ? (
-                    <div className="text-muted-foreground px-2 pt-2 pb-1 text-xs font-medium">
+                    <div
+                      className={cn(
+                        "text-muted-foreground px-2 pb-1 text-xs font-medium",
+                        virtualItem.index === 0 ? "pt-1" : "pt-4",
+                      )}
+                    >
                       {row.label}
                     </div>
-                  ) : (
-                    <ChatItem
-                      activeChatId={activeChatId}
-                      id={row.chat.id}
-                      title={row.chat.title}
-                      branchOf={row.chat.branchOf}
-                      branchParentTitle={
-                        row.chat.branchOf
-                          ? chats.find((c) => c.id === row.chat.branchOf)?.title
-                          : undefined
-                      }
-                      scheduledAgentTitle={
-                        row.chat.scheduledAgentId
-                          ? (scheduledAgentTitles[row.chat.scheduledAgentId] ??
-                            row.chat.scheduledAgentTitle)
-                          : undefined
-                      }
-                      snippet={row.chat.snippet}
-                      additionalOnChatClickCallback={additionalOnChatClickCallback}
+                  ) : row.type === "project" ? (
+                    <ProjectItem
+                      project={row.project}
+                      collapsed={row.collapsed}
+                      onToggle={toggleProject}
                       selectionMode={selectionMode}
-                      isSelected={selectedChatIds.has(row.chat.id)}
-                      onSelectionToggle={toggleSelection}
-                      onEnterSelectionMode={enterSelectionMode}
+                      onNewChat={
+                        additionalOnChatClickCallback
+                          ? () => additionalOnChatClickCallback(row.project.id)
+                          : undefined
+                      }
                     />
+                  ) : row.type === "empty-project" ? (
+                    <div className="pl-6">
+                      <div className="text-muted-foreground flex h-7 items-center pl-2 text-xs">
+                        No chats yet
+                      </div>
+                    </div>
+                  ) : row.type === "show-more" ? (
+                    <div className="pl-6">
+                      <button
+                        type="button"
+                        className="text-muted-foreground hover:text-foreground h-7 w-full rounded-md pl-2 text-left text-xs"
+                        onClick={() => toggleProjectShowAll(row.projectId)}
+                      >
+                        {row.expanded ? "Show less" : `Show ${row.hiddenCount} more`}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className={row.nested ? "pl-6" : undefined}>
+                      <ChatItem
+                        activeChatId={activeChatId}
+                        id={row.chat.id}
+                        title={row.chat.title}
+                        branchOf={row.chat.branchOf}
+                        branchParentTitle={
+                          row.chat.branchOf
+                            ? chats.find((c) => c.id === row.chat.branchOf)?.title
+                            : undefined
+                        }
+                        scheduledAgentTitle={
+                          row.chat.scheduledAgentId
+                            ? (scheduledAgentTitles[row.chat.scheduledAgentId] ??
+                              row.chat.scheduledAgentTitle)
+                            : undefined
+                        }
+                        projectId={row.chat.projectId}
+                        showProject={row.showProject}
+                        snippet={row.chat.snippet}
+                        additionalOnChatClickCallback={additionalOnChatClickCallback}
+                        selectionMode={selectionMode}
+                        isSelected={selectedChatIds.has(row.chat.id)}
+                        onSelectionToggle={toggleSelection}
+                        onEnterSelectionMode={enterSelectionMode}
+                      />
+                    </div>
                   )}
                 </div>
               );
@@ -607,6 +781,8 @@ export const VirtualizedChatList = ({
         chatIds={Array.from(selectedChatIds)}
         chatCount={selectedChatIds.size}
       />
+
+      <ProjectModal isOpen={showNewProjectModal} onClose={() => setShowNewProjectModal(false)} />
 
       <BulkExportModal
         isOpen={showBulkExportModal}

@@ -10,6 +10,7 @@ import {
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 
+import { AgentsFilesEditor } from "@/components/a1/agents-files-editor";
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
 import {
   AdaptiveTooltip,
@@ -47,6 +48,7 @@ import {
 } from "@/lib/constants";
 import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
+import { globalAgentsFilesAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { MAX_MEMORY_ENTRIES, MAX_MEMORY_ENTRY_CHARS } from "@/lib/memory";
 
 import { SettingsTarget } from "./settings-target";
@@ -298,8 +300,25 @@ export function HideAgentOneModelsControl() {
   );
 }
 
+export function GlobalAgentsFilesControl() {
+  const [files, setFiles] = useAtom(globalAgentsFilesAtom);
+  return <AgentsFilesEditor files={files} setFiles={setFiles} />;
+}
+
 export function MemoryControl() {
   const [memory, setMemory] = useAtom(settingAtoms.MEMORY);
+  return <MemoryEditor memory={memory} setMemory={setMemory} inputId="memory-control" />;
+}
+
+export function MemoryEditor({
+  memory,
+  setMemory,
+  inputId,
+}: {
+  memory: string[];
+  setMemory: (update: (prev: string[]) => string[]) => void;
+  inputId?: string;
+}) {
   const [removingIndex, setRemovingIndex] = useState<number | null>(null);
 
   const addMemoryEntry = () => {
@@ -342,7 +361,7 @@ export function MemoryControl() {
           {memory.map((entry, index) => (
             <div key={`memory-entry-${index}`} className="flex items-center gap-2">
               <Input
-                id={index === 0 ? "memory-control" : undefined}
+                id={index === 0 ? inputId : undefined}
                 value={entry}
                 onChange={(e) => updateMemoryEntry(index, e.target.value)}
                 placeholder="e.g. I prefer concise technical answers"

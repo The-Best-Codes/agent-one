@@ -10,6 +10,7 @@ import { GuidedTour } from "@/components/a1/guided-tour";
 import { MainChatInput } from "@/components/a1/input/main-chat-input";
 import { MessagePreviewRail } from "@/components/a1/message-preview-rail";
 import { MessageParts } from "@/components/a1/messages";
+import { ProjectPicker } from "@/components/a1/project-picker";
 import { Sidebar } from "@/components/a1/sidebar";
 import { Spinner } from "@/components/ui/spinner";
 import { useChatLoading, useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
@@ -20,6 +21,7 @@ import {
   editingMessageIdsAtom,
 } from "@/lib/jotai/chat-message-editing-atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
+import { projectsAtom } from "@/lib/projects";
 import { cn } from "@/lib/utils";
 
 const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
@@ -37,6 +39,7 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
   const chatVirtualizationThreshold = useAtomValue(settingAtoms.CHAT_VIRTUALIZATION_THRESHOLD);
   const showMessagePreviewRail = useAtomValue(settingAtoms.SHOW_MESSAGE_PREVIEW_RAIL);
   const clearEditingMessages = useSetAtom(clearEditingMessagesAtom);
+  const hasProjects = useAtomValue(projectsAtom).length > 0;
 
   useEffect(() => {
     clearEditingMessages();
@@ -201,6 +204,7 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
             initialValue={initialInputValue}
             initialValueKey={chatId ? undefined : location.key}
             disabled={isChatLoading}
+            toolbarStart={!chatId && hasProjects ? <ProjectPicker /> : undefined}
             onScrollNeededAction={() => {
               scrollRef.current?.scrollToBottom();
             }}

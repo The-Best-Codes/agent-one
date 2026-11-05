@@ -5,7 +5,15 @@ import { EditorView, keymap } from "@codemirror/view";
 import { IconArrowUp, IconPaperclip, IconPlayerStopFilled } from "@tabler/icons-react";
 import CodeMirror from "@uiw/react-codemirror";
 import { useAtomValue, useAtomValueRawSync } from "jotai";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import {
   AdaptiveTooltip,
@@ -107,12 +115,14 @@ export const MainChatInput = ({
   initialValueKey,
   draftKey,
   disabled = false,
+  toolbarStart,
 }: {
   onScrollNeededAction?: () => void;
   initialValue?: string;
   initialValueKey?: string;
   draftKey: string;
   disabled?: boolean;
+  toolbarStart?: ReactNode;
 }) => {
   const { status } = useChatStatus();
   const isChatLoading = useChatLoading();
@@ -689,7 +699,7 @@ export const MainChatInput = ({
           />
         </div>
         <div className="bg-secondary dark:bg-secondary flex items-center justify-between rounded-t-none rounded-b-md p-2 pr-0">
-          <div className="relative">
+          <div className="relative flex min-w-0 items-center gap-2">
             <AdaptiveTooltip>
               <AdaptiveTooltipTrigger asChild>
                 <Button
@@ -722,6 +732,7 @@ export const MainChatInput = ({
               </AdaptiveTooltipTrigger>
               <AdaptiveTooltipContent>Attach files to your message</AdaptiveTooltipContent>
             </AdaptiveTooltip>
+            {toolbarStart}
           </div>
           <div className="flex items-center gap-2">
             <div className="flex flex-row" data-tour="model-selector">

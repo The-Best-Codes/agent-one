@@ -2,11 +2,13 @@ import { isToolUIPart, tool, type UIMessage } from "ai";
 import { z } from "zod";
 
 import formatBytes from "@/lib/format-bytes";
+import { canAccessChat, getChatAccessScope, type Project } from "@/lib/projects";
 import type { ReadChatToolConfig } from "@/lib/settings/types";
 import { chatStorage } from "@/lib/storage/chat-storage";
 
 export interface ChatToolsContext {
   currentChatId?: string;
+  project?: Project;
 }
 
 function reduceTranscript(messages: UIMessage[], includeToolCalls: boolean) {
@@ -66,7 +68,10 @@ export const createReadChatTool = (config: ReadChatToolConfig, context: ChatTool
         chatStorage.getChatMessages(chatId),
       ]);
 
-      if (!metadata && messages === null) {
+      if (
+        (!metadata && messages === null) ||
+        !canAccessChat(metadata?.projectId, getChatAccessScope(context.project))
+      ) {
         throw new Error(`No chat found with ID "${chatId}".`);
       }
 

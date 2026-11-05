@@ -4,13 +4,13 @@ import { tool } from "ai";
 import { z } from "zod";
 
 import { raceWithAbort } from "@/lib/ai/tools/utils/abort";
-import { resolvePath } from "@/lib/ai/tools/utils/path";
+import { resolveToolPath } from "@/lib/ai/tools/utils/path";
 import { getLogger } from "@/lib/logger";
 import type { CreateFileToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
-export const createCreateFileTool = (config: CreateFileToolConfig) =>
+export const createCreateFileTool = (config: CreateFileToolConfig, baseDir?: string) =>
   tool({
     description:
       "Create a new file or overwrite an existing file with the given content. Prefer this tool over shell `cat`/`echo`/heredoc redirection for writing files.",
@@ -38,7 +38,7 @@ export const createCreateFileTool = (config: CreateFileToolConfig) =>
 
       abortSignal?.throwIfAborted();
 
-      const filePath = await raceWithAbort(resolvePath(input.filePath), abortSignal);
+      const filePath = await raceWithAbort(resolveToolPath(input.filePath, baseDir), abortSignal);
 
       abortSignal?.throwIfAborted();
 
