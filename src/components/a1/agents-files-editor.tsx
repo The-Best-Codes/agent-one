@@ -4,6 +4,14 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { getLogger } from "@/lib/logger";
 import { PROJECT_FOLDER_AGENTS_FILE } from "@/lib/projects";
 
@@ -18,6 +26,7 @@ interface AgentsFilesEditorProps {
 
 export function AgentsFilesEditor({ files, setFiles, folder, action }: AgentsFilesEditorProps) {
   const [home, setHome] = useState<string>();
+  const [removingFile, setRemovingFile] = useState<string | null>(null);
 
   useEffect(() => {
     homeDir()
@@ -73,15 +82,39 @@ export function AgentsFilesEditor({ files, setFiles, folder, action }: AgentsFil
               >
                 <span className="truncate">{getLabel(entry)}</span>
               </p>
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                onClick={() => setFiles((prev) => prev.filter((file) => file !== entry))}
-                aria-label="Remove file"
+              <Popover
+                open={removingFile === entry}
+                onOpenChange={(isOpen) => setRemovingFile(isOpen ? entry : null)}
               >
-                <IconX />
-              </Button>
+                <PopoverTrigger asChild>
+                  <Button type="button" variant="destructive" size="icon" aria-label="Remove file">
+                    <IconX />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="end">
+                  <PopoverHeader>
+                    <PopoverTitle>Remove this file?</PopoverTitle>
+                    <PopoverDescription>
+                      AgentOne will stop following it. The file itself won't be deleted.
+                    </PopoverDescription>
+                  </PopoverHeader>
+                  <div className="flex justify-end gap-2">
+                    <Button size="sm" variant="outline" onClick={() => setRemovingFile(null)}>
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => {
+                        setFiles((prev) => prev.filter((file) => file !== entry));
+                        setRemovingFile(null);
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           ))}
         </div>
