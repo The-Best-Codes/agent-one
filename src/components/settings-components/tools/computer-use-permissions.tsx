@@ -1,20 +1,13 @@
 import { IconCircleCheck } from "@tabler/icons-react";
-import { useCallback, useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  type ComputerUsePermission,
-  type ComputerUsePermissions as Permissions,
-  getComputerUsePermissions,
-  requestComputerUsePermission,
-} from "@/lib/computer-use";
+import { useComputerUsePermissions } from "@/hooks/use-computer-use-permissions";
+import { type ComputerUsePermission, requestComputerUsePermission } from "@/lib/computer-use";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
-
-const POLL_INTERVAL_MS = 2000;
 
 const PERMISSION_INFO: Record<ComputerUsePermission, { name: string; description: string }> = {
   accessibility: {
@@ -29,28 +22,7 @@ const PERMISSION_INFO: Record<ComputerUsePermission, { name: string; description
 };
 
 export function ComputerUsePermissions() {
-  const [permissions, setPermissions] = useState<Permissions | null>(null);
-
-  const refresh = useCallback(() => {
-    getComputerUsePermissions()
-      .then(setPermissions)
-      .catch((error: unknown) => {
-        logger.error("Failed to check computer use permissions:", error);
-      });
-  }, []);
-
-  const allGranted = permissions?.accessibility && permissions.screenRecording;
-
-  useEffect(() => {
-    refresh();
-    if (allGranted) return;
-    const interval = setInterval(refresh, POLL_INTERVAL_MS);
-    window.addEventListener("focus", refresh);
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener("focus", refresh);
-    };
-  }, [refresh, allGranted]);
+  const { permissions, refresh } = useComputerUsePermissions();
 
   if (!permissions) return null;
 

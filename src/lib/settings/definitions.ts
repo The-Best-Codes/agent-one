@@ -94,7 +94,7 @@ const DEFAULT_TOOL_CONFIGS: ToolConfigs = {
   deleteFile: { requiresApproval: true },
   viewFile: { requiresApproval: false, defaultMaxChars: 10000 },
   executeCommand: { requiresApproval: true, defaultTimeoutMs: 120000, maxScrollbackChars: 25000 },
-  subAgent: { requiresApproval: true },
+  subAgent: { requiresApproval: false },
   listSettings: { requiresApproval: false },
   getSetting: { requiresApproval: false },
   updateSetting: { requiresApproval: true },

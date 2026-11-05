@@ -100,10 +100,10 @@ pub fn status() -> PermissionStatus {
 pub fn ensure_granted() -> Result<(), String> {
     let status = status();
     if !status.accessibility {
-        return Err("AgentOne does not have Accessibility permission. Ask the user to grant it in AgentOne Settings → Tools → Computer Use.".to_string());
+        return Err("AgentOne does not have macOS Accessibility permission, so it can't use other apps yet. Tell the user to open AgentOne Settings → Tools → Computer Use, click Allow next to Accessibility, and turn AgentOne on in the System Settings window that opens.".to_string());
     }
     if !status.screen_recording {
-        return Err("AgentOne does not have Screen Recording permission. Ask the user to grant it in AgentOne Settings → Tools → Computer Use.".to_string());
+        return Err("AgentOne does not have macOS Screen Recording permission, so it can't see other apps yet. Tell the user to open AgentOne Settings → Tools → Computer Use, click Allow next to Screen Recording, turn AgentOne on in the System Settings window that opens, then restart AgentOne if macOS asks.".to_string());
     }
     Ok(())
 }

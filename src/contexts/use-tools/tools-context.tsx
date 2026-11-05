@@ -47,7 +47,7 @@ import { mcpAuthStatesAtom, mcpServerLoadStatesAtom, mcpServersAtom } from "@/li
 import type { McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
-import { DEFAULT_SETTINGS } from "@/lib/settings/definitions";
+import { getMergedEnabledTools, getMergedToolConfigs } from "@/lib/settings/tools";
 import type { McpServerConfig } from "@/lib/settings/types";
 
 import { ToolsContext } from "./tools-contexts";
@@ -485,77 +485,8 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       const filteredStaticTools: ToolSet = {};
       const chatContext = options?.chatContext ?? {};
       const projectFolder = chatContext.project?.folder;
-      const mergedEnabledTools = { ...DEFAULT_SETTINGS.ENABLED_TOOLS, ...enabledTools };
-      const mergedToolConfigs = {
-        dateTime: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.dateTime, ...toolConfigs.dateTime },
-        waitNumberMilliseconds: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.waitNumberMilliseconds,
-          ...toolConfigs.waitNumberMilliseconds,
-        },
-        getUrlContent: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.getUrlContent,
-          ...toolConfigs.getUrlContent,
-        },
-        webSearch: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.webSearch, ...toolConfigs.webSearch },
-        wikipedia: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.wikipedia, ...toolConfigs.wikipedia },
-        memory: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.memory,
-          ...toolConfigs.memory,
-          requiresApproval: false,
-        },
-        editFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.editFile, ...toolConfigs.editFile },
-        createFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.createFile, ...toolConfigs.createFile },
-        deleteFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.deleteFile, ...toolConfigs.deleteFile },
-        viewFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.viewFile, ...toolConfigs.viewFile },
-        executeCommand: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.executeCommand,
-          ...toolConfigs.executeCommand,
-        },
-        subAgent: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.subAgent, ...toolConfigs.subAgent },
-        listSettings: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.listSettings,
-          ...toolConfigs.listSettings,
-        },
-        getSetting: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.getSetting, ...toolConfigs.getSetting },
-        updateSetting: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.updateSetting,
-          ...toolConfigs.updateSetting,
-        },
-        listScheduledAgents: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.listScheduledAgents,
-          ...toolConfigs.listScheduledAgents,
-        },
-        createScheduledAgent: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.createScheduledAgent,
-          ...toolConfigs.createScheduledAgent,
-        },
-        updateScheduledAgent: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.updateScheduledAgent,
-          ...toolConfigs.updateScheduledAgent,
-        },
-        deleteScheduledAgent: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.deleteScheduledAgent,
-          ...toolConfigs.deleteScheduledAgent,
-        },
-        searchChats: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.searchChats,
-          ...toolConfigs.searchChats,
-          requiresApproval: false,
-        },
-        readChat: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.readChat,
-          ...toolConfigs.readChat,
-          requiresApproval: false,
-        },
-        computerUseObserve: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.computerUseObserve,
-          ...toolConfigs.computerUseObserve,
-        },
-        computerUseAct: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.computerUseAct,
-          ...toolConfigs.computerUseAct,
-        },
-      };
+      const mergedEnabledTools = getMergedEnabledTools(enabledTools);
+      const mergedToolConfigs = getMergedToolConfigs(toolConfigs);
 
       if (mergedEnabledTools.dateTime) {
         filteredStaticTools.dateTime = createDateTimeTool(mergedToolConfigs.dateTime);
