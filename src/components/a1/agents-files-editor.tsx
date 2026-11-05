@@ -1,6 +1,7 @@
 import { IconPlus, IconX } from "@tabler/icons-react";
-import { sep } from "@tauri-apps/api/path";
+import { homeDir, sep } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { getLogger } from "@/lib/logger";
@@ -16,6 +17,14 @@ interface AgentsFilesEditorProps {
 }
 
 export function AgentsFilesEditor({ files, setFiles, folder, action }: AgentsFilesEditorProps) {
+  const [home, setHome] = useState<string>();
+
+  useEffect(() => {
+    homeDir()
+      .then(setHome)
+      .catch((error) => logger.warn("Failed to get home folder", error));
+  }, []);
+
   const addFiles = async () => {
     try {
       const selected = await open({
@@ -32,8 +41,13 @@ export function AgentsFilesEditor({ files, setFiles, folder, action }: AgentsFil
     }
   };
 
-  const getLabel = (entry: string) =>
-    entry === PROJECT_FOLDER_AGENTS_FILE && folder ? `${folder}${sep()}${entry}` : entry;
+  const getLabel = (entry: string) => {
+    if (entry === PROJECT_FOLDER_AGENTS_FILE && folder) return `${folder}${sep()}${entry}`;
+    if (home && (entry.startsWith("~/") || entry.startsWith("~\\"))) {
+      return `${home}${sep()}${entry.slice(2).replace(/[/\\]/g, sep())}`;
+    }
+    return entry;
+  };
 
   return (
     <div className="rounded-md border p-3">
