@@ -1,4 +1,10 @@
-import { IconCheck, IconChevronDown, IconFolder, IconFolderPlus } from "@tabler/icons-react";
+import {
+  IconCheck,
+  IconChevronDown,
+  IconFolder,
+  IconFolderOff,
+  IconFolderPlus,
+} from "@tabler/icons-react";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
 import { useSearchParams } from "react-router";
@@ -45,7 +51,11 @@ export const ProjectPicker = () => {
             variant="outline"
             className={cn("min-w-0 max-w-48", !selectedProject && "text-muted-foreground")}
           >
-            <IconFolder data-icon="inline-start" />
+            {selectedProject ? (
+              <IconFolder data-icon="inline-start" />
+            ) : (
+              <IconFolderOff data-icon="inline-start" />
+            )}
             <span className="truncate">{selectedProject?.name ?? "No project"}</span>
             <IconChevronDown data-icon="inline-end" />
           </Button>
@@ -53,13 +63,15 @@ export const ProjectPicker = () => {
         <DropdownMenuContent align="start" className="w-auto min-w-48">
           <DropdownMenuGroup>
             <DropdownMenuItem onSelect={() => selectProject(undefined)}>
-              {selectedProject ? <span className="size-4" /> : <IconCheck />}
+              <IconFolderOff />
               No project
+              {!selectedProject && <IconCheck className="ml-auto" />}
             </DropdownMenuItem>
             {projects.map((project) => (
               <DropdownMenuItem key={project.id} onSelect={() => selectProject(project.id)}>
-                {project.id === selectedProject?.id ? <IconCheck /> : <IconFolder />}
+                <IconFolder />
                 <span className="max-w-60 truncate">{project.name}</span>
+                {project.id === selectedProject?.id && <IconCheck className="ml-auto" />}
               </DropdownMenuItem>
             ))}
           </DropdownMenuGroup>

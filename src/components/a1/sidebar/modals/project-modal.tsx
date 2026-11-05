@@ -121,7 +121,7 @@ const ProjectForm = ({ project, onClose }: { project?: Project; onClose: () => v
           </div>
           <FieldDescription>Chats in this project work inside this folder.</FieldDescription>
         </Field>
-        <Field orientation="horizontal">
+        <Field orientation="horizontal" className="has-[>[data-slot=field-content]]:items-center">
           <FieldContent>
             <FieldLabel htmlFor="project-separate-memory">Separate memory</FieldLabel>
             <FieldDescription>

@@ -160,6 +160,7 @@ interface ChatItemProps {
   branchParentTitle?: string;
   scheduledAgentTitle?: string;
   projectId?: string;
+  showProject?: boolean;
   snippet?: string;
   selectionMode?: boolean;
   isSelected?: boolean;
@@ -177,6 +178,7 @@ export const ChatItem = memo(
     branchParentTitle,
     scheduledAgentTitle,
     projectId,
+    showProject,
     snippet,
     selectionMode,
     isSelected,
@@ -191,6 +193,10 @@ export const ChatItem = memo(
     const { setChatsProject } = usePersistence();
 
     const isSelectedChat = activeChatId === id;
+    const projectName = showProject
+      ? projects.find((project) => project.id === projectId)?.name
+      : undefined;
+    const hasSubtitle = Boolean(snippet || projectName);
     const moveToProject = (targetProjectId: string | undefined) => {
       logger.verbose("Moving chat to project", { chatId: id, projectId: targetProjectId });
       setChatsProject([id], targetProjectId);
@@ -225,7 +231,7 @@ export const ChatItem = memo(
               variant={isSelectedChat ? "secondary" : "ghost"}
               className={cn(
                 "group/chat-item w-full justify-between pr-1 pl-2 transition-none",
-                snippet ? "h-auto items-start py-1" : "py-2",
+                hasSubtitle ? "h-auto items-start py-1" : "py-2",
                 isSelectedChat && "border border-border",
               )}
               asChild
@@ -268,6 +274,12 @@ export const ChatItem = memo(
                     {scheduledAgentTitle && <ScheduledAgentIcon title={scheduledAgentTitle} />}
                     <MarqueeText contentClassName="pe-7">{title}</MarqueeText>
                   </span>
+                  {projectName && (
+                    <span className="text-muted-foreground mt-0.5 flex min-w-0 items-center gap-1 text-xs font-normal">
+                      <IconFolder className="size-3 shrink-0" />
+                      <span className="truncate">{projectName}</span>
+                    </span>
+                  )}
                   {snippet && (
                     <span className="text-muted-foreground [&_mark]:text-foreground mt-0.5 truncate text-xs italic [&_mark]:bg-yellow-500/30">
                       {renderSnippet(snippet)}

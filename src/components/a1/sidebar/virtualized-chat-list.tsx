@@ -69,7 +69,7 @@ type ChatListRow =
   | { type: "project"; project: Project; chatCount: number; collapsed: boolean }
   | { type: "show-more"; projectId: string; hiddenCount: number; expanded: boolean }
   | { type: "empty-project"; projectId: string }
-  | { type: "chat"; chat: ChatListItem; nested?: boolean };
+  | { type: "chat"; chat: ChatListItem; nested?: boolean; showProject?: boolean };
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 const PROJECT_CHAT_PREVIEW_COUNT = 5;
@@ -87,7 +87,7 @@ function getRowSize(row: ChatListRow | undefined): number {
   if (row.type === "header") return 32;
   if (row.type === "show-more" || row.type === "empty-project") return 28;
   if (row.type === "project") return 34;
-  return row.chat.snippet ? 48 : 34;
+  return row.chat.snippet || row.showProject ? 48 : 34;
 }
 
 function getChatSortTimestamp(chat: ChatListItem, chatSort: SettingValue<"CHAT_SORT">): number {
@@ -387,7 +387,11 @@ export const VirtualizedChatList = ({
         const projectChats = chatsByProject.get(project.id) ?? [];
         const collapsed = collapsedProjectIds.includes(project.id);
         rows.push({ type: "project", project, chatCount: projectChats.length, collapsed });
-        if (collapsed) continue;
+        if (collapsed) {
+          const activeChat = projectChats.find((chat) => chat.id === activeChatId);
+          if (activeChat) rows.push({ type: "chat", chat: activeChat, nested: true });
+          continue;
+        }
         if (projectChats.length === 0) {
           rows.push({ type: "empty-project", projectId: project.id });
           continue;
@@ -416,7 +420,7 @@ export const VirtualizedChatList = ({
 
     if (!sidebarChatTimeGrouping || isSearchActive) {
       for (const chat of otherChats) {
-        rows.push({ type: "chat", chat });
+        rows.push({ type: "chat", chat, showProject: isSearchActive });
       }
       return rows;
     }
@@ -433,6 +437,7 @@ export const VirtualizedChatList = ({
     }
     return rows;
   }, [
+    activeChatId,
     chatSort,
     collapsedProjectIds,
     expandedProjectIds,
@@ -749,6 +754,7 @@ export const VirtualizedChatList = ({
                             : undefined
                         }
                         projectId={row.chat.projectId}
+                        showProject={row.showProject}
                         snippet={row.chat.snippet}
                         additionalOnChatClickCallback={additionalOnChatClickCallback}
                         selectionMode={selectionMode}
