@@ -45,6 +45,8 @@ export async function getDb(): Promise<Database> {
   return dbPromise;
 }
 
+const pendingMessageWrites = new Map<string, Promise<void>>();
+
 export async function enqueueWrite<T>(operation: (database: Database) => Promise<T>): Promise<T> {
   const next = writeQueue.then(async () => operation(await getDb()));
   writeQueue = next.then(
@@ -247,6 +249,7 @@ export const chatStorage = {
   },
 
   async getChatMessages(id: string): Promise<UIMessage[] | null> {
+    await pendingMessageWrites.get(id);
     const d = await getDb();
     const rows = await d.select<{ messages: string }[]>(
       "SELECT messages FROM chat_messages WHERE id = $1",
@@ -270,13 +273,21 @@ export const chatStorage = {
   },
 
   async setChatMessages(id: string, messages: UIMessage[]): Promise<void> {
-    await enqueueWrite((d) =>
+    const write = enqueueWrite((d) =>
       d.execute(
         `INSERT INTO chat_messages (id, messages) VALUES ($1, $2)
          ON CONFLICT(id) DO UPDATE SET messages = $2`,
         [id, JSON.stringify(messages)],
       ),
-    );
+    ).then(() => undefined);
+    const settled = write.catch(() => undefined);
+    pendingMessageWrites.set(id, settled);
+    void settled.then(() => {
+      if (pendingMessageWrites.get(id) === settled) {
+        pendingMessageWrites.delete(id);
+      }
+    });
+    await write;
   },
 
   async deleteChat(id: string): Promise<void> {
