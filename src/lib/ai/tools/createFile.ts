@@ -73,8 +73,6 @@ export const createCreateFileTool = (config: CreateFileToolConfig, baseDir?: str
 
       logger.verbose("File created successfully:", filePath);
 
-      return {
-        overwritten: fileExists,
-      };
+      return fileExists ? { path: filePath, overwritten: true } : { path: filePath, created: true };
     },
   });
