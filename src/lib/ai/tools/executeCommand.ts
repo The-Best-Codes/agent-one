@@ -1,3 +1,4 @@
+import { homeDir } from "@tauri-apps/api/path";
 import { tool } from "ai";
 import { z } from "zod";
 
@@ -16,6 +17,7 @@ export interface ExecuteCommandOutput {
   timedOut: boolean;
   skipped?: boolean;
   stopped?: boolean;
+  error?: string;
 }
 
 export type ExecuteCommandLiveStatus = "running" | "skipped-running" | "stopping" | "completed";
@@ -141,6 +143,7 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
       abortSignal?.throwIfAborted();
 
       const timeoutMs = input.timeoutMs ?? config.defaultTimeoutMs;
+      const cwd = await raceWithAbort(homeDir(), abortSignal);
 
       const startedAt = Date.now();
       executeCommandLiveStateMap.set(toolCallId, {
@@ -167,6 +170,7 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
       let done = false;
       let exitCode: number | null = null;
       let signal: number | null = null;
+      let error: string | undefined;
 
       const truncateScrollback = (text: string) => {
         const maxChars = config.maxScrollbackChars;
@@ -239,6 +243,7 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
       })();
 
       const { handle, result } = spawnCommand(input.command, {
+        cwd,
         signal: combinedSignal,
         onStdout: (data) => {
           queueUpdate("stdout", data);
@@ -265,7 +270,10 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
           exitCode = r.exitCode;
           signal = r.signal;
         })
-        .catch((error) => logger.error("Command failed to run", error))
+        .catch((err: unknown) => {
+          logger.error("Command failed to run", err);
+          error = err instanceof Error ? err.message : String(err);
+        })
         .finally(() => {
           done = true;
           flush();
@@ -369,6 +377,7 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
           exitCode,
           signal,
           timedOut,
+          ...(error && { error }),
         } as ExecuteCommandOutput;
       } finally {
         if (flushTimeoutId) {
