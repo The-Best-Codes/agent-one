@@ -37,6 +37,7 @@ export const ProjectPicker = () => {
         } else {
           next.delete("project");
         }
+        next.delete("initialMessage");
         return next;
       },
       { replace: true },

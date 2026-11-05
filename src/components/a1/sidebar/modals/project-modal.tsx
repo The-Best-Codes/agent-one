@@ -1,7 +1,8 @@
 import { IconFolder, IconX } from "@tabler/icons-react";
 import { open } from "@tauri-apps/plugin-dialog";
+import { exists } from "@tauri-apps/plugin-fs";
 import { useAtomValue } from "jotai";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 import { AgentsFilesEditor } from "@/components/a1/agents-files-editor";
@@ -28,6 +29,7 @@ import {
   type Project,
   updateProject,
 } from "@/lib/projects";
+import { cn } from "@/lib/utils";
 
 const logger = getLogger(import.meta.url);
 
@@ -42,6 +44,22 @@ const ProjectForm = ({ project, onClose }: { project?: Project; onClose: () => v
   const [name, setName] = useState(project?.name ?? "");
   const [instructions, setInstructions] = useState(project?.instructions ?? "");
   const [folder, setFolder] = useState(project?.folder);
+  const [savedFolderMissing, setSavedFolderMissing] = useState(false);
+  const folderMissing = savedFolderMissing && folder === project?.folder;
+
+  useEffect(() => {
+    const savedFolder = project?.folder;
+    if (!savedFolder) return;
+    let cancelled = false;
+    void exists(savedFolder)
+      .then((found) => {
+        if (!cancelled) setSavedFolderMissing(!found);
+      })
+      .catch((error) => logger.warn("Failed to check project folder", error));
+    return () => {
+      cancelled = true;
+    };
+  }, [project?.folder]);
   const [separateMemory, setSeparateMemory] = useState(project?.separateMemory ?? false);
   const globalAgentsFiles = useAtomValue(globalAgentsFilesAtom);
   const [customAgentsFiles, setCustomAgentsFiles] = useState(project?.agentsFiles);
@@ -90,7 +108,7 @@ const ProjectForm = ({ project, onClose }: { project?: Project; onClose: () => v
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") handleSave();
+              if (e.key === "Enter" && !e.nativeEvent.isComposing) handleSave();
             }}
             placeholder="e.g. Kitchen remodel"
             maxLength={100}
@@ -135,7 +153,11 @@ const ProjectForm = ({ project, onClose }: { project?: Project; onClose: () => v
               </Button>
             )}
           </div>
-          <FieldDescription>Chats in this project work inside this folder.</FieldDescription>
+          <FieldDescription className={cn(folderMissing && "text-destructive")}>
+            {folderMissing
+              ? "This folder can't be found. It may have been moved or deleted, so choose it again."
+              : "Chats in this project work inside this folder."}
+          </FieldDescription>
         </Field>
         <Field>
           <FieldLabel>AGENTS.md files</FieldLabel>

@@ -3,6 +3,7 @@ import { tool } from "ai";
 import { z } from "zod";
 
 import { createAbortError, raceWithAbort } from "@/lib/ai/tools/utils/abort";
+import { assertProjectFolderExists } from "@/lib/ai/tools/utils/path";
 import { getLogger } from "@/lib/logger";
 import { spawnCommand } from "@/lib/run-command";
 import type { ExecuteCommandToolConfig } from "@/lib/settings/types";
@@ -143,6 +144,7 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig, cwd?:
       abortSignal?.throwIfAborted();
 
       const timeoutMs = input.timeoutMs ?? config.defaultTimeoutMs;
+      await raceWithAbort(assertProjectFolderExists(cwd), abortSignal);
       const workingDir = cwd ?? (await raceWithAbort(homeDir(), abortSignal));
 
       const startedAt = Date.now();
