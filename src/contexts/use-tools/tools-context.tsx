@@ -498,7 +498,11 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         },
         webSearch: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.webSearch, ...toolConfigs.webSearch },
         wikipedia: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.wikipedia, ...toolConfigs.wikipedia },
-        memory: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.memory, ...toolConfigs.memory },
+        memory: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.memory,
+          ...toolConfigs.memory,
+          requiresApproval: false,
+        },
         editFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.editFile, ...toolConfigs.editFile },
         createFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.createFile, ...toolConfigs.createFile },
         deleteFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.deleteFile, ...toolConfigs.deleteFile },
@@ -533,8 +537,16 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
           ...DEFAULT_SETTINGS.TOOL_CONFIGS.deleteScheduledAgent,
           ...toolConfigs.deleteScheduledAgent,
         },
-        searchChats: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.searchChats, ...toolConfigs.searchChats },
-        readChat: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.readChat, ...toolConfigs.readChat },
+        searchChats: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.searchChats,
+          ...toolConfigs.searchChats,
+          requiresApproval: false,
+        },
+        readChat: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.readChat,
+          ...toolConfigs.readChat,
+          requiresApproval: false,
+        },
         computerUseObserve: {
           ...DEFAULT_SETTINGS.TOOL_CONFIGS.computerUseObserve,
           ...toolConfigs.computerUseObserve,

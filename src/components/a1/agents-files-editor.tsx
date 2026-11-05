@@ -37,7 +37,7 @@ export function AgentsFilesEditor({ files, setFiles, folder, action }: AgentsFil
       if (paths.length === 0) return;
       setFiles((prev) => [...prev, ...paths.filter((path) => !prev.includes(path))]);
     } catch (error) {
-      logger.error("Failed to choose AGENTS.md files", error);
+      logger.error("Failed to choose instruction files", error);
     }
   };
 
@@ -87,7 +87,7 @@ export function AgentsFilesEditor({ files, setFiles, folder, action }: AgentsFil
         </div>
       ) : (
         <p className="text-muted-foreground flex h-20 items-center justify-center rounded-md border border-dashed p-2 text-sm">
-          No AGENTS.md files will be used.
+          No instruction files will be used.
         </p>
       )}
     </div>

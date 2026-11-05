@@ -50,6 +50,10 @@ import {
 } from "@/components/settings-components/providers/provider-cards";
 import type { SettingsLayout } from "@/components/settings-components/setting-controls";
 import { ComputerUsePermissions } from "@/components/settings-components/tools/computer-use-permissions";
+import {
+  ChatHistoryToolToggle,
+  MemoryToolToggle,
+} from "@/components/settings-components/tools/tool-permission-toggle";
 import { ToolRow } from "@/components/settings-components/tools/tool-row";
 import { ToolsIntro } from "@/components/settings-components/tools/tools-intro";
 import { TOOL_GROUPS, TOOL_INFO } from "@/components/settings-components/tools/tools-metadata";
@@ -191,14 +195,30 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
           },
           {
             id: "global-agents-files",
-            label: "AGENTS.md files",
+            label: "Instruction files",
             description:
-              "AgentOne follows the instructions in these files in every chat. Projects can use a different list.",
-            keywords: ["agents.md", "instructions", "rules", "system prompt", "file"],
+              "AgentOne follows the instructions in these files in every chat, like AGENTS.md or CLAUDE.md. Projects can use a different list.",
+            keywords: ["agents.md", "claude.md", "instructions", "rules", "system prompt", "file"],
             layout: "stacked",
             control: GlobalAgentsFilesControl,
           },
           { id: "memory", key: "MEMORY", layout: "stacked", control: MemoryControl },
+          {
+            id: "allow-memory-edits",
+            label: "Allow AgentOne to edit memories",
+            description: "AgentOne can add, change, and remove memories on its own as you chat.",
+            keywords: ["memory", "remember", "tool", "personalize"],
+            layout: "row",
+            control: MemoryToolToggle,
+          },
+          {
+            id: "allow-chat-history",
+            label: "Allow AgentOne to read past chats",
+            description: "AgentOne can search and read your earlier conversations for context.",
+            keywords: ["chat history", "recall", "search chats", "read chat", "tool", "past"],
+            layout: "row",
+            control: ChatHistoryToolToggle,
+          },
         ],
       },
     ],

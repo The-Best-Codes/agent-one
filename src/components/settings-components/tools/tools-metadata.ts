@@ -146,8 +146,8 @@ export const TOOL_GROUPS: ToolGroup[] = [
   },
   {
     title: "Utilities",
-    description: "Everyday helpers like the clock, timers, and long-term memory.",
-    toolIds: ["dateTime", "waitNumberMilliseconds", "memory"],
+    description: "Everyday helpers like the clock and timers.",
+    toolIds: ["dateTime", "waitNumberMilliseconds"],
   },
   {
     title: "System",
@@ -168,11 +168,6 @@ export const TOOL_GROUPS: ToolGroup[] = [
       "updateScheduledAgent",
       "deleteScheduledAgent",
     ],
-  },
-  {
-    title: "Chat History",
-    description: "Let AgentOne look through and read your past conversations.",
-    toolIds: ["searchChats", "readChat"],
   },
   {
     title: "Computer Use",

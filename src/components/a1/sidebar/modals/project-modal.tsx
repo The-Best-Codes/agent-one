@@ -160,11 +160,11 @@ const ProjectForm = ({ project, onClose }: { project?: Project; onClose: () => v
           </FieldDescription>
         </Field>
         <Field>
-          <FieldLabel>AGENTS.md files</FieldLabel>
+          <FieldLabel>Instruction files</FieldLabel>
           <FieldDescription>
             {customAgentsFiles
               ? "This project uses its own list."
-              : "Same as your AGENTS.md settings, plus the one in the project folder."}
+              : "Same as your instruction files in settings, plus AGENTS.md in the project folder."}
           </FieldDescription>
           <AgentsFilesEditor
             files={agentsFiles}
