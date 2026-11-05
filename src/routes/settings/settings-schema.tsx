@@ -66,6 +66,7 @@ import {
   SettingsApprovalToggle,
   SettingsToolToggle,
   SubAgentsToolToggle,
+  ToolGroupHeading,
   WebToolToggle,
 } from "@/components/settings-components/tools/tool-controls";
 import { ToolsIntro } from "@/components/settings-components/tools/tools-intro";
@@ -85,6 +86,8 @@ const isLinuxAtom = atom(() => platform() === "linux");
 const computerUsePermissionsVisibleAtom = atom(() => platform() === "macos");
 
 const computerUseEnabledAtom = toolsEnabledAtom(TOOL_SETS.computerUse);
+
+const computerUseCardVisibleAtom = atom((get) => get(computerUseSupportedAtom) || get(isLinuxAtom));
 
 const isVirtualizationEnabledAtom = atom(
   (get) => get(settingAtoms.CHAT_VIRTUALIZATION_MODE) !== "off",
@@ -555,13 +558,17 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     intro: ToolsIntro,
     cards: [
       {
-        title: "Approvals",
-        items: [{ id: "confirm-yolo-mode", key: "CONFIRM_YOLO_MODE" }],
-      },
-      {
-        title: "Web",
-        description: "Let AgentOne look things up online and read the pages it finds.",
         items: [
+          {
+            id: "tools-web",
+            render: () => (
+              <ToolGroupHeading
+                title="Web"
+                description="Let AgentOne look things up online and read the pages it finds."
+                first
+              />
+            ),
+          },
           {
             id: "allow-web-access",
             label: "Allow web access",
@@ -570,12 +577,15 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
             layout: "row",
             control: WebToolToggle,
           },
-        ],
-      },
-      {
-        title: "Files",
-        description: "Read and change files on your computer.",
-        items: [
+          {
+            id: "tools-files",
+            render: () => (
+              <ToolGroupHeading
+                title="Files"
+                description="Read and change files on your computer."
+              />
+            ),
+          },
           {
             id: "allow-read-files",
             label: "Allow AgentOne to read files",
@@ -599,12 +609,15 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
             visible: toolsEnabledAtom(TOOL_SETS.changeFiles),
             control: ChangeFilesApprovalToggle,
           },
-        ],
-      },
-      {
-        title: "System",
-        description: "Reach outside AgentOne by running commands or delegating to subagents.",
-        items: [
+          {
+            id: "tools-system",
+            render: () => (
+              <ToolGroupHeading
+                title="System"
+                description="Reach outside AgentOne by running commands or delegating to subagents."
+              />
+            ),
+          },
           {
             id: "allow-run-commands",
             label: "Allow AgentOne to run commands",
@@ -630,14 +643,16 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
             layout: "row",
             control: SubAgentsToolToggle,
           },
-        ],
-      },
-      {
-        title: "Computer Use",
-        description:
-          "Let AgentOne see and use the other apps on your computer, like a person at the keyboard.",
-        visible: atom((get) => get(computerUseSupportedAtom) || get(isLinuxAtom)),
-        items: [
+          {
+            id: "tools-computer-use",
+            visible: computerUseCardVisibleAtom,
+            render: () => (
+              <ToolGroupHeading
+                title="Computer Use"
+                description="Let AgentOne see and use the other apps on your computer, like a person at the keyboard."
+              />
+            ),
+          },
           {
             id: "computer-use-unsupported",
             label: "Not available on Linux yet",
@@ -669,6 +684,16 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
             visible: atom((get) => get(computerUseSupportedAtom) && get(computerUseEnabledAtom)),
             control: ComputerUseApprovalToggle,
           },
+          {
+            id: "tools-approvals",
+            render: () => (
+              <ToolGroupHeading
+                title="Approvals"
+                description="Control how YOLO mode is turned on for a chat."
+              />
+            ),
+          },
+          { id: "confirm-yolo-mode", key: "CONFIRM_YOLO_MODE" },
         ],
       },
     ],

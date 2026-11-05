@@ -15,6 +15,7 @@ import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { DEFAULT_SETTINGS } from "@/lib/settings/definitions";
 import { getMergedEnabledTools, getMergedToolConfigs } from "@/lib/settings/tools";
 import type { ToolId } from "@/lib/settings/types";
+import { cn } from "@/lib/utils";
 
 import { ToolSettingsDialog } from "./tool-settings-dialog";
 import { TOOL_SETS } from "./tools-metadata";
@@ -247,4 +248,19 @@ export function ComputerUseToolToggle() {
 
 export function ComputerUseApprovalToggle() {
   return <ToolApprovalSwitch toolIds={TOOL_SETS.computerUse} label="Ask before using apps" />;
+}
+
+interface ToolGroupHeadingProps {
+  title: string;
+  description: string;
+  first?: boolean;
+}
+
+export function ToolGroupHeading({ title, description, first }: ToolGroupHeadingProps) {
+  return (
+    <div className={cn("flex flex-col gap-1", !first && "border-t pt-6")}>
+      <h3 className="text-base font-medium">{title}</h3>
+      <p className="text-muted-foreground text-sm">{description}</p>
+    </div>
+  );
 }
