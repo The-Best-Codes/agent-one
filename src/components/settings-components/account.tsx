@@ -46,8 +46,9 @@ import {
   AGENT_ONE_DASHBOARD_URL,
   AGENT_ONE_UPGRADE_URL,
 } from "@/lib/constants";
-import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
+import { hideAgentOneModelsAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
+import { syncEnabledAtom } from "@/lib/jotai/sync-atoms";
 import { globalAgentsFilesAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { MAX_MEMORY_ENTRIES, MAX_MEMORY_ENTRY_CHARS } from "@/lib/memory";
 

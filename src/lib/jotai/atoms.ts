@@ -32,10 +32,6 @@ export const onboardingReminderDismissedAtom = atomWithStorage(
 
 export const tourActiveAtom = atom(false);
 
-export const syncEnabledAtom = atomWithStorage("agent-one-sync-enabled", true, undefined, {
-  getOnInit: true,
-});
-
 export const hideAgentOneModelsAtom = atomWithStorage(
   "agent-one-hide-agentone-models",
   false,
