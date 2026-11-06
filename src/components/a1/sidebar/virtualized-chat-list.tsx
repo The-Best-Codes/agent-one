@@ -469,15 +469,25 @@ export const VirtualizedChatList = ({
     watch: `${listRows.length}:${chats.length}:${isMetadataLoaded}:${searchQuery}`,
   });
 
+  const hasScrolledRef = useRef(false);
+
   useEffect(() => {
     if (scrollToActiveChat && activeChatId && virtualizer && !searchQuery) {
       const activeIndex = listRows.findIndex(
         (row) => row.type === "chat" && row.chat.id === activeChatId,
       );
       if (activeIndex !== -1) {
-        virtualizer.scrollToIndex(activeIndex, {
-          align: "center",
-        });
+        const el = parentRef.current;
+        const item = virtualizer.getVirtualItems().find((i) => i.index === activeIndex);
+        const inView =
+          el && item && item.start >= el.scrollTop && item.end <= el.scrollTop + el.clientHeight;
+        if (!hasScrolledRef.current || !inView) {
+          virtualizer.scrollToIndex(activeIndex, {
+            align: "center",
+            behavior: hasScrolledRef.current ? "smooth" : "auto",
+          });
+        }
+        hasScrolledRef.current = true;
       }
     }
   }, [activeChatId, listRows, virtualizer, scrollToActiveChat, searchQuery]);
