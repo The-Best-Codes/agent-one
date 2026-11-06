@@ -382,7 +382,6 @@ export const VirtualizedChatList = ({
         }
       }
 
-      rows.push({ type: "header", id: "projects", label: "Projects" });
       for (const project of projects) {
         const projectChats = chatsByProject.get(project.id) ?? [];
         const collapsed = collapsedProjectIds.includes(project.id);
