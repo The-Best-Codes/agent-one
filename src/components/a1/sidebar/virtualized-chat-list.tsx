@@ -65,7 +65,7 @@ interface ChatListItem {
 }
 
 type ChatListRow =
-  | { type: "header"; id: string; label: string }
+  | { type: "header"; id: string; label: string; afterProjects?: boolean }
   | { type: "project"; project: Project; collapsed: boolean }
   | { type: "show-more"; projectId: string; hiddenCount: number; expanded: boolean }
   | { type: "empty-project"; projectId: string }
@@ -367,6 +367,7 @@ export const VirtualizedChatList = ({
     const groupByProject = showProjects && !isSearchActive && projects.length > 0;
     const rows: ChatListRow[] = [];
     let otherChats = filteredChats;
+    let projectRowCount = 0;
 
     if (groupByProject) {
       const projectIds = new Set(projects.map((project) => project.id));
@@ -417,8 +418,9 @@ export const VirtualizedChatList = ({
         }
       }
 
+      projectRowCount = rows.length;
       if (!sidebarChatTimeGrouping && otherChats.length > 0) {
-        rows.push({ type: "header", id: "chats", label: "Chats" });
+        rows.push({ type: "header", id: "chats", label: "Chats", afterProjects: true });
       }
     }
 
@@ -434,7 +436,11 @@ export const VirtualizedChatList = ({
     for (const chat of otherChats) {
       const group = getChatTimeGroup(getChatSortTimestamp(chat, chatSort), now);
       if (group.id !== previousGroupId) {
-        rows.push({ type: "header", ...group });
+        rows.push({
+          type: "header",
+          ...group,
+          afterProjects: projectRowCount > 0 && rows.length === projectRowCount,
+        });
         previousGroupId = group.id;
       }
       rows.push({ type: "chat", chat });
@@ -715,7 +721,7 @@ export const VirtualizedChatList = ({
                     <div
                       className={cn(
                         "text-muted-foreground px-2 pb-1 text-xs font-medium",
-                        virtualItem.index === 0 ? "pt-1" : "pt-4",
+                        virtualItem.index === 0 ? "pt-1" : row.afterProjects ? "pt-2" : "pt-4",
                       )}
                     >
                       {row.label}
