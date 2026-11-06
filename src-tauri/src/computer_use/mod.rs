@@ -14,7 +14,7 @@ use apps::{InstalledApp, RunningApp};
 use observe::{AppState, ObserveOptions};
 use permissions::PermissionStatus;
 
-const SETTLE_DELAY: Duration = Duration::from_millis(200);
+const SETTLE_DELAY: Duration = Duration::from_millis(500);
 const DEFAULT_MAX_ELEMENTS: usize = 1500;
 
 type NativeComputer = Computer<NativeBackend>;
