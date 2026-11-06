@@ -23,7 +23,7 @@ const inputSchema = z.object({
   app: z
     .string()
     .describe(
-      "App name or process ID, the same one used with computerUseObserve. For openApp, the installed app's name.",
+      "App name or process ID, the same one used with computerUseObserve. For openApp, the installed app's name, or its path when several share a name.",
     ),
   summary: z
     .string()
@@ -32,7 +32,7 @@ const inputSchema = z.object({
     ),
   action: actionSchema.describe(
     [
-      "openApp: open an installed app by name, then observe it.",
+      "openApp: open an installed app by name (or path), then observe it.",
       "click: click an element (elementIndex) or a screenshot point (x, y).",
       "typeText: type text into the focused element, or into elementIndex.",
       "pressKey: press a key or chord, like Return, Escape, Tab, ctrl+shift+t, or cmd+c on macOS.",

@@ -113,7 +113,11 @@ ${COMPUTER_USE_GUIDANCE}`,
       }
 
       if (output.kind === "installed") {
-        const names = output.apps.map((app) => app.name);
+        const counts = new Map<string, number>();
+        for (const { name } of output.apps) counts.set(name, (counts.get(name) ?? 0) + 1);
+        const names = output.apps.map((app) =>
+          (counts.get(app.name) ?? 0) > 1 ? `${app.name} (${app.path})` : app.name,
+        );
         const more =
           output.total > names.length
             ? `\nShowing ${names.length} of ${output.total}. Search with a more specific query to narrow it down.`

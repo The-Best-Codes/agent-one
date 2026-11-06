@@ -124,7 +124,7 @@ pub fn list_installed(
                 path,
             })
         })
-        .filter(|app| seen.insert(app.name.to_lowercase()))
+        .filter(|app| seen.insert(app.path.clone()))
         .collect();
     apps.sort_by_key(|app| app.name.to_lowercase());
     Ok(apps)
