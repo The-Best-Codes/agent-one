@@ -31,7 +31,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       return (
         <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1">
-            <IconTool className="text-foreground size-4" />
+            <IconTool className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
               {`AgentOne wants to run tool "${toolName}"`}
             </span>
@@ -60,7 +60,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
     case "output-denied":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <IconCircleX className="text-muted-foreground size-4" />
+          <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
             {`Tool "${toolName}" denied`}
           </span>
@@ -82,7 +82,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       if (part.approval?.approved === false) {
         return (
           <div key={callId} className="flex items-center gap-1">
-            <IconCircleX className="text-muted-foreground size-4" />
+            <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
               {`Tool "${toolName}" denied`}
             </span>
@@ -141,7 +141,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       if (part.errorText === TOOL_CANCELLED_BY_USER_SYMBOL) {
         return (
           <div key={callId} className="flex items-center gap-2">
-            <IconCircleX className="text-muted-foreground size-4" />
+            <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
               {`Tool "${toolName}" cancelled`}
             </span>
@@ -161,7 +161,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
     default:
       return (
         <div key={callId} className="flex items-center gap-2">
-          <IconCircleX className="text-destructive size-4" />
+          <IconCircleX className="text-destructive size-4 shrink-0" />
           <span className="text-destructive text-sm font-bold">{`Unknown tool "${toolName}"`}</span>
         </div>
       );

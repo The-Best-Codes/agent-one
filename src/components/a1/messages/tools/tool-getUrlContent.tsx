@@ -216,7 +216,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                       href={input.urls[0]}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="max-w-2xl cursor-pointer truncate text-blue-500 hover:text-blue-600 hover:underline"
+                      className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
                     >
                       {formatUrl(input.urls[0])}
                     </a>
@@ -370,7 +370,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                     href={results[0].url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="max-w-2xl cursor-pointer truncate text-blue-500 hover:text-blue-600 hover:underline"
+                    className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
                   >
                     {formatUrl(results[0].url)}
                   </a>

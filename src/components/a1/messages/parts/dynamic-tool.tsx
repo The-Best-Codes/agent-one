@@ -130,7 +130,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
     case "output-denied": {
       return (
         <div key={callId} className="flex items-center gap-1">
-          <IconCircleX className="text-muted-foreground size-4" />
+          <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
             {`"${toolName}" tool denied`}
           </span>
@@ -143,7 +143,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
       if (part.approval?.approved === false) {
         return (
           <div key={callId} className="flex items-center gap-1">
-            <IconCircleX className="text-muted-foreground size-4" />
+            <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
               {`"${toolName}" tool denied`}
             </span>
@@ -316,7 +316,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
       if (part.errorText === TOOL_CANCELLED_BY_USER_SYMBOL) {
         return (
           <div key={callId} className="flex items-center gap-1">
-            <IconCircleX className="text-muted-foreground size-4" />
+            <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
               {`"${toolName}" tool cancelled`}
             </span>
@@ -376,7 +376,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
     default: {
       return (
         <div key={callId} className="flex items-center gap-1">
-          <IconCircleX className="text-destructive size-4" />
+          <IconCircleX className="text-destructive size-4 shrink-0" />
           <span className="text-destructive text-sm font-bold">
             {`Unknown "${toolName}" tool state`}
           </span>
