@@ -14,7 +14,7 @@ export function UserProfileDisplay({ user, action, className }: UserProfileDispl
   return (
     <div className={cn("flex items-center justify-between gap-4", className)}>
       <div className="flex items-center gap-3">
-        <div className="size-10 overflow-hidden rounded-lg">
+        <div className="size-10 shrink-0 overflow-hidden rounded-lg">
           <Avatar size={40} name={user.id} variant="beam" square />
         </div>
         <div>
