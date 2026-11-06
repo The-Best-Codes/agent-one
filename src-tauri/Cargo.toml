@@ -83,5 +83,4 @@ windows-sys = { version = "0.61.2", features = [
 zbus-secret-service-keyring-store = { version = "1.0.1", features = ["rt-async-io-crypto-rust"] }
 
 [target.'cfg(any(target_os = "macos", target_os = "windows"))'.dependencies]
-applications = "0.3.1"
-xa11y = { version = "0.15.4", default-features = false }
+computer-use-rs = "0.2.0"

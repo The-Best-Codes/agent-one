@@ -1,67 +1,76 @@
 mod actions;
 mod apps;
-mod keys;
 mod observe;
 mod permissions;
-mod state;
-mod tree;
 
-use std::thread::sleep;
+use std::sync::{Mutex, PoisonError};
 use std::time::Duration;
 
-use xa11y::{App, AppExt, Element, Error};
+use computer_use::{Computer, Delivery, Error, NativeBackend, Permission};
+use once_cell::sync::Lazy;
 
 use actions::ComputerAction;
 use apps::{InstalledApp, RunningApp};
 use observe::{AppState, ObserveOptions};
 use permissions::PermissionStatus;
 
-const ACTIVATE_DELAY: Duration = Duration::from_millis(150);
+const SETTLE_DELAY: Duration = Duration::from_millis(200);
 const DEFAULT_MAX_ELEMENTS: usize = 1500;
+
+type NativeComputer = Computer<NativeBackend>;
+
+static COMPUTER: Lazy<Mutex<Option<NativeComputer>>> = Lazy::new(|| Mutex::new(None));
 
 fn describe_error(error: Error) -> String {
     match error {
-        Error::ElementStale { .. } => {
-            "The element no longer exists. Observe the app again to get fresh element indexes."
-                .to_string()
+        Error::PermissionDenied(Permission::Accessibility) => {
+            permissions::ACCESSIBILITY_MISSING.to_string()
         }
+        Error::PermissionDenied(Permission::ScreenRecording) => {
+            permissions::SCREEN_RECORDING_MISSING.to_string()
+        }
+        Error::NoAppState(_) => {
+            "Observe the app before acting on it so element indexes are known.".to_string()
+        }
+        Error::ElementNotFound { index, .. } => format!(
+            "Element [{index}] is not in the latest observation of this app. Observe the app again."
+        ),
         other => other.to_string(),
     }
 }
 
-fn activate(window: Option<&Element>, pid: u32) -> Result<(), String> {
-    let not_front = || {
-        "The app's window could not be brought to the front, so no input was sent. Observe the app again."
-            .to_string()
-    };
-    let window = window.ok_or_else(not_front)?;
-    window.activate().map_err(|_| not_front())?;
-    sleep(ACTIVATE_DELAY);
-    let foreground = App::foreground(Duration::ZERO).map_err(describe_error)?;
-    if foreground.pid != Some(pid) {
-        return Err(not_front());
+fn with_computer<T>(
+    task: impl FnOnce(&mut NativeComputer) -> Result<T, String>,
+) -> Result<T, String> {
+    let mut guard = COMPUTER.lock().unwrap_or_else(PoisonError::into_inner);
+    if guard.is_none() {
+        let computer = Computer::new()
+            .map_err(describe_error)?
+            .delivery(Delivery::FocusedBackground)
+            .settle_delay(SETTLE_DELAY);
+        *guard = Some(computer);
     }
-    Ok(())
+    task(guard.as_mut().expect("computer was just created"))
 }
 
 async fn run_blocking<T, F>(task: F) -> Result<T, String>
 where
     T: Send + 'static,
-    F: FnOnce() -> Result<T, String> + Send + 'static,
+    F: FnOnce(&mut NativeComputer) -> Result<T, String> + Send + 'static,
 {
-    tokio::task::spawn_blocking(task)
+    tokio::task::spawn_blocking(move || with_computer(task))
         .await
         .map_err(|e| format!("Computer use task failed: {e}"))?
 }
 
 #[tauri::command]
-pub fn computer_use_permissions() -> PermissionStatus {
-    permissions::status()
+pub async fn computer_use_permissions() -> Result<PermissionStatus, String> {
+    run_blocking(|computer| Ok(permissions::status(computer))).await
 }
 
 #[tauri::command]
-pub fn computer_use_request_permission(permission: String) -> Result<(), String> {
-    permissions::request(&permission)
+pub async fn computer_use_request_permission(permission: String) -> Result<(), String> {
+    run_blocking(move |computer| permissions::request(computer, &permission)).await
 }
 
 #[tauri::command]
@@ -73,7 +82,7 @@ pub async fn computer_use_list_apps() -> Result<Vec<RunningApp>, String> {
 pub async fn computer_use_search_installed_apps(
     query: Option<String>,
 ) -> Result<Vec<InstalledApp>, String> {
-    run_blocking(move || apps::list_installed(query.as_deref())).await
+    run_blocking(move |computer| apps::list_installed(computer, query.as_deref())).await
 }
 
 #[tauri::command]
@@ -84,8 +93,9 @@ pub async fn computer_use_get_state(
     include_menu_bar: Option<bool>,
     max_elements: Option<usize>,
 ) -> Result<AppState, String> {
-    run_blocking(move || {
+    run_blocking(move |computer| {
         observe::get_state(
+            computer,
             &app,
             ObserveOptions {
                 window,
@@ -100,5 +110,5 @@ pub async fn computer_use_get_state(
 
 #[tauri::command]
 pub async fn computer_use_act(app: String, action: ComputerAction) -> Result<String, String> {
-    run_blocking(move || actions::act(&app, action)).await
+    run_blocking(move |computer| actions::act(computer, &app, action)).await
 }

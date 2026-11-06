@@ -1,14 +1,12 @@
-use std::thread::sleep;
-use std::time::Duration;
-
+use computer_use::{
+    ClickOptions, ClickOutcome, ClickTarget, MouseButton, ScrollDirection, SelectionMode,
+    TextSelection,
+};
 use serde::Deserialize;
-use xa11y::{ClickOptions, ClickTarget, Error, MouseButton, ScrollDelta};
 
-use super::state::{element_center, snapshots, visible_center};
-use super::{activate, apps, describe_error, keys};
+use super::{apps, describe_error, NativeComputer};
 
-const SETTLE_DELAY: Duration = Duration::from_millis(200);
-const AX_ERROR_CANNOT_COMPLETE: i64 = -25204;
+const DEFAULT_SCROLL_PAGES: f64 = 1.0;
 
 #[derive(Debug, Deserialize)]
 #[serde(
@@ -20,8 +18,8 @@ pub enum ComputerAction {
     OpenApp,
     Click {
         element_index: Option<usize>,
-        x: Option<i32>,
-        y: Option<i32>,
+        x: Option<f64>,
+        y: Option<f64>,
         button: Option<String>,
         click_count: Option<u32>,
     },
@@ -34,20 +32,27 @@ pub enum ComputerAction {
     },
     Scroll {
         direction: String,
-        amount: Option<i32>,
+        pages: Option<f64>,
         element_index: Option<usize>,
-        x: Option<i32>,
-        y: Option<i32>,
+        x: Option<f64>,
+        y: Option<f64>,
     },
     Drag {
-        from_x: i32,
-        from_y: i32,
-        to_x: i32,
-        to_y: i32,
+        from_x: f64,
+        from_y: f64,
+        to_x: f64,
+        to_y: f64,
     },
     SetValue {
         element_index: usize,
         value: String,
+    },
+    SelectText {
+        element_index: usize,
+        text: String,
+        prefix: Option<String>,
+        suffix: Option<String>,
+        mode: Option<String>,
     },
     PerformAction {
         element_index: usize,
@@ -55,46 +60,53 @@ pub enum ComputerAction {
     },
 }
 
-fn parse_button(button: Option<&str>) -> Result<MouseButton, String> {
-    match button.unwrap_or("left").to_ascii_lowercase().as_str() {
-        "left" | "l" => Ok(MouseButton::Left),
-        "right" | "r" => Ok(MouseButton::Right),
-        "middle" | "m" => Ok(MouseButton::Middle),
-        other => Err(format!("Unknown mouse button \"{other}\"")),
+fn target(element_index: Option<usize>, x: Option<f64>, y: Option<f64>) -> Option<ClickTarget> {
+    match (element_index, x, y) {
+        (Some(index), _, _) => Some(ClickTarget::Element(index)),
+        (None, Some(x), Some(y)) => Some(ClickTarget::Pixel { x, y }),
+        _ => None,
     }
 }
 
-// xa11y's horizontal scroll axis points left on macOS and right on Windows.
-const SCROLL_RIGHT: i32 = if cfg!(target_os = "macos") { -1 } else { 1 };
-
-fn scroll_delta(direction: &str, amount: i32) -> Result<ScrollDelta, String> {
-    match direction.to_ascii_lowercase().as_str() {
-        "up" | "u" => Ok(ScrollDelta::vertical(amount)),
-        "down" | "d" => Ok(ScrollDelta::vertical(-amount)),
-        "left" | "l" => Ok(ScrollDelta::horizontal(-amount * SCROLL_RIGHT)),
-        "right" | "r" => Ok(ScrollDelta::horizontal(amount * SCROLL_RIGHT)),
-        other => Err(format!("Unknown scroll direction \"{other}\"")),
+fn label(computer: &NativeComputer, key: &str, index: usize) -> String {
+    let element = computer.state(key).and_then(|state| state.element(index));
+    match element {
+        Some(e) => match e.label().filter(|l| !l.is_empty()) {
+            Some(text) => format!("[{index}] {} \"{text}\"", e.role),
+            None => format!("[{index}] {}", e.role),
+        },
+        None => format!("[{index}]"),
     }
 }
 
-pub fn act(query: &str, action: ComputerAction) -> Result<String, String> {
+fn describe_target(computer: &NativeComputer, key: &str, target: &ClickTarget) -> String {
+    match target {
+        ClickTarget::Element(index) => label(computer, key, *index),
+        ClickTarget::Pixel { x, y } | ClickTarget::Screen { x, y } => format!("({x}, {y})"),
+        _ => "the target".to_string(),
+    }
+}
+
+fn selection_mode(mode: Option<&str>) -> Result<SelectionMode, String> {
+    match mode.map(|m| m.trim().to_ascii_lowercase()).as_deref() {
+        None | Some("select") | Some("text") => Ok(SelectionMode::Text),
+        Some("before") => Ok(SelectionMode::CursorBefore),
+        Some("after") => Ok(SelectionMode::CursorAfter),
+        Some(other) => Err(format!("Unknown selection mode \"{other}\"")),
+    }
+}
+
+pub fn act(
+    computer: &mut NativeComputer,
+    query: &str,
+    action: ComputerAction,
+) -> Result<String, String> {
     if matches!(action, ComputerAction::OpenApp) {
-        return apps::open(query);
+        return apps::open(computer, query);
     }
 
-    let app = apps::find_running(query)?;
-    let pid = app
-        .pid
-        .ok_or_else(|| "The app has no process id.".to_string())?;
-    let snapshots = snapshots();
-    let snapshot = snapshots.get(&pid).ok_or_else(|| {
-        format!(
-            "Observe \"{}\" before acting on it so element indexes are known.",
-            app.name
-        )
-    })?;
-    let window = snapshot.window.as_ref();
-    let input = || xa11y::input_sim().map_err(describe_error);
+    let (_, key) = apps::find_running(computer, query)?;
+    let key = key.as_str();
 
     let message = match action {
         ComputerAction::OpenApp => unreachable!(),
@@ -105,96 +117,71 @@ pub fn act(query: &str, action: ComputerAction) -> Result<String, String> {
             button,
             click_count,
         } => {
-            let button = parse_button(button.as_deref())?;
+            let target = target(element_index, x, y)
+                .ok_or("Provide either elementIndex or both x and y.")?;
+            let button: MouseButton = button
+                .as_deref()
+                .unwrap_or("left")
+                .parse()
+                .map_err(describe_error)?;
             let count = click_count.unwrap_or(1).clamp(1, 3);
-
-            let pressed = match element_index {
-                Some(index) if button == MouseButton::Left && count == 1 => {
-                    let element = snapshot.element(index)?;
-                    element.actions.iter().any(|a| a == "press")
-                        && match element.press() {
-                            Ok(()) => true,
-                            // The app is still handling the press (e.g. it opened a modal).
-                            Err(Error::Platform { code, .. }) => code == AX_ERROR_CANNOT_COMPLETE,
-                            Err(_) => false,
-                        }
+            let described = describe_target(computer, key, &target);
+            let outcome = computer
+                .click(
+                    key,
+                    target,
+                    ClickOptions::default().button(button).count(count),
+                )
+                .map_err(describe_error)?;
+            match outcome {
+                ClickOutcome::Action(name) => {
+                    format!("Clicked {described} with its \"{name}\" action.")
                 }
-                _ => false,
-            };
-
-            if !pressed {
-                let point = snapshot.target_point(element_index, x, y)?;
-                activate(window, pid)?;
-                input()?
-                    .mouse()
-                    .click_with(
-                        ClickTarget::from(point),
-                        ClickOptions::new().button(button).count(count),
-                    )
-                    .map_err(describe_error)?;
-            }
-
-            match element_index {
-                Some(index) => format!("Clicked {}.", snapshot.label(index)),
-                None => format!("Clicked at ({}, {}).", x.unwrap_or(0), y.unwrap_or(0)),
+                _ => format!("Clicked {described}."),
             }
         }
         ComputerAction::TypeText {
             text,
             element_index,
         } => {
-            let typed = match element_index {
-                Some(index) => {
-                    let element = snapshot.element(index)?;
-                    element.focus().is_ok() && element.type_text(&text).is_ok()
-                }
-                None => false,
-            };
-            if !typed {
-                activate(window, pid)?;
-                input()?
-                    .keyboard()
-                    .type_text(&text)
+            if let Some(index) = element_index {
+                computer
+                    .click(key, ClickTarget::Element(index), ClickOptions::default())
                     .map_err(describe_error)?;
             }
+            computer.type_text(key, &text).map_err(describe_error)?;
             format!("Typed {} characters.", text.chars().count())
         }
-        ComputerAction::PressKey { key } => {
-            let chord = keys::parse_chord(&key)?;
-            activate(window, pid)?;
-            let sim = input()?;
-            let keyboard = sim.keyboard();
-            if chord.held.is_empty() {
-                keyboard.press(chord.key).map_err(describe_error)?;
-            } else {
-                keyboard
-                    .chord(chord.key, &chord.held)
-                    .map_err(describe_error)?;
-            }
-            format!("Pressed {key}.")
+        ComputerAction::PressKey { key: chord } => {
+            computer.press_key(key, &chord).map_err(describe_error)?;
+            format!("Pressed {chord}.")
         }
         ComputerAction::Scroll {
             direction,
-            amount,
+            pages,
             element_index,
             x,
             y,
         } => {
-            let amount = amount.unwrap_or(5).clamp(1, 50);
-            let delta = scroll_delta(&direction, amount)?;
-            let point = match (element_index, x, y) {
-                (None, None, None) => {
-                    element_center(window.ok_or("The app has no window to scroll.")?)?
+            let parsed: ScrollDirection = direction.parse().map_err(describe_error)?;
+            let pages = pages.unwrap_or(DEFAULT_SCROLL_PAGES).clamp(0.1, 20.0);
+            let target = match target(element_index, x, y) {
+                Some(target) => target,
+                None => {
+                    let state = computer
+                        .state(key)
+                        .ok_or("Observe the app before scrolling it.")?;
+                    let center = state.window.frame.center();
+                    ClickTarget::Screen {
+                        x: center.x,
+                        y: center.y,
+                    }
                 }
-                (Some(index), _, _) => visible_center(snapshot.element(index)?, window)?,
-                _ => snapshot.target_point(element_index, x, y)?,
             };
-            activate(window, pid)?;
-            input()?
-                .mouse()
-                .scroll(point, delta)
+            computer
+                .scroll_at(key, target, parsed, pages)
                 .map_err(describe_error)?;
-            format!("Scrolled {direction} by {amount}.")
+            format!("Scrolled {direction} by {pages} pages.")
         }
         ComputerAction::Drag {
             from_x,
@@ -202,36 +189,56 @@ pub fn act(query: &str, action: ComputerAction) -> Result<String, String> {
             to_x,
             to_y,
         } => {
-            let from = snapshot.screenshot_point(from_x, from_y)?;
-            let to = snapshot.screenshot_point(to_x, to_y)?;
-            activate(window, pid)?;
-            input()?.mouse().drag(from, to).map_err(describe_error)?;
+            computer
+                .drag(key, (from_x, from_y), (to_x, to_y))
+                .map_err(describe_error)?;
             format!("Dragged from ({from_x}, {from_y}) to ({to_x}, {to_y}).")
         }
         ComputerAction::SetValue {
             element_index,
             value,
         } => {
-            snapshot
-                .element(element_index)?
-                .set_value(&value)
+            computer
+                .set_value(key, element_index, &value)
                 .map_err(describe_error)?;
-            format!("Set the value of {}.", snapshot.label(element_index))
+            format!("Set the value of {}.", label(computer, key, element_index))
+        }
+        ComputerAction::SelectText {
+            element_index,
+            text,
+            prefix,
+            suffix,
+            mode,
+        } => {
+            let mode = selection_mode(mode.as_deref())?;
+            let mut selection = TextSelection::new(text).mode(mode);
+            if let Some(prefix) = prefix {
+                selection = selection.prefix(prefix);
+            }
+            if let Some(suffix) = suffix {
+                selection = selection.suffix(suffix);
+            }
+            computer
+                .select_text(key, element_index, &selection)
+                .map_err(describe_error)?;
+            format!(
+                "Updated the selection in {}.",
+                label(computer, key, element_index)
+            )
         }
         ComputerAction::PerformAction {
             element_index,
             action,
         } => {
-            let name = action.trim().to_lowercase().replace([' ', '-'], "_");
-            snapshot
-                .element(element_index)?
-                .perform_action(&name)
+            computer
+                .perform_secondary_action(key, element_index, &action)
                 .map_err(describe_error)?;
-            format!("Performed \"{name}\" on {}.", snapshot.label(element_index))
+            format!(
+                "Performed \"{action}\" on {}.",
+                label(computer, key, element_index)
+            )
         }
     };
 
-    drop(snapshots);
-    sleep(SETTLE_DELAY);
     Ok(message)
 }

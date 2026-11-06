@@ -14,6 +14,7 @@ const actionSchema = z.enum([
   "scroll",
   "drag",
   "setValue",
+  "selectText",
   "performAction",
 ]);
 
@@ -34,10 +35,11 @@ const inputSchema = z.object({
       "click: click an element (elementIndex) or a screenshot point (x, y).",
       "typeText: type text into the focused element, or into elementIndex.",
       "pressKey: press a key or chord, like Return, Escape, Tab, cmd+c, ctrl+shift+t.",
-      "scroll: scroll in a direction over an element, a point, or the window center.",
+      "scroll: scroll in a direction over an element, a screenshot point, or the window center.",
       "drag: drag between two screenshot points.",
       "setValue: replace the value of an editable element.",
-      "performAction: run an action listed on an element, like toggle, expand, show_menu, focus, or activate.",
+      "selectText: select text inside an element, or put the caret before or after it. Use prefix/suffix when the text appears more than once.",
+      "performAction: run a secondary action listed on an element, like Show Menu, Raise, or Increment.",
     ].join("\n"),
   ),
   elementIndex: z
@@ -54,19 +56,35 @@ const inputSchema = z.object({
     .string()
     .optional()
     .describe(
-      "Text for typeText, the new value for setValue, or the action name for performAction.",
+      "Text for typeText, the new value for setValue, the text to find for selectText, or the action name for performAction.",
     ),
-  key: z.string().optional().describe("Key or chord for pressKey."),
+  key: z
+    .string()
+    .optional()
+    .describe(
+      'Key or chord for pressKey, in xdotool style like "Return", "cmd+c", or "ctrl+shift+Tab".',
+    ),
+  prefix: z
+    .string()
+    .optional()
+    .describe("For selectText: text that must appear right before the match."),
+  suffix: z
+    .string()
+    .optional()
+    .describe("For selectText: text that must appear right after the match."),
+  mode: z
+    .enum(["select", "before", "after"])
+    .optional()
+    .describe("For selectText: select the text (default), or place the caret before or after it."),
   button: z.enum(["left", "right", "middle"]).optional().describe("Mouse button for click."),
   clickCount: z.number().int().min(1).max(3).optional().describe("2 for a double-click."),
   direction: z.enum(["up", "down", "left", "right"]).optional().describe("Scroll direction."),
-  amount: z
+  pages: z
     .number()
-    .int()
-    .min(1)
-    .max(50)
+    .min(0.1)
+    .max(20)
     .optional()
-    .describe("Scroll distance in wheel steps. Defaults to 5."),
+    .describe("Scroll distance in pages; fractions allowed. Defaults to 1."),
 });
 
 type ComputerUseActInput = z.infer<typeof inputSchema>;
@@ -108,7 +126,7 @@ function toAction(input: ComputerUseActInput): ComputerUseAction {
       return {
         type: "scroll",
         direction: required(input.direction, "direction", action),
-        amount: input.amount,
+        pages: input.pages,
         elementIndex: input.elementIndex,
         x: input.x,
         y: input.y,
@@ -127,6 +145,15 @@ function toAction(input: ComputerUseActInput): ComputerUseAction {
         elementIndex: required(input.elementIndex, "elementIndex", action),
         value: required(input.text, "text", action),
       };
+    case "selectText":
+      return {
+        type: "selectText",
+        elementIndex: required(input.elementIndex, "elementIndex", action),
+        text: required(input.text, "text", action),
+        prefix: input.prefix,
+        suffix: input.suffix,
+        mode: input.mode,
+      };
     case "performAction":
       return {
         type: "performAction",
@@ -138,7 +165,7 @@ function toAction(input: ComputerUseActInput): ComputerUseAction {
 
 export const createComputerUseActTool = (config: ComputerUseActToolConfig) =>
   tool({
-    description: `Use an app on the user's computer: open it, click, type, press keys, scroll, drag, set values, or run element actions. Observe the app with computerUseObserve before acting on it, and again afterwards to see the result.
+    description: `Use an app on the user's computer: open it, click, type, press keys, scroll, drag, set values, select text, or run element actions. Input goes to the app in the background, so it does not take over the user's mouse, keyboard, or focus. Observe the app with computerUseObserve before acting on it, and again afterwards to see the result.
 
 ${COMPUTER_USE_GUIDANCE}`,
     needsApproval: config.requiresApproval,

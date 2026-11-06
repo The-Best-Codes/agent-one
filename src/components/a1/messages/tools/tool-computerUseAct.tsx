@@ -35,7 +35,7 @@ interface ComputerUseActInput {
   text?: string;
   key?: string;
   direction?: string;
-  amount?: number;
+  pages?: number;
   clickCount?: number;
   button?: string;
 }
@@ -71,6 +71,8 @@ function describeAction(input: ComputerUseActInput) {
       return `Drag from (${input.x}, ${input.y}) to (${input.toX}, ${input.toY})`;
     case "setValue":
       return `Set the value of element ${input.elementIndex ?? "?"}`;
+    case "selectText":
+      return `Select text in element ${input.elementIndex ?? "?"}`;
     case "performAction":
       return `Run "${input.text ?? "an action"}" on element ${input.elementIndex ?? "?"}`;
     default:

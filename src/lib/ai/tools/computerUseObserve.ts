@@ -48,20 +48,20 @@ ${COMPUTER_USE_GUIDANCE}`,
         .string()
         .optional()
         .describe(
-          'Which window to expand: a window number from a previous observation (e.g. "1") or part of its title. Defaults to the focused window.',
+          "Which window to capture: a window id from a previous observation, or part of its title. Defaults to the focused or main window.",
         ),
       includeScreenshot: z
         .boolean()
         .default(false)
         .describe(
           config.includeScreenshots
-            ? "Also capture a screenshot of the window. This brings the window to the front. Needed before using x/y coordinates in computerUseAct."
+            ? "Also capture a screenshot of the window. It is captured in the background without bringing the window to the front. Needed before using x/y coordinates in computerUseAct."
             : "Screenshots are turned off by the user; leave this false.",
         ),
       includeMenuBar: z
         .boolean()
         .default(false)
-        .describe("Also expand the app's menu bar, which is collapsed by default."),
+        .describe("Also include the app's menu bar (macOS keeps it outside the window)."),
       maxElements: z
         .number()
         .int()
