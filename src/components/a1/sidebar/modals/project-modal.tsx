@@ -7,6 +7,12 @@ import { useNavigate } from "react-router";
 
 import { AgentsFilesEditor } from "@/components/a1/agents-files-editor";
 import { MemoryEditor } from "@/components/settings-components/account";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -42,6 +48,7 @@ interface ProjectModalProps {
 const ProjectForm = ({ project, onClose }: { project?: Project; onClose: () => void }) => {
   const navigate = useNavigate();
   const [name, setName] = useState(project?.name ?? "");
+  const [nameFromFolder, setNameFromFolder] = useState(false);
   const [instructions, setInstructions] = useState(project?.instructions ?? "");
   const [folder, setFolder] = useState(project?.folder);
   const [savedFolderMissing, setSavedFolderMissing] = useState(false);
@@ -70,7 +77,13 @@ const ProjectForm = ({ project, onClose }: { project?: Project; onClose: () => v
   const chooseFolder = async () => {
     try {
       const selected = await open({ directory: true, defaultPath: folder });
-      if (typeof selected === "string") setFolder(selected);
+      if (typeof selected !== "string") return;
+      setFolder(selected);
+      const folderName = selected.split(/[\\/]/).filter(Boolean).at(-1);
+      if (folderName && (!name.trim() || nameFromFolder)) {
+        setName(folderName.slice(0, 100));
+        setNameFromFolder(true);
+      }
     } catch (error) {
       logger.error("Failed to choose project folder", error);
     }
@@ -106,23 +119,16 @@ const ProjectForm = ({ project, onClose }: { project?: Project; onClose: () => v
           <Input
             id="project-name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value);
+              setNameFromFolder(false);
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.nativeEvent.isComposing) handleSave();
             }}
             placeholder="e.g. Kitchen remodel"
             maxLength={100}
             autoFocus
-          />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="project-instructions">Instructions</FieldLabel>
-          <Textarea
-            id="project-instructions"
-            value={instructions}
-            onChange={(e) => setInstructions(e.target.value)}
-            placeholder="What should AgentOne know or do in this project?"
-            className="max-h-48 min-h-24"
           />
         </Field>
         <Field>
@@ -160,49 +166,73 @@ const ProjectForm = ({ project, onClose }: { project?: Project; onClose: () => v
           </FieldDescription>
         </Field>
         <Field>
-          <FieldLabel>Instruction files</FieldLabel>
-          <FieldDescription>
-            {customAgentsFiles
-              ? "This project uses its own list."
-              : "Same as your instruction files in settings, plus AGENTS.md in the project folder."}
-          </FieldDescription>
-          <AgentsFilesEditor
-            files={agentsFiles}
-            setFiles={(update) => setCustomAgentsFiles(update(agentsFiles))}
-            folder={folder}
-            action={
-              customAgentsFiles && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setCustomAgentsFiles(undefined)}
+          <FieldLabel htmlFor="project-instructions">Instructions</FieldLabel>
+          <Textarea
+            id="project-instructions"
+            value={instructions}
+            onChange={(e) => setInstructions(e.target.value)}
+            placeholder="What should AgentOne know or do in this project?"
+            className="max-h-48 min-h-24"
+          />
+        </Field>
+        <Accordion type="single" collapsible className="rounded-md border px-3">
+          <AccordionItem value="advanced" className="border-b-0">
+            <AccordionTrigger className="py-3 text-sm">
+              Memory and instruction files
+            </AccordionTrigger>
+            <AccordionContent className="h-auto pb-3">
+              <div className="flex flex-col gap-5">
+                <Field
+                  orientation="horizontal"
+                  className="has-[>[data-slot=field-content]]:items-center"
                 >
-                  Reset
-                </Button>
-              )
-            }
-          />
-        </Field>
-        <Field orientation="horizontal" className="has-[>[data-slot=field-content]]:items-center">
-          <FieldContent>
-            <FieldLabel htmlFor="project-separate-memory">Separate memory</FieldLabel>
-            <FieldDescription>
-              Keep this project's memory and chats apart from your other chats.
-            </FieldDescription>
-          </FieldContent>
-          <Switch
-            id="project-separate-memory"
-            checked={separateMemory}
-            onCheckedChange={setSeparateMemory}
-          />
-        </Field>
-        {project && separateMemory && (
-          <Field>
-            <FieldLabel>Project memory</FieldLabel>
-            <MemoryEditor memory={memory} setMemory={setMemory} />
-          </Field>
-        )}
+                  <FieldContent>
+                    <FieldLabel htmlFor="project-separate-memory">Separate memory</FieldLabel>
+                    <FieldDescription>
+                      Keep this project's memory and chats apart from your other chats.
+                    </FieldDescription>
+                  </FieldContent>
+                  <Switch
+                    id="project-separate-memory"
+                    checked={separateMemory}
+                    onCheckedChange={setSeparateMemory}
+                  />
+                </Field>
+                {project && separateMemory && (
+                  <Field>
+                    <FieldLabel>Project memory</FieldLabel>
+                    <MemoryEditor memory={memory} setMemory={setMemory} />
+                  </Field>
+                )}
+                <Field>
+                  <FieldLabel>Instruction files</FieldLabel>
+                  <FieldDescription>
+                    {customAgentsFiles
+                      ? "This project uses its own list."
+                      : "Same as your instruction files in settings, plus AGENTS.md in the project folder."}
+                  </FieldDescription>
+                  <AgentsFilesEditor
+                    files={agentsFiles}
+                    setFiles={(update) => setCustomAgentsFiles(update(agentsFiles))}
+                    folder={folder}
+                    action={
+                      customAgentsFiles && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setCustomAgentsFiles(undefined)}
+                        >
+                          Reset
+                        </Button>
+                      )
+                    }
+                  />
+                </Field>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
       <DialogFooter>
         <Button variant="outline" onClick={onClose}>
