@@ -29,7 +29,7 @@ export const COMPUTER_USE_GUIDANCE = `Computer use workflow:
 
 export const createComputerUseObserveTool = (config: ComputerUseObserveToolConfig) =>
   tool({
-    description: `See the apps on the user's computer. "runningApps" lists open apps and their window titles. "installedApps" searches apps that can be opened. "app" returns one running app's accessibility tree (numbered UI elements for computerUseAct) and, optionally, a screenshot of its window.
+    description: `See the apps on the user's computer. "runningApps" lists open apps and their window titles; an app marked needsRestart can't be used until the user quits and reopens it, so ask them to. "installedApps" searches apps that can be opened. "app" returns one running app's accessibility tree (numbered UI elements for computerUseAct) and, optionally, a screenshot of its window.
 
 ${COMPUTER_USE_GUIDANCE}`,
     needsApproval: config.requiresApproval,

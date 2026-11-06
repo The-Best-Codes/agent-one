@@ -12,6 +12,7 @@ export interface ComputerUseAppInfo {
   name: string;
   pid?: number;
   windows: string[];
+  needsRestart?: boolean;
 }
 
 export interface ComputerUseInstalledApp {

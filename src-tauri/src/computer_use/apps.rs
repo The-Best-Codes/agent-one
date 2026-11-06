@@ -13,6 +13,8 @@ pub struct RunningApp {
     #[serde(skip_serializing_if = "Option::is_none")]
     pid: Option<u32>,
     windows: Vec<String>,
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    needs_restart: bool,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -59,6 +61,12 @@ pub fn find_running(computer: &NativeComputer, query: &str) -> Result<(AppInfo, 
             app.name
         ));
     }
+    if app.needs_restart {
+        return Err(format!(
+            "{name} is running but can't be inspected or controlled until it is restarted. Ask the user to quit {name} completely and open it again.",
+            name = app.name
+        ));
+    }
     let key = session_key(&app)?;
     Ok((app, key))
 }
@@ -85,6 +93,7 @@ pub fn list_running(computer: &mut NativeComputer) -> Result<Vec<RunningApp>, St
                 name: app.name,
                 pid: app.pid,
                 windows,
+                needs_restart: app.needs_restart,
             }
         })
         .collect())

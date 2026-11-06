@@ -1,3 +1,4 @@
+import { platform } from "@tauri-apps/plugin-os";
 import { tool } from "ai";
 import { z } from "zod";
 
@@ -34,7 +35,7 @@ const inputSchema = z.object({
       "openApp: open an installed app by name, then observe it.",
       "click: click an element (elementIndex) or a screenshot point (x, y).",
       "typeText: type text into the focused element, or into elementIndex.",
-      "pressKey: press a key or chord, like Return, Escape, Tab, cmd+c, ctrl+shift+t.",
+      "pressKey: press a key or chord, like Return, Escape, Tab, ctrl+shift+t, or cmd+c on macOS.",
       "scroll: scroll in a direction over an element, a screenshot point, or the window center.",
       "drag: drag between two screenshot points.",
       "setValue: replace the value of an editable element.",
@@ -62,7 +63,7 @@ const inputSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Key or chord for pressKey, in xdotool style like "Return", "cmd+c", or "ctrl+shift+Tab".',
+      'Key or chord for pressKey, in xdotool style like "Return", "ctrl+shift+Tab", or "cmd+c" on macOS.',
     ),
   prefix: z
     .string()
@@ -163,9 +164,14 @@ function toAction(input: ComputerUseActInput): ComputerUseAction {
   }
 }
 
+const inputDelivery = () =>
+  platform() === "linux"
+    ? "Actions on element indexes run in the background. Clicks and scrolls at x/y coordinates, drags, key presses, and typing that can't go through the element use the real mouse and keyboard and go to the focused window, so prefer element indexes."
+    : "Input goes to the app in the background, so it does not take over the user's mouse, keyboard, or focus.";
+
 export const createComputerUseActTool = (config: ComputerUseActToolConfig) =>
   tool({
-    description: `Use an app on the user's computer: open it, click, type, press keys, scroll, drag, set values, select text, or run element actions. Input goes to the app in the background, so it does not take over the user's mouse, keyboard, or focus. Observe the app with computerUseObserve before acting on it, and again afterwards to see the result.
+    description: `Use an app on the user's computer: open it, click, type, press keys, scroll, drag, set values, select text, or run element actions. ${inputDelivery()} Observe the app with computerUseObserve before acting on it, and again afterwards to see the result.
 
 ${COMPUTER_USE_GUIDANCE}`,
     needsApproval: config.requiresApproval,
