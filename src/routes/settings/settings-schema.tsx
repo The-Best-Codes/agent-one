@@ -81,13 +81,9 @@ import type { SettingKey } from "@/lib/settings/definitions";
 
 const computerUseSupportedAtom = atom(() => isComputerUseSupported());
 
-const isLinuxAtom = atom(() => platform() === "linux");
-
 const computerUsePermissionsVisibleAtom = atom(() => platform() === "macos");
 
 const computerUseEnabledAtom = toolsEnabledAtom(TOOL_SETS.computerUse);
-
-const computerUseCardVisibleAtom = atom((get) => get(computerUseSupportedAtom) || get(isLinuxAtom));
 
 const isVirtualizationEnabledAtom = atom(
   (get) => get(settingAtoms.CHAT_VIRTUALIZATION_MODE) !== "off",
@@ -645,19 +641,13 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
           },
           {
             id: "tools-computer-use",
-            visible: computerUseCardVisibleAtom,
+            visible: computerUseSupportedAtom,
             render: () => (
               <ToolGroupHeading
                 title="Computer Use"
                 description="Let AgentOne see and use the other apps on your computer, like a person at the keyboard."
               />
             ),
-          },
-          {
-            id: "computer-use-unsupported",
-            label: "Not available on Linux yet",
-            description: "Computer use works on macOS and Windows for now.",
-            visible: isLinuxAtom,
           },
           {
             id: "computer-use-permissions",

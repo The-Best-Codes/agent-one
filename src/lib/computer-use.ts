@@ -70,7 +70,7 @@ export type ComputerUseAction =
     }
   | { type: "performAction"; elementIndex: number; action: string };
 
-export const isComputerUseSupported = () => ["macos", "windows"].includes(platform());
+export const isComputerUseSupported = () => ["macos", "windows", "linux"].includes(platform());
 
 export const getComputerUsePermissions = () =>
   invoke<ComputerUsePermissions>("computer_use_permissions");

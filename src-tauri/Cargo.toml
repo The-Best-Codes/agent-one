@@ -68,6 +68,7 @@ tauri-plugin-global-shortcut = "2"
 tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
 tauri-plugin-updater = "2"
 tauri-plugin-window-state = "2"
+computer-use-rs = "0.2.0"
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
 apple-native-keyring-store = { version = "1.0.2", features = ["keychain", "protected"] }
@@ -81,6 +82,3 @@ windows-sys = { version = "0.61.2", features = [
 
 [target.'cfg(target_os = "linux")'.dependencies]
 zbus-secret-service-keyring-store = { version = "1.0.1", features = ["rt-async-io-crypto-rust"] }
-
-[target.'cfg(any(target_os = "macos", target_os = "windows"))'.dependencies]
-computer-use-rs = "0.2.0"
