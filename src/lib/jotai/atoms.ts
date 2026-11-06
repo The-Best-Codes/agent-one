@@ -75,7 +75,7 @@ export const lastModelDirectorySyncTimestampAtom = atomWithStorage<number>(
 );
 
 const COMMAND_SHELLS: Partial<Record<ReturnType<typeof platform>, string>> = {
-  windows: "cmd",
+  windows: "powershell",
   macos: "zsh",
 };
 

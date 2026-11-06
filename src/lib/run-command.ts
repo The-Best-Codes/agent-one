@@ -11,6 +11,7 @@ export interface RunCommandOptions {
   onStdout?: (data: string) => void;
   onStderr?: (data: string) => void;
   signal?: AbortSignal;
+  windowsShell?: "cmd" | "powershell";
 }
 
 export interface RunCommandResult {
@@ -75,10 +76,31 @@ function createOutputDecoder(fallbackEncoding: string) {
   };
 }
 
-function buildShellArgs(command: string): { program: string; args: string[] } {
+const POWERSHELL_COMMAND_ENV = "AGENT_ONE_COMMAND";
+
+function buildShellArgs(
+  command: string,
+  windowsShell: RunCommandOptions["windowsShell"] = "cmd",
+): { program: string; args: string[]; env?: Record<string, string> } {
   const isWindows = platform() === "windows";
   if (isWindows) {
-    return { program: "cmd", args: ["/C", command] };
+    return windowsShell === "powershell"
+      ? {
+          program: "powershell",
+          args: [
+            "-NoLogo",
+            "-NoProfile",
+            "-NonInteractive",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-Command",
+            `$ProgressPreference = 'SilentlyContinue'; [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; Invoke-Expression $env:${POWERSHELL_COMMAND_ENV}`,
+          ],
+          env: {
+            [POWERSHELL_COMMAND_ENV]: `${command}\nif (-not $?) { if ($LASTEXITCODE) { exit $LASTEXITCODE } else { exit 1 } }`,
+          },
+        }
+      : { program: "cmd", args: ["/C", command] };
   }
 
   return platform() === "macos"
@@ -87,9 +109,10 @@ function buildShellArgs(command: string): { program: string; args: string[] } {
 }
 
 export function spawnCommand(command: string, options: RunCommandOptions = {}): RunCommandProcess {
-  const { program, args } = buildShellArgs(command);
+  const { program, args, env: shellEnv } = buildShellArgs(command, options.windowsShell);
+  const env = { ...options.env, ...shellEnv };
   const spawnOptions: { env?: Record<string, string>; cwd?: string } = {};
-  if (options.env && Object.keys(options.env).length > 0) spawnOptions.env = options.env;
+  if (Object.keys(env).length > 0) spawnOptions.env = env;
   if (options.cwd) spawnOptions.cwd = options.cwd;
 
   const cmd = Command.create(program, args, { ...spawnOptions, encoding: "raw" });

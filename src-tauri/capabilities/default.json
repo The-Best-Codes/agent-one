@@ -52,6 +52,11 @@
           "name": "zsh",
           "cmd": "zsh",
           "args": true
+        },
+        {
+          "name": "powershell",
+          "cmd": "powershell",
+          "args": true
         }
       ]
     },

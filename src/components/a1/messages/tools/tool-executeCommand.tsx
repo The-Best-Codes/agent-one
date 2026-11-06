@@ -60,7 +60,7 @@ function applyCarriageReturns(text: string): string {
   let result = "";
   let lineBuffer = "";
 
-  for (const char of text) {
+  for (const char of text.replaceAll("\r\n", "\n")) {
     if (char === "\r") {
       lineBuffer = "";
       continue;

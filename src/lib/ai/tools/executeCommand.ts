@@ -247,6 +247,7 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig, cwd?:
       const { handle, result } = spawnCommand(input.command, {
         cwd: workingDir,
         signal: combinedSignal,
+        windowsShell: "powershell",
         onStdout: (data) => {
           queueUpdate("stdout", data);
         },
