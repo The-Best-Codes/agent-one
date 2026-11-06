@@ -92,7 +92,10 @@ export const ProjectItem = memo(
               >
                 <button
                   type="button"
-                  className="flex h-full min-w-0 flex-1 items-center gap-2 text-left"
+                  className={cn(
+                    "flex h-full min-w-0 flex-1 items-center gap-2 text-left group-hover/project-item:pr-14 group-focus-within/project-item:pr-14 pointer-coarse:pr-14",
+                    isDropdownOpen && "pr-14",
+                  )}
                   onClick={() => onToggle(project.id)}
                   aria-expanded={!collapsed}
                 >
@@ -105,7 +108,7 @@ export const ProjectItem = memo(
                 </button>
                 <div
                   className={cn(
-                    "flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity duration-200 group-hover/project-item:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100",
+                    "absolute top-1/2 right-1 flex -translate-y-1/2 items-center gap-0.5 opacity-0 transition-opacity duration-200 group-hover/project-item:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100",
                     isDropdownOpen && "opacity-100",
                   )}
                 >
