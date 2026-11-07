@@ -57,7 +57,10 @@ export const MessagePartToolReadChat = ({ part }: { part: ToolUIPart }) => {
   switch (part.state) {
     case "approval-requested":
       return (
-        <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
+        <div
+          key={callId}
+          className="border-border flex w-fit max-w-full flex-col gap-2 rounded-md border p-2"
+        >
           <div className="flex items-center gap-1 text-sm font-bold">
             <IconMessages className="text-foreground size-4 shrink-0" />
             <ReadChatApprovalTarget chatId={input?.chatId} />
@@ -126,16 +129,16 @@ export const MessagePartToolReadChat = ({ part }: { part: ToolUIPart }) => {
       return (
         <div key={callId} className="flex items-center gap-1 text-sm font-bold">
           <IconMessages className="size-4 shrink-0" />
-          <span className="flex max-w-2xl min-w-0 gap-1 tabular-nums">
-            <span className="shrink-0">{rangeLabel}</span>
+          <span className="max-w-2xl truncate tabular-nums">
+            {rangeLabel}{" "}
             {output?.isCurrent ? (
-              <span className="truncate">this chat</span>
+              "this chat"
             ) : chatId ? (
-              <Link to={`/chat/${chatId}`} className="truncate hover:underline">
+              <Link to={`/chat/${chatId}`} className="hover:underline">
                 {title}
               </Link>
             ) : (
-              <span className="truncate">{title}</span>
+              title
             )}
           </span>
         </div>
