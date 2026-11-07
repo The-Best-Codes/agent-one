@@ -3,12 +3,10 @@ import { z } from "zod";
 
 import { createScheduledAgent, delayCutoffMinutesToSeconds, describeDelayCutoff } from "@/lib/cron";
 import { describeSchedule } from "@/lib/cron-schedule";
-import type { ScheduledAgentToolConfig } from "@/lib/settings/types";
 
-export const createCreateScheduledAgentTool = (config: ScheduledAgentToolConfig) =>
+export const createCreateScheduledAgentTool = () =>
   tool({
     description: "Create and enable a scheduled agent using a standard five-field cron expression.",
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       title: z.string().min(1).describe("A concise, descriptive title."),
       schedule: z.string().min(1).describe("A standard five-field cron expression."),

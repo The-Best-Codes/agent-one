@@ -129,7 +129,6 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig, cwd?:
   tool({
     description:
       "Execute a terminal command and return its output. Works on Windows, macOS, and Linux. Use this for running shell commands, scripts, build tools, git operations, and any other command-line tasks.",
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       command: z.string().describe("The command to execute (passed to the system shell)"),
       timeoutMs: z
@@ -198,7 +197,11 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig, cwd?:
             pendingStderr = "";
           }
 
-          updateLiveState(toolCallId, (state) => ({ ...state, stdout, stderr }));
+          updateLiveState(toolCallId, (state) => ({
+            ...state,
+            stdout,
+            stderr,
+          }));
           push({ type: "stdout" });
         }
       };

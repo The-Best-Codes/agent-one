@@ -5,14 +5,12 @@ import { z } from "zod";
 import { raceWithAbort } from "@/lib/ai/tools/utils/abort";
 import { resolveToolPath } from "@/lib/ai/tools/utils/path";
 import { getLogger } from "@/lib/logger";
-import type { DeleteFileToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
-export const createDeleteFileTool = (config: DeleteFileToolConfig, baseDir?: string) =>
+export const createDeleteFileTool = (baseDir?: string) =>
   tool({
     description: "Delete a file from the filesystem.",
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       filePath: z
         .string()

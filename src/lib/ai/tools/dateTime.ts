@@ -6,7 +6,6 @@ import type { DateTimeToolConfig } from "@/lib/settings/types";
 export const createDateTimeTool = (config: DateTimeToolConfig) =>
   tool({
     description: `Get the current date and time${config.useUtc ? " in UTC" : " in local timezone"}`,
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({}),
     execute: async (input, { abortSignal }) => {
       void input;

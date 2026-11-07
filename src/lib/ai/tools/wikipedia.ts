@@ -20,7 +20,6 @@ export const createWikipediaTool = (config: WikipediaToolConfig) =>
   tool({
     description:
       "Interact with Wikipedia: 'search' finds articles by keyword, 'getSummary' returns the intro paragraph, 'getContent' returns full plain text, 'getLinks' lists internal links, 'getCategories' lists categories.",
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       action: z
         .enum(["search", "getSummary", "getContent", "getLinks", "getCategories"])

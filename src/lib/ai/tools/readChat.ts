@@ -36,7 +36,6 @@ export const createReadChatTool = (config: ReadChatToolConfig, context: ChatTool
   return tool({
     description:
       "Read part of one of the user's past conversations with you, by chat ID (from the searchChats tool). The chat is turned into a JSON transcript of its messages (reasoning and tool calls are left out unless includeToolCalls is true, and attachment data is replaced with a short description); this returns a range of that transcript starting at a character offset. If hasMore is true, you haven't read the whole chat: keep reading from end, and don't assume anything about parts you haven't read. The conversation you are currently in is marked with isCurrent: true, and its latest messages may not be saved yet.",
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       chatId: z.string().min(1).describe("The ID of the chat to read."),
       start: z

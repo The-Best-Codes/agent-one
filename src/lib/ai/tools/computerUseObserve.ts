@@ -16,7 +16,12 @@ const MAX_INSTALLED_RESULTS = 100;
 
 export type ComputerUseObserveOutput =
   | { kind: "running"; apps: ComputerUseAppInfo[] }
-  | { kind: "installed"; query?: string; apps: ComputerUseInstalledApp[]; total: number }
+  | {
+      kind: "installed";
+      query?: string;
+      apps: ComputerUseInstalledApp[];
+      total: number;
+    }
   | { kind: "state"; state: ComputerUseAppState };
 
 export const COMPUTER_USE_GUIDANCE = `Computer use workflow:
@@ -35,7 +40,6 @@ export const createComputerUseObserveTool = (config: ComputerUseObserveToolConfi
     description: `See the apps on the user's computer. "runningApps" lists open apps and their window titles; an app marked needsRestart can't be used until the user quits and reopens it, so ask them to. "installedApps" searches apps that can be opened. "app" returns one running app's accessibility tree (numbered UI elements for computerUseAct) and, optionally, a screenshot of its window.
 
 ${COMPUTER_USE_GUIDANCE}`,
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       view: z
         .enum(["runningApps", "installedApps", "app"])

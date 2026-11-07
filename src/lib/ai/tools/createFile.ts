@@ -6,15 +6,13 @@ import { z } from "zod";
 import { raceWithAbort } from "@/lib/ai/tools/utils/abort";
 import { resolveToolPath } from "@/lib/ai/tools/utils/path";
 import { getLogger } from "@/lib/logger";
-import type { CreateFileToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
-export const createCreateFileTool = (config: CreateFileToolConfig, baseDir?: string) =>
+export const createCreateFileTool = (baseDir?: string) =>
   tool({
     description:
       "Create a new file or overwrite an existing file with the given content. Prefer this tool over shell `cat`/`echo`/heredoc redirection for writing files.",
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       filePath: z
         .string()

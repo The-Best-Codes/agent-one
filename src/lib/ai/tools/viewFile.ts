@@ -13,7 +13,6 @@ export const createViewFileTool = (config: ViewFileToolConfig, baseDir?: string)
   tool({
     description:
       "View the contents of a file. Supports reading specific line ranges and automatically truncates large files to avoid excessive output. Prefer this tool over shell commands like `cat` for simple file reads.",
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       filePath: z
         .string()

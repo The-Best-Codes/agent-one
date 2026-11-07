@@ -44,6 +44,7 @@ import {
   createAgentOneTurnId,
   getAgentOneRequestHeaders,
 } from "@/lib/ai/providers/agent-one-headers";
+import { toolApproval } from "@/lib/ai/tools/approval";
 import type { ChatToolsContext } from "@/lib/ai/tools/readChat";
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
 import { getLogger } from "@/lib/logger";
@@ -351,6 +352,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
         turnId,
       ),
       tools,
+      toolApproval,
       toolChoice: toolBehavior === "disable" ? "none" : "auto",
       stopWhen: stopWhenCondition,
       instructions,

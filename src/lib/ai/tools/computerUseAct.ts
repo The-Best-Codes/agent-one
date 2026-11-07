@@ -5,7 +5,6 @@ import { z } from "zod";
 import { COMPUTER_USE_GUIDANCE } from "@/lib/ai/tools/computerUseObserve";
 import { raceWithAbort } from "@/lib/ai/tools/utils/abort";
 import { type ComputerUseAction, performComputerUseAction } from "@/lib/computer-use";
-import type { ComputerUseActToolConfig } from "@/lib/settings/types";
 
 const actionSchema = z.enum([
   "openApp",
@@ -122,7 +121,10 @@ function toAction(input: ComputerUseActInput): ComputerUseAction {
         elementIndex: input.elementIndex,
       };
     case "pressKey":
-      return { type: "pressKey", key: required(input.key ?? input.text, "key", action) };
+      return {
+        type: "pressKey",
+        key: required(input.key ?? input.text, "key", action),
+      };
     case "scroll":
       return {
         type: "scroll",
@@ -169,12 +171,11 @@ const inputDelivery = () =>
     ? "Actions on element indexes run in the background. Clicks and scrolls at x/y coordinates, drags, key presses, and typing that can't go through the element use the real mouse and keyboard and go to the focused window, so prefer element indexes."
     : "Input goes to the app in the background, so it does not take over the user's mouse, keyboard, or focus.";
 
-export const createComputerUseActTool = (config: ComputerUseActToolConfig) =>
+export const createComputerUseActTool = () =>
   tool({
     description: `Use an app on the user's computer: open it, click, type, press keys, scroll, drag, set values, select text, or run element actions. ${inputDelivery()} Observe the app with computerUseObserve before acting on it, and again afterwards to see the result.
 
 ${COMPUTER_USE_GUIDANCE}`,
-    needsApproval: config.requiresApproval,
     inputSchema,
     execute: async (input, { abortSignal }): Promise<ComputerUseActOutput> => {
       abortSignal?.throwIfAborted();

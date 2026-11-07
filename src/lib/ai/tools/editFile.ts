@@ -5,15 +5,13 @@ import { z } from "zod";
 import { raceWithAbort } from "@/lib/ai/tools/utils/abort";
 import { resolveToolPath } from "@/lib/ai/tools/utils/path";
 import { getLogger } from "@/lib/logger";
-import type { EditFileToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
-export const createEditFileTool = (config: EditFileToolConfig, baseDir?: string) =>
+export const createEditFileTool = (baseDir?: string) =>
   tool({
     description:
       "Edit a file by applying a text replacement. Provide the file path, the old text to find, and the new text to replace it with.",
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       filePath: z
         .string()

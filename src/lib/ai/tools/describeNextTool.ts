@@ -11,7 +11,6 @@ export const createDescribeNextToolTool = () =>
   tool({
     description:
       "Describe the next tool call with user-friendly display labels. Call this immediately before calling any MCP tool to provide human-readable loading, completed, and error messages instead of showing the raw tool name.",
-    needsApproval: false,
     inputSchema: z.object({
       loadingTitle: z
         .string()

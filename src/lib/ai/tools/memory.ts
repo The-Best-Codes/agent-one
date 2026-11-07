@@ -12,7 +12,6 @@ import {
   sanitizeMemoryEntry,
 } from "@/lib/memory";
 import { getProject, updateProject } from "@/lib/projects";
-import type { MemoryToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
@@ -44,11 +43,10 @@ function getMemoryStore(context: ChatToolsContext) {
   };
 }
 
-export const createMemoryTool = (config: MemoryToolConfig, context: ChatToolsContext) =>
+export const createMemoryTool = (context: ChatToolsContext) =>
   tool({
     description:
       "Store long-term memory. Use this to add, remove, or replace concise memory entries that you can reference in later conversations. Keep entries short, stable, non-duplicative, and free of contradictions.",
-    needsApproval: config.requiresApproval,
     inputSchema: memoryOperationSchema,
     execute: async (input) => {
       logger.verbose("Executing memory tool with input:", input);

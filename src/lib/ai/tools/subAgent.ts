@@ -16,6 +16,7 @@ import { z } from "zod";
 
 import { getReasoningEffort, type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { getAgentOneRequestHeaders } from "@/lib/ai/providers/agent-one-headers";
+import { toolApproval } from "@/lib/ai/tools/approval";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -118,7 +119,10 @@ function setLiveState(toolCallId: string, state: SubAgentLiveState) {
     if (throttle?.timeoutId) {
       clearTimeout(throttle.timeoutId);
     }
-    subAgentEmitThrottleMap.set(toolCallId, { lastEmitAt: now, timeoutId: null });
+    subAgentEmitThrottleMap.set(toolCallId, {
+      lastEmitAt: now,
+      timeoutId: null,
+    });
     emitLiveState(toolCallId);
     return;
   }
@@ -351,6 +355,7 @@ async function* streamSubAgentRun({
         parentTurnId: context.parentTurnId,
       }),
       tools,
+      toolApproval,
       toolChoice: "auto",
       stopWhen: isStepCount(getSubAgentMaxSteps(maxSteps, context.modelConfig.maxSteps)),
       instructions: buildSubAgentInstructions(context.systemPrompt),
@@ -457,14 +462,10 @@ async function* streamSubAgentRun({
   return finalMessage;
 }
 
-export const createSubAgentTool = (
-  config: SubAgentToolConfig,
-  context: SubAgentExecutionContext,
-) => {
+export const createSubAgentTool = (context: SubAgentExecutionContext) => {
   return {
     description:
       "Spawn a subagent to work on a focused task. The subagent starts fresh and cannot see this conversation, so include all the context it needs in the task. It can use the same tools as you, except it cannot spawn more subagents.",
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       task: z
         .string()

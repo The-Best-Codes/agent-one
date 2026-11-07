@@ -9,13 +9,11 @@ import {
   updateScheduledAgent,
 } from "@/lib/cron";
 import { describeSchedule } from "@/lib/cron-schedule";
-import type { ScheduledAgentToolConfig } from "@/lib/settings/types";
 
-export const createUpdateScheduledAgentTool = (config: ScheduledAgentToolConfig) =>
+export const createUpdateScheduledAgentTool = () =>
   tool({
     description:
       "Update, enable, or disable a scheduled agent. Use listScheduledAgents first when the ID is unknown.",
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       id: z.string().min(1),
       title: z.string().min(1).optional(),

@@ -10,7 +10,6 @@ export const createSearchChatsTool = (config: SearchChatsToolConfig, context: Ch
   tool({
     description:
       "Search the user's past conversations with you by keyword, or list the most recent conversations when no query is given. Each result includes the chat's ID and how many messages it has (messageCount). The conversation you are currently in is marked with isCurrent: true.",
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       query: z
         .string()
