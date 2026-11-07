@@ -2,6 +2,7 @@ import type { ToolUIPart, UIMessage } from "ai";
 import { deepEqual } from "fast-equals";
 import { memo } from "react";
 
+import { hideAutomaticApprovalRequest } from "@/lib/ai/tools/approval";
 import { getLogger } from "@/lib/logger";
 
 import { AutoModeVerdict } from "./parts/auto-mode-verdict";
@@ -108,7 +109,7 @@ export const MessageToolHandler = memo(
 
     return (
       <>
-        <ToolPart part={part} />
+        <ToolPart part={hideAutomaticApprovalRequest(part as ToolUIPart)} />
         <AutoModeVerdict part={part as ToolUIPart} />
       </>
     );
