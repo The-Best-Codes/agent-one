@@ -177,7 +177,7 @@ export const MessagePartToolSearchChats = ({ part }: { part: ToolUIPart }) => {
                   <div key={result.chatId} className="flex min-w-0 flex-col">
                     <Link
                       to={`/chat/${result.chatId}`}
-                      className="text-foreground truncate text-sm font-bold hover:underline"
+                      className="text-foreground max-w-full self-start truncate text-sm font-bold hover:underline"
                     >
                       {result.title || "Untitled chat"}
                       {result.isCurrent ? " (this chat)" : ""}
