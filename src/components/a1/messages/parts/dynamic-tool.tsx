@@ -37,6 +37,7 @@ import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
+import { AutoModeVerdict } from "./auto-mode-verdict";
 import { MessagePartMcpApp } from "./mcp-app";
 
 type DynamicToolOutputContentItem = {
@@ -53,7 +54,10 @@ interface DynamicToolPartProps {
 }
 
 export const MessagePartDynamicTool = (props: DynamicToolPartProps) => (
-  <MessagePartMcpApp part={props.part} fallback={<MessagePartDynamicToolFallback {...props} />} />
+  <>
+    <MessagePartMcpApp part={props.part} fallback={<MessagePartDynamicToolFallback {...props} />} />
+    <AutoModeVerdict part={props.part} />
+  </>
 );
 
 const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) => {

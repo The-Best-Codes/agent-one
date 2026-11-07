@@ -4,6 +4,7 @@ import { memo } from "react";
 
 import { getLogger } from "@/lib/logger";
 
+import { AutoModeVerdict } from "./parts/auto-mode-verdict";
 import { MessagePartFallback } from "./parts/fallback";
 import { MessagePartToolCall } from "./tools/tool-call";
 import { MessagePartToolComputerUseAct } from "./tools/tool-computerUseAct";
@@ -37,6 +38,63 @@ type MessageToolHandlerProps = {
   part: UIMessage["parts"][number];
 };
 
+function ToolPart({ part }: MessageToolHandlerProps) {
+  switch (part.type) {
+    case "tool-describeNextTool":
+      return null;
+    case "tool-dateTime":
+      return <MessagePartToolDateTime part={part} />;
+    case "tool-waitNumberMilliseconds":
+      return <MessagePartToolWaitNumberMilliseconds part={part} />;
+    case "tool-getUrlContent":
+      return <MessagePartToolGetUrlContent part={part} />;
+    case "tool-webSearch":
+      return <MessagePartToolWebSearch part={part} />;
+    case "tool-wikipedia":
+      return <MessagePartToolWikipedia part={part} />;
+    case "tool-memory":
+      return <MessagePartToolMemory part={part} />;
+    case "tool-editFile":
+      return <MessagePartToolEditFile part={part} />;
+    case "tool-createFile":
+      return <MessagePartToolCreateFile part={part} />;
+    case "tool-deleteFile":
+      return <MessagePartToolDeleteFile part={part} />;
+    case "tool-viewFile":
+      return <MessagePartToolViewFile part={part} />;
+    case "tool-executeCommand":
+      return <MessagePartToolExecuteCommand part={part} />;
+    case "tool-subAgent":
+      return <MessagePartToolSubAgent part={part} />;
+    case "tool-listSettings":
+      return <MessagePartToolListSettings part={part} />;
+    case "tool-getSetting":
+      return <MessagePartToolGetSetting part={part} />;
+    case "tool-updateSetting":
+      return <MessagePartToolUpdateSetting part={part} />;
+    case "tool-listScheduledAgents":
+      return <MessagePartToolListScheduledAgents part={part} />;
+    case "tool-createScheduledAgent":
+      return <MessagePartToolCreateScheduledAgent part={part} />;
+    case "tool-updateScheduledAgent":
+      return <MessagePartToolUpdateScheduledAgent part={part} />;
+    case "tool-deleteScheduledAgent":
+      return <MessagePartToolDeleteScheduledAgent part={part} />;
+    case "tool-searchChats":
+      return <MessagePartToolSearchChats part={part} />;
+    case "tool-readChat":
+      return <MessagePartToolReadChat part={part} />;
+    case "tool-sendFeedback":
+      return <MessagePartToolSendFeedback part={part} />;
+    case "tool-computerUseObserve":
+      return <MessagePartToolComputerUseObserve part={part} />;
+    case "tool-computerUseAct":
+      return <MessagePartToolComputerUseAct part={part} />;
+    default:
+      return <MessagePartToolCall part={part as ToolUIPart} />;
+  }
+}
+
 export const MessageToolHandler = memo(
   ({ part }: MessageToolHandlerProps) => {
     if (!part.type.startsWith("tool-")) {
@@ -44,60 +102,16 @@ export const MessageToolHandler = memo(
       return <MessagePartFallback {...part} />;
     }
 
-    switch (part.type) {
-      case "tool-describeNextTool":
-        return null;
-      case "tool-dateTime":
-        return <MessagePartToolDateTime part={part} />;
-      case "tool-waitNumberMilliseconds":
-        return <MessagePartToolWaitNumberMilliseconds part={part} />;
-      case "tool-getUrlContent":
-        return <MessagePartToolGetUrlContent part={part} />;
-      case "tool-webSearch":
-        return <MessagePartToolWebSearch part={part} />;
-      case "tool-wikipedia":
-        return <MessagePartToolWikipedia part={part} />;
-      case "tool-memory":
-        return <MessagePartToolMemory part={part} />;
-      case "tool-editFile":
-        return <MessagePartToolEditFile part={part} />;
-      case "tool-createFile":
-        return <MessagePartToolCreateFile part={part} />;
-      case "tool-deleteFile":
-        return <MessagePartToolDeleteFile part={part} />;
-      case "tool-viewFile":
-        return <MessagePartToolViewFile part={part} />;
-      case "tool-executeCommand":
-        return <MessagePartToolExecuteCommand part={part} />;
-      case "tool-subAgent":
-        return <MessagePartToolSubAgent part={part} />;
-      case "tool-listSettings":
-        return <MessagePartToolListSettings part={part} />;
-      case "tool-getSetting":
-        return <MessagePartToolGetSetting part={part} />;
-      case "tool-updateSetting":
-        return <MessagePartToolUpdateSetting part={part} />;
-      case "tool-listScheduledAgents":
-        return <MessagePartToolListScheduledAgents part={part} />;
-      case "tool-createScheduledAgent":
-        return <MessagePartToolCreateScheduledAgent part={part} />;
-      case "tool-updateScheduledAgent":
-        return <MessagePartToolUpdateScheduledAgent part={part} />;
-      case "tool-deleteScheduledAgent":
-        return <MessagePartToolDeleteScheduledAgent part={part} />;
-      case "tool-searchChats":
-        return <MessagePartToolSearchChats part={part} />;
-      case "tool-readChat":
-        return <MessagePartToolReadChat part={part} />;
-      case "tool-sendFeedback":
-        return <MessagePartToolSendFeedback part={part} />;
-      case "tool-computerUseObserve":
-        return <MessagePartToolComputerUseObserve part={part} />;
-      case "tool-computerUseAct":
-        return <MessagePartToolComputerUseAct part={part} />;
-      default:
-        return <MessagePartToolCall part={part as ToolUIPart} />;
+    if (part.type === "tool-describeNextTool") {
+      return null;
     }
+
+    return (
+      <>
+        <ToolPart part={part} />
+        <AutoModeVerdict part={part as ToolUIPart} />
+      </>
+    );
   },
   (prevProps, nextProps) => {
     return deepEqual(prevProps.part, nextProps.part);

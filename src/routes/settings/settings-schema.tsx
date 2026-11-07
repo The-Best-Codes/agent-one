@@ -49,6 +49,7 @@ import {
   TtsProviders,
 } from "@/components/settings-components/providers/provider-cards";
 import type { SettingsLayout } from "@/components/settings-components/setting-controls";
+import { AutoModeModelControl } from "@/components/settings-components/tools/auto-mode-controls";
 import { ComputerUsePermissions } from "@/components/settings-components/tools/computer-use-permissions";
 import {
   ChangeFilesApprovalToggle,
@@ -557,6 +558,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     intro: ToolsIntro,
     cards: [
       {
+        title: "Configure",
         items: [
           {
             id: "tools-web",
@@ -696,6 +698,21 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
             control: FeedbackApprovalToggle,
           },
           { id: "confirm-yolo-mode", key: "CONFIRM_YOLO_MODE" },
+        ],
+      },
+      {
+        id: "auto-mode",
+        title: "Auto Mode",
+        description:
+          "When a chat's tool behavior is set to Auto, a model checks each tool call that would need your approval and decides whether it can run.",
+        keywords: ["auto mode", "classifier", "approval", "tool behavior"],
+        items: [
+          {
+            id: "auto-mode-model",
+            key: "AUTO_MODE_MODEL",
+            control: AutoModeModelControl,
+          },
+          { id: "auto-mode-rules", key: "AUTO_MODE_RULES" },
         ],
       },
     ],
