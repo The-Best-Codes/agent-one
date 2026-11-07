@@ -15,6 +15,7 @@ import {
 import { z } from "zod";
 
 import { getReasoningEffort, type ModelConfig } from "@/hooks/ai/use-model-catalog";
+import { getAgentOneRequestHeaders } from "@/lib/ai/providers/agent-one-headers";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -33,6 +34,8 @@ export interface SubAgentInput {
 }
 
 export interface SubAgentExecutionContext {
+  chatId?: string;
+  parentTurnId?: string;
   model: LanguageModel;
   modelConfig: ModelConfig;
   systemPrompt: string;
@@ -342,6 +345,11 @@ async function* streamSubAgentRun({
       reasoning: getReasoningEffort(context.modelConfig),
       messages: promptMessages,
       abortSignal,
+      headers: getAgentOneRequestHeaders(wrappedModel, {
+        type: "sub-agent",
+        chatId: context.chatId,
+        parentTurnId: context.parentTurnId,
+      }),
       tools,
       toolChoice: "auto",
       stopWhen: isStepCount(getSubAgentMaxSteps(maxSteps, context.modelConfig.maxSteps)),

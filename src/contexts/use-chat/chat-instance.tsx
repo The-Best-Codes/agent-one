@@ -196,6 +196,7 @@ export const ChatInstance = memo(
             titleGenerationSettings,
             undefined,
             extractReasoningEnabled,
+            chatId,
           )
             .then((generatedTitle) => {
               if (chatIds.includes(chatId)) {

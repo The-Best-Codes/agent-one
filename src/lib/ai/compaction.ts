@@ -204,11 +204,13 @@ export async function summarizeConversation({
   messages,
   startsWithSummary,
   abortSignal,
+  headers,
 }: {
   model: LanguageModel;
   messages: ModelMessage[];
   startsWithSummary: boolean;
   abortSignal?: AbortSignal;
+  headers?: Record<string, string>;
 }): Promise<{ summary: string; usage: LanguageModelUsage }> {
   const prunedMessages = pruneMessages({
     messages: labelNewUserMessage(messages, startsWithSummary),
@@ -221,6 +223,7 @@ export async function summarizeConversation({
     instructions: SUMMARY_INSTRUCTIONS,
     messages: [...prunedMessages, { role: "user", content: SUMMARY_REQUEST }],
     abortSignal,
+    headers,
   });
 
   const summary = result.text.trim();

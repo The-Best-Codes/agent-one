@@ -76,6 +76,7 @@ const ChangeTitleForm = ({
           "none",
           extractReasoningEnabled,
           titleGenerationSettings.characterLimit,
+          { chatId, trigger: "manual" },
         );
         setTitle(generatedTitle);
       }

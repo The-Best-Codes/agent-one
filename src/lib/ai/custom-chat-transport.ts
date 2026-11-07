@@ -40,6 +40,10 @@ import {
   UIMessageChunkInjector,
   withCompactionSummary,
 } from "@/lib/ai/compaction";
+import {
+  createAgentOneTurnId,
+  getAgentOneRequestHeaders,
+} from "@/lib/ai/providers/agent-one-headers";
 import type { ChatToolsContext } from "@/lib/ai/tools/readChat";
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
 import { getLogger } from "@/lib/logger";
@@ -187,7 +191,10 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       ? `${systemPrompt}\n\n${mcpAppContextInstructions}`
       : systemPrompt;
     const chatContext: ChatToolsContext = { currentChatId: options.chatId, project };
+    const turnId = createAgentOneTurnId();
     const subAgentContext: SubAgentExecutionContext = {
+      chatId: options.chatId,
+      parentTurnId: turnId,
       model: baseModel,
       modelConfig,
       systemPrompt,
@@ -230,7 +237,10 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     const compact = async (
       messagesToSummarize: ModelMessage[],
       writeChunk: (chunk: UIMessageChunk) => void,
-      { fallbackOnError = false }: { fallbackOnError?: boolean } = {},
+      {
+        fallbackOnError = false,
+        trigger = "manual",
+      }: { fallbackOnError?: boolean; trigger?: "manual" | "auto" } = {},
     ) => {
       const compactionId = generateId();
       writeChunk(createCompactionChunk(compactionId, { status: "compacting" }));
@@ -242,6 +252,12 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
           messages: messagesToSummarize,
           startsWithSummary: activeCompactionId !== undefined,
           abortSignal: options.abortSignal,
+          headers: getAgentOneRequestHeaders(model, {
+            type: "compaction",
+            chatId: options.chatId,
+            trigger,
+            parentTurnId: turnId,
+          }),
         });
       } catch (error) {
         if (options.abortSignal?.aborted) {
@@ -329,6 +345,11 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       reasoning: getReasoningEffort(modelConfig),
       messages,
       abortSignal: options.abortSignal,
+      headers: getAgentOneRequestHeaders(
+        model,
+        { type: "chat", chatId: options.chatId, trigger: options.trigger },
+        turnId,
+      ),
       tools,
       toolChoice: toolBehavior === "disable" ? "none" : "auto",
       stopWhen: stopWhenCondition,
@@ -374,7 +395,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
         const { compactionId, summary } = await compact(
           stepMessages,
           (chunk) => chunkInjector.write(chunk),
-          { fallbackOnError: true },
+          { fallbackOnError: true, trigger: "auto" },
         );
 
         activeCompactionId = compactionId;
