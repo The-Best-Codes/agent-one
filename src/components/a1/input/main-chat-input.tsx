@@ -698,7 +698,7 @@ export const MainChatInput = ({
             basicSetup={EDITOR_BASIC_SETUP}
           />
         </div>
-        <div className="bg-secondary dark:bg-secondary flex items-center justify-between rounded-t-none rounded-b-md p-2 pr-0">
+        <div className="bg-secondary dark:bg-secondary flex items-center justify-between gap-2 rounded-t-none rounded-b-md p-2 pr-0">
           <div className="relative flex min-w-0 items-center gap-2">
             <AdaptiveTooltip>
               <AdaptiveTooltipTrigger asChild>
@@ -734,11 +734,11 @@ export const MainChatInput = ({
             </AdaptiveTooltip>
             {toolbarStart}
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex flex-row" data-tour="model-selector">
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="flex min-w-0 flex-row" data-tour="model-selector">
               <ModelSelector
                 loading={isChatLoading}
-                className="w-40 min-w-0 flex-1 rounded-r-none sm:w-60"
+                className="w-40 min-w-0 flex-1 shrink rounded-r-none sm:w-60"
                 popoverClassName="w-60"
               />
 
