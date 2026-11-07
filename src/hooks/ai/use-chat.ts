@@ -1,12 +1,12 @@
 import { type UIMessage, useChat as useChatSDK, type UseChatOptions } from "@ai-sdk/react";
 import { type ChatInit, type LanguageModel } from "ai";
 import { useAtomValue } from "jotai";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useTools } from "@/contexts/use-tools/tools-hooks";
-import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
+import { type ModelConfig, useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { CustomChatTransport } from "@/lib/ai/custom-chat-transport";
 import { systemPromptAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
@@ -39,6 +39,13 @@ export function useChat(
   options?: CustomChatOptions,
 ) {
   const extractReasoningEnabled = useAtomValue(settingAtoms.EXTRACT_REASONING_ENABLED);
+  const autoModeModelId = useAtomValue(settingAtoms.AUTO_MODE_MODEL);
+  const { getChatModelById } = useModelCatalog();
+  const autoModeModelData = autoModeModelId ? getChatModelById(autoModeModelId) : undefined;
+  const autoModeModel = useMemo(
+    () => autoModeModelData?.getLanguageModel() ?? null,
+    [autoModeModelData],
+  );
   const getSystemPrompt = useAtomValue(systemPromptAtom);
   const { getApiKeysLoadedPromise } = useApiKeys();
   const { getTools } = useTools();
@@ -69,6 +76,10 @@ export function useChat(
       typeof model === "string" ? model : model?.modelId,
     );
   }, [model, providerName, transport]);
+
+  useEffect(() => {
+    transport.updateAutoModeModel(autoModeModel);
+  }, [autoModeModel, transport]);
 
   useEffect(() => {
     transport.updateModelId(modelId);
@@ -128,12 +139,14 @@ export function useChat(
 
   const syncTransport = useCallback(() => {
     transport.updateModel(model, providerName);
+    transport.updateAutoModeModel(autoModeModel);
     transport.updateModelId(modelId);
     transport.updateModelConfig(modelConfig);
     transport.updateContextWindow(contextWindow);
     transport.updateExtractReasoningEnabled(extractReasoningEnabled);
   }, [
     model,
+    autoModeModel,
     modelId,
     providerName,
     modelConfig,

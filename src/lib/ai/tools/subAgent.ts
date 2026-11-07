@@ -17,6 +17,7 @@ import { z } from "zod";
 import { getReasoningEffort, type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { getAgentOneRequestHeaders } from "@/lib/ai/providers/agent-one-headers";
 import { toolApproval } from "@/lib/ai/tools/approval";
+import type { AutoModeToolApproval } from "@/lib/ai/tools/auto-mode";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -42,6 +43,7 @@ export interface SubAgentExecutionContext {
   systemPrompt: string;
   extractReasoningEnabled: boolean;
   getTools: () => Promise<ToolSet>;
+  createToolApproval?: (abortSignal?: AbortSignal) => AutoModeToolApproval;
 }
 
 export interface SubAgentLiveState {
@@ -319,6 +321,7 @@ async function* streamSubAgentRun({
     { id: generateId(), role: "user", parts: [{ type: "text", text: task }] },
   ];
   let finalMessage: UIMessage | undefined;
+  const subAgentToolApproval = context.createToolApproval?.(abortSignal) ?? toolApproval;
 
   const wrappedModel =
     context.extractReasoningEnabled && typeof context.model !== "string"
@@ -355,7 +358,7 @@ async function* streamSubAgentRun({
         parentTurnId: context.parentTurnId,
       }),
       tools,
-      toolApproval,
+      toolApproval: subAgentToolApproval,
       toolChoice: "auto",
       stopWhen: isStepCount(getSubAgentMaxSteps(maxSteps, context.modelConfig.maxSteps)),
       instructions: buildSubAgentInstructions(context.systemPrompt),

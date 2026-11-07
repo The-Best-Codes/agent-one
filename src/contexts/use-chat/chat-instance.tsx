@@ -102,6 +102,7 @@ export const ChatInstance = memo(
             part.state === "approval-requested" &&
             "approval" in part &&
             part.approval?.id &&
+            !part.approval.isAutomatic &&
             !notifiedApprovalIdsRef.current.has(part.approval.id),
         );
       const shouldNotify =

@@ -31,12 +31,14 @@ import {
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { useGetChatFunctions } from "@/contexts/use-chat/chat-hooks";
+import { hideAutomaticApprovalRequest } from "@/lib/ai/tools/approval";
 import type { ToolDisplayLabels } from "@/lib/ai/tools/describeNextTool";
 import { getToolDisplayName } from "@/lib/ai/tools/mcp";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
+import { AutoModeVerdict } from "./auto-mode-verdict";
 import { MessagePartMcpApp } from "./mcp-app";
 
 type DynamicToolOutputContentItem = {
@@ -52,9 +54,18 @@ interface DynamicToolPartProps {
   labels?: ToolDisplayLabels | null;
 }
 
-export const MessagePartDynamicTool = (props: DynamicToolPartProps) => (
-  <MessagePartMcpApp part={props.part} fallback={<MessagePartDynamicToolFallback {...props} />} />
-);
+export const MessagePartDynamicTool = ({ part, labels }: DynamicToolPartProps) => {
+  const visiblePart = hideAutomaticApprovalRequest(part);
+  return (
+    <>
+      <MessagePartMcpApp
+        part={visiblePart}
+        fallback={<MessagePartDynamicToolFallback part={visiblePart} labels={labels} />}
+      />
+      <AutoModeVerdict part={part} />
+    </>
+  );
+};
 
 const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) => {
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();

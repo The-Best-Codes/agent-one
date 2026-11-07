@@ -495,6 +495,23 @@ export const SETTINGS = {
       "Show a warning before switching tool behavior to YOLO, which runs tools without asking for your approval.",
     default: true,
   }),
+  AUTO_MODE_MODEL: data<string>({
+    keywords: ["auto mode", "classifier", "approval", "model", "tool behavior"],
+    label: "Auto mode model",
+    description:
+      "The model that decides whether a tool call can run in auto mode. Leave empty to use the chat's own model.",
+    default: "",
+  }),
+  AUTO_MODE_RULES: text({
+    keywords: ["auto mode", "classifier", "approval", "rules", "allow", "block", "tool behavior"],
+    label: "Auto mode rules",
+    description:
+      "Extra rules for auto mode, like actions it should always allow or always block. These are added to the built-in rules.",
+    default: "",
+    placeholder: "e.g., Installing npm packages is fine. Never push to git.",
+    maxLength: 2000,
+    multiline: true,
+  }),
 };
 
 export type SettingKey = keyof typeof SETTINGS;

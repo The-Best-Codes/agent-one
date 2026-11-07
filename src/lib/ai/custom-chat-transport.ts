@@ -15,6 +15,7 @@ import {
   type UIMessageChunk,
   wrapLanguageModel,
 } from "ai";
+import { getDefaultStore } from "jotai";
 
 import {
   getReasoningEffort,
@@ -45,8 +46,10 @@ import {
   getAgentOneRequestHeaders,
 } from "@/lib/ai/providers/agent-one-headers";
 import { toolApproval } from "@/lib/ai/tools/approval";
+import { createAutoModeApproval } from "@/lib/ai/tools/auto-mode";
 import type { ChatToolsContext } from "@/lib/ai/tools/readChat";
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { getAgentsFilesPromptSection, type Project } from "@/lib/projects";
 
@@ -54,6 +57,7 @@ const logger = getLogger(import.meta.url);
 
 export class CustomChatTransport implements ChatTransport<UIMessage> {
   private model: LanguageModel | null;
+  private autoModeModel: LanguageModel | null = null;
   private modelId: string | null;
   private providerName: string | null;
   private modelConfig: ModelConfig;
@@ -102,6 +106,10 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       "CustomChatTransport model updated to:",
       typeof model === "string" ? model : model?.modelId,
     );
+  }
+
+  updateAutoModeModel(model: LanguageModel | null) {
+    this.autoModeModel = model;
   }
 
   updateModelId(modelId: string | null) {
@@ -193,6 +201,23 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       : systemPrompt;
     const chatContext: ChatToolsContext = { currentChatId: options.chatId, project };
     const turnId = createAgentOneTurnId();
+    const autoModeModel = this.autoModeModel ?? baseModel;
+    const autoModeRules = getDefaultStore().get(settingAtoms.AUTO_MODE_RULES);
+    const createAutoApproval = (
+      abortSignal: AbortSignal | undefined,
+      subAgent?: { contextMessages: ModelMessage[] },
+    ) =>
+      createAutoModeApproval({
+        model: autoModeModel,
+        extractReasoningEnabled,
+        rules: autoModeRules,
+        projectFolder: project?.folder,
+        chatId: options.chatId,
+        parentTurnId: turnId,
+        abortSignal,
+        delegatedTask: subAgent !== undefined,
+        contextMessages: subAgent?.contextMessages,
+      });
     const subAgentContext: SubAgentExecutionContext = {
       chatId: options.chatId,
       parentTurnId: turnId,
@@ -201,6 +226,10 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       systemPrompt,
       extractReasoningEnabled,
       getTools: () => this.getTools({ subAgentContext, toolBehavior, chatContext }),
+      createToolApproval:
+        toolBehavior === "auto"
+          ? (abortSignal) => createAutoApproval(abortSignal, { contextMessages: messages })
+          : undefined,
     };
     const tools =
       toolBehavior === "disable"
@@ -352,7 +381,8 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
         turnId,
       ),
       tools,
-      toolApproval,
+      toolApproval:
+        toolBehavior === "auto" ? createAutoApproval(options.abortSignal) : toolApproval,
       toolChoice: toolBehavior === "disable" ? "none" : "auto",
       stopWhen: stopWhenCondition,
       instructions,
