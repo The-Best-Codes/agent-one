@@ -187,9 +187,9 @@ function AgentEditor({
   return (
     <AccordionItem value={agent.id}>
       <AccordionTrigger className="px-1 py-2 hover:no-underline">
-        <div className="flex flex-1 items-center justify-between gap-2 pr-2">
+        <div className="flex min-w-0 flex-1 items-center justify-between gap-2 pr-2">
           <span className="flex min-w-0 flex-col items-start gap-1">
-            <span className="truncate">{agent.title}</span>
+            <span className="max-w-full truncate">{agent.title}</span>
             <span className="text-muted-foreground flex items-center gap-1 font-mono text-xs font-normal">
               <ScheduledAgentSchedule cron={agent.schedule} />
             </span>

@@ -66,13 +66,13 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
             className="flex flex-row items-center justify-center gap-1 hover:underline"
           >
             Open Login Form Manually
-            <IconExternalLink className="size-4" />
+            <IconExternalLink className="size-4 shrink-0" />
           </a>
         }
         action={
           <>
-            <div className="bg-secondary flex flex-row items-center justify-center rounded-md pl-2">
-              <span className="font-mono text-sm leading-none font-bold tracking-wider">
+            <div className="bg-secondary flex shrink-0 flex-row items-center justify-center rounded-md pl-2">
+              <span className="font-mono text-sm leading-none font-bold tracking-wider whitespace-nowrap">
                 {deviceFlow.userCode}
               </span>
               <CopyButton
@@ -142,16 +142,16 @@ interface StatusRowProps {
 function StatusRow({ icon, title, description, action, className }: StatusRowProps) {
   return (
     <div className={cn("flex items-center justify-between gap-4", className)}>
-      <div className="flex items-center gap-3">
+      <div className="flex min-w-0 items-center gap-3">
         <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-lg">
           {icon}
         </div>
-        <div>
+        <div className="min-w-0">
           <p className="leading-none font-medium">{title}</p>
           <p className="text-muted-foreground text-sm">{description}</p>
         </div>
       </div>
-      <div className="flex items-center gap-2">{action}</div>
+      <div className="flex shrink-0 items-center gap-2">{action}</div>
     </div>
   );
 }

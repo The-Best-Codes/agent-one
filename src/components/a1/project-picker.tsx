@@ -50,7 +50,7 @@ export const ProjectPicker = () => {
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className={cn("min-w-0 max-w-48", !selectedProject && "text-muted-foreground")}
+            className={cn("min-w-0 max-w-48 shrink", !selectedProject && "text-muted-foreground")}
           >
             {selectedProject ? (
               <IconFolder data-icon="inline-start" />
