@@ -22,6 +22,7 @@ import { MessagePartToolListSettings } from "./tools/tool-listSettings";
 import { MessagePartToolMemory } from "./tools/tool-memory";
 import { MessagePartToolReadChat } from "./tools/tool-readChat";
 import { MessagePartToolSearchChats } from "./tools/tool-searchChats";
+import { MessagePartToolSendFeedback } from "./tools/tool-sendFeedback";
 import { MessagePartToolSubAgent } from "./tools/tool-subAgent";
 import { MessagePartToolUpdateScheduledAgent } from "./tools/tool-updateScheduledAgent";
 import { MessagePartToolUpdateSetting } from "./tools/tool-updateSetting";
@@ -88,6 +89,8 @@ export const MessageToolHandler = memo(
         return <MessagePartToolSearchChats part={part} />;
       case "tool-readChat":
         return <MessagePartToolReadChat part={part} />;
+      case "tool-sendFeedback":
+        return <MessagePartToolSendFeedback part={part} />;
       case "tool-computerUseObserve":
         return <MessagePartToolComputerUseObserve part={part} />;
       case "tool-computerUseAct":

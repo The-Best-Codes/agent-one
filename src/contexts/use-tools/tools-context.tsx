@@ -28,6 +28,7 @@ import {
   createComputerUseObserveTool,
   createComputerUseActTool,
   createSearchChatsTool,
+  createSendFeedbackTool,
 } from "@/lib/ai/tools";
 import { withApproval } from "@/lib/ai/tools/approval";
 import {
@@ -565,6 +566,9 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       }
       if (mergedEnabledTools.readChat) {
         filteredStaticTools.readChat = createReadChatTool(mergedToolConfigs.readChat, chatContext);
+      }
+      if (mergedEnabledTools.sendFeedback) {
+        filteredStaticTools.sendFeedback = createSendFeedbackTool(chatContext);
       }
 
       if (isComputerUseSupported()) {

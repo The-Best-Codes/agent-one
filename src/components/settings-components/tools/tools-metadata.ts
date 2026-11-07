@@ -21,6 +21,7 @@ export const TOOL_SETS = {
   changeFiles: ["editFile", "createFile", "deleteFile"],
   commands: ["executeCommand"],
   subAgents: ["subAgent"],
+  feedback: ["sendFeedback"],
   computerUse: ["computerUseObserve", "computerUseAct"],
 } satisfies Record<string, ToolId[]>;
 

@@ -223,6 +223,16 @@ export function SubAgentsToolToggle() {
   return <ToolAccessSwitch toolIds={TOOL_SETS.subAgents} label="Allow AgentOne to use subagents" />;
 }
 
+export function FeedbackToolToggle() {
+  return (
+    <ToolAccessSwitch toolIds={TOOL_SETS.feedback} label="Allow AgentOne to report problems" />
+  );
+}
+
+export function FeedbackApprovalToggle() {
+  return <ToolApprovalSwitch toolIds={TOOL_SETS.feedback} label="Ask before reporting problems" />;
+}
+
 const PERMISSION_NAMES = { accessibility: "Accessibility", screenRecording: "Screen Recording" };
 
 function useMissingComputerUsePermissionsReason() {
@@ -263,4 +273,8 @@ export function ToolGroupHeading({ title, description, first }: ToolGroupHeading
       <p className="text-muted-foreground text-sm">{description}</p>
     </div>
   );
+}
+
+export function ToolGroupSeparator() {
+  return <div className="border-t" />;
 }

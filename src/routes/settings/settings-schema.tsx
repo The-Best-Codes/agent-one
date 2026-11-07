@@ -58,6 +58,8 @@ import {
   CommandsToolToggle,
   ComputerUseApprovalToggle,
   ComputerUseToolToggle,
+  FeedbackApprovalToggle,
+  FeedbackToolToggle,
   MemoryToolToggle,
   OpenScheduledAgentsButton,
   ReadFilesToolToggle,
@@ -67,6 +69,7 @@ import {
   SettingsToolToggle,
   SubAgentsToolToggle,
   ToolGroupHeading,
+  ToolGroupSeparator,
   WebToolToggle,
 } from "@/components/settings-components/tools/tool-controls";
 import { ToolsIntro } from "@/components/settings-components/tools/tools-intro";
@@ -674,14 +677,23 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
             visible: atom((get) => get(computerUseSupportedAtom) && get(computerUseEnabledAtom)),
             control: ComputerUseApprovalToggle,
           },
+          { id: "tools-other", render: ToolGroupSeparator },
           {
-            id: "tools-approvals",
-            render: () => (
-              <ToolGroupHeading
-                title="Approvals"
-                description="Control how YOLO mode is turned on for a chat."
-              />
-            ),
+            id: "allow-feedback",
+            label: "Allow AgentOne to report problems",
+            description:
+              "When something goes wrong, AgentOne can send a short report about it to the AgentOne developers.",
+            keywords: ["feedback", "bug", "report", "issue", "telemetry", "tool"],
+            layout: "row",
+            control: FeedbackToolToggle,
+          },
+          {
+            id: "ask-before-feedback",
+            label: "Ask before reporting problems",
+            keywords: ["feedback", "bug", "report", "approval", "confirm", "tool"],
+            layout: "row",
+            visible: toolsEnabledAtom(TOOL_SETS.feedback),
+            control: FeedbackApprovalToggle,
           },
           { id: "confirm-yolo-mode", key: "CONFIRM_YOLO_MODE" },
         ],
