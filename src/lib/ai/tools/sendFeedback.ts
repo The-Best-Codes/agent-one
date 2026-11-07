@@ -48,6 +48,10 @@ export const createSendFeedbackTool = (context: ChatToolsContext) =>
         signal: abortSignal,
       });
 
+      if (response.status === 429) {
+        throw new Error("Too many problem reports were sent recently. Don't try again.");
+      }
+
       if (!response.ok) {
         throw new Error(`Feedback could not be sent (HTTP ${response.status}).`);
       }
