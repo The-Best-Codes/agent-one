@@ -581,7 +581,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       for (const [name, tool] of Object.entries(filteredStaticTools)) {
         filteredStaticTools[name] = withApproval(
           tool,
-          mergedToolConfigs[name as keyof typeof mergedToolConfigs].requiresApproval,
+          mergedToolConfigs[name as keyof typeof mergedToolConfigs]?.requiresApproval ?? true,
         );
       }
 
