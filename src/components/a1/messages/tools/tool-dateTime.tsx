@@ -27,7 +27,10 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
   switch (part.state) {
     case "approval-requested":
       return (
-        <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
+        <div
+          key={callId}
+          className="border-border flex w-fit max-w-full flex-col gap-2 rounded-md border p-2"
+        >
           <div className="flex items-center gap-1">
             <IconCalendar className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">

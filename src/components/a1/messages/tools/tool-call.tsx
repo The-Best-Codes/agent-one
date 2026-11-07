@@ -29,7 +29,10 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
   switch (part.state) {
     case "approval-requested":
       return (
-        <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
+        <div
+          key={callId}
+          className="border-border flex w-fit max-w-full flex-col gap-2 rounded-md border p-2"
+        >
           <div className="flex items-center gap-1">
             <IconTool className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
@@ -93,7 +96,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
         <Accordion type="single" collapsible className="bg-secondary my-1 w-full rounded-md">
           <AccordionItem value={callId}>
             <AccordionTrigger className="p-2 hover:no-underline">
-              <p className="text-destructive flex flex-row items-center gap-1 text-sm font-bold">
+              <p className="text-destructive flex min-w-0 flex-row items-center gap-1 text-sm font-bold">
                 <Spinner className="text-destructive" />
                 <span className="max-w-2xl truncate">{`Running unknown tool "${toolName}"`}</span>
               </p>
@@ -118,8 +121,8 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
         <Accordion type="single" collapsible className="bg-secondary my-1 w-full rounded-md">
           <AccordionItem value={callId}>
             <AccordionTrigger className="p-2 hover:no-underline">
-              <p className="text-destructive flex flex-row items-center gap-1 text-sm font-bold">
-                <IconCircleX className="text-destructive" />
+              <p className="text-destructive flex min-w-0 flex-row items-center gap-1 text-sm font-bold">
+                <IconCircleX className="text-destructive size-4 shrink-0" />
                 <span className="max-w-2xl truncate">{`Unknown tool "${toolName}" finished`}</span>
               </p>
             </AccordionTrigger>
