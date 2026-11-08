@@ -105,9 +105,7 @@ export function PathListEditor({
                 className="dark:bg-input/30 flex h-8 min-w-0 flex-1 items-center rounded-lg border px-2.5 text-sm"
                 title={getLabel(entry)}
               >
-                <span className="truncate text-left" dir="rtl">
-                  <bdi dir="ltr">{getLabel(entry)}</bdi>
-                </span>
+                <span className="truncate">{getLabel(entry)}</span>
               </div>
               <Popover
                 open={removingFile === entry}
