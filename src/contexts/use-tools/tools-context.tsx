@@ -13,7 +13,7 @@ import {
   createGetUrlContentTool,
   createMemoryTool,
   createSubAgentTool,
-  createUseSkillTool,
+  createListSkillsTool,
   createViewFileTool,
   createWaitTool,
   createWebSearchTool,
@@ -584,8 +584,8 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       }
 
       if (mergedEnabledTools.viewFile) {
-        filteredStaticTools.useSkill = withApproval(
-          createUseSkillTool(chatContext.project),
+        filteredStaticTools.listSkills = withApproval(
+          createListSkillsTool(chatContext.project),
           mergedToolConfigs.viewFile.requiresApproval,
         );
       }

@@ -21,6 +21,7 @@ import { MessagePartToolGetSetting } from "./tools/tool-getSetting";
 import { MessagePartToolGetUrlContent } from "./tools/tool-getUrlContent";
 import { MessagePartToolListScheduledAgents } from "./tools/tool-listScheduledAgents";
 import { MessagePartToolListSettings } from "./tools/tool-listSettings";
+import { MessagePartToolListSkills } from "./tools/tool-listSkills";
 import { MessagePartToolMemory } from "./tools/tool-memory";
 import { MessagePartToolReadChat } from "./tools/tool-readChat";
 import { MessagePartToolSearchChats } from "./tools/tool-searchChats";
@@ -28,7 +29,6 @@ import { MessagePartToolSendFeedback } from "./tools/tool-sendFeedback";
 import { MessagePartToolSubAgent } from "./tools/tool-subAgent";
 import { MessagePartToolUpdateScheduledAgent } from "./tools/tool-updateScheduledAgent";
 import { MessagePartToolUpdateSetting } from "./tools/tool-updateSetting";
-import { MessagePartToolUseSkill } from "./tools/tool-useSkill";
 import { MessagePartToolViewFile } from "./tools/tool-viewFile";
 import { MessagePartToolWaitNumberMilliseconds } from "./tools/tool-waitNumberMilliseconds";
 import { MessagePartToolWebSearch } from "./tools/tool-webSearch";
@@ -92,8 +92,8 @@ function ToolPart({ part }: MessageToolHandlerProps) {
       return <MessagePartToolComputerUseObserve part={part} />;
     case "tool-computerUseAct":
       return <MessagePartToolComputerUseAct part={part} />;
-    case "tool-useSkill":
-      return <MessagePartToolUseSkill part={part} />;
+    case "tool-listSkills":
+      return <MessagePartToolListSkills part={part} />;
     default:
       return <MessagePartToolCall part={part as ToolUIPart} />;
   }

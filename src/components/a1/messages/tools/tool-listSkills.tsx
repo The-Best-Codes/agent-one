@@ -9,11 +9,11 @@ import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 
 import { ToolErrorAccordion } from "./tool-error-accordion";
 
-interface UseSkillOutput {
+interface ListSkillsOutput {
   skills?: unknown[];
 }
 
-export const MessagePartToolUseSkill = ({ part }: { part: ToolUIPart }) => {
+export const MessagePartToolListSkills = ({ part }: { part: ToolUIPart }) => {
   const callId = part.toolCallId;
   const approvalHandler = useChatApprovalHandler();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
@@ -74,7 +74,7 @@ export const MessagePartToolUseSkill = ({ part }: { part: ToolUIPart }) => {
       );
 
     case "output-available": {
-      const count = (part.output as UseSkillOutput | undefined)?.skills?.length ?? 0;
+      const count = (part.output as ListSkillsOutput | undefined)?.skills?.length ?? 0;
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconBook className="text-foreground size-4 shrink-0" />
@@ -120,4 +120,4 @@ export const MessagePartToolUseSkill = ({ part }: { part: ToolUIPart }) => {
   }
 };
 
-MessagePartToolUseSkill.displayName = "MessagePartToolUseSkill";
+MessagePartToolListSkills.displayName = "MessagePartToolListSkills";

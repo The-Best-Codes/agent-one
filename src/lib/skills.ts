@@ -13,6 +13,9 @@ const logger = getLogger(import.meta.url);
 
 export const PROJECT_FOLDER_SKILLS_FOLDERS = [".agents/skills", ".claude/skills"];
 
+const MAX_NAME_LENGTH = 64;
+const MAX_DESCRIPTION_LENGTH = 1024;
+
 export interface Skill {
   name: string;
   description: string;
@@ -41,8 +44,12 @@ async function readSkill(folder: string, folderName: string): Promise<Skill | un
   }
   const { name, description } = (vfile.data.matter ?? {}) as Record<string, unknown>;
   return {
-    name: typeof name === "string" && name.trim() ? name.trim() : folderName,
-    description: typeof description === "string" ? description.trim() : "",
+    name: (typeof name === "string" && name.trim() ? name.trim() : folderName).slice(
+      0,
+      MAX_NAME_LENGTH,
+    ),
+    description:
+      typeof description === "string" ? description.trim().slice(0, MAX_DESCRIPTION_LENGTH) : "",
     folder,
     file,
   };

@@ -77,7 +77,7 @@ export function PathListEditor({
 
   const getLabel = (entry: string) => {
     if (folder && [PROJECT_FOLDER_AGENTS_FILE, ...PROJECT_FOLDER_SKILLS_FOLDERS].includes(entry)) {
-      return `${folder}${sep()}${entry}`;
+      return `${folder}${sep()}${entry.split("/").join(sep())}`;
     }
     if (home && (entry.startsWith("~/") || entry.startsWith("~\\"))) {
       return `${home}${sep()}${entry.slice(2).replace(/[/\\]/g, sep())}`;
