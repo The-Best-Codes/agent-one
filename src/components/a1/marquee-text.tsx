@@ -92,7 +92,7 @@ export const MarqueeText = ({
     <span
       ref={viewportRef}
       className={cn(
-        "block min-w-0 overflow-hidden whitespace-nowrap [--scroll-fade-reveal:--spacing(4)] [--scroll-fade-size:--spacing(5)]",
+        "block min-w-0 overflow-hidden whitespace-nowrap [--scroll-fade-reveal:--spacing(4)] scroll-fade-[--spacing(5)]",
         isOverflowing && "scroll-fade-x",
         className,
       )}
