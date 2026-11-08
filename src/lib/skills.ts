@@ -16,6 +16,7 @@ export const PROJECT_FOLDER_SKILLS_FOLDERS = [".agents/skills", ".claude/skills"
 export interface Skill {
   name: string;
   description: string;
+  folder: string;
   file: string;
 }
 
@@ -42,6 +43,7 @@ async function readSkill(folder: string, folderName: string): Promise<Skill | un
   return {
     name: typeof name === "string" && name.trim() ? name.trim() : folderName,
     description: typeof description === "string" ? description.trim() : "",
+    folder,
     file,
   };
 }
