@@ -112,6 +112,16 @@ function buildTranscriptEntries(messages: ModelMessage[], userLabel: string): Tr
 
   for (const message of messages) {
     if (message.role === "user") {
+      if (typeof message.content !== "string") {
+        for (const part of message.content) {
+          if (part.type === "text" && isCompactionSummaryPart(part)) {
+            entries.push({
+              text: `Summary of the earlier conversation (written by the agent, not the user):\n${part.text}`,
+              fromUser: false,
+            });
+          }
+        }
+      }
       const text = describeUserContent(message.content).trim();
       if (text) {
         entries.push({ text: `${userLabel}:\n${text}`, fromUser: true });
