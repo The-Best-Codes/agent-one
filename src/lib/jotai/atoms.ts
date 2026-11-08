@@ -32,6 +32,8 @@ export const onboardingReminderDismissedAtom = atomWithStorage(
 
 export const tourActiveAtom = atom(false);
 
+export const recordingShortcutAtom = atom(false);
+
 export const hideAgentOneModelsAtom = atomWithStorage(
   "agent-one-hide-agentone-models",
   false,

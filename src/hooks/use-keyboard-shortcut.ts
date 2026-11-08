@@ -1,6 +1,7 @@
 import { useAtomValue } from "jotai";
 import { useHotkeys } from "react-hotkeys-hook";
 
+import { recordingShortcutAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import type { KeyboardShortcutId } from "@/lib/kbd-registry";
 import { DEFAULT_SETTINGS } from "@/lib/settings/definitions";
@@ -13,6 +14,7 @@ function isTypingTarget(target: EventTarget | null) {
 export function useKeyboardShortcut(id: KeyboardShortcutId, callback: () => void) {
   const shortcuts = useAtomValue(settingAtoms.KEYBOARD_SHORTCUTS);
   const enabledInInputsDefault = useAtomValue(settingAtoms.KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS);
+  const recordingShortcut = useAtomValue(recordingShortcutAtom);
   const config = shortcuts[id] ?? DEFAULT_SETTINGS.KEYBOARD_SHORTCUTS[id];
   const enableOnFormTags = config.enabledInInputs ?? enabledInInputsDefault;
 
@@ -23,7 +25,7 @@ export function useKeyboardShortcut(id: KeyboardShortcutId, callback: () => void
       callback();
     },
     {
-      enabled: Boolean(config.shortcut),
+      enabled: Boolean(config.shortcut) && !recordingShortcut,
       enableOnContentEditable: enableOnFormTags,
       enableOnFormTags,
       preventDefault: config.preventDefault,
