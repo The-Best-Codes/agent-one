@@ -40,6 +40,7 @@ import { cn } from "@/lib/utils";
 
 import { ChatModelConfig } from "../chat-model-config";
 import { ModelSelector } from "../chat-model-selector";
+import { ShortcutKbd, ShortcutKeys } from "../shortcut-kbd";
 import { Attachments } from "./attachments";
 import { MainInputErrorSection } from "./error-section";
 import { MainInputIncompleteSection } from "./incomplete-section";
@@ -776,7 +777,10 @@ export const MainChatInput = ({
                       <IconPlayerStopFilled />
                     </Button>
                   </AdaptiveTooltipTrigger>
-                  <AdaptiveTooltipContent>Stop the current response</AdaptiveTooltipContent>
+                  <AdaptiveTooltipContent>
+                    Stop the current response
+                    <ShortcutKbd id="stopResponse" />
+                  </AdaptiveTooltipContent>
                 </AdaptiveTooltip>
                 <AdaptiveTooltip>
                   <AdaptiveTooltipTrigger asChild>
@@ -811,6 +815,9 @@ export const MainChatInput = ({
                     {showInterruptButton
                       ? "Stop the response and send your message"
                       : "Send your message"}
+                    {!(isMobile && chatShortcutKey === "enter") && (
+                      <ShortcutKeys shortcut={getChatShortcut(chatShortcutKey)} />
+                    )}
                   </AdaptiveTooltipContent>
                 </AdaptiveTooltip>
               </ButtonGroup>

@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 
+import { ShortcutKbd } from "@/components/a1/shortcut-kbd";
 import {
   AdaptiveTooltip,
   AdaptiveTooltipContent,
@@ -158,7 +159,10 @@ export const Sidebar = ({ className }: SidebarProps) => {
           <IconLayoutSidebar data-icon="inline-start" />
         </Button>
       </AdaptiveTooltipTrigger>
-      <AdaptiveTooltipContent side={tooltipSide}>{toggleTooltip}</AdaptiveTooltipContent>
+      <AdaptiveTooltipContent side={tooltipSide}>
+        {toggleTooltip}
+        <ShortcutKbd id="toggleSidebar" />
+      </AdaptiveTooltipContent>
     </AdaptiveTooltip>
   ) : (
     <Drawer direction="left" open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
@@ -176,7 +180,10 @@ export const Sidebar = ({ className }: SidebarProps) => {
             </Button>
           </DrawerTrigger>
         </AdaptiveTooltipTrigger>
-        <AdaptiveTooltipContent>{toggleTooltip}</AdaptiveTooltipContent>
+        <AdaptiveTooltipContent>
+          {toggleTooltip}
+          <ShortcutKbd id="toggleSidebar" />
+        </AdaptiveTooltipContent>
       </AdaptiveTooltip>
       <DrawerContent
         onCloseAutoFocus={(e) => e.preventDefault()}
@@ -229,7 +236,10 @@ export const Sidebar = ({ className }: SidebarProps) => {
                   <IconSearch data-icon="inline-start" />
                 </Button>
               </AdaptiveTooltipTrigger>
-              <AdaptiveTooltipContent side={tooltipSide}>Search chats</AdaptiveTooltipContent>
+              <AdaptiveTooltipContent side={tooltipSide}>
+                Search chats
+                <ShortcutKbd id="focusChatSearchCollapsed" />
+              </AdaptiveTooltipContent>
             </AdaptiveTooltip>
             <AdaptiveTooltip>
               <AdaptiveTooltipTrigger asChild>
@@ -243,7 +253,10 @@ export const Sidebar = ({ className }: SidebarProps) => {
                   <IconPlus data-icon="inline-start" />
                 </Button>
               </AdaptiveTooltipTrigger>
-              <AdaptiveTooltipContent side={tooltipSide}>New Chat</AdaptiveTooltipContent>
+              <AdaptiveTooltipContent side={tooltipSide}>
+                New Chat
+                <ShortcutKbd id="newChat" />
+              </AdaptiveTooltipContent>
             </AdaptiveTooltip>
           </div>
         </div>
