@@ -108,7 +108,7 @@ export const ProjectItem = memo(
                 </button>
                 <div
                   className={cn(
-                    "absolute top-1/2 right-1 flex -translate-y-1/2 items-center gap-0.5 opacity-0 transition-opacity duration-200 group-hover/project-item:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100",
+                    "absolute top-1/2 right-1 flex -translate-y-1/2 items-center gap-0.5 opacity-0 transition-opacity duration-200 will-change-[opacity] group-hover/project-item:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100",
                     isDropdownOpen && "opacity-100",
                   )}
                 >
