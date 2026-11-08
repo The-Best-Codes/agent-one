@@ -13,6 +13,7 @@ import {
   createGetUrlContentTool,
   createMemoryTool,
   createSubAgentTool,
+  createUseSkillTool,
   createViewFileTool,
   createWaitTool,
   createWebSearchTool,
@@ -87,7 +88,7 @@ function getServerLoadSignature(server: McpServerConfig): string {
   });
 }
 
-const ALWAYS_APPROVAL_FREE_TOOLS = new Set(["describeNextTool"]);
+const ALWAYS_APPROVAL_FREE_TOOLS = new Set(["describeNextTool", "useSkill"]);
 
 function applyApprovalConfigToTools(
   tools: ToolSet,
@@ -587,6 +588,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
           tool,
           mergedToolConfigs[name as keyof typeof mergedToolConfigs]?.requiresApproval ?? true,
         );
+      }
+
+      if (mergedEnabledTools.viewFile) {
+        filteredStaticTools.useSkill = withApproval(createUseSkillTool(chatContext.project), false);
       }
 
       if (!mcpLoadedRef.current && loadingPromiseRef.current) {

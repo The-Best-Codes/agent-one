@@ -104,6 +104,8 @@
     "tailwindcss": "^4.3.5",
     "typescript-eslint": "^8.72.1",
     "vaul": "^1.1.2",
+    "vfile": "^6.0.3",
+    "vfile-matter": "^5.0.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {

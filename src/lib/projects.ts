@@ -49,7 +49,10 @@ export function getProject(id: string | undefined): Project | undefined {
 }
 
 export function createProject(
-  details: Pick<Project, "name" | "instructions" | "folder" | "separateMemory" | "agentsFiles">,
+  details: Pick<
+    Project,
+    "name" | "instructions" | "folder" | "separateMemory" | "agentsFiles" | "skillsFolders"
+  >,
 ): Project {
   const now = Date.now();
   const project: Project = {

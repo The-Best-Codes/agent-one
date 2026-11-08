@@ -10,7 +10,7 @@ import {
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 
-import { AgentsFilesEditor } from "@/components/a1/agents-files-editor";
+import { PathListEditor } from "@/components/a1/path-list-editor";
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
 import {
   AdaptiveTooltip,
@@ -49,7 +49,7 @@ import {
 import { hideAgentOneModelsAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { syncEnabledAtom } from "@/lib/jotai/sync-atoms";
-import { globalAgentsFilesAtom } from "@/lib/jotai/unsynced-local-atoms";
+import { globalAgentsFilesAtom, globalSkillsFoldersAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { MAX_MEMORY_ENTRIES, MAX_MEMORY_ENTRY_CHARS } from "@/lib/memory";
 
 import { SettingsTarget } from "./settings-target";
@@ -303,7 +303,12 @@ export function HideAgentOneModelsControl() {
 
 export function GlobalAgentsFilesControl() {
   const [files, setFiles] = useAtom(globalAgentsFilesAtom);
-  return <AgentsFilesEditor files={files} setFiles={setFiles} />;
+  return <PathListEditor files={files} setFiles={setFiles} />;
+}
+
+export function GlobalSkillsFoldersControl() {
+  const [folders, setFolders] = useAtom(globalSkillsFoldersAtom);
+  return <PathListEditor files={folders} setFiles={setFolders} directory />;
 }
 
 export function MemoryControl() {

@@ -28,6 +28,7 @@ import { MessagePartToolSendFeedback } from "./tools/tool-sendFeedback";
 import { MessagePartToolSubAgent } from "./tools/tool-subAgent";
 import { MessagePartToolUpdateScheduledAgent } from "./tools/tool-updateScheduledAgent";
 import { MessagePartToolUpdateSetting } from "./tools/tool-updateSetting";
+import { MessagePartToolUseSkill } from "./tools/tool-useSkill";
 import { MessagePartToolViewFile } from "./tools/tool-viewFile";
 import { MessagePartToolWaitNumberMilliseconds } from "./tools/tool-waitNumberMilliseconds";
 import { MessagePartToolWebSearch } from "./tools/tool-webSearch";
@@ -91,6 +92,8 @@ function ToolPart({ part }: MessageToolHandlerProps) {
       return <MessagePartToolComputerUseObserve part={part} />;
     case "tool-computerUseAct":
       return <MessagePartToolComputerUseAct part={part} />;
+    case "tool-useSkill":
+      return <MessagePartToolUseSkill part={part} />;
     default:
       return <MessagePartToolCall part={part as ToolUIPart} />;
   }

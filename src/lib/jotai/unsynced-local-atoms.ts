@@ -29,6 +29,13 @@ export const globalAgentsFilesAtom = atomWithStorage<string[]>(
   { getOnInit: true },
 );
 
+export const globalSkillsFoldersAtom = atomWithStorage<string[]>(
+  "agent-one-skills-folders",
+  ["~/.agents/skills", "~/.claude/skills"],
+  createNoSyncStorage<string[]>(),
+  { getOnInit: true },
+);
+
 export const collapsedProjectIdsAtom = atomWithStorage<string[]>(
   "agent-one-collapsed-project-ids",
   [],
