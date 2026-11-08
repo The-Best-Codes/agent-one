@@ -13,6 +13,8 @@ const store = getDefaultStore();
 
 const logger = getLogger(import.meta.url);
 
+const loginsInProgress = new Set<string>();
+
 export function isAuthError(error: unknown): boolean {
   if (error instanceof UnauthorizedError) {
     return true;
@@ -51,6 +53,10 @@ export async function mcpLogin(
   serverUrl: string,
   serverName: string,
 ): Promise<boolean> {
+  if (loginsInProgress.has(serverId)) {
+    return false;
+  }
+  loginsInProgress.add(serverId);
   dismissMcpLoginToasts(serverId);
 
   const toastId = toast.loading(`Connecting AgentOne to "${serverName}"...`, {
@@ -105,6 +111,8 @@ export async function mcpLogin(
       });
     }
     return false;
+  } finally {
+    loginsInProgress.delete(serverId);
   }
 }
 
@@ -146,6 +154,13 @@ export async function mcpCheckAuth(
     return "logged-in";
   } catch (error) {
     logger.debug(`No valid token for MCP server ${serverId}`, error);
+    store.set(mcpAuthStatesAtom, (prev) => {
+      if (prev[serverId] !== undefined) return prev;
+      return {
+        ...prev,
+        [serverId]: "logged-out",
+      };
+    });
     return undefined;
   }
 }

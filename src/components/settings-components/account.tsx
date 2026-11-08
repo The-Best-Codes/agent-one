@@ -320,7 +320,7 @@ export function MemoryEditor({
   setMemory: (update: (prev: string[]) => string[]) => void;
   inputId?: string;
 }) {
-  const [removingIndex, setRemovingIndex] = useState<number | null>(null);
+  const [removing, setRemoving] = useState<{ index: number; entry: string } | null>(null);
 
   const addMemoryEntry = () => {
     if (memory.length >= MAX_MEMORY_ENTRIES) return;
@@ -333,8 +333,10 @@ export function MemoryEditor({
     setMemory((prev) => prev.map((entry, entryIndex) => (entryIndex === index ? value : entry)));
   };
 
-  const removeMemoryEntry = (index: number) => {
-    setMemory((prev) => prev.filter((_, entryIndex) => entryIndex !== index));
+  const removeMemoryEntry = (index: number, expectedEntry: string) => {
+    setMemory((prev) =>
+      prev[index] === expectedEntry ? prev.filter((_, entryIndex) => entryIndex !== index) : prev,
+    );
   };
 
   return (
@@ -372,8 +374,8 @@ export function MemoryEditor({
 
               {entry ? (
                 <Popover
-                  open={removingIndex === index}
-                  onOpenChange={(open) => setRemovingIndex(open ? index : null)}
+                  open={removing?.index === index && removing.entry === entry}
+                  onOpenChange={(open) => setRemoving(open ? { index, entry } : null)}
                 >
                   <PopoverTrigger asChild>
                     <Button
@@ -391,15 +393,15 @@ export function MemoryEditor({
                       <PopoverDescription>This cannot be undone.</PopoverDescription>
                     </PopoverHeader>
                     <div className="flex justify-end gap-2">
-                      <Button size="sm" variant="outline" onClick={() => setRemovingIndex(null)}>
+                      <Button size="sm" variant="outline" onClick={() => setRemoving(null)}>
                         Cancel
                       </Button>
                       <Button
                         size="sm"
                         variant="destructive"
                         onClick={() => {
-                          removeMemoryEntry(index);
-                          setRemovingIndex(null);
+                          removeMemoryEntry(index, entry);
+                          setRemoving(null);
                         }}
                       >
                         Delete
@@ -412,7 +414,7 @@ export function MemoryEditor({
                   type="button"
                   variant="destructive"
                   size="icon"
-                  onClick={() => removeMemoryEntry(index)}
+                  onClick={() => removeMemoryEntry(index, entry)}
                   aria-label="Remove memory entry"
                 >
                   <IconX />

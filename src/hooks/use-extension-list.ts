@@ -62,17 +62,21 @@ export function useExtensionList(
               "The extension list could not be loaded. Installed extensions are still available.";
           }
           if (cancelled) return;
+          const resetKey = JSON.stringify([
+            query,
+            onlyInstalled,
+            showDeviceExtensions,
+            showOnlineExtensions,
+          ]);
           setResult((previous) => ({
-            extensions: queryError && !onlyInstalled ? previous.extensions : extensions,
+            extensions:
+              queryError && !onlyInstalled && previous.resetKey === resetKey
+                ? previous.extensions
+                : extensions,
             installedSummaries,
-            resetKey: JSON.stringify([
-              query,
-              onlyInstalled,
-              showDeviceExtensions,
-              showOnlineExtensions,
-            ]),
+            resetKey,
             knownRegistryNames: new Set(installedSummaries.map((summary) => summary.id)),
-            hasMore: queryError ? previous.hasMore : hasMore,
+            hasMore: queryError && previous.resetKey === resetKey ? previous.hasMore : hasMore,
           }));
           setError(queryError);
         })()

@@ -1,6 +1,6 @@
 import type { TextUIPart, ToolUIPart, UIMessage } from "ai";
-import { useSetAtom } from "jotai";
-import { memo, useCallback, useMemo, useState } from "react";
+import { atom, useAtomValue, useSetAtom } from "jotai";
+import { memo, useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
 
 import { useGetChatMessages } from "@/contexts/use-chat/chat-hooks";
@@ -8,7 +8,10 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { isCompactionPart } from "@/lib/ai/compaction";
 import type { ToolDisplayLabels } from "@/lib/ai/tools/describeNextTool";
 import { getToolDisplayName } from "@/lib/ai/tools/mcp";
-import { setMessageEditingAtom } from "@/lib/jotai/chat-message-editing-atoms";
+import {
+  editingMessageIdsAtom,
+  setMessageEditingAtom,
+} from "@/lib/jotai/chat-message-editing-atoms";
 import { getLogger } from "@/lib/logger";
 
 // When these imports are updates, check if ./src/components/a1/messages/parts/subagent-transcript.tsx needs to be updated as well!
@@ -33,7 +36,11 @@ const MessagePartsInternal = ({
   message: UIMessage;
   isLastMessage?: boolean;
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const isEditingAtom = useMemo(
+    () => atom((get) => get(editingMessageIdsAtom).includes(message.id)),
+    [message.id],
+  );
+  const isEditing = useAtomValue(isEditingAtom);
   const setMessageEditing = useSetAtom(setMessageEditingAtom);
 
   const navigate = useNavigate();
@@ -43,12 +50,10 @@ const MessagePartsInternal = ({
 
   const handleEdit = useCallback(() => {
     setMessageEditing({ isEditing: true, messageId: message.id });
-    setIsEditing(true);
   }, [message.id, setMessageEditing]);
 
   const handleCloseEditor = useCallback(() => {
     setMessageEditing({ isEditing: false, messageId: message.id });
-    setIsEditing(false);
   }, [message.id, setMessageEditing]);
 
   const handleBranch = useCallback(() => {

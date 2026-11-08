@@ -130,10 +130,13 @@ export async function loadPersistedModelDirectory(): Promise<void> {
     const raw = await readTextFile(MODEL_DIRECTORY_FILENAME, {
       baseDir: BaseDirectory.AppLocalData,
     });
-    getDefaultStore().set(downloadedModelDirectoryAtom, parseModelDirectory(raw));
+    const data = parseModelDirectory(raw);
+    const store = getDefaultStore();
+    if (store.get(downloadedModelDirectoryAtom) === null) {
+      store.set(downloadedModelDirectoryAtom, data);
+    }
   } catch (error) {
     logger.warn("Failed to load persisted model directory", error);
-    getDefaultStore().set(downloadedModelDirectoryAtom, null);
   }
 }
 

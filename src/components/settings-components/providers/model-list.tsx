@@ -318,6 +318,7 @@ function AddModelDialog({ open, onOpenChange, ...formProps }: AddModelDialogProp
 }
 
 function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigDialogProps) {
+  const [initialModel] = useState(model);
   const [draft, setDraft] = useState(model);
   const [contextWindowValue, setContextWindowValue] = useState(
     model.contextWindow?.toString() ?? "",
@@ -332,7 +333,7 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
   const isMaxOutputTokensInvalid = parsedMaxOutputTokens === null;
 
   const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen) {
+    if (!nextOpen && !isSameModelMetadata(draft, initialModel)) {
       onChange(draft);
     }
 
@@ -532,7 +533,7 @@ const ModelRow = memo(function ModelRow({
 
       {configOpen ? (
         <ModelConfigDialog
-          key={`${model.id}-${model.name ?? ""}-${model.contextWindow ?? ""}-${model.maxOutputTokens ?? ""}-${model.supportsText}-${model.supportsTools}-${model.supportsImages}-${model.supportsAttachments}`}
+          key={model.id}
           model={model}
           open={configOpen}
           onOpenChange={setConfigOpen}
@@ -564,7 +565,12 @@ export function ModelList({
   const [fetchState, setFetchState] = useState<"idle" | "fetching" | "success" | "error">("idle");
   const fetchResetTimeoutRef = useRef<number | null>(null);
   const hasAutoFetchedRef = useRef(false);
+  const latestModelsRef = useRef(models);
   const parentRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    latestModelsRef.current = models;
+  }, [models]);
 
   useEffect(() => {
     return () => {
@@ -667,7 +673,8 @@ export function ModelList({
 
     try {
       const response: OpenAIModelsResponse = await fetchProviderModels(baseUrl, apiKey, headers);
-      const existingIds = new Set(models.map((model) => model.id));
+      const currentModels = latestModelsRef.current;
+      const existingIds = new Set(currentModels.map((model) => model.id));
       const fetchedModels = response.data
         .filter((model) => !existingIds.has(model.id))
         .map((model): ProviderModelMetadata => ({
@@ -679,7 +686,7 @@ export function ModelList({
         }));
 
       if (fetchedModels.length > 0) {
-        onChange([...fetchedModels, ...models]);
+        onChange([...fetchedModels, ...currentModels]);
       }
 
       setFetchStateWithReset("success");

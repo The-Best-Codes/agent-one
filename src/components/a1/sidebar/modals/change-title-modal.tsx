@@ -63,6 +63,7 @@ const ChangeTitleForm = ({
   };
 
   const handleGenerate = async () => {
+    const titleBeforeGenerating = title;
     setIsGenerating(true);
     try {
       const chatMetadata = loadChatMetadata(chatId);
@@ -78,7 +79,7 @@ const ChangeTitleForm = ({
           titleGenerationSettings.characterLimit,
           { chatId, trigger: "manual" },
         );
-        setTitle(generatedTitle);
+        setTitle((current) => (current === titleBeforeGenerating ? generatedTitle : current));
       }
     } catch (error) {
       logger.error("Failed to generate title:", error);

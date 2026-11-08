@@ -1,6 +1,6 @@
 import { IconArrowLeft } from "@tabler/icons-react";
 import { generateId, type UIMessage } from "ai";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -88,6 +88,7 @@ async function yieldToUi(): Promise<void> {
 export default function LocalDatabaseTestRoute() {
   const navigate = useNavigate();
   const [isRunning, setIsRunning] = useState(false);
+  const isRunningRef = useRef(false);
   const [logs, setLogs] = useState<string[]>([]);
   const [metrics, setMetrics] = useState<BenchmarkMetric[]>([]);
   const [summary, setSummary] = useState<string | null>(null);
@@ -97,10 +98,11 @@ export default function LocalDatabaseTestRoute() {
   };
 
   const runBenchmark = async () => {
-    if (isRunning) {
+    if (isRunningRef.current) {
       return;
     }
 
+    isRunningRef.current = true;
     setIsRunning(true);
     setLogs([]);
     setMetrics([]);
@@ -296,6 +298,7 @@ export default function LocalDatabaseTestRoute() {
         );
         addLog(`Cleanup failed: ${cleanupMessage}`);
       } finally {
+        isRunningRef.current = false;
         setIsRunning(false);
       }
     }
@@ -305,7 +308,13 @@ export default function LocalDatabaseTestRoute() {
     <div className="bg-background min-h-screen">
       <div className="container mx-auto max-w-4xl p-6">
         <div className="mb-6 flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={() => navigate("/tests")} className="gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/tests")}
+            disabled={isRunning}
+            className="gap-2"
+          >
             <IconArrowLeft data-icon="inline-start" />
             Back to Tests
           </Button>

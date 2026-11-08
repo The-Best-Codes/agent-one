@@ -74,17 +74,46 @@ export const MarqueeText = ({
       viewport.scrollTo({ left: 0, behavior: prefersReducedMotion() ? "instant" : "smooth" });
     };
 
-    trigger.addEventListener("pointerenter", start);
-    trigger.addEventListener("pointerleave", reset);
-    trigger.addEventListener("focusin", start);
-    trigger.addEventListener("focusout", reset);
+    let hovered = false;
+    let focused = false;
+    let active = false;
+
+    const update = () => {
+      const nextActive = hovered || focused;
+      if (nextActive === active) return;
+      active = nextActive;
+      if (active) start();
+      else reset();
+    };
+    const onPointerEnter = () => {
+      hovered = true;
+      update();
+    };
+    const onPointerLeave = () => {
+      hovered = false;
+      update();
+    };
+    const onFocusIn = () => {
+      focused = true;
+      update();
+    };
+    const onFocusOut = (event: FocusEvent) => {
+      if (trigger.contains(event.relatedTarget as Node | null)) return;
+      focused = false;
+      update();
+    };
+
+    trigger.addEventListener("pointerenter", onPointerEnter);
+    trigger.addEventListener("pointerleave", onPointerLeave);
+    trigger.addEventListener("focusin", onFocusIn);
+    trigger.addEventListener("focusout", onFocusOut);
 
     return () => {
       cancel();
-      trigger.removeEventListener("pointerenter", start);
-      trigger.removeEventListener("pointerleave", reset);
-      trigger.removeEventListener("focusin", start);
-      trigger.removeEventListener("focusout", reset);
+      trigger.removeEventListener("pointerenter", onPointerEnter);
+      trigger.removeEventListener("pointerleave", onPointerLeave);
+      trigger.removeEventListener("focusin", onFocusIn);
+      trigger.removeEventListener("focusout", onFocusOut);
     };
   }, []);
 

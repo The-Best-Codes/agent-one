@@ -21,27 +21,36 @@ const logger = getLogger(import.meta.url);
 const TOKEN_KEY = "agent-one-web-auth-token";
 const DEVICE_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code" as const;
 
+type SignInState =
+  | { phase: "idle" }
+  | { phase: "requesting-code"; attempt: number }
+  | { phase: "awaiting-approval"; attempt: number; deviceFlow: DeviceFlowState };
+
 export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const setAgentOneApiKey = useSetAtom(getApiKeyBaseAtom("agent-one"));
   const setAgentOneConfig = useSetAtom(getProviderConfigAtom("agent-one"));
 
   const [user, setUser] = useState<WebAuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [signInState, setSignInState] = useState<SignInState>({ phase: "idle" });
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const [deviceFlow, setDeviceFlow] = useState<DeviceFlowState | null>(null);
   const [customerState, setCustomerState] = useState<CustomerState | null>(null);
   const [billingLoading, setBillingLoading] = useState(false);
   const [billingError, setBillingError] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const cancelledRef = useRef(false);
+  const signInAttemptRef = useRef(0);
+  const sessionGenerationRef = useRef(0);
   const loadBillingRef = useRef<((silent?: boolean) => Promise<void>) | null>(null);
 
   const fetchSession = useCallback(
     async (accessToken: string): Promise<"valid" | "invalid" | "error"> => {
+      const generation = sessionGenerationRef.current;
       try {
         setAuthToken(accessToken);
         const { data, error } = await authClient.getSession();
+        if (generation !== sessionGenerationRef.current) {
+          return "error";
+        }
         if (data?.user) {
           setUser({
             id: data.user.id,
@@ -119,7 +128,12 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
           return;
         }
 
-        setCustomerState(data ?? null);
+        if (!data) {
+          setBillingError("Unable to load billing information.");
+          return;
+        }
+
+        setCustomerState(data);
       } catch (error) {
         logger.error("Failed to load billing information", error);
         if (!cancelled) {
@@ -157,14 +171,21 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   }, []);
 
+  const endSignInAttempt = useCallback((attempt: number) => {
+    setSignInState((current) =>
+      current.phase !== "idle" && current.attempt === attempt ? { phase: "idle" } : current,
+    );
+  }, []);
+
   const pollForToken = useCallback(
-    (deviceCode: string, interval: number, expiresAt: number) => {
+    (deviceCode: string, interval: number, expiresAt: number, attempt: number) => {
       let currentInterval = interval;
+      const isCurrentAttempt = () => signInAttemptRef.current === attempt;
 
       const poll = async () => {
-        if (cancelledRef.current || Date.now() >= expiresAt) {
-          setIsSigningIn(false);
-          setDeviceFlow(null);
+        if (!isCurrentAttempt()) return;
+        if (Date.now() >= expiresAt) {
+          endSignInAttempt(attempt);
           return;
         }
 
@@ -174,12 +195,16 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
             device_code: deviceCode,
             client_id: CLIENT_ID,
           });
+          if (!isCurrentAttempt()) return;
 
           if (data?.access_token) {
             await keyringStorage.setItem(TOKEN_KEY, data.access_token);
+            if (!isCurrentAttempt()) {
+              await keyringStorage.removeItem(TOKEN_KEY);
+              return;
+            }
             await fetchSession(data.access_token);
-            setIsSigningIn(false);
-            setDeviceFlow(null);
+            endSignInAttempt(attempt);
             return;
           }
 
@@ -192,25 +217,21 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
                 break;
               case "access_denied":
                 logger.warn("Device authorization denied by user");
-                setIsSigningIn(false);
-                setDeviceFlow(null);
+                endSignInAttempt(attempt);
                 return;
               case "expired_token":
                 logger.warn("Device code expired");
-                setIsSigningIn(false);
-                setDeviceFlow(null);
+                endSignInAttempt(attempt);
                 return;
               default:
                 logger.error("Device token error:", error);
-                setIsSigningIn(false);
-                setDeviceFlow(null);
+                endSignInAttempt(attempt);
                 return;
             }
           }
         } catch (error) {
           logger.error("Device token poll error:", error);
-          setIsSigningIn(false);
-          setDeviceFlow(null);
+          endSignInAttempt(attempt);
           return;
         }
 
@@ -219,66 +240,73 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
 
       pollingRef.current = setTimeout(poll, currentInterval * 1000);
     },
-    [fetchSession],
+    [fetchSession, endSignInAttempt],
   );
 
   const startSignIn = useCallback(async () => {
-    cancelledRef.current = false;
-    setIsSigningIn(true);
+    const attempt = ++signInAttemptRef.current;
     stopPolling();
+    setSignInState({ phase: "requesting-code", attempt });
 
     try {
       const { data, error } = await authClient.device.code({
         client_id: CLIENT_ID,
       });
+      if (signInAttemptRef.current !== attempt) return;
 
       if (error || !data) {
         logger.error("Failed to request device code:", error);
-        setIsSigningIn(false);
+        endSignInAttempt(attempt);
         return;
       }
 
       const interval = data.interval ?? 5;
       const expiresAt = Date.now() + (data.expires_in ?? 1800) * 1000;
 
-      setDeviceFlow({
-        userCode: data.user_code,
-        verificationUri: data.verification_uri,
-        verificationUriComplete: data.verification_uri_complete,
-        deviceCode: data.device_code,
-        expiresAt,
-        interval,
+      setSignInState({
+        phase: "awaiting-approval",
+        attempt,
+        deviceFlow: {
+          userCode: data.user_code,
+          verificationUri: data.verification_uri,
+          verificationUriComplete: data.verification_uri_complete,
+          deviceCode: data.device_code,
+          expiresAt,
+          interval,
+        },
       });
 
-      const url = data.verification_uri_complete || data.verification_uri;
-      await openUrl(url);
+      pollForToken(data.device_code, interval, expiresAt, attempt);
 
-      pollForToken(data.device_code, interval, expiresAt);
+      const url = data.verification_uri_complete || data.verification_uri;
+      await openUrl(url).catch((error: unknown) => {
+        logger.warn("Failed to open the sign-in page:", error);
+      });
     } catch (error) {
       logger.error("Failed to start device sign-in:", error);
-      setIsSigningIn(false);
+      endSignInAttempt(attempt);
     }
-  }, [stopPolling, pollForToken]);
+  }, [stopPolling, pollForToken, endSignInAttempt]);
 
   const cancelSignIn = useCallback(() => {
-    cancelledRef.current = true;
+    signInAttemptRef.current++;
     stopPolling();
-    setIsSigningIn(false);
-    setDeviceFlow(null);
+    setSignInState({ phase: "idle" });
   }, [stopPolling]);
 
   const signOut = useCallback(async () => {
     setIsSigningOut(true);
     try {
+      signInAttemptRef.current++;
+      sessionGenerationRef.current++;
       stopPolling();
       settingsSyncManager.onSignedOut();
       setAuthToken(null);
-      await keyringStorage.removeItem(TOKEN_KEY);
+      setUser(null);
+      setSignInState({ phase: "idle" });
       void setAgentOneApiKey("");
       setAgentOneConfig({ enabled: false, headers: {}, models: [] });
-      setUser(null);
-      setDeviceFlow(null);
-      setIsSigningIn(false);
+      await keyringStorage.removeItem(TOKEN_KEY);
     } finally {
       setIsSigningOut(false);
     }
@@ -304,6 +332,9 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
   const refreshBilling = useCallback(() => {
     void loadBillingRef.current?.(true);
   }, []);
+
+  const isSigningIn = signInState.phase !== "idle";
+  const deviceFlow = signInState.phase === "awaiting-approval" ? signInState.deviceFlow : null;
 
   const value = useMemo(
     () => ({

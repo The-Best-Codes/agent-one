@@ -128,9 +128,11 @@ function AgentEditor({
   onDelete,
   onToggle,
   onError,
+  hidden,
 }: {
   agent: ScheduledAgent;
   busy: boolean;
+  hidden: boolean;
   onSaved: (agent: ScheduledAgent) => void;
   onDelete: () => void;
   onToggle: (enabled: boolean) => void;
@@ -185,7 +187,7 @@ function AgentEditor({
   };
 
   return (
-    <AccordionItem value={agent.id}>
+    <AccordionItem value={agent.id} hidden={hidden}>
       <AccordionTrigger className="px-1 py-2 hover:no-underline">
         <div className="flex min-w-0 flex-1 items-center justify-between gap-2 pr-2">
           <span className="flex min-w-0 flex-col items-start gap-1">
@@ -268,7 +270,15 @@ export default function ScheduledAgentsRoute() {
   const [agents, setAgents] = useState<ScheduledAgent[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const [busyId, setBusyId] = useState<string | null>(null);
+  const [busyIds, setBusyIds] = useState<ReadonlySet<string>>(new Set());
+  const setAgentBusy = (id: string, busy: boolean) => {
+    setBusyIds((current) => {
+      const next = new Set(current);
+      if (busy) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
   const [createOpen, setCreateOpen] = useState(false);
   const [manualCreate, setManualCreate] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ScheduledAgent | null>(null);
@@ -289,9 +299,10 @@ export default function ScheduledAgentsRoute() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = agents.filter((agent) =>
-    `${agent.title} ${agent.schedule} ${agent.prompt}`.toLowerCase().includes(query.toLowerCase()),
-  );
+  const matchesQuery = (agent: ScheduledAgent) =>
+    `${agent.title} ${agent.schedule} ${agent.prompt}`.toLowerCase().includes(query.toLowerCase());
+  const filtered = agents.filter(matchesQuery);
+  const isDeleting = deleteTarget !== null && busyIds.has(deleteTarget.id);
   const handleNavigateBack = () => {
     const chatId = searchParams.get("chatId");
     void navigate(chatId ? `/chat/${chatId}` : "/chat");
@@ -333,7 +344,7 @@ export default function ScheduledAgentsRoute() {
   };
 
   const toggle = async (agent: ScheduledAgent, enabled: boolean) => {
-    setBusyId(agent.id);
+    setAgentBusy(agent.id, true);
     try {
       const updated = await setScheduledAgentEnabled(agent.id, enabled);
       setAgents((current) => current.map((item) => (item.id === agent.id ? updated : item)));
@@ -341,13 +352,13 @@ export default function ScheduledAgentsRoute() {
       logger.error("Failed to change scheduled agent state", error);
       setErrorMessage(`Failed to change scheduled agent state: ${String(error)}`);
     } finally {
-      setBusyId(null);
+      setAgentBusy(agent.id, false);
     }
   };
 
   const remove = async () => {
     if (!deleteTarget) return;
-    setBusyId(deleteTarget.id);
+    setAgentBusy(deleteTarget.id, true);
     try {
       await deleteScheduledAgent(deleteTarget.id);
       setAgents((current) => current.filter((agent) => agent.id !== deleteTarget.id));
@@ -356,7 +367,7 @@ export default function ScheduledAgentsRoute() {
       logger.error("Failed to delete scheduled agent", error);
       setErrorMessage(`Failed to delete scheduled agent: ${String(error)}`);
     } finally {
-      setBusyId(null);
+      setAgentBusy(deleteTarget.id, false);
     }
   };
 
@@ -405,11 +416,12 @@ export default function ScheduledAgentsRoute() {
           </Empty>
         ) : (
           <Accordion className="rounded-md border px-2" type="single" collapsible>
-            {filtered.map((agent) => (
+            {agents.map((agent) => (
               <AgentEditor
                 key={agent.id}
                 agent={agent}
-                busy={busyId === agent.id}
+                hidden={!matchesQuery(agent)}
+                busy={busyIds.has(agent.id)}
                 onToggle={(enabled) => void toggle(agent, enabled)}
                 onDelete={() => setDeleteTarget(agent)}
                 onSaved={(updated) =>
@@ -500,7 +512,10 @@ export default function ScheduledAgentsRoute() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+      <Dialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => !open && !isDeleting && setDeleteTarget(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete scheduled agent?</DialogTitle>
@@ -510,16 +525,12 @@ export default function ScheduledAgentsRoute() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteTarget(null)}
-              disabled={busyId !== null}
-            >
+            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={isDeleting}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={() => void remove()} disabled={busyId !== null}>
-              {busyId !== null ? <Spinner data-icon="inline-start" /> : null}
-              {busyId !== null ? "Deleting" : "Delete"}
+            <Button variant="destructive" onClick={() => void remove()} disabled={isDeleting}>
+              {isDeleting ? <Spinner data-icon="inline-start" /> : null}
+              {isDeleting ? "Deleting" : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>

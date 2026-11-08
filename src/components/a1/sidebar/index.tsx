@@ -105,6 +105,9 @@ export const Sidebar = ({ className }: SidebarProps) => {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  if (isDesktop && isDrawerOpen) {
+    setIsDrawerOpen(false);
+  }
   const navigate = useNavigate();
   const { id: activeChatId } = useParams<{ id: string }>();
 

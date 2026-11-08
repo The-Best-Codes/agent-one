@@ -3,6 +3,8 @@ import {
   type LanguageModel,
   lastAssistantMessageIsCompleteWithApprovalResponses,
   type UIMessage,
+  type UITool,
+  type UIToolInvocation,
 } from "ai";
 import { useAtomValue, useAtomValueRawSync } from "jotai";
 import { memo, useCallback, useEffect, useRef } from "react";
@@ -10,12 +12,14 @@ import { memo, useCallback, useEffect, useRef } from "react";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
+import { isCompactionPart } from "@/lib/ai/compaction";
 import { getLastTextPart, truncateMessagePreview } from "@/lib/ai/message-preview";
 import {
   generateChatTitle,
   getChatTitleFallback,
   hasMessageTextContent,
 } from "@/lib/ai/title-generator";
+import { TOOL_CANCELLED_BY_USER_SYMBOL, TOOL_INTERRUPTED_BY_ERROR_TEXT } from "@/lib/constants";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
@@ -24,6 +28,45 @@ import { sendNotificationIfAllowed } from "@/lib/notifications";
 const logger = getLogger(import.meta.url);
 
 export type ChatInstanceHelpers = ReturnType<typeof useChat>;
+
+function closeInterruptedParts(
+  messages: UIMessage[],
+  outcome: "ready" | "error",
+): UIMessage[] | null {
+  const lastMessage = messages[messages.length - 1];
+  if (lastMessage?.role !== "assistant") return null;
+
+  let hasChanges = false;
+  const newParts = lastMessage.parts.map((part) => {
+    if (
+      (part.type.startsWith("tool-") || part.type === "dynamic-tool") &&
+      "state" in part &&
+      (part.state === "approval-responded" ||
+        part.state === "input-streaming" ||
+        part.state === "input-available" ||
+        (part.state === "output-available" &&
+          (part as { preliminary?: boolean }).preliminary === true))
+    ) {
+      hasChanges = true;
+      return {
+        ...part,
+        state: "output-error",
+        errorText:
+          outcome === "error" ? TOOL_INTERRUPTED_BY_ERROR_TEXT : TOOL_CANCELLED_BY_USER_SYMBOL,
+      } as UIToolInvocation<UITool>;
+    }
+    return part;
+  });
+  const cleanedParts = (newParts as UIMessage["parts"]).filter(
+    (part) => !isCompactionPart(part) || part.data.status === "done",
+  );
+  if (cleanedParts.length !== newParts.length) {
+    hasChanges = true;
+  }
+
+  if (!hasChanges) return null;
+  return [...messages.slice(0, -1), { ...lastMessage, parts: cleanedParts }];
+}
 
 export const ChatInstance = memo(
   ({
@@ -75,6 +118,7 @@ export const ChatInstance = memo(
     }, []);
 
     const onUserMessageSent = useCallback(() => {
+      suppressAutoSubmitAfterAbortRef.current = false;
       markChatMessageSent(chatId);
     }, [chatId, markChatMessageSent]);
 
@@ -90,6 +134,8 @@ export const ChatInstance = memo(
       id: chatId,
       messages: initialMessages,
     });
+
+    const setChatMessages = chat.setMessages;
 
     useEffect(() => {
       const pendingApproval = chat.messages
@@ -114,6 +160,9 @@ export const ChatInstance = memo(
       if (chat.status === "streaming" || chat.status === "submitted") {
         wasBusyRef.current = true;
       }
+
+      const finishedRun =
+        wasBusyRef.current && (chat.status === "ready" || chat.status === "error");
 
       if (wasBusyRef.current && chat.status === "ready") {
         wasBusyRef.current = false;
@@ -143,6 +192,16 @@ export const ChatInstance = memo(
         wasBusyRef.current = false;
       }
 
+      if (finishedRun) {
+        const closedMessages = closeInterruptedParts(
+          chat.messages,
+          chat.status === "error" ? "error" : "ready",
+        );
+        if (closedMessages) {
+          setChatMessages(closedMessages);
+        }
+      }
+
       if (
         pendingApproval &&
         "approval" in pendingApproval &&
@@ -157,7 +216,14 @@ export const ChatInstance = memo(
           chatId,
         );
       }
-    }, [chat.status, chat.messages, chatId, loadChatMetadata, notificationSetting]);
+    }, [
+      chat.status,
+      chat.messages,
+      setChatMessages,
+      chatId,
+      loadChatMetadata,
+      notificationSetting,
+    ]);
 
     useEffect(() => {
       if (chat.messages.length > 0) {

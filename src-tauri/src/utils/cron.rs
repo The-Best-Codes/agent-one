@@ -95,8 +95,7 @@ fn create_cron_blocking(
     install_cron(&cron)?;
     crons.push(cron.clone());
     if let Err(error) = write_crons(&app, &crons) {
-        let _ = remove_cron(&cron.id);
-        return Err(error);
+        return Err(with_rollback(error, remove_cron(&cron.id)));
     }
 
     Ok(cron)
@@ -138,7 +137,7 @@ fn update_cron_blocking(
     crons[index] = updated.clone();
     if let Err(error) = write_crons(&app, &crons) {
         if updated.enabled {
-            let _ = install_cron(&previous);
+            return Err(with_rollback(error, install_cron(&previous)));
         }
         return Err(error);
     }
@@ -176,12 +175,12 @@ fn set_cron_enabled_blocking(
 
     crons[index].enabled = enabled;
     if let Err(error) = write_crons(&app, &crons) {
-        if enabled {
-            let _ = remove_cron(&id);
+        let rollback = if enabled {
+            disable_cron(&id)
         } else {
-            let _ = install_cron(&previous);
-        }
-        return Err(error);
+            install_cron(&previous)
+        };
+        return Err(with_rollback(error, rollback));
     }
 
     Ok(crons[index].clone())
@@ -205,7 +204,7 @@ fn delete_cron_blocking(app: tauri::AppHandle, id: String) -> Result<(), String>
     crons.remove(index);
     if let Err(error) = write_crons(&app, &crons) {
         if cron.enabled {
-            let _ = install_cron(&cron);
+            return Err(with_rollback(error, install_cron(&cron)));
         }
         return Err(error);
     }
@@ -295,8 +294,7 @@ fn create_scheduled_agent_blocking(
     install_cron(&cron)?;
     crons.push(cron.clone());
     if let Err(error) = write_crons(&app, &crons) {
-        let _ = remove_cron(&cron.id);
-        return Err(error);
+        return Err(with_rollback(error, remove_cron(&cron.id)));
     }
     Ok(cron)
 }
@@ -357,7 +355,7 @@ fn update_scheduled_agent_blocking(
     crons[index] = updated.clone();
     if let Err(error) = write_crons(&app, &crons) {
         if updated.enabled {
-            let _ = install_cron(&previous);
+            return Err(with_rollback(error, install_cron(&previous)));
         }
         return Err(error);
     }
@@ -399,6 +397,44 @@ where
     })
     .await
     .map_err(|error| format!("Cron operation task failed: {error}"))?
+}
+
+fn with_rollback(error: String, rollback: Result<(), String>) -> String {
+    match rollback {
+        Ok(()) => error,
+        Err(rollback_error) => {
+            format!("{error} Restoring the previous schedule also failed: {rollback_error}")
+        }
+    }
+}
+
+pub async fn reconcile_crons(app: tauri::AppHandle) -> Result<(), String> {
+    run_blocking(move || {
+        let mut failures = Vec::new();
+        for cron in read_crons(&app)? {
+            if let Err(error) = reconcile_cron(&cron) {
+                failures.push(format!("{}: {error}", cron.id));
+            }
+        }
+        if failures.is_empty() {
+            Ok(())
+        } else {
+            Err(failures.join("; "))
+        }
+    })
+    .await
+}
+
+fn reconcile_cron(cron: &Cron) -> Result<(), String> {
+    let job = native_cron::job(cron.id.as_str()).map_err(|error| error.to_string())?;
+    let state = job.status().map_err(|error| error.to_string())?.state;
+    match (cron.enabled, state) {
+        (true, native_cron::JobState::Missing | native_cron::JobState::Inactive) => {
+            install_cron(cron)
+        }
+        (false, native_cron::JobState::Active) => job.disable().map_err(|error| error.to_string()),
+        _ => Ok(()),
+    }
 }
 
 fn ensure_scheduled_agent(app: &tauri::AppHandle, id: &str) -> Result<(), String> {

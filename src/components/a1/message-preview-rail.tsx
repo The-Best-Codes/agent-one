@@ -83,9 +83,33 @@ export function MessagePreviewRail({
       }
     };
 
+    const handleMutations = (records: MutationRecord[]) => {
+      const reindexed = records.filter(
+        (record) => record.type === "attributes" && observedElements.has(record.target as Element),
+      );
+      if (reindexed.length > 0) {
+        setVisibleIndexes((current) => {
+          const next = new Set(current);
+          for (const record of reindexed) next.delete(Number(record.oldValue));
+          return next;
+        });
+        for (const record of reindexed) {
+          observer.unobserve(record.target as Element);
+          observer.observe(record.target as Element);
+        }
+      }
+      observeMessages();
+    };
+
     observeMessages();
-    const mutationObserver = new MutationObserver(observeMessages);
-    mutationObserver.observe(root, { childList: true, subtree: true });
+    const mutationObserver = new MutationObserver(handleMutations);
+    mutationObserver.observe(root, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["data-message-index"],
+      attributeOldValue: true,
+    });
 
     return () => {
       mutationObserver.disconnect();

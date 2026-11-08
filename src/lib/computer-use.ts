@@ -90,7 +90,11 @@ export const getComputerUseAppState = (options: {
   includeScreenshot?: boolean;
   includeMenuBar?: boolean;
   maxElements?: number;
+  observer?: string;
 }) => invoke<ComputerUseAppState>("computer_use_get_state", options);
 
-export const performComputerUseAction = (app: string, action: ComputerUseAction) =>
-  invoke<string>("computer_use_act", { app, action });
+export const performComputerUseAction = (
+  app: string,
+  action: ComputerUseAction,
+  observer?: string,
+) => invoke<string>("computer_use_act", { app, action, observer });

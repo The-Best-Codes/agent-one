@@ -1,5 +1,5 @@
 import { IconDeviceFloppy, IconEye, IconEyeClosed, IconRestore } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -30,11 +30,14 @@ export function SecretInput({
   const resolvedPlaceholder = placeholder ?? "Enter secret value";
   const [showValue, setShowValue] = useState(false);
   const [inputValue, setInputValue] = useState(value);
+  const [syncedValue, setSyncedValue] = useState(value);
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setInputValue(value);
-  }, [value]);
+  if (value !== syncedValue) {
+    setSyncedValue(value);
+    if (!showSaveCancel || inputValue === syncedValue) {
+      setInputValue(value);
+    }
+  }
 
   const hasChanges = inputValue !== value;
 

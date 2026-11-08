@@ -12,8 +12,15 @@ import { UpdateContext } from "./update-contexts";
 
 const logger = getLogger(import.meta.url);
 
+const BUSY_UPDATE_STATUSES = new Set<UpdateStatus>(["checking", "downloading", "installing"]);
+
 export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [updateStatus, setUpdateStatus] = useState<UpdateStatus>("idle");
+  const [updateStatus, setUpdateStatusState] = useState<UpdateStatus>("idle");
+  const updateStatusRef = useRef<UpdateStatus>("idle");
+  const setUpdateStatus = useCallback((status: UpdateStatus) => {
+    updateStatusRef.current = status;
+    setUpdateStatusState(status);
+  }, []);
   const [updateProgress, setUpdateProgress] = useState<number | null>(null);
   const [updateVersion, setUpdateVersion] = useState("");
   const [remindAfter, setRemindAfter] = useAtom(updateRemindAfterAtom);
@@ -23,6 +30,10 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   });
 
   const checkForUpdates = useCallback(async () => {
+    if (BUSY_UPDATE_STATUSES.has(updateStatusRef.current)) {
+      logger.verbose(`Skipping update check while ${updateStatusRef.current}.`);
+      return;
+    }
     logger.verbose("Initiating update check.");
     try {
       setUpdateStatus("checking");
@@ -58,9 +69,13 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       const message = error instanceof Error ? error.message : "Failed to check for updates";
       logger.error(`Error during update check: ${message}`, error);
     }
-  }, []);
+  }, [setUpdateStatus]);
 
   const downloadAndInstallUpdate = useCallback(async () => {
+    if (updateStatusRef.current === "downloading" || updateStatusRef.current === "installing") {
+      logger.verbose(`Skipping update install while ${updateStatusRef.current}.`);
+      return;
+    }
     logger.verbose("Initiating download and install of update.");
     try {
       setUpdateStatus("downloading");
@@ -117,7 +132,7 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       const message = error instanceof Error ? error.message : "Failed to install update";
       logger.error(`Error during update: ${message}`, error);
     }
-  }, []);
+  }, [setUpdateStatus]);
 
   useEffect(() => {
     if (hasCheckedRef.current) return;

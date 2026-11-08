@@ -1,6 +1,6 @@
 import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import { useAtomValue } from "jotai";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
 import {
@@ -45,17 +45,28 @@ export function AccountStep({ onSignedIn, onContinueWithoutAccount }: AccountSte
   const [isSubmitting, setIsSubmitting] = useState(false);
   const hasEnabledProvider = useAtomValue(hasEnabledProviderAtom);
 
+  const transitionTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (transitionTimerRef.current !== null) window.clearTimeout(transitionTimerRef.current);
+    };
+  }, []);
+
   const handleViewChange = (newView: "account" | "byok") => {
+    if (transitionTimerRef.current !== null) return;
     setIsExiting(true);
-    setTimeout(() => {
+    transitionTimerRef.current = window.setTimeout(() => {
+      transitionTimerRef.current = null;
       setView(newView);
       setIsExiting(false);
     }, 500);
   };
 
   const exitThen = (callback: () => void) => {
+    if (transitionTimerRef.current !== null) return;
     setIsSubmitting(true);
-    setTimeout(callback, 500);
+    transitionTimerRef.current = window.setTimeout(callback, 500);
   };
 
   if (view === "byok") {

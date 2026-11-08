@@ -1,5 +1,5 @@
 import { type UseChatHelpers } from "@ai-sdk/react";
-import { type UIMessage, type UITool, type UIToolInvocation } from "ai";
+import { type UIMessage } from "ai";
 import { useAtomValue, useAtomValueRawSync, useSetAtom } from "jotai";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
@@ -11,8 +11,6 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { type ModelConfig, type ModelData } from "@/hooks/ai/use-model-catalog";
-import { isCompactionPart } from "@/lib/ai/compaction";
-import { TOOL_CANCELLED_BY_USER_SYMBOL, TOOL_INTERRUPTED_BY_ERROR_TEXT } from "@/lib/constants";
 import { chatIdsAtom, chatStatusIndicatorsAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
 import { projectsAtom, projectsLoadedAtom } from "@/lib/projects";
@@ -93,6 +91,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const loadedMessagesRef = useRef<Map<string, UIMessage[]>>(new Map());
   const [chatMessagesLoaded, setChatMessagesLoaded] = useState<Set<string>>(new Set());
   const loadVersionRef = useRef(0);
+  const inFlightLoadRef = useRef<{ chatId: string; version: number } | null>(null);
 
   const isChatLoading = useMemo(() => {
     if (!currentChatId) return false;
@@ -100,12 +99,13 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   }, [currentChatId, chatMessagesLoaded]);
 
   useEffect(() => {
-    const version = ++loadVersionRef.current;
-
     if (!currentChatId) return;
     if (chatMessagesLoaded.has(currentChatId)) return;
+    if (inFlightLoadRef.current?.chatId === currentChatId) return;
 
+    const version = ++loadVersionRef.current;
     const chatIdToLoad = currentChatId;
+    inFlightLoadRef.current = { chatId: chatIdToLoad, version };
 
     loadChatMessages(chatIdToLoad)
       .then((messages) => {
@@ -126,6 +126,11 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
           next.add(chatIdToLoad);
           return next;
         });
+      })
+      .finally(() => {
+        if (inFlightLoadRef.current?.version === version) {
+          inFlightLoadRef.current = null;
+        }
       });
   }, [currentChatId, chatMessagesLoaded, loadChatMessages]);
 
@@ -541,62 +546,6 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     sendMessage = noopAsync,
     updateMcpAppModelContext = noopUpdateMcpAppModelContext,
   } = instanceForFunctions ?? {};
-
-  const wasBusyRef = useRef(false);
-  useEffect(() => {
-    if (statusValue.status === "streaming" || statusValue.status === "submitted") {
-      wasBusyRef.current = true;
-    }
-
-    if (wasBusyRef.current && (statusValue.status === "ready" || statusValue.status === "error")) {
-      wasBusyRef.current = false;
-
-      const lastMessage = messages[messages.length - 1];
-      if (lastMessage?.role === "assistant") {
-        let hasChanges = false;
-        const newParts = lastMessage.parts.map((part) => {
-          if (
-            (part.type.startsWith("tool-") || part.type === "dynamic-tool") &&
-            "state" in part &&
-            (part.state === "approval-responded" ||
-              part.state === "input-streaming" ||
-              part.state === "input-available" ||
-              (part.state === "output-available" &&
-                (part as { preliminary?: boolean }).preliminary === true))
-          ) {
-            hasChanges = true;
-            return {
-              ...part,
-              state: "output-error",
-              errorText:
-                statusValue.status === "error"
-                  ? TOOL_INTERRUPTED_BY_ERROR_TEXT
-                  : TOOL_CANCELLED_BY_USER_SYMBOL,
-            } as UIToolInvocation<UITool>;
-          }
-          return part;
-        });
-        const cleanedParts = (newParts as UIMessage["parts"]).filter(
-          (part) => !isCompactionPart(part) || part.data.status === "done",
-        );
-        if (cleanedParts.length !== newParts.length) {
-          hasChanges = true;
-        }
-
-        if (hasChanges) {
-          const updatedMessage: UIMessage = {
-            ...lastMessage,
-            parts: cleanedParts,
-          };
-
-          const newMessages = [...messages.slice(0, -1), updatedMessage];
-          if (setMessages) {
-            setMessages(newMessages);
-          }
-        }
-      }
-    }
-  }, [statusValue.status, messages, setMessages]);
 
   useEffect(() => {
     if (!isMetadataLoaded) return;

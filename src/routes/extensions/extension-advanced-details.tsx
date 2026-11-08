@@ -47,8 +47,11 @@ function McpAuthStatus({ server, disabled }: { server: McpHttpServerConfig; disa
 
   async function runAuthAction(action: () => Promise<unknown>) {
     setLoading(true);
-    await action();
-    setLoading(false);
+    try {
+      await action();
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (disabled) {
@@ -257,6 +260,14 @@ export function ExtensionAdvancedDetails({
   const loadStates = useAtomValue(mcpServerLoadStatesAtom);
   const loadState = loadStates[server.id];
   const [draft, setDraft] = useState(server);
+  const [syncedServer, setSyncedServer] = useState(server);
+
+  if (server !== syncedServer) {
+    setSyncedServer(server);
+    if (JSON.stringify(draft) === JSON.stringify(syncedServer)) {
+      setDraft(server);
+    }
+  }
 
   const hasChanges = JSON.stringify(draft) !== JSON.stringify(server);
   const updateDraft = (updates: Partial<McpServerConfig>) => {

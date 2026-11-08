@@ -106,6 +106,11 @@ function ConnectedMcpAppInternal({
   const getChatFunctions = useGetChatFunctions();
   const { status } = useChatStatus();
   const containerRef = useRef<HTMLDivElement>(null);
+  const [containerElement, setContainerElement] = useState<HTMLDivElement | null>(null);
+  const setContainer = useCallback((node: HTMLDivElement | null) => {
+    containerRef.current = node;
+    setContainerElement(node);
+  }, []);
   const [initialized, setInitialized] = useState(false);
   const [cancellationSent, setCancellationSent] = useState(false);
   const [displayMode, setDisplayMode] = useState<(typeof DISPLAY_MODES)[number]>("inline");
@@ -129,7 +134,7 @@ function ConnectedMcpAppInternal({
   }, [viewportSize.height, viewportSize.width]);
 
   useEffect(() => {
-    const container = containerRef.current;
+    const container = containerElement;
     if (!container) return;
 
     const updateWidth = () =>
@@ -138,7 +143,7 @@ function ConnectedMcpAppInternal({
     const observer = new ResizeObserver(updateWidth);
     observer.observe(container);
     return () => observer.disconnect();
-  }, []);
+  }, [containerElement]);
 
   useEffect(() => {
     const updateViewportSize = () =>
@@ -227,8 +232,9 @@ function ConnectedMcpAppInternal({
           return {};
         },
         requestDisplayMode: ({ mode }) => {
-          setDisplayMode(mode);
-          return { mode };
+          const nextMode = DISPLAY_MODES.includes(mode) ? mode : "inline";
+          setDisplayMode(nextMode);
+          return { mode: nextMode };
         },
         onSizeChange: ({ height }) => {
           if (displayMode === "inline" && height && Number.isFinite(height) && height > 0) {
@@ -299,6 +305,9 @@ function ConnectedMcpAppInternal({
         : { width: containerWidth, maxHeight: Math.max(viewportSize.height - 32, 1) };
 
   if (!handlers) {
+    if (displayMode !== "inline") {
+      setDisplayMode("inline");
+    }
     return fallback;
   }
 
@@ -327,7 +336,7 @@ function ConnectedMcpAppInternal({
         />
       )}
       <div
-        ref={containerRef}
+        ref={setContainer}
         className={
           displayMode === "fullscreen"
             ? "bg-background fixed z-51 overflow-hidden rounded-md text-sm"

@@ -1,4 +1,4 @@
-import { atom, type Atom } from "jotai";
+import { atom, type Atom, type Getter } from "jotai";
 import { atomWithStorage, unwrap } from "jotai/utils";
 
 import { loadable } from "@/lib/jotai/loadable";
@@ -29,16 +29,23 @@ export function getCustomProviderApiKeyAtom(providerId: string) {
   return apiKeyAtom;
 }
 
+function readStoredKeys(get: Getter): CustomProviderApiKeys | Promise<CustomProviderApiKeys> {
+  const stored = get(baseAtom);
+  return stored instanceof Promise ? stored.then(() => get(baseAtom)) : stored;
+}
+
 export const setCustomProviderApiKeyAtom = atom(
   null,
   async (get, set, providerId: string, apiKey: string) => {
-    const current = get(customProviderApiKeysAtom);
+    const stored = readStoredKeys(get);
+    const current = stored instanceof Promise ? await stored : stored;
     await set(baseAtom, { ...current, [providerId]: apiKey });
   },
 );
 
 export const deleteCustomProviderApiKeyAtom = atom(null, async (get, set, providerId: string) => {
-  const current = get(customProviderApiKeysAtom);
+  const stored = readStoredKeys(get);
+  const current = stored instanceof Promise ? await stored : stored;
   const { [providerId]: _removed, ...rest } = current;
   void _removed;
   await set(baseAtom, rest);

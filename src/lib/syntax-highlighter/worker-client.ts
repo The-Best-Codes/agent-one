@@ -39,6 +39,7 @@ class WorkerClient {
   private sessions = new Map<string, ClientSession>();
   private cache = new Map<string, HighlightedCode>();
   private cacheCodeLength = 0;
+  private failed = false;
 
   constructor() {
     this.worker = new Worker(
@@ -57,6 +58,7 @@ class WorkerClient {
 
     this.worker.onerror = (error) => {
       logger.error("Syntax highlighter worker error:", error);
+      this.failed = true;
       this.pendingRequests.forEach((callback, id) => {
         callback({ id, error: "Worker error occurred" });
       });
@@ -118,6 +120,10 @@ class WorkerClient {
     language: string,
     theme: HighlightTheme = "dark-plus",
   ): Promise<HighlightResult> {
+    if (this.failed) {
+      return Promise.resolve({ highlighted: null, error: "Syntax highlighting is unavailable" });
+    }
+
     const existing = this.sessions.get(sessionId);
     const reset = !existing;
     const session: ClientSession = existing ?? { lines: [] };

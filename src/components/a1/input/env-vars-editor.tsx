@@ -96,9 +96,7 @@ export function EnvVarsEditor({
       }
       return updated;
     });
-    const nextDupes = getDuplicateKeys(next);
-    const nextEmpty = next.some(([key]) => !key.trim());
-    if (!nextEmpty && nextDupes.size === 0) {
+    if (!hasChanges) {
       onChange(toRecord(next));
     }
   };

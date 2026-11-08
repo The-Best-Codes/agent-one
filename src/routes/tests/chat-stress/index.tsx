@@ -1,6 +1,6 @@
 import { IconArrowLeft, IconMessage2Plus } from "@tabler/icons-react";
 import { generateId, type UIMessage } from "ai";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
@@ -114,11 +114,12 @@ export default function ChatStressTestRoute() {
   const [paragraphsPerAssistantMessage, setParagraphsPerAssistantMessage] = useState(4);
   const [includeReasoning, setIncludeReasoning] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
+  const isCreatingRef = useRef(false);
 
   const totalMessages = messagePairs * 2;
 
   const handleCreate = async () => {
-    if (isCreating) {
+    if (isCreatingRef.current) {
       return;
     }
 
@@ -128,6 +129,7 @@ export default function ChatStressTestRoute() {
     const trimmedTitle = title.trim() || `Stress Chat ${normalizedPairs * 2} messages`;
     const modelId = getNewChatModelId() || "openrouter/auto";
 
+    isCreatingRef.current = true;
     setIsCreating(true);
 
     try {
@@ -161,6 +163,7 @@ export default function ChatStressTestRoute() {
       const message = error instanceof Error ? error.message : String(error);
       toast.error(`Failed to create stress chat: ${message}`);
     } finally {
+      isCreatingRef.current = false;
       setIsCreating(false);
     }
   };

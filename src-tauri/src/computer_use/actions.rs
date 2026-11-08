@@ -87,6 +87,20 @@ fn describe_target(computer: &NativeComputer, key: &str, target: &ClickTarget) -
     }
 }
 
+fn uses_element_index(action: &ComputerAction) -> bool {
+    match action {
+        ComputerAction::Click { element_index, .. }
+        | ComputerAction::TypeText { element_index, .. }
+        | ComputerAction::Scroll { element_index, .. } => element_index.is_some(),
+        ComputerAction::SetValue { .. }
+        | ComputerAction::SelectText { .. }
+        | ComputerAction::PerformAction { .. } => true,
+        ComputerAction::OpenApp | ComputerAction::PressKey { .. } | ComputerAction::Drag { .. } => {
+            false
+        }
+    }
+}
+
 fn selection_mode(mode: Option<&str>) -> Result<SelectionMode, String> {
     match mode.map(|m| m.trim().to_ascii_lowercase()).as_deref() {
         None | Some("select") | Some("text") => Ok(SelectionMode::Text),
@@ -100,6 +114,7 @@ pub fn act(
     computer: &mut NativeComputer,
     query: &str,
     action: ComputerAction,
+    observer: Option<&str>,
 ) -> Result<String, String> {
     if matches!(action, ComputerAction::OpenApp) {
         return apps::open(computer, query);
@@ -107,6 +122,10 @@ pub fn act(
 
     let (_, key) = apps::find_running(computer, query)?;
     let key = key.as_str();
+
+    if uses_element_index(&action) {
+        super::ensure_latest_observer(key, observer)?;
+    }
 
     let message = match action {
         ComputerAction::OpenApp => unreachable!(),

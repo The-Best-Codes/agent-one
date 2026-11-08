@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 
 const logger = getLogger(import.meta.url);
 
+let activePlaybackId = 0;
+
 export function TtsButton({
   messageId,
   getText,
@@ -35,6 +37,7 @@ export function TtsButton({
   const isDisabled = isCurrentMessage && ["loading", "error"].includes(ttsState.status);
 
   const stopPlayback = () => {
+    activePlaybackId++;
     controller?.stop();
     setController(null);
     setTtsState({ status: "idle", messageId: null });
@@ -53,6 +56,13 @@ export function TtsButton({
 
     stopPlayback();
 
+    const playbackId = ++activePlaybackId;
+    const isCurrentPlayback = () => playbackId === activePlaybackId;
+    const resetAfterError = () => {
+      window.setTimeout(() => {
+        if (isCurrentPlayback()) setTtsState({ status: "idle", messageId: null });
+      }, 1500);
+    };
     const abortController = new AbortController();
     const audio = new Audio();
     let objectUrl: string | null = null;
@@ -89,10 +99,8 @@ export function TtsButton({
         abortController.signal,
       );
 
-      if (abortController.signal.aborted) {
+      if (abortController.signal.aborted || !isCurrentPlayback()) {
         cleanup();
-        setController(null);
-        setTtsState({ status: "idle", messageId: null });
         return;
       }
 
@@ -100,30 +108,35 @@ export function TtsButton({
       audio.src = objectUrl;
       audio.onended = () => {
         cleanup();
+        if (!isCurrentPlayback()) return;
+        activePlaybackId++;
         setController(null);
         setTtsState({ status: "idle", messageId: null });
       };
       audio.onerror = () => {
         cleanup();
+        if (!isCurrentPlayback()) return;
         setController(null);
         setTtsState({ status: "error", messageId });
-        window.setTimeout(() => setTtsState({ status: "idle", messageId: null }), 1500);
+        resetAfterError();
       };
 
       await audio.play();
+      if (!isCurrentPlayback()) {
+        cleanup();
+        return;
+      }
       setTtsState({ status: "playing", messageId });
     } catch (error) {
       cleanup();
-      setController(null);
-
-      if (abortController.signal.aborted) {
-        setTtsState({ status: "idle", messageId: null });
+      if (abortController.signal.aborted || !isCurrentPlayback()) {
         return;
       }
 
+      setController(null);
       logger.error("Error generating speech:", error);
       setTtsState({ status: "error", messageId });
-      window.setTimeout(() => setTtsState({ status: "idle", messageId: null }), 1500);
+      resetAfterError();
     }
   };
 

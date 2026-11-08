@@ -55,6 +55,7 @@ class SettingsSyncManager {
   private timestamps: TimestampMap;
   private dirtyKeys: Set<SettingKey> = new Set();
   private pullPromise: Promise<void> | null = null;
+  private pushState: "idle" | "pushing" | "pushing-with-more-queued" = "idle";
   private atomSetters = new Map<SettingKey, (value: unknown) => void>();
   private pushRetryMs = INITIAL_RETRY_MS;
   private retryTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -150,6 +151,26 @@ class SettingsSyncManager {
   }
 
   private async push(): Promise<void> {
+    if (this.pushState !== "idle") {
+      this.pushState = "pushing-with-more-queued";
+      return;
+    }
+
+    this.pushState = "pushing";
+    try {
+      await this.pushDirtyKeys();
+    } finally {
+      const pushAgain = this.hasQueuedPush();
+      this.pushState = "idle";
+      if (pushAgain) void this.push();
+    }
+  }
+
+  private hasQueuedPush(): boolean {
+    return this.pushState === "pushing-with-more-queued";
+  }
+
+  private async pushDirtyKeys(): Promise<void> {
     if (!getDefaultStore().get(syncEnabledAtom) || !getAuthToken()) return;
 
     if (this.dirtyKeys.size === 0) {

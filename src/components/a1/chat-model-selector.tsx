@@ -447,7 +447,10 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
 
   const enabledModels = AVAILABLE_ENABLED_CHAT_MODELS;
   const shouldShowLoadingSkeleton = loading && loadingDelayPassed;
-  const effectiveDisabled = disabled || loading;
+  const effectiveDisabled = disabled || loading || isModelCatalogLoading;
+  if (open && effectiveDisabled) {
+    setOpen(false);
+  }
   const effectiveOpen = effectiveDisabled ? false : open;
   const displayedModel = loading ? (staleModel ?? currentModel) : currentModel;
 

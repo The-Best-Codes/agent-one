@@ -125,7 +125,7 @@ export function FontControl() {
     try {
       const { fonts: added, failed } = await importCustomFonts();
       if (added.length > 0) {
-        setCustomFonts([...fonts, ...added]);
+        setCustomFonts((previous) => [...(Array.isArray(previous) ? previous : []), ...added]);
         selectFont(added[0].id);
       }
       if (failed.length > 0) {
@@ -138,7 +138,9 @@ export function FontControl() {
 
   const removeFont = (customFont: CustomFont) => {
     void deleteCustomFontFile(customFont);
-    setCustomFonts(fonts.filter((f) => f.id !== customFont.id));
+    setCustomFonts((previous) =>
+      (Array.isArray(previous) ? previous : []).filter((f) => f.id !== customFont.id),
+    );
     if (activeCustomFont?.id === customFont.id) setActiveCustomFontId(null);
   };
 

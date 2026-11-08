@@ -55,6 +55,7 @@ import type { McpServerConfig } from "@/lib/settings/types";
 import { ToolsContext } from "./tools-contexts";
 
 const logger = getLogger(import.meta.url);
+const DEFAULT_MCP_LOAD_TIMEOUT_MS = 30_000;
 
 export interface ToolsContextType {
   getTools: (options?: {
@@ -220,6 +221,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     authStatesRef.current = mcpAuthStates;
 
     if (enabledServers.length === 0) {
+      loadIdRef.current++;
       invalidateServerCache();
       mcpToolsRef.current = {};
       mcpLoadedRef.current = true;
@@ -349,16 +351,21 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
 
           await Promise.all(
             chunk.map(async (server) => {
+              let timeoutId: ReturnType<typeof setTimeout> | undefined;
               try {
-                await authResetPromisesRef.current.get(server.id);
                 const tools = await Promise.race([
-                  getMcpToolsForServer(server),
-                  new Promise<ToolSet>((_, reject) =>
-                    setTimeout(
-                      () => reject(new Error(`Timeout after ${server.timeoutMs}ms`)),
-                      server.timeoutMs,
-                    ),
-                  ),
+                  (async () => {
+                    await authResetPromisesRef.current.get(server.id);
+                    return getMcpToolsForServer(server);
+                  })(),
+                  new Promise<ToolSet>((_, reject) => {
+                    const timeoutMs =
+                      server.timeoutMs > 0 ? server.timeoutMs : DEFAULT_MCP_LOAD_TIMEOUT_MS;
+                    timeoutId = setTimeout(
+                      () => reject(new Error(`Timeout after ${timeoutMs}ms`)),
+                      timeoutMs,
+                    );
+                  }),
                 ]);
                 const toolEntries = Object.entries(tools).map(([name, tool]) => ({
                   name,
@@ -418,6 +425,8 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                     },
                   };
                 });
+              } finally {
+                clearTimeout(timeoutId);
               }
             }),
           );
@@ -431,6 +440,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         setMcpLoaded(true);
       } catch (error) {
         logger.error("Failed to load MCP tools in background:", error);
+        if (loadId !== loadIdRef.current) return;
         mcpToolsRef.current = {};
         mcpLoadedRef.current = true;
         setMcpTools({});
@@ -452,7 +462,9 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
           return next;
         });
       } finally {
-        setIsMcpLoading(false);
+        if (loadId === loadIdRef.current) {
+          setIsMcpLoading(false);
+        }
       }
     };
 
@@ -572,13 +584,15 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       }
 
       if (isComputerUseSupported()) {
+        const computerUseObserver = crypto.randomUUID();
         if (mergedEnabledTools.computerUseObserve) {
           filteredStaticTools.computerUseObserve = createComputerUseObserveTool(
             mergedToolConfigs.computerUseObserve,
+            computerUseObserver,
           );
         }
         if (mergedEnabledTools.computerUseAct) {
-          filteredStaticTools.computerUseAct = createComputerUseActTool();
+          filteredStaticTools.computerUseAct = createComputerUseActTool(computerUseObserver);
         }
       }
 
@@ -589,8 +603,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         );
       }
 
-      if (!mcpLoadedRef.current && loadingPromiseRef.current) {
-        await loadingPromiseRef.current;
+      while (!mcpLoadedRef.current && loadingPromiseRef.current) {
+        const loadingPromise = loadingPromiseRef.current;
+        await loadingPromise;
+        if (loadingPromise === loadingPromiseRef.current) break;
       }
 
       let tools: ToolSet = {

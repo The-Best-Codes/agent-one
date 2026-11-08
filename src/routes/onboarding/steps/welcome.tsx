@@ -1,5 +1,5 @@
 import { IconBook, IconExternalLink, IconMap } from "@tabler/icons-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { AGENT_ONE_DOCS_URL } from "@/lib/constants";
@@ -13,10 +13,18 @@ interface WelcomeStepProps {
 
 export function WelcomeStep({ name, onComplete, onStartTour }: WelcomeStepProps) {
   const [isExiting, setIsExiting] = useState(false);
+  const exitTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (exitTimerRef.current !== null) window.clearTimeout(exitTimerRef.current);
+    };
+  }, []);
 
   const exitThen = (callback: () => void) => {
+    if (exitTimerRef.current !== null) return;
     setIsExiting(true);
-    setTimeout(callback, 500);
+    exitTimerRef.current = window.setTimeout(callback, 500);
   };
 
   return (

@@ -76,7 +76,11 @@ export const ProjectItem = memo(
                   e.dataTransfer.dropEffect = "copy";
                   setIsDragOver(true);
                 }}
-                onDragLeave={() => setIsDragOver(false)}
+                onDragLeave={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+                    setIsDragOver(false);
+                  }
+                }}
                 onDrop={(e) => {
                   setIsDragOver(false);
                   const data = e.dataTransfer.getData(CHAT_DRAG_TYPE);

@@ -3,6 +3,7 @@ mod apps;
 mod observe;
 mod permissions;
 
+use std::collections::HashMap;
 use std::sync::{Mutex, PoisonError};
 use std::time::Duration;
 
@@ -20,6 +21,38 @@ const DEFAULT_MAX_ELEMENTS: usize = 1500;
 type NativeComputer = Computer<NativeBackend>;
 
 static COMPUTER: Lazy<Mutex<Option<NativeComputer>>> = Lazy::new(|| Mutex::new(None));
+static LAST_OBSERVERS: Lazy<Mutex<HashMap<String, String>>> =
+    Lazy::new(|| Mutex::new(HashMap::new()));
+
+fn record_observer(app_key: &str, observer: Option<String>) {
+    let mut observers = LAST_OBSERVERS
+        .lock()
+        .unwrap_or_else(PoisonError::into_inner);
+    match observer {
+        Some(observer) => {
+            observers.insert(app_key.to_string(), observer);
+        }
+        None => {
+            observers.remove(app_key);
+        }
+    }
+}
+
+fn ensure_latest_observer(app_key: &str, observer: Option<&str>) -> Result<(), String> {
+    let Some(observer) = observer else {
+        return Ok(());
+    };
+    let observers = LAST_OBSERVERS
+        .lock()
+        .unwrap_or_else(PoisonError::into_inner);
+    match observers.get(app_key) {
+        Some(latest) if latest != observer => Err(
+            "This app was observed again by another task since your last observation, so its element indexes changed. Observe the app again before acting on elements."
+                .to_string(),
+        ),
+        _ => Ok(()),
+    }
+}
 
 fn describe_error(error: Error) -> String {
     match error {
@@ -92,9 +125,10 @@ pub async fn computer_use_get_state(
     include_screenshot: Option<bool>,
     include_menu_bar: Option<bool>,
     max_elements: Option<usize>,
+    observer: Option<String>,
 ) -> Result<AppState, String> {
     run_blocking(move |computer| {
-        observe::get_state(
+        let (state, app_key) = observe::get_state(
             computer,
             &app,
             ObserveOptions {
@@ -103,12 +137,18 @@ pub async fn computer_use_get_state(
                 include_menu_bar: include_menu_bar.unwrap_or(false),
                 max_elements: max_elements.unwrap_or(DEFAULT_MAX_ELEMENTS).clamp(50, 5000),
             },
-        )
+        )?;
+        record_observer(&app_key, observer);
+        Ok(state)
     })
     .await
 }
 
 #[tauri::command]
-pub async fn computer_use_act(app: String, action: ComputerAction) -> Result<String, String> {
-    run_blocking(move |computer| actions::act(computer, &app, action)).await
+pub async fn computer_use_act(
+    app: String,
+    action: ComputerAction,
+    observer: Option<String>,
+) -> Result<String, String> {
+    run_blocking(move |computer| actions::act(computer, &app, action, observer.as_deref())).await
 }

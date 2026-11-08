@@ -214,6 +214,16 @@ pub fn run() {
                 })?;
             }
 
+            #[cfg(not(any(target_os = "android", target_os = "ios")))]
+            {
+                let handle = app.handle().clone();
+                tauri::async_runtime::spawn(async move {
+                    if let Err(error) = utils::reconcile_crons(handle).await {
+                        tauri_plugin_log::log::warn!("Failed to sync scheduled jobs: {error}");
+                    }
+                });
+            }
+
             app.manage(mcp_auth::AuthCancellationState(std::sync::Arc::new(
                 tokio::sync::Mutex::new(std::collections::HashMap::new()),
             )));

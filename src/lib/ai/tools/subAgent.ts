@@ -258,18 +258,22 @@ export function respondToSubAgentApproval(
   approved: boolean,
   reason?: string,
 ) {
-  updateLiveState(toolCallId, (state) => ({
-    ...state,
-    message:
-      state.message && state.pendingApprovalIds.includes(approvalId)
-        ? patchApprovalResponses(state.message, new Map([[approvalId, { approved, reason }]]))
-        : state.message,
-    pendingApprovalIds: state.pendingApprovalIds.filter((id) => id !== approvalId),
-    status:
-      state.pendingApprovalIds.filter((id) => id !== approvalId).length > 0
-        ? "waiting-approval"
-        : "running",
-  }));
+  updateLiveState(toolCallId, (state) => {
+    if (state.status === "completed") {
+      return state;
+    }
+
+    const pendingApprovalIds = state.pendingApprovalIds.filter((id) => id !== approvalId);
+    return {
+      ...state,
+      message:
+        state.message && state.pendingApprovalIds.includes(approvalId)
+          ? patchApprovalResponses(state.message, new Map([[approvalId, { approved, reason }]]))
+          : state.message,
+      pendingApprovalIds,
+      status: pendingApprovalIds.length > 0 ? "waiting-approval" : "running",
+    };
+  });
 
   subAgentApprovalWaiters.get(approvalId)?.resolve({ approved, reason });
 }

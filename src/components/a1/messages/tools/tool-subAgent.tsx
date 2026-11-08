@@ -71,7 +71,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
     part.state === "output-available" && (part as { preliminary?: boolean }).preliminary === true;
   const pendingApprovals = liveState?.pendingApprovalIds ?? [];
   const hasPendingApprovals = pendingApprovals.length > 0;
-  const isExpanded = Boolean(isAccordionOpen || hasPendingApprovals);
+  const isExpanded = isAccordionOpen ?? hasPendingApprovals;
   const isChatBusy = chatStatus === "streaming" || chatStatus === "submitted";
   const showSpinnerIcon = isChatBusy && (isStreaming || liveState?.status === "running");
   const nestedApprovalHandler = useCallback(
@@ -170,6 +170,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
         <Accordion
           type="single"
           collapsible
+          value={isExpanded ? callId : ""}
           onValueChange={(value) => setIsAccordionOpen(value === callId)}
           className="text-foreground flex w-full max-w-3xl flex-row bg-transparent p-0 text-sm"
         >

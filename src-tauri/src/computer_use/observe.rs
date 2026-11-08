@@ -52,7 +52,7 @@ pub fn get_state(
     computer: &mut NativeComputer,
     query: &str,
     options: ObserveOptions,
-) -> Result<AppState, String> {
+) -> Result<(AppState, String), String> {
     let (app, key) = apps::find_running(computer, query)?;
     let pid = app.pid.unwrap_or_default();
 
@@ -98,7 +98,7 @@ pub fn get_state(
         lines.push(format!("Notes: {}", state.notes.join(" ")));
     }
 
-    Ok(AppState {
+    let app_state = AppState {
         app: state.app.name.clone(),
         pid,
         window: state.window.title.clone(),
@@ -108,5 +108,7 @@ pub fn get_state(
         truncated: state.truncated,
         screenshot,
         screenshot_error,
-    })
+    };
+
+    Ok((app_state, key))
 }

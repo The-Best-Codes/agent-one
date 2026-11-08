@@ -13,7 +13,6 @@ use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use sqlx::Row;
 use sqlx::SqlitePool;
 use tauri::Manager;
-#[cfg(target_os = "linux")]
 use tauri_plugin_log::log;
 use tokio::sync::OnceCell;
 use tokio::task;
@@ -83,7 +82,9 @@ pub fn initialize_keyring_store(app: &tauri::AppHandle) -> Result<(), String> {
     };
 
     keyring_core::set_default_store(store);
-    migrate_legacy_service_entries()?;
+    if let Err(e) = migrate_legacy_service_entries() {
+        log::warn!("{}", e);
+    }
 
     #[cfg(target_os = "linux")]
     {
@@ -98,11 +99,16 @@ pub fn initialize_keyring_store(app: &tauri::AppHandle) -> Result<(), String> {
 
 #[cfg(target_os = "linux")]
 fn migrate_secrets_file(path: &Path) -> Result<(), String> {
-    let secrets = read_secrets_file(path)?;
-    for (key, value) in &secrets {
-        Entry::new(SERVICE_NAME, key)
-            .and_then(|entry| entry.set_password(value))
-            .map_err(|e| format!("Failed to migrate secret to keyring: {}", e))?;
+    let mut secrets = read_secrets_file(path)?;
+    let keys: Vec<String> = secrets.keys().cloned().collect();
+    for key in keys {
+        let migrated =
+            Entry::new(SERVICE_NAME, &key).and_then(|entry| entry.set_password(&secrets[&key]));
+        if let Err(e) = migrated {
+            write_secrets_file(path, &secrets)?;
+            return Err(format!("Failed to migrate secret to keyring: {}", e));
+        }
+        secrets.remove(&key);
     }
 
     if path.exists() {
@@ -124,38 +130,49 @@ fn migrate_legacy_service_entries() -> Result<(), String> {
     let legacy_entries = Entry::search(&search)
         .map_err(|e| format!("Failed to find legacy keyring entries: {}", e))?;
 
-    for legacy_entry in legacy_entries {
-        #[cfg(target_os = "windows")]
-        let key = legacy_entry
-            .get_attributes()
-            .map_err(|e| format!("Failed to read legacy keyring attributes: {}", e))?
-            .remove("username")
-            .ok_or_else(|| "Legacy keyring entry has no username".to_string())?;
+    let failures: Vec<String> = legacy_entries
+        .iter()
+        .filter_map(|legacy_entry| migrate_legacy_entry(legacy_entry).err())
+        .collect();
 
-        #[cfg(not(target_os = "windows"))]
-        let (_, key) = legacy_entry
-            .get_specifiers()
-            .ok_or_else(|| "Legacy keyring entry has no service or account".to_string())?;
-        let current_entry = Entry::new(SERVICE_NAME, &key)
-            .map_err(|e| format!("Failed to create migrated keyring entry: {}", e))?;
-
-        match current_entry.get_password() {
-            Ok(_) => {}
-            Err(KeyringError::NoEntry) => {
-                let value = legacy_entry
-                    .get_password()
-                    .map_err(|e| format!("Failed to read legacy keyring entry: {}", e))?;
-                current_entry
-                    .set_password(&value)
-                    .map_err(|e| format!("Failed to write migrated keyring entry: {}", e))?;
-            }
-            Err(e) => return Err(format!("Failed to read migrated keyring entry: {}", e)),
-        }
-
-        legacy_entry
-            .delete_credential()
-            .map_err(|e| format!("Failed to delete migrated legacy keyring entry: {}", e))?;
+    if failures.is_empty() {
+        Ok(())
+    } else {
+        Err(failures.join("; "))
     }
+}
+
+fn migrate_legacy_entry(legacy_entry: &Entry) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    let key = legacy_entry
+        .get_attributes()
+        .map_err(|e| format!("Failed to read legacy keyring attributes: {}", e))?
+        .remove("username")
+        .ok_or_else(|| "Legacy keyring entry has no username".to_string())?;
+
+    #[cfg(not(target_os = "windows"))]
+    let (_, key) = legacy_entry
+        .get_specifiers()
+        .ok_or_else(|| "Legacy keyring entry has no service or account".to_string())?;
+    let current_entry = Entry::new(SERVICE_NAME, &key)
+        .map_err(|e| format!("Failed to create migrated keyring entry: {}", e))?;
+
+    match current_entry.get_password() {
+        Ok(_) => {}
+        Err(KeyringError::NoEntry) => {
+            let value = legacy_entry
+                .get_password()
+                .map_err(|e| format!("Failed to read legacy keyring entry: {}", e))?;
+            current_entry
+                .set_password(&value)
+                .map_err(|e| format!("Failed to write migrated keyring entry: {}", e))?;
+        }
+        Err(e) => return Err(format!("Failed to read migrated keyring entry: {}", e)),
+    }
+
+    legacy_entry
+        .delete_credential()
+        .map_err(|e| format!("Failed to delete migrated legacy keyring entry: {}", e))?;
 
     Ok(())
 }
@@ -315,10 +332,13 @@ async fn delete_fallback_record(
     .transpose()
 }
 
-fn fallback_key_ref(logical_key: &str) -> String {
+fn new_fallback_key_ref(logical_key: &str) -> String {
+    let mut suffix = [0u8; 8];
+    rand::rng().fill_bytes(&mut suffix);
     format!(
-        "agentone-secret-key-v1-{}",
-        URL_SAFE_NO_PAD.encode(logical_key)
+        "agentone-secret-key-v1-{}-{}",
+        URL_SAFE_NO_PAD.encode(logical_key),
+        URL_SAFE_NO_PAD.encode(suffix)
     )
 }
 
@@ -451,20 +471,12 @@ async fn delete_keyring_password_only(key: &str) -> Result<bool, String> {
     .map_err(|e| format!("Task join error: {}", e))?
 }
 
-async fn load_fallback_value(
-    db_path: &Path,
-    logical_key: &str,
-    keyring_ref: &str,
-) -> Result<String, String> {
+async fn load_fallback_value(db_path: &Path, logical_key: &str) -> Result<String, String> {
     let record = get_fallback_record(db_path, logical_key)
         .await?
         .ok_or_else(|| "Fallback secret metadata not found in database".to_string())?;
 
-    if record.keyring_ref != keyring_ref {
-        return Err("Fallback key reference mismatch".to_string());
-    }
-
-    let encryption_key = get_keyring_password_only(keyring_ref)
+    let encryption_key = get_keyring_password_only(&record.keyring_ref)
         .await?
         .ok_or_else(|| "Fallback decryption key not found in keyring".to_string())?;
 
@@ -475,16 +487,14 @@ pub async fn get_password(key: &str, db_path: &Path) -> Result<Option<String>, S
     let keyring_value = get_keyring_password_only(key).await?;
 
     let Some(value) = keyring_value else {
-        if let Some(record) = get_fallback_record(db_path, key).await? {
-            let decrypted = load_fallback_value(db_path, key, &record.keyring_ref).await?;
-            return Ok(Some(decrypted));
+        if get_fallback_record(db_path, key).await?.is_some() {
+            return load_fallback_value(db_path, key).await.map(Some);
         }
         return Ok(None);
     };
 
-    if let Some(keyring_ref) = value.strip_prefix(FALLBACK_MARKER_PREFIX) {
-        let decrypted = load_fallback_value(db_path, key, keyring_ref).await?;
-        return Ok(Some(decrypted));
+    if value.starts_with(FALLBACK_MARKER_PREFIX) {
+        return load_fallback_value(db_path, key).await.map(Some);
     }
 
     Ok(Some(value))
@@ -493,8 +503,12 @@ pub async fn get_password(key: &str, db_path: &Path) -> Result<Option<String>, S
 pub async fn set_password(key: &str, value: &str, db_path: &Path) -> Result<(), String> {
     match set_keyring_password_only(key, value).await {
         Ok(()) => {
-            if let Some(keyring_ref) = delete_fallback_record(db_path, key).await? {
-                let _ = delete_keyring_password_only(&keyring_ref).await;
+            match delete_fallback_record(db_path, key).await {
+                Ok(Some(keyring_ref)) => {
+                    let _ = delete_keyring_password_only(&keyring_ref).await;
+                }
+                Ok(None) => {}
+                Err(e) => log::warn!("Failed to clean up the fallback copy of a secret: {}", e),
             }
             Ok(())
         }
@@ -503,14 +517,27 @@ pub async fn set_password(key: &str, value: &str, db_path: &Path) -> Result<(), 
                 return Err(primary_error);
             }
 
-            let keyring_ref = fallback_key_ref(key);
+            let previous_ref = get_fallback_record(db_path, key)
+                .await?
+                .map(|record| record.keyring_ref);
+            let keyring_ref = new_fallback_key_ref(key);
             let marker = format!("{}{}", FALLBACK_MARKER_PREFIX, keyring_ref);
 
             let (encryption_key, nonce_b64, ciphertext_b64) = encrypt_value(value)?;
 
             set_keyring_password_only(&keyring_ref, &encryption_key).await?;
-            upsert_fallback_record(db_path, key, &keyring_ref, &nonce_b64, &ciphertext_b64).await?;
+            if let Err(e) =
+                upsert_fallback_record(db_path, key, &keyring_ref, &nonce_b64, &ciphertext_b64)
+                    .await
+            {
+                let _ = delete_keyring_password_only(&keyring_ref).await;
+                return Err(e);
+            }
             set_keyring_password_only(key, &marker).await?;
+
+            if let Some(previous_ref) = previous_ref.filter(|previous| previous != &keyring_ref) {
+                let _ = delete_keyring_password_only(&previous_ref).await;
+            }
 
             Ok(())
         }

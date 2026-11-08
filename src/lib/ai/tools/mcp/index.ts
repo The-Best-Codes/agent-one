@@ -37,7 +37,7 @@ interface ManagedMCPServer {
 interface LoadingOperation {
   controller: AbortController;
   configHash: string;
-  promise: Promise<void>;
+  promise: Promise<ToolSet>;
 }
 
 const serverCache = new Map<string, ManagedMCPServer>();
@@ -77,11 +77,13 @@ class TauriStdioMCPTransport implements MCPTransport {
       result
         .then((r) => {
           logger.verbose(`MCP Server Closed with code ${r.exitCode} and signal ${r.signal}`);
+          if (this.handle === handle) this.handle = null;
           this.onclose?.();
         })
         .catch((error: unknown) => {
           const err = error instanceof Error ? error : new Error(String(error));
           logger.verbose(`MCP Server Command error:`, err);
+          if (this.handle === handle) this.handle = null;
           this.onerror?.(err);
         });
     } catch (error) {
@@ -491,8 +493,7 @@ export async function getMcpToolsForServer(server: McpServerConfig): Promise<Too
     if (existingLoad.configHash !== configHash) {
       abortMcpServerLoad(server.id);
     } else {
-      await existingLoad.promise;
-      return serverCache.get(server.id)?.tools || {};
+      return existingLoad.promise;
     }
   }
 
@@ -501,6 +502,12 @@ export async function getMcpToolsForServer(server: McpServerConfig): Promise<Too
   const promise = (async () => {
     try {
       const result = await getMcpClientAndTools(server, controller.signal);
+      if (controller.signal.aborted) {
+        await result.transport.close().catch((error) => {
+          logger.error(`Error closing aborted MCP server ${server.id}:`, error);
+        });
+        throw new Error("Operation aborted");
+      }
       serverCache.set(server.id, { ...result, configHash });
 
       if (server.type === "http") {
@@ -530,6 +537,10 @@ export async function getMcpToolsForServer(server: McpServerConfig): Promise<Too
           });
         }
       }
+
+      return result.tools;
+    } catch (error) {
+      throw await normalizeMcpLoadError(server, error, controller.signal);
     } finally {
       if (loadingOperations.get(server.id)?.controller === controller) {
         loadingOperations.delete(server.id);
@@ -539,37 +550,40 @@ export async function getMcpToolsForServer(server: McpServerConfig): Promise<Too
 
   loadingOperations.set(server.id, { controller, configHash, promise });
 
-  try {
-    await promise;
-    return serverCache.get(server.id)?.tools || {};
-  } catch (error) {
-    logger.warn(`Failed to initialize MCP client for ${server.name}:`, error);
-    let normalizedError = error instanceof Error ? error : new Error("Unknown error");
+  return promise;
+}
 
-    if (server.type === "http" && isAuthError(error) && !controller.signal.aborted) {
-      const supportsOAuth = await checkOAuthSupport(server.url);
+async function normalizeMcpLoadError(
+  server: McpServerConfig,
+  error: unknown,
+  signal: AbortSignal,
+): Promise<Error> {
+  logger.warn(`Failed to initialize MCP client for ${server.name}:`, error);
+  const normalizedError = error instanceof Error ? error : new Error("Unknown error");
 
-      if (controller.signal.aborted) {
-        throw normalizedError;
-      }
-
-      if (supportsOAuth) {
-        store.set(mcpAuthStatesAtom, (prev) => {
-          if (prev[server.id] === "logged-out") return prev;
-          return { ...prev, [server.id]: "logged-out" };
-        });
-        promptLoginToast(server as McpHttpServerConfig);
-        normalizedError = new Error("Authentication required. Log in to load tools.");
-      } else {
-        logger.warn(
-          `MCP server ${server.name} returned an auth error but does not appear to support OAuth`,
-        );
-        normalizedError = new Error("Authentication failed while loading tools.");
-      }
-    }
-
-    throw normalizedError;
+  if (server.type !== "http" || !isAuthError(error) || signal.aborted) {
+    return normalizedError;
   }
+
+  const supportsOAuth = await checkOAuthSupport(server.url);
+
+  if (signal.aborted) {
+    return normalizedError;
+  }
+
+  if (supportsOAuth) {
+    store.set(mcpAuthStatesAtom, (prev) => {
+      if (prev[server.id] === "logged-out") return prev;
+      return { ...prev, [server.id]: "logged-out" };
+    });
+    promptLoginToast(server as McpHttpServerConfig);
+    return new Error("Authentication required. Log in to load tools.");
+  }
+
+  logger.warn(
+    `MCP server ${server.name} returned an auth error but does not appear to support OAuth`,
+  );
+  return new Error("Authentication failed while loading tools.");
 }
 
 export function abortMcpServerLoad(serverId: string): void {

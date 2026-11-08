@@ -38,6 +38,7 @@ import {
   DEFAULT_MODEL_CONFIG,
   getReasoningEffort,
   getToolBehavior,
+  type ModelConfig,
   type ReasoningEffort,
   type ToolBehavior,
 } from "@/hooks/ai/use-model-catalog";
@@ -316,12 +317,22 @@ export const ChatModelConfig = ({
     configRef.current = currentModelConfig;
   }, [currentModelConfig]);
 
+  const pendingPatchRef = useRef<Partial<ModelConfig>>({});
   const debouncedSetModelConfig = useMemo(
-    () => debounce((config: Parameters<typeof setModelConfig>[0]) => setModelConfig(config), 300),
-    [setModelConfig],
+    () => debounce((applyPendingPatch: () => void) => applyPendingPatch(), 300),
+    [],
   );
 
-  useEffect(() => () => debouncedSetModelConfig.cancel(), [debouncedSetModelConfig]);
+  useEffect(() => () => debouncedSetModelConfig.flush(), [debouncedSetModelConfig]);
+
+  const queueModelConfigPatch = (patch: Partial<ModelConfig>) => {
+    pendingPatchRef.current = { ...pendingPatchRef.current, ...patch };
+    debouncedSetModelConfig(() => {
+      const pendingPatch = pendingPatchRef.current;
+      pendingPatchRef.current = {};
+      setModelConfig({ ...configRef.current, ...pendingPatch });
+    });
+  };
 
   const setToolBehavior = (value: ToolBehavior) => {
     setModelConfig({ ...configRef.current, toolBehavior: value });
@@ -361,7 +372,7 @@ export const ChatModelConfig = ({
   const handleMaxTokensChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value === "" ? undefined : parseInt(e.target.value);
     setLocalInputs((prev) => ({ ...prev, maxTokens: val }));
-    debouncedSetModelConfig({ ...configRef.current, maxTokens: val });
+    queueModelConfigPatch({ maxTokens: val });
   };
 
   const handleTopPChange = (value: number | undefined) => {
@@ -371,13 +382,13 @@ export const ChatModelConfig = ({
   const handleTopKChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value === "" ? undefined : parseInt(e.target.value);
     setLocalInputs((prev) => ({ ...prev, topK: val }));
-    debouncedSetModelConfig({ ...configRef.current, topK: val });
+    queueModelConfigPatch({ topK: val });
   };
 
   const handleMaxStepsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value === "" ? undefined : parseInt(e.target.value);
     setLocalInputs((prev) => ({ ...prev, maxSteps: val }));
-    debouncedSetModelConfig({ ...configRef.current, maxSteps: val });
+    queueModelConfigPatch({ maxSteps: val });
   };
 
   const handleFrequencyPenaltyChange = (value: number | undefined) => {
@@ -391,11 +402,12 @@ export const ChatModelConfig = ({
   const handleSeedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value === "" ? undefined : parseInt(e.target.value);
     setLocalInputs((prev) => ({ ...prev, seed: val }));
-    debouncedSetModelConfig({ ...configRef.current, seed: val });
+    queueModelConfigPatch({ seed: val });
   };
 
   const resetToDefaults = () => {
     debouncedSetModelConfig.cancel();
+    pendingPatchRef.current = {};
     setLocalInputs({
       maxTokens: DEFAULT_MODEL_CONFIG.maxTokens,
       topK: DEFAULT_MODEL_CONFIG.topK,

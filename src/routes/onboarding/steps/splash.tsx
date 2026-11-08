@@ -34,12 +34,20 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
   const [showButton, setShowButton] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
+  const isExitingRef = useRef(false);
 
   const animateWidth = useCallback(
-    (from: number, to: number, duration: number, onComplete?: () => void) => {
+    (
+      from: number,
+      to: number,
+      duration: number,
+      isCancelled: () => boolean,
+      onComplete?: () => void,
+    ) => {
       const startTime = performance.now();
 
       function frame(now: number) {
+        if (isCancelled()) return;
         const elapsed = now - startTime;
         const t = Math.min(elapsed / duration, 1);
         const easedT = easeInOutExpo(t);
@@ -67,7 +75,8 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
   );
 
   const handleGetStarted = () => {
-    if (isExiting) return;
+    if (isExitingRef.current) return;
+    isExitingRef.current = true;
     setIsExiting(true);
     setTimeout(() => {
       onGetStarted();
@@ -76,15 +85,17 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
 
   useEffect(() => {
     const timeouts: number[] = [];
+    let cancelled = false;
+    const isCancelled = () => cancelled;
 
     const measureWidth = () => {
       if (textRef.current) {
         const width = textRef.current.getBoundingClientRect().width;
 
         const revealTimeout = window.setTimeout(() => {
-          animateWidth(0, width, CONFIG.revealDuration, () => {
+          animateWidth(0, width, CONFIG.revealDuration, isCancelled, () => {
             const pauseTimeout = window.setTimeout(() => {
-              animateWidth(width, 0, CONFIG.hideDuration, () => {
+              animateWidth(width, 0, CONFIG.hideDuration, isCancelled, () => {
                 const toButtonDelayTimeout = window.setTimeout(() => {
                   setIsMorphing(true);
 
@@ -118,6 +129,7 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
     timeouts.push(initialTimeout);
 
     return () => {
+      cancelled = true;
       timeouts.forEach((id) => window.clearTimeout(id));
     };
   }, [animateWidth]);

@@ -12,7 +12,8 @@ interface NameStepProps {
 export function NameStep({ onSubmit }: NameStepProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [nameInput, setNameInput] = useState("");
-  const [isExiting, setIsExiting] = useState(false);
+  const [submittedName, setSubmittedName] = useState<string | null>(null);
+  const isExiting = submittedName !== null;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -21,17 +22,22 @@ export function NameStep({ onSubmit }: NameStepProps) {
     return () => clearTimeout(timer);
   }, []);
 
+  const onSubmitRef = useRef(onSubmit);
   useEffect(() => {
-    if (!isExiting) return;
+    onSubmitRef.current = onSubmit;
+  });
+
+  useEffect(() => {
+    if (submittedName === null) return;
     const timer = setTimeout(() => {
-      onSubmit(nameInput.trim());
+      onSubmitRef.current(submittedName);
     }, 500);
     return () => clearTimeout(timer);
-  }, [isExiting, nameInput, onSubmit]);
+  }, [submittedName]);
 
   const handleSubmit = () => {
-    if (nameInput.trim()) {
-      setIsExiting(true);
+    if (nameInput.trim() && submittedName === null) {
+      setSubmittedName(nameInput.trim());
     }
   };
 
@@ -81,13 +87,17 @@ interface GreetingStepProps {
 
 export function GreetingStep({ name, onComplete }: GreetingStepProps) {
   const [isExiting, setIsExiting] = useState(false);
+  const onCompleteRef = useRef(onComplete);
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  });
 
   useEffect(() => {
     const timer = isExiting
-      ? setTimeout(onComplete, 500)
+      ? setTimeout(() => onCompleteRef.current(), 500)
       : setTimeout(() => setIsExiting(true), 1500);
     return () => clearTimeout(timer);
-  }, [isExiting, onComplete]);
+  }, [isExiting]);
 
   return (
     <div

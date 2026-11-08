@@ -155,7 +155,7 @@ export const VirtualizedChatList = ({
   const [showBulkExportModal, setShowBulkExportModal] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const latestSearchQueryRef = useRef("");
+  const latestSearchIdRef = useRef(0);
   const chatIds = useAtomValueRawSync(chatIdsAtom);
   const [chatSort] = useAtom(settingAtoms.CHAT_SORT);
   const [sidebarChatTimeGrouping] = useAtom(settingAtoms.SIDEBAR_CHAT_TIME_GROUPING);
@@ -233,7 +233,7 @@ export const VirtualizedChatList = ({
 
   const debouncedSearch = useMemo(
     () =>
-      debounce(async (query: string, useRawOperators: boolean) => {
+      debounce(async (query: string, useRawOperators: boolean, searchId: number) => {
         if (!query.trim()) {
           setSearchResults(null);
           setIsSearching(false);
@@ -243,18 +243,18 @@ export const VirtualizedChatList = ({
 
         try {
           const results = await searchChats(query, useRawOperators);
-          if (latestSearchQueryRef.current !== query) {
+          if (latestSearchIdRef.current !== searchId) {
             return;
           }
           setSearchResults(results);
         } catch (error) {
-          if (latestSearchQueryRef.current !== query) {
+          if (latestSearchIdRef.current !== searchId) {
             return;
           }
           logger.error("Search failed:", error);
           setSearchResults(null);
         } finally {
-          if (latestSearchQueryRef.current === query) {
+          if (latestSearchIdRef.current === searchId) {
             setIsSearching(false);
           }
         }
@@ -271,14 +271,14 @@ export const VirtualizedChatList = ({
   const handleSearchChange = useCallback(
     (value: string) => {
       setSearchQuery(value);
-      latestSearchQueryRef.current = value;
+      const searchId = ++latestSearchIdRef.current;
       if (!value.trim()) {
         debouncedSearch.cancel();
         setSearchResults(null);
         setIsSearching(false);
       } else if (searchContent) {
         setIsSearching(true);
-        void debouncedSearch(value, rawOperators);
+        void debouncedSearch(value, rawOperators, searchId);
       }
     },
     [debouncedSearch, searchContent, rawOperators],
@@ -286,9 +286,10 @@ export const VirtualizedChatList = ({
 
   useEffect(() => {
     if (!searchQuery.trim()) return;
+    const searchId = ++latestSearchIdRef.current;
     if (searchContent) {
       setIsSearching(true);
-      void debouncedSearch(searchQuery, rawOperators);
+      void debouncedSearch(searchQuery, rawOperators, searchId);
     } else {
       debouncedSearch.cancel();
       setSearchResults(null);

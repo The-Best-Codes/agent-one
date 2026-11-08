@@ -48,6 +48,8 @@ import { MainInputProvisioningSection } from "./provisioning-section";
 
 const logger = getLogger(import.meta.url);
 
+type InterruptState = { phase: "idle" } | { phase: "stopping" | "sending"; id: number };
+
 const DRAFT_SAVE_DELAY_MS = 300;
 
 const EDITOR_BASIC_SETUP = {
@@ -144,7 +146,7 @@ export const MainChatInput = ({
   });
 
   const [isEmpty, setIsEmpty] = useState(true);
-  const [isInterruptSubmitting, setIsInterruptSubmitting] = useState(false);
+  const [interrupt, setInterrupt] = useState<InterruptState>({ phase: "idle" });
   const [editorInitialValue] = useState(() => initialValue ?? loadChatInputDraft(draftKey));
   const [files, setFiles] = useState<FileList | undefined>(undefined);
   const [isDraggingFiles, setIsDraggingFiles] = useState(false);
@@ -157,29 +159,38 @@ export const MainChatInput = ({
   const fileDragCounter = useRef(0);
   const chatDragCounter = useRef(0);
   const isSubmittingRef = useRef(false);
-  const hasSentInterruptRef = useRef(false);
+  const interruptIdRef = useRef(0);
   const statusRef = useRef(status);
-  const readyResolverRef = useRef<(() => void) | null>(null);
+  const stopSettledResolverRef = useRef<((outcome: "settled" | "unmounted") => void) | null>(null);
   const pendingDraftRef = useRef<{ key: string; text: string } | null>(null);
   const draftSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const endInterrupt = useCallback((id: number) => {
+    setInterrupt((current) =>
+      current.phase !== "idle" && current.id === id ? { phase: "idle" } : current,
+    );
+  }, []);
+
   useEffect(() => {
     statusRef.current = status;
-    if (status === "ready") {
-      readyResolverRef.current?.();
-      readyResolverRef.current = null;
+    if (status === "ready" || status === "error") {
+      stopSettledResolverRef.current?.("settled");
+      stopSettledResolverRef.current = null;
     }
   }, [status]);
 
   useEffect(() => {
-    if (
-      isInterruptSubmitting &&
-      hasSentInterruptRef.current &&
-      (status === "error" || (isEmpty && (status === "submitted" || status === "streaming")))
-    ) {
-      setIsInterruptSubmitting(false);
-    }
-  }, [isInterruptSubmitting, isEmpty, status]);
+    return () => {
+      stopSettledResolverRef.current?.("unmounted");
+      stopSettledResolverRef.current = null;
+    };
+  }, []);
+
+  if (interrupt.phase === "sending" && status !== "ready") {
+    setInterrupt({ phase: "idle" });
+  }
+
+  const isInterruptSubmitting = interrupt.phase !== "idle";
 
   useEffect(() => {
     if (initialValue) {
@@ -276,28 +287,25 @@ export const MainChatInput = ({
         hasFiles: !!files,
         fileCount: files?.length || 0,
       });
+      const interruptId = showInterruptButton ? ++interruptIdRef.current : null;
       try {
-        if (showInterruptButton) {
-          hasSentInterruptRef.current = false;
-          setIsInterruptSubmitting(true);
+        if (interruptId !== null) {
+          setInterrupt({ phase: "stopping", id: interruptId });
           await stop();
-          if (statusRef.current !== "ready") {
-            await new Promise<void>((resolve) => {
-              readyResolverRef.current = resolve;
+          if (statusRef.current === "submitted" || statusRef.current === "streaming") {
+            const outcome = await new Promise<"settled" | "unmounted">((resolve) => {
+              stopSettledResolverRef.current = resolve;
             });
+            if (outcome === "unmounted") return;
           }
-        }
-        if (showInterruptButton) {
-          hasSentInterruptRef.current = true;
+          setInterrupt({ phase: "sending", id: interruptId });
         }
         void sendMessage({ text: currentText, files }).catch((error: unknown) => {
-          hasSentInterruptRef.current = false;
-          setIsInterruptSubmitting(false);
+          if (interruptId !== null) endInterrupt(interruptId);
           logger.error("Message submission failed", error);
         });
       } catch (error) {
-        hasSentInterruptRef.current = false;
-        setIsInterruptSubmitting(false);
+        if (interruptId !== null) endInterrupt(interruptId);
         logger.error("Message submission failed", error);
         return;
       } finally {
@@ -429,7 +437,7 @@ export const MainChatInput = ({
     // TODO: Consider using `relatedTarget` here
     e.preventDefault();
     e.stopPropagation();
-    chatDragCounter.current--;
+    chatDragCounter.current = Math.max(0, chatDragCounter.current - 1);
     if (chatDragCounter.current === 0) {
       logger.verbose("Chat drag leave detected, hiding drop zone");
       setIsDraggingChat(false);
@@ -549,16 +557,25 @@ export const MainChatInput = ({
       }
     };
 
+    const resetChatDrag = () => {
+      chatDragCounter.current = 0;
+      setIsDraggingChat(false);
+    };
+
     window.addEventListener("dragenter", handleWindowDragEnter);
     window.addEventListener("dragleave", handleWindowDragLeave);
     window.addEventListener("dragover", handleWindowDragOver);
     window.addEventListener("drop", handleWindowDrop);
+    window.addEventListener("dragend", resetChatDrag);
+    window.addEventListener("drop", resetChatDrag);
 
     return () => {
       window.removeEventListener("dragenter", handleWindowDragEnter);
       window.removeEventListener("dragleave", handleWindowDragLeave);
       window.removeEventListener("dragover", handleWindowDragOver);
       window.removeEventListener("drop", handleWindowDrop);
+      window.removeEventListener("dragend", resetChatDrag);
+      window.removeEventListener("drop", resetChatDrag);
     };
   }, [addFiles]);
 

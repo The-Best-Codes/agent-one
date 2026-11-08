@@ -79,9 +79,7 @@ export function HttpHeadersEditor({
   const removeEntry = (index: number) => {
     const next = draft.filter((_, i) => i !== index);
     setDraft(next);
-    const nextDupes = getDuplicateKeys(next);
-    const nextEmpty = next.some(([key]) => !key.trim());
-    if (!nextEmpty && nextDupes.size === 0) {
+    if (!hasChanges) {
       onChange(toRecord(next));
     }
   };

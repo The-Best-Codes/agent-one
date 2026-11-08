@@ -99,8 +99,10 @@ export default function SettingsNav({ activeIds, onNavigate, className }: Settin
   }, [items]);
 
   const startIndex = items.findIndex((item) => activeIds.includes(item.id));
-  const endIndex =
-    startIndex + items.slice(startIndex).filter((item) => activeIds.includes(item.id)).length - 1;
+  let endIndex = -1;
+  items.forEach((item, index) => {
+    if (activeIds.includes(item.id)) endIndex = index;
+  });
   const hasActive = Boolean(track) && startIndex !== -1;
   const trackTop = hasActive ? (track?.positions[startIndex]?.[0] ?? 0) : 0;
   const trackBottom = hasActive ? (track?.positions[endIndex]?.[1] ?? 0) : 0;

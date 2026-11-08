@@ -111,6 +111,8 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [chatSort] = useAtom(settingAtoms.CHAT_SORT);
 
   const metadataCacheRef = useRef<Map<string, ChatMetadata>>(new Map());
+  const deletedChatIdsRef = useRef<Set<string>>(new Set());
+  const hasLoadedMetadataRef = useRef(false);
   const [isMetadataLoaded, setIsMetadataLoaded] = useState(false);
 
   useEffect(() => {
@@ -121,13 +123,29 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       if (cancelled) return;
 
+      const isFirstLoad = !hasLoadedMetadataRef.current;
+      const currentCache = metadataCacheRef.current;
       const cache = new Map<string, ChatMetadata>();
       for (const { id, metadata } of storedChats) {
-        cache.set(id, metadata);
+        if (deletedChatIdsRef.current.has(id)) continue;
+        const interruptedTitle = isFirstLoad && metadata.titleState === "generating";
+        cache.set(
+          id,
+          currentCache.get(id) ??
+            (interruptedTitle ? { ...metadata, titleState: undefined } : metadata),
+        );
+      }
+      const createdWhileLoading = [...currentCache.keys()].filter((id) => !cache.has(id));
+      for (const id of createdWhileLoading) {
+        cache.set(id, currentCache.get(id)!);
       }
 
       metadataCacheRef.current = cache;
-      setChatIds(storedChats.map(({ id }) => id));
+      hasLoadedMetadataRef.current = true;
+      setChatIds([
+        ...createdWhileLoading,
+        ...storedChats.map(({ id }) => id).filter((id) => cache.has(id)),
+      ]);
       setIsMetadataLoaded(true);
     };
 
@@ -172,6 +190,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
 
   const removeMetadata = useCallback((id: string) => {
     metadataCacheRef.current.delete(id);
+    deletedChatIdsRef.current.add(id);
   }, []);
 
   const getNewChatModelId = useCallback(() => {
@@ -217,6 +236,21 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
       logger.error(`Failed to persist chat metadata ${id}`, error);
     });
   }, []);
+
+  const updateKnownMetadata = useCallback(
+    (id: string, update: (metadata: ChatMetadata) => ChatMetadata): ChatMetadata | null => {
+      const current = metadataCacheRef.current.get(id);
+      if (!current) {
+        logger.verbose(`Skipping a save for chat ${id} because it isn't loaded or was deleted`);
+        return null;
+      }
+      const updated = update(current);
+      metadataCacheRef.current.set(id, updated);
+      persistMetadata(id, updated);
+      return updated;
+    },
+    [persistMetadata],
+  );
 
   const persistMessages = useCallback((id: string, messages: UIMessage[]) => {
     void chatStorage.setChatMessages(id, messages).catch((error) => {
@@ -293,12 +327,11 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
   const saveChat = useCallback(
     ({ chatId, messages }: { chatId: string; messages: UIMessage[] }) => {
       try {
-        const updatedMetadata = touchMetadata({
-          ...getMetadata(chatId),
-        });
+        const updatedMetadata = updateKnownMetadata(chatId, (metadata) =>
+          touchMetadata({ ...metadata }),
+        );
+        if (!updatedMetadata) return;
 
-        setMetadata(chatId, updatedMetadata);
-        persistMetadata(chatId, updatedMetadata);
         persistMessages(chatId, messages);
         void chatStorage.updateFtsIndex(chatId, updatedMetadata.title, messages).catch((error) => {
           logger.error(`Failed to update FTS index ${chatId}`, error);
@@ -308,45 +341,48 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         logger.error(`Failed to save chat ${chatId}`, error);
       }
     },
-    [getMetadata, setMetadata, persistMetadata, persistMessages, setChatUpdateTrigger],
+    [updateKnownMetadata, persistMessages, setChatUpdateTrigger],
   );
 
   const markChatMessageSent = useCallback(
     (chatId: string) => {
-      const metadata = touchMetadata({ ...getMetadata(chatId), lastMessageAt: Date.now() });
-      setMetadata(chatId, metadata);
-      persistMetadata(chatId, metadata);
+      const updated = updateKnownMetadata(chatId, (metadata) =>
+        touchMetadata({ ...metadata, lastMessageAt: Date.now() }),
+      );
+      if (!updated) return;
       setChatUpdateTrigger((prev) => prev + 1);
     },
-    [getMetadata, setMetadata, persistMetadata, setChatUpdateTrigger],
+    [updateKnownMetadata, setChatUpdateTrigger],
   );
 
   const saveChatModel = useCallback(
     ({ chatId, modelId }: { chatId: string; modelId: string }) => {
       try {
-        const updated = touchMetadata({ ...getMetadata(chatId), modelId });
-        setMetadata(chatId, updated);
-        persistMetadata(chatId, updated);
+        const updated = updateKnownMetadata(chatId, (metadata) =>
+          touchMetadata({ ...metadata, modelId }),
+        );
+        if (!updated) return;
         setChatUpdateTrigger((prev) => prev + 1);
       } catch (error) {
         logger.error(`Failed to save chat model ${chatId}`, error);
       }
     },
-    [getMetadata, setMetadata, persistMetadata, setChatUpdateTrigger],
+    [updateKnownMetadata, setChatUpdateTrigger],
   );
 
   const saveChatModelConfig = useCallback(
     ({ chatId, modelConfig }: { chatId: string; modelConfig: ModelConfig }) => {
       try {
-        const updated = touchMetadata({ ...getMetadata(chatId), modelConfig });
-        setMetadata(chatId, updated);
-        persistMetadata(chatId, updated);
+        const updated = updateKnownMetadata(chatId, (metadata) =>
+          touchMetadata({ ...metadata, modelConfig }),
+        );
+        if (!updated) return;
         setChatUpdateTrigger((prev) => prev + 1);
       } catch (error) {
         logger.error(`Failed to save chat model config ${chatId}`, error);
       }
     },
-    [getMetadata, setMetadata, persistMetadata, setChatUpdateTrigger],
+    [updateKnownMetadata, setChatUpdateTrigger],
   );
 
   const saveChatTitleState = useCallback(
@@ -360,13 +396,14 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
       title?: string;
     }) => {
       try {
-        const updated = touchMetadata({
-          ...getMetadata(chatId),
-          titleState,
-          ...(title !== undefined && { title }),
-        });
-        setMetadata(chatId, updated);
-        persistMetadata(chatId, updated);
+        const updated = updateKnownMetadata(chatId, (metadata) =>
+          touchMetadata({
+            ...metadata,
+            titleState,
+            ...(title !== undefined && { title }),
+          }),
+        );
+        if (!updated) return;
         if (title !== undefined) {
           void chatStorage.updateFtsTitle(chatId, title).catch((error) => {
             logger.error(`Failed to update FTS title ${chatId}`, error);
@@ -377,19 +414,20 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         logger.error(`Failed to save chat title state ${chatId}`, error);
       }
     },
-    [getMetadata, setMetadata, persistMetadata, setChatUpdateTrigger],
+    [updateKnownMetadata, setChatUpdateTrigger],
   );
 
   const saveChatTitle = useCallback(
     ({ chatId, title }: { chatId: string; title: string }) => {
       try {
-        const updated = touchMetadata({
-          ...getMetadata(chatId),
-          title,
-          titleState: "generated",
-        });
-        setMetadata(chatId, updated);
-        persistMetadata(chatId, updated);
+        const updated = updateKnownMetadata(chatId, (metadata) =>
+          touchMetadata({
+            ...metadata,
+            title,
+            titleState: "generated",
+          }),
+        );
+        if (!updated) return;
         void chatStorage.updateFtsTitle(chatId, title).catch((error) => {
           logger.error(`Failed to update FTS title ${chatId}`, error);
         });
@@ -398,19 +436,17 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         logger.error(`Failed to save chat title ${chatId}`, error);
       }
     },
-    [getMetadata, setMetadata, persistMetadata, setChatUpdateTrigger],
+    [updateKnownMetadata, setChatUpdateTrigger],
   );
 
   const setChatsProject = useCallback(
     (chatIds: string[], projectId: string | undefined) => {
       for (const chatId of chatIds) {
-        const updated = { ...getMetadata(chatId), projectId };
-        setMetadata(chatId, updated);
-        persistMetadata(chatId, updated);
+        updateKnownMetadata(chatId, (metadata) => ({ ...metadata, projectId }));
       }
       setChatUpdateTrigger((prev) => prev + 1);
     },
-    [getMetadata, setMetadata, persistMetadata, setChatUpdateTrigger],
+    [updateKnownMetadata, setChatUpdateTrigger],
   );
 
   const deleteChat = useCallback(

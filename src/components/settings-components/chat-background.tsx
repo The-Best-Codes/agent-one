@@ -126,6 +126,7 @@ export function ChatBackgroundPicker() {
   >([]);
   const [removingCustomUrl, setRemovingCustomUrl] = useState<string | null>(null);
   const addingCustomBackgroundRef = useRef(false);
+  const removedPendingUrlsRef = useRef(new Set<string>());
 
   const isEffectsDefault = EFFECT_KEYS.every(
     (key) => (chatBackground[key] ?? chatBackgroundDefaults[key]) === chatBackgroundDefaults[key],
@@ -145,6 +146,9 @@ export function ChatBackgroundPicker() {
   };
 
   const removeCustomBackground = (url: string) => {
+    if (pendingCustomBackgrounds.some((background) => background.url === url)) {
+      removedPendingUrlsRef.current.add(url);
+    }
     void removeManagedBackgroundFile(url);
     setChatBackground((prev) => {
       const customUrls = (prev.customUrls ?? []).filter((customUrl) => customUrl !== url);
@@ -221,17 +225,29 @@ export function ChatBackgroundPicker() {
 
       try {
         await createThumbnailFile(imageUrl, thumbnailRelativePath);
+        if (removedPendingUrlsRef.current.has(imageAbsolutePath)) {
+          const thumbnailAbsolutePath = await join(appLocalDataPath, thumbnailRelativePath);
+          await remove(thumbnailAbsolutePath).catch((error) =>
+            logger.warn(
+              `Failed to remove chat background thumbnail ${thumbnailAbsolutePath}`,
+              error,
+            ),
+          );
+        }
       } catch (error) {
         logger.warn("Failed to create chat background thumbnail", error);
-        setChatBackground((prev) => ({
-          ...chatBackgroundDefaults,
-          ...prev,
-          customThumbnails: {
-            ...prev.customThumbnails,
-            [imageAbsolutePath]: imageAbsolutePath,
-          },
-        }));
+        if (!removedPendingUrlsRef.current.has(imageAbsolutePath)) {
+          setChatBackground((prev) => ({
+            ...chatBackgroundDefaults,
+            ...prev,
+            customThumbnails: {
+              ...prev.customThumbnails,
+              [imageAbsolutePath]: imageAbsolutePath,
+            },
+          }));
+        }
       } finally {
+        removedPendingUrlsRef.current.delete(imageAbsolutePath);
         setPendingCustomBackgrounds((prev) =>
           prev.filter((background) => background.url !== imageAbsolutePath),
         );

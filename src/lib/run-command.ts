@@ -108,6 +108,11 @@ function buildShellArgs(
     : { program: "sh", args: ["-c", command] };
 }
 
+type ProcessState =
+  | { phase: "spawning"; killRequested: boolean }
+  | { phase: "running"; child: Child }
+  | { phase: "killed" };
+
 export function spawnCommand(command: string, options: RunCommandOptions = {}): RunCommandProcess {
   const { program, args, env: shellEnv } = buildShellArgs(command, options.windowsShell);
   const env = { ...options.env, ...shellEnv };
@@ -119,8 +124,7 @@ export function spawnCommand(command: string, options: RunCommandOptions = {}): 
   let decodeStdout = createOutputDecoder("utf-8");
   let decodeStderr = createOutputDecoder("utf-8");
 
-  let child: Child | null = null;
-  let killed = false;
+  let processState: ProcessState = { phase: "spawning", killRequested: false };
   let resolveResult!: (result: RunCommandResult) => void;
   let rejectResult!: (err: unknown) => void;
 
@@ -174,8 +178,13 @@ export function spawnCommand(command: string, options: RunCommandOptions = {}): 
   };
 
   const kill = async () => {
-    if (killed || !child) return;
-    killed = true;
+    if (processState.phase === "killed") return;
+    if (processState.phase === "spawning") {
+      processState = { phase: "spawning", killRequested: true };
+      return;
+    }
+    const { child } = processState;
+    processState = { phase: "killed" };
     await killTree(child.pid);
     await child.kill().catch((err) => {
       logger.verbose("Failed to kill child process:", err);
@@ -194,9 +203,10 @@ export function spawnCommand(command: string, options: RunCommandOptions = {}): 
       decodeStderr = createOutputDecoder(encoding);
       return cmd.spawn();
     })
-    .then((c) => {
-      child = c;
-      if (options.signal?.aborted) {
+    .then((child) => {
+      const killRequested = processState.phase === "spawning" && processState.killRequested;
+      processState = { phase: "running", child };
+      if (killRequested || options.signal?.aborted) {
         void kill();
       }
     });
@@ -207,8 +217,11 @@ export function spawnCommand(command: string, options: RunCommandOptions = {}): 
 
   const handle: RunCommandHandle = {
     write: async (data: string) => {
-      if (!child) await spawnPromise;
-      await child!.write(data);
+      if (processState.phase === "spawning") await spawnPromise;
+      if (processState.phase !== "running") {
+        throw new Error("The process is no longer running.");
+      }
+      await processState.child.write(data);
     },
     kill,
   };

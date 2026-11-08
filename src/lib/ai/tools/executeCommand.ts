@@ -247,17 +247,29 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig, cwd?:
         return controller.signal;
       })();
 
-      const { handle, result } = spawnCommand(input.command, {
-        cwd: workingDir,
-        signal: combinedSignal,
-        windowsShell: "powershell",
-        onStdout: (data) => {
-          queueUpdate("stdout", data);
-        },
-        onStderr: (data) => {
-          queueUpdate("stderr", data);
-        },
-      });
+      let spawned: ReturnType<typeof spawnCommand>;
+      try {
+        spawned = spawnCommand(input.command, {
+          cwd: workingDir,
+          signal: combinedSignal,
+          windowsShell: "powershell",
+          onStdout: (data) => {
+            queueUpdate("stdout", data);
+          },
+          onStderr: (data) => {
+            queueUpdate("stderr", data);
+          },
+        });
+      } catch (spawnError) {
+        updateLiveState(toolCallId, (state) => ({
+          ...state,
+          endedAt: Date.now(),
+          status: "completed",
+        }));
+        pruneLiveState(toolCallId);
+        throw spawnError;
+      }
+      const { handle, result } = spawned;
 
       executeCommandKillMap.set(toolCallId, () => handle.kill());
 

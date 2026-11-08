@@ -68,20 +68,25 @@ const langAliases: Record<string, keyof typeof shikiLangsMap> = {
   mmd: "mermaid",
 };
 
-async function initializeHighlighter() {
-  if (highlighter) return highlighter;
+let highlighterPromise: Promise<HighlighterCore> | null = null;
 
-  try {
-    highlighter = await createHighlighterCore({
-      langs: [],
-      themes: [themeDarkPlus, themeLightPlus],
-      engine: createJavaScriptRegexEngine({ forgiving: true }),
-    });
-    return highlighter;
-  } catch (error) {
-    logger.error("Failed to initialize highlighter:", error);
-    throw error;
-  }
+function initializeHighlighter() {
+  highlighterPromise ??= createHighlighterCore({
+    langs: [],
+    themes: [themeDarkPlus, themeLightPlus],
+    engine: createJavaScriptRegexEngine({ forgiving: true }),
+  }).then(
+    (created) => {
+      highlighter = created;
+      return created;
+    },
+    (error: unknown) => {
+      highlighterPromise = null;
+      logger.error("Failed to initialize highlighter:", error);
+      throw error;
+    },
+  );
+  return highlighterPromise;
 }
 
 async function loadLanguage(lang: string) {

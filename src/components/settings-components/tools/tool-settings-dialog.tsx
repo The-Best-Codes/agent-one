@@ -1,6 +1,6 @@
 import { IconRestore } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -84,6 +84,12 @@ function ToolNumberField({
     }
   };
 
+  const commitDraftRef = useRef(commitDraft);
+  useEffect(() => {
+    commitDraftRef.current = commitDraft;
+  });
+  useEffect(() => () => commitDraftRef.current(), []);
+
   return (
     <Field>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
@@ -96,6 +102,9 @@ function ToolNumberField({
           value={draft ?? String(value)}
           onChange={(event) => setDraft(event.target.value)}
           onBlur={commitDraft}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") commitDraft();
+          }}
         />
         <FieldResetButton
           label={label}

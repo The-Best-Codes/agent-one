@@ -240,7 +240,7 @@ export default function CronsTestRoute() {
         </Card>
       </div>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={(open) => !isSaving && setDialogOpen(open)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editingCron ? "Edit Cron" : "Add Cron"}</DialogTitle>

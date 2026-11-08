@@ -15,12 +15,13 @@ const previewRegistry: Record<string, PreviewEntry> = {
 
 export const usePreview = (lang?: string) => {
   const entry = lang ? previewRegistry[lang.toLowerCase()] : undefined;
-  const [isPreviewMode, setIsPreviewMode] = useState(entry?.defaultEnabled ?? false);
+  const [chosenPreviewMode, setChosenPreviewMode] = useState<boolean | null>(null);
+  const isPreviewMode = chosenPreviewMode ?? entry?.defaultEnabled ?? false;
   const PreviewComponent = entry?.component;
   const isSupported = Boolean(PreviewComponent);
 
   const togglePreview = () => {
-    setIsPreviewMode((prev) => !prev);
+    setChosenPreviewMode(!isPreviewMode);
   };
 
   return {
@@ -38,5 +39,5 @@ export const registerPreview = (
   component: PreviewComponent,
   options?: { defaultEnabled?: boolean },
 ) => {
-  previewRegistry[lang] = { component, ...options };
+  previewRegistry[lang.toLowerCase()] = { component, ...options };
 };

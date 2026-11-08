@@ -12,6 +12,7 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 use tauri_plugin_opener::OpenerExt;
@@ -19,8 +20,23 @@ use tokio::sync::{oneshot, Mutex};
 
 use crate::keyring::{delete_password, get_password, resolve_agent_db_path, set_password};
 
-pub struct AuthCancellationState(pub Arc<Mutex<HashMap<String, oneshot::Sender<()>>>>);
+pub struct AuthCancellationState(pub Arc<Mutex<HashMap<String, PendingAuth>>>);
+
+pub struct PendingAuth {
+    flow_id: u64,
+    cancel: oneshot::Sender<()>,
+}
+
 const OAUTH_CALLBACK_TIMEOUT_SECS: u64 = 300;
+static NEXT_AUTH_FLOW_ID: AtomicU64 = AtomicU64::new(1);
+
+struct AbortOnDrop<T>(tokio::task::JoinHandle<T>);
+
+impl<T> Drop for AbortOnDrop<T> {
+    fn drop(&mut self) {
+        self.0.abort();
+    }
+}
 
 fn get_client_metadata_url(port: u16) -> String {
     format!(
@@ -175,13 +191,10 @@ async fn callback_handler(
     Html(include_str!("../static/mcp_oauth_callback.html"))
 }
 
-#[tauri::command]
-pub async fn mcp_authenticate(
-    app: tauri::AppHandle,
-    state: tauri::State<'_, AuthCancellationState>,
-    server_id: String,
-    server_url: String,
-) -> Result<String, String> {
+async fn wait_for_authorization(
+    app: &tauri::AppHandle,
+    server_url: &str,
+) -> Result<(OAuthState, CallbackResult), String> {
     let addr = SocketAddr::from(([127, 0, 0, 1], 0));
     let listener = tokio::net::TcpListener::bind(addr)
         .await
@@ -200,23 +213,16 @@ pub async fn mcp_authenticate(
         .route("/callback", get(callback_handler))
         .with_state(app_state);
 
-    let server_handle = tokio::spawn(async move { axum::serve(listener, router).await });
+    let _server = AbortOnDrop(tokio::spawn(
+        async move { axum::serve(listener, router).await },
+    ));
 
-    let scopes = discover_scopes_with_rmcp(&server_url)
+    let scopes = discover_scopes_with_rmcp(server_url)
         .await
         .unwrap_or_default();
 
-    let redirect_uri_clone = redirect_uri.clone();
-    let client_metadata_clone = client_metadata_url.clone();
-    let scopes_clone = scopes.clone();
-
-    let mut oauth_state = initialize_and_start_auth(
-        &server_url,
-        &redirect_uri_clone,
-        &client_metadata_clone,
-        &scopes_clone,
-    )
-    .await?;
+    let oauth_state =
+        initialize_and_start_auth(server_url, &redirect_uri, &client_metadata_url, &scopes).await?;
 
     let auth_url = oauth_state
         .get_authorization_url()
@@ -227,34 +233,67 @@ pub async fn mcp_authenticate(
         .open_url(&auth_url, None::<&str>)
         .map_err(|e| format!("Failed to open browser: {}", e))?;
 
+    let callback = match tokio::time::timeout(
+        Duration::from_secs(OAUTH_CALLBACK_TIMEOUT_SECS),
+        code_receiver,
+    )
+    .await
+    {
+        Ok(Ok(callback)) => callback,
+        Ok(Err(_)) => return Err("Authorization callback failed".to_string()),
+        Err(_) => {
+            return Err(format!(
+                "Authorization timed out after {} seconds",
+                OAUTH_CALLBACK_TIMEOUT_SECS
+            ))
+        }
+    };
+
+    Ok((oauth_state, callback))
+}
+
+#[tauri::command]
+pub async fn mcp_authenticate(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, AuthCancellationState>,
+    server_id: String,
+    server_url: String,
+) -> Result<String, String> {
+    let flow_id = NEXT_AUTH_FLOW_ID.fetch_add(1, Ordering::Relaxed);
     let (cancel_tx, cancel_rx) = oneshot::channel::<()>();
 
     {
         let mut map = state.0.lock().await;
-        map.insert(server_id.clone(), cancel_tx);
+        let previous = map.insert(
+            server_id.clone(),
+            PendingAuth {
+                flow_id,
+                cancel: cancel_tx,
+            },
+        );
+        if let Some(previous) = previous {
+            let _ = previous.cancel.send(());
+        }
     }
 
-    let params_result = tokio::select! {
-        res = tokio::time::timeout(Duration::from_secs(OAUTH_CALLBACK_TIMEOUT_SECS), code_receiver) => {
-            match res {
-                Ok(Ok(params)) => Ok(params),
-                Ok(Err(_)) => Err("Authorization callback failed".to_string()),
-                Err(_) => Err(format!("Authorization timed out after {} seconds", OAUTH_CALLBACK_TIMEOUT_SECS)),
-            }
-        },
-        _ = cancel_rx => {
-            Err("Authorization cancelled".to_string())
-        }
+    let authorization = tokio::select! {
+        res = wait_for_authorization(&app, &server_url) => res,
+        _ = cancel_rx => Err("Authorization cancelled".to_string()),
     };
 
     {
         let mut map = state.0.lock().await;
-        map.remove(&server_id);
+        if map
+            .get(&server_id)
+            .is_some_and(|pending| pending.flow_id == flow_id)
+        {
+            map.remove(&server_id);
+        }
     }
 
-    server_handle.abort();
+    let (mut oauth_state, callback) = authorization?;
 
-    let params = match params_result? {
+    let params = match callback {
         CallbackResult::Success(params) => params,
         CallbackResult::Error { error, description } => {
             let message = description.unwrap_or(error);
@@ -296,8 +335,8 @@ pub async fn mcp_cancel_auth(
     server_id: String,
 ) -> Result<(), String> {
     let mut map = state.0.lock().await;
-    if let Some(tx) = map.remove(&server_id) {
-        let _ = tx.send(());
+    if let Some(pending) = map.remove(&server_id) {
+        let _ = pending.cancel.send(());
     }
     Ok(())
 }
