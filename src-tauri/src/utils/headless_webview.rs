@@ -8,11 +8,11 @@ use tokio::time::{sleep, timeout, Duration};
 type WebviewTimeoutHandleMap = Arc<Mutex<HashMap<String, tokio::task::JoinHandle<()>>>>;
 type WebviewChannelMap = Arc<Mutex<HashMap<String, oneshot::Sender<String>>>>;
 
-static WEBVIEW_TIMEOUTS: once_cell::sync::Lazy<WebviewTimeoutHandleMap> =
-    once_cell::sync::Lazy::new(|| Arc::new(Mutex::new(HashMap::new())));
+static WEBVIEW_TIMEOUTS: std::sync::LazyLock<WebviewTimeoutHandleMap> =
+    std::sync::LazyLock::new(|| Arc::new(Mutex::new(HashMap::new())));
 
-static WEBVIEW_CHANNELS: once_cell::sync::Lazy<WebviewChannelMap> =
-    once_cell::sync::Lazy::new(|| Arc::new(Mutex::new(HashMap::new())));
+static WEBVIEW_CHANNELS: std::sync::LazyLock<WebviewChannelMap> =
+    std::sync::LazyLock::new(|| Arc::new(Mutex::new(HashMap::new())));
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WebviewFetchResult {
@@ -208,11 +208,11 @@ pub async fn fetch_url_with_webview(
 }
 
 fn extract_title(html: &str) -> Option<String> {
-    use once_cell::sync::Lazy;
     use regex::Regex;
+    use std::sync::LazyLock;
 
-    static TITLE_REGEX: Lazy<Regex> =
-        Lazy::new(|| Regex::new(r"<title[^>]*>([^<]*)</title>").unwrap());
+    static TITLE_REGEX: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"<title[^>]*>([^<]*)</title>").unwrap());
 
     TITLE_REGEX
         .captures(html)

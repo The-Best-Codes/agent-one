@@ -4,15 +4,16 @@ use super::html_to_markdown::{convert_html_to_markdown, truncate_content};
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 use crate::utils::headless_webview::fetch_url_with_webview;
 
-use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
+use std::sync::LazyLock;
 use tauri::AppHandle;
 use tokio::time::{timeout, Duration};
 use wreq::Client;
 use wreq_util::Emulation;
 
-static TITLE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"<title[^>]*>([^<]*)</title>").unwrap());
+static TITLE_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"<title[^>]*>([^<]*)</title>").unwrap());
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UrlContentResponse {

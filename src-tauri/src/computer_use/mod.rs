@@ -7,7 +7,7 @@ use std::sync::{Mutex, PoisonError};
 use std::time::Duration;
 
 use computer_use::{Computer, Delivery, Error, NativeBackend, Permission};
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 use actions::ComputerAction;
 use apps::{InstalledApp, RunningApp};
@@ -19,7 +19,7 @@ const DEFAULT_MAX_ELEMENTS: usize = 1500;
 
 type NativeComputer = Computer<NativeBackend>;
 
-static COMPUTER: Lazy<Mutex<Option<NativeComputer>>> = Lazy::new(|| Mutex::new(None));
+static COMPUTER: LazyLock<Mutex<Option<NativeComputer>>> = LazyLock::new(|| Mutex::new(None));
 
 fn describe_error(error: Error) -> String {
     match error {

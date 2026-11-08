@@ -3,33 +3,36 @@ use super::constants::{DEFAULT_TIMEOUT_SECONDS, MAX_TIMEOUT_SECONDS};
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 use crate::utils::headless_webview::fetch_url_with_webview;
 
-use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+use std::sync::LazyLock;
 use tauri::AppHandle;
 use tokio::sync::Semaphore;
 use tokio::time::{timeout, Duration};
 use wreq::Client;
 use wreq_util::Emulation;
 
-static VQD_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r#"<input[^>]*name="vqd"[^>]*value="([^"]+)"[^>]*/?\s*>"#).unwrap());
-static VQD_REGEX_ALT: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r#"<input[^>]*value="([^"]+)"[^>]*name="vqd"[^>]*/?\s*>"#).unwrap());
-static RESULT_REGEX: Lazy<Regex> = Lazy::new(|| {
+static VQD_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"<input[^>]*name="vqd"[^>]*value="([^"]+)"[^>]*/?\s*>"#).unwrap()
+});
+static VQD_REGEX_ALT: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"<input[^>]*value="([^"]+)"[^>]*name="vqd"[^>]*/?\s*>"#).unwrap()
+});
+static RESULT_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r#"(?s)<div[^>]*class="[^"]*result[^"]*results_links[^"]*web-result[^"]*"[^>]*>(.*?)</div>\s*</div>"#).unwrap()
 });
-static TITLE_REGEX: Lazy<Regex> = Lazy::new(|| {
+static TITLE_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r#"(?s)<h2[^>]*class="[^"]*result__title[^"]*"[^>]*>.*?<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]*)"[^>]*>(.*?)</a>"#).unwrap()
 });
-static DISPLAY_URL_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r#"<a[^>]*class="[^"]*result__url[^"]*"[^>]*>([^<]*)</a>"#).unwrap());
-static SNIPPET_REGEX: Lazy<Regex> = Lazy::new(|| {
+static DISPLAY_URL_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"<a[^>]*class="[^"]*result__url[^"]*"[^>]*>([^<]*)</a>"#).unwrap()
+});
+static SNIPPET_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r#"(?s)<a[^>]*class="[^"]*result__snippet[^"]*"[^>]*>(.*?)</a>"#).unwrap()
 });
-static TAG_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"<[^>]*>").unwrap());
-static WHITESPACE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\s+").unwrap());
+static TAG_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"<[^>]*>").unwrap());
+static WHITESPACE_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\s+").unwrap());
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SearchResult {
