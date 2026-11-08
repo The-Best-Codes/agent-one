@@ -101,7 +101,7 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
         _delta,
         instance,
       ) => {
-        const scrollOffset = (instance.scrollOffset ?? 0) + instance.scrollAdjustments;
+        const scrollOffset = instance.scrollOffset ?? 0;
 
         return item.end <= scrollOffset && instance.scrollDirection !== "backward";
       };
