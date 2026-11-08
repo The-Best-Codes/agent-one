@@ -1,4 +1,4 @@
-use htmd::{element_handler::Handlers, Element, HtmlToMarkdown};
+use htmd::{Element, HtmlToMarkdown, element_handler::Handlers};
 use regex::Regex;
 use std::sync::LazyLock;
 

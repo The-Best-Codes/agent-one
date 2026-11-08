@@ -8,7 +8,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::sync::LazyLock;
 use tauri::AppHandle;
-use tokio::time::{timeout, Duration};
+use tokio::time::{Duration, timeout};
 use wreq::Client;
 use wreq_util::Emulation;
 

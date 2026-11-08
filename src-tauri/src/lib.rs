@@ -1,5 +1,5 @@
 use tauri::{Listener, Manager};
-use tauri_plugin_log::{log::LevelFilter, FileOpenStrategy, RotationStrategy, Target, TargetKind};
+use tauri_plugin_log::{FileOpenStrategy, RotationStrategy, Target, TargetKind, log::LevelFilter};
 
 const LOG_FILE_NAME: &str = "agent-one-logs";
 const LOG_LEVEL_ENV: &str = "AGENT_ONE_LOG_LEVEL";

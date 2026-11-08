@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use computer_use::{AppInfo, Backend, Error};
 use serde::Serialize;
 
-use super::{describe_error, permissions, NativeComputer};
+use super::{NativeComputer, describe_error, permissions};
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]

@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
-use tokio::sync::{oneshot, Mutex};
-use tokio::time::{sleep, timeout, Duration};
+use tokio::sync::{Mutex, oneshot};
+use tokio::time::{Duration, sleep, timeout};
 
 type WebviewTimeoutHandleMap = Arc<Mutex<HashMap<String, tokio::task::JoinHandle<()>>>>;
 type WebviewChannelMap = Arc<Mutex<HashMap<String, oneshot::Sender<String>>>>;
@@ -176,7 +176,7 @@ pub async fn fetch_url_with_webview(
                 error: Some(e),
                 url,
                 title: None,
-            })
+            });
         }
     };
 

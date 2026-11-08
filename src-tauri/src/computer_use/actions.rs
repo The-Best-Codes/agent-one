@@ -4,7 +4,7 @@ use computer_use::{
 };
 use serde::Deserialize;
 
-use super::{apps, describe_error, NativeComputer};
+use super::{NativeComputer, apps, describe_error};
 
 const DEFAULT_SCROLL_PAGES: f64 = 1.0;
 

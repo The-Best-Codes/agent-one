@@ -1,9 +1,9 @@
-use base64::engine::general_purpose::STANDARD;
 use base64::Engine as _;
+use base64::engine::general_purpose::STANDARD;
 use computer_use::{CaptureOptions, WindowSelector};
 use serde::Serialize;
 
-use super::{apps, describe_error, NativeComputer};
+use super::{NativeComputer, apps, describe_error};
 
 const MAX_SCREENSHOT_SIDE: u32 = 1280;
 

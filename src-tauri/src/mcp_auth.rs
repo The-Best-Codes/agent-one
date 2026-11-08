@@ -1,8 +1,8 @@
 use axum::{
+    Router,
     extract::{Query, State},
     response::Html,
     routing::get,
-    Router,
 };
 use rmcp::transport::auth::{
     AuthError, AuthorizationManager, AuthorizationRequest, CredentialStore, OAuthState,
@@ -15,7 +15,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
 use tauri_plugin_opener::OpenerExt;
-use tokio::sync::{oneshot, Mutex};
+use tokio::sync::{Mutex, oneshot};
 
 use crate::keyring::{delete_password, get_password, resolve_agent_db_path, set_password};
 
