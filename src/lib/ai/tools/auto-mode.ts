@@ -18,8 +18,9 @@ const CLASSIFIER_TIMEOUT_MS = 60_000;
 const MAX_CONSECUTIVE_BLOCKS = 3;
 const MAX_TOTAL_BLOCKS = 20;
 const MAX_INPUT_CHARS = 2_000;
-const MAX_PENDING_INPUT_CHARS = 8_000;
+const MAX_PENDING_INPUT_CHARS = 100_000;
 const MAX_TRANSCRIPT_CHARS = 40_000;
+const OMITTED_MESSAGES = "[earlier messages omitted]";
 
 export const AUTO_MODE_BLOCKED_PREFIX = "Auto mode blocked this action: ";
 export const AUTO_MODE_BLOCKED_SUFFIX =
@@ -73,14 +74,12 @@ function truncate(text: string, limit: number) {
   return text.length <= limit ? text : `${text.slice(0, limit)}… [truncated]`;
 }
 
-function stringifyInput(input: unknown, limit: number) {
-  let text: string;
+function inputToText(input: unknown) {
   try {
-    text = typeof input === "string" ? input : JSON.stringify(input, null, 2);
+    return (typeof input === "string" ? input : JSON.stringify(input, null, 2)) ?? "";
   } catch {
-    text = String(input);
+    return String(input);
   }
-  return truncate(text ?? "", limit);
 }
 
 function describeUserContent(content: ModelMessage["content"]): string {
@@ -105,14 +104,16 @@ function describeUserContent(content: ModelMessage["content"]): string {
     .join("\n");
 }
 
-function buildTranscriptEntries(messages: ModelMessage[], userLabel: string): string[] {
-  const entries: string[] = [];
+type TranscriptEntry = { text: string; fromUser: boolean };
+
+function buildTranscriptEntries(messages: ModelMessage[], userLabel: string): TranscriptEntry[] {
+  const entries: TranscriptEntry[] = [];
 
   for (const message of messages) {
     if (message.role === "user") {
       const text = describeUserContent(message.content).trim();
       if (text) {
-        entries.push(`${userLabel}:\n${text}`);
+        entries.push({ text: `${userLabel}:\n${text}`, fromUser: true });
       }
       continue;
     }
@@ -123,9 +124,10 @@ function buildTranscriptEntries(messages: ModelMessage[], userLabel: string): st
 
     for (const part of message.content) {
       if (part.type === "tool-call") {
-        entries.push(
-          `Agent called tool "${part.toolName}" with input:\n${stringifyInput(part.input, MAX_INPUT_CHARS)}`,
-        );
+        entries.push({
+          text: `Agent called tool "${part.toolName}" with input:\n${truncate(inputToText(part.input), MAX_INPUT_CHARS)}`,
+          fromUser: false,
+        });
       }
     }
   }
@@ -133,26 +135,42 @@ function buildTranscriptEntries(messages: ModelMessage[], userLabel: string): st
   return entries;
 }
 
-function fitTranscript(entries: string[]): string {
+function fitTranscript(entries: TranscriptEntry[]): string {
   if (entries.length === 0) {
     return "(no earlier messages)";
   }
 
-  const [first, ...rest] = entries;
+  const [head, ...rest] = entries;
+  let latestUserIndex = rest.length - 1;
+  while (latestUserIndex >= 0 && !rest[latestUserIndex].fromUser) latestUserIndex--;
+  const first = truncate(
+    head.text,
+    latestUserIndex === -1 ? MAX_TRANSCRIPT_CHARS / 2 : MAX_TRANSCRIPT_CHARS / 4,
+  );
+  const latestUser =
+    latestUserIndex === -1 ? "" : truncate(rest[latestUserIndex].text, MAX_TRANSCRIPT_CHARS / 4);
+  let budget = MAX_TRANSCRIPT_CHARS - first.length - latestUser.length;
+  let omitting = false;
   const kept: string[] = [];
-  let size = first.length;
 
   for (let index = rest.length - 1; index >= 0; index--) {
-    const entry = rest[index];
-    if (size + entry.length > MAX_TRANSCRIPT_CHARS) {
-      kept.unshift("[earlier messages omitted]");
-      break;
+    if (index === latestUserIndex) {
+      kept.unshift(latestUser);
+      continue;
     }
-    kept.unshift(entry);
-    size += entry.length;
+    const { text } = rest[index];
+    if (!omitting && text.length <= budget) {
+      kept.unshift(text);
+      budget -= text.length;
+      continue;
+    }
+    omitting = true;
+    if (kept[0] !== OMITTED_MESSAGES) {
+      kept.unshift(OMITTED_MESSAGES);
+    }
   }
 
-  return [truncate(first, MAX_TRANSCRIPT_CHARS / 2), ...kept].join("\n\n---\n\n");
+  return [first, ...kept].join("\n\n---\n\n");
 }
 
 export function wasApprovedByUser(messages: ModelMessage[], toolCallId: string | undefined) {
@@ -219,7 +237,8 @@ export function createAutoModeApproval(options: AutoModeApprovalOptions): AutoMo
   let totalBlocks = 0;
 
   const classify = async (
-    toolCall: { toolName: string; input: unknown },
+    toolName: string,
+    pendingInput: string,
     tools: ToolSet | undefined,
     messages: ModelMessage[],
   ): Promise<Verdict | undefined> => {
@@ -232,14 +251,14 @@ export function createAutoModeApproval(options: AutoModeApprovalOptions): AutoMo
           : "User",
       ),
     ];
-    const description = getToolDescription(tools, toolCall.toolName);
+    const description = getToolDescription(tools, toolName);
     const prompt = [
       options.projectFolder
         ? `The user's project folder is: ${options.projectFolder}`
         : "This chat has no project folder.",
       rules ? `The user's own auto mode rules (these take priority):\n${rules}` : undefined,
       `<transcript>\n${fitTranscript(entries)}\n</transcript>`,
-      `<pending_tool_call>\nTool: ${toolCall.toolName}${description ? `\nTool description: ${truncate(description, MAX_INPUT_CHARS)}` : ""}\nInput:\n${stringifyInput(toolCall.input, MAX_PENDING_INPUT_CHARS)}\n</pending_tool_call>`,
+      `<pending_tool_call>\nTool: ${toolName}${description ? `\nTool description: ${truncate(description, MAX_INPUT_CHARS)}` : ""}\nInput:\n${pendingInput}\n</pending_tool_call>`,
       "Decide whether the pending tool call can run. Reply with one line: ALLOW, BLOCK or ASK, then a colon and a short reason.",
     ]
       .filter(Boolean)
@@ -272,9 +291,17 @@ export function createAutoModeApproval(options: AutoModeApprovalOptions): AutoMo
       return base;
     }
 
+    const pendingInput = inputToText(toolCall.input);
+    if (pendingInput.length > MAX_PENDING_INPUT_CHARS) {
+      return {
+        type: "user-approval",
+        reason: "This action is too large for auto mode to check, so it needs your approval.",
+      };
+    }
+
     let verdict: Verdict | undefined;
     try {
-      verdict = await classify(toolCall, tools, messages);
+      verdict = await classify(toolCall.toolName, pendingInput, tools, messages);
     } catch (error) {
       if (options.abortSignal?.aborted) {
         throw error;
