@@ -147,6 +147,12 @@ export function getMessagesAfterCompaction(messages: UIMessage[]): {
   return { compaction: part, messages: result };
 }
 
+const COMPACTION_SUMMARY_MARKER = "agentOneCompactionSummary";
+
+export function isCompactionSummaryPart(part: { providerOptions?: Record<string, unknown> }) {
+  return part.providerOptions?.[COMPACTION_SUMMARY_MARKER] !== undefined;
+}
+
 function getSummaryText(summary: string) {
   return `This conversation was compacted to free up space in the context window. Here is a summary of everything that happened before this point:\n\n<summary>\n${summary}\n</summary>`;
 }
@@ -156,7 +162,11 @@ function toUserContentParts(content: UserModelMessage["content"]) {
 }
 
 export function withCompactionSummary(summary: string, messages: ModelMessage[]): ModelMessage[] {
-  const summaryPart = { type: "text" as const, text: getSummaryText(summary) };
+  const summaryPart = {
+    type: "text" as const,
+    text: getSummaryText(summary),
+    providerOptions: { [COMPACTION_SUMMARY_MARKER]: { summary: true } },
+  };
   const [firstMessage, ...rest] = messages;
 
   if (firstMessage?.role === "user") {

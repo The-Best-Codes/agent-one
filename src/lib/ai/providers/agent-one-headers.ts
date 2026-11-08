@@ -3,7 +3,12 @@ import type { LanguageModel } from "ai";
 
 import packageJson from "@/../package.json";
 
-export type AgentOneRequestType = "chat" | "title-generation" | "compaction" | "sub-agent";
+export type AgentOneRequestType =
+  | "chat"
+  | "title-generation"
+  | "compaction"
+  | "sub-agent"
+  | "auto-mode";
 
 export interface AgentOneRequestMetadata {
   type: AgentOneRequestType;

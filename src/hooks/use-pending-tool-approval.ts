@@ -13,7 +13,8 @@ export const usePendingToolApproval = () => {
           (part) =>
             (part.type.startsWith("tool-") || part.type === "dynamic-tool") &&
             "state" in part &&
-            part.state === "approval-requested",
+            part.state === "approval-requested" &&
+            !part.approval.isAutomatic,
         ) ?? false,
     [messages],
   );

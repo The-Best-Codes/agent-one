@@ -52,7 +52,7 @@ export interface ModelData {
   contextWindow?: number;
 }
 
-export type ToolBehavior = "default" | "ask" | "yolo" | "disable";
+export type ToolBehavior = "default" | "ask" | "auto" | "yolo" | "disable";
 
 export const REASONING_EFFORTS = [
   "none",
@@ -89,13 +89,13 @@ export const DEFAULT_MODEL_CONFIG: ModelConfig = {
   frequencyPenalty: undefined,
   presencePenalty: undefined,
   seed: undefined,
-  toolBehavior: "default",
+  toolBehavior: "auto",
   reasoningEffort: undefined,
   compactionThreshold: undefined,
 };
 
 export function getToolBehavior(modelConfig: ModelConfig): ToolBehavior {
-  return modelConfig.toolBehavior ?? "default";
+  return modelConfig.toolBehavior ?? "auto";
 }
 
 export function getReasoningEffort(modelConfig: ModelConfig): ReasoningEffort | undefined {

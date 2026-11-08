@@ -65,6 +65,12 @@ interface SliderConfigProps {
 
 const TOOL_BEHAVIORS: { value: ToolBehavior; label: string; description: string }[] = [
   {
+    value: "auto",
+    label: "Auto",
+    description:
+      "A model checks each tool that would need your approval. It runs safe ones, blocks risky ones, and asks you when it can't tell. You can pick the model in Settings.",
+  },
+  {
     value: "default",
     label: "Per-tool approval",
     description: "Use enabled tools and ask for approval only when each tool requires it.",

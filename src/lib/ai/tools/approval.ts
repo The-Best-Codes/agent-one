@@ -1,4 +1,4 @@
-import type { ToolSet } from "ai";
+import type { DynamicToolUIPart, ToolSet, ToolUIPart } from "ai";
 
 const REQUIRES_APPROVAL = Symbol("agentOneRequiresApproval");
 
@@ -20,4 +20,9 @@ export async function toolApproval({
   const rule = (tools?.[toolCall.toolName] as ApprovalMarked | undefined)?.[REQUIRES_APPROVAL];
   const required = typeof rule === "function" ? await rule(toolCall.input) : rule;
   return required ? "user-approval" : "not-applicable";
+}
+
+export function hideAutomaticApprovalRequest<T extends ToolUIPart | DynamicToolUIPart>(part: T): T {
+  if (part.state !== "approval-requested" || !part.approval.isAutomatic) return part;
+  return { ...part, state: "input-available", approval: undefined };
 }

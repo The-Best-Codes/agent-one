@@ -52,6 +52,10 @@ interface ModelSelectorProps {
   popoverClassName?: string;
   disabled?: boolean;
   loading?: boolean;
+  value?: ModelData | null;
+  onValueChange?: (modelId: string) => void;
+  placeholder?: string;
+  id?: string;
 }
 
 type VirtualRow =
@@ -404,8 +408,14 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   popoverClassName,
   disabled = false,
   loading = false,
+  value,
+  onValueChange,
+  placeholder = "No model selected",
+  id,
 }) => {
-  const { currentModel, setModel } = useModel();
+  const modelContext = useModel();
+  const currentModel = value === undefined ? modelContext.currentModel : (value ?? undefined);
+  const setModel = onValueChange ?? modelContext.setModel;
   const [open, setOpen] = useState(false);
   const [loadingDelayPassed, setLoadingDelayPassed] = useState(false);
   const [staleModel, setStaleModel] = useState(currentModel);
@@ -516,13 +526,13 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   ) : (
     <>
       <div className="min-w-0 flex-1 text-left">
-        <span className="text-muted-foreground">No model selected</span>
+        <span className="text-muted-foreground">{placeholder}</span>
       </div>
       <IconSelector className="size-4 shrink-0 opacity-50" />
     </>
   );
 
-  const modelLabel = displayedModel ? `Model: ${displayedModel.name}` : "No model";
+  const modelLabel = displayedModel ? `Model: ${displayedModel.name}` : placeholder;
 
   if (isModelCatalogLoading || shouldShowLoadingSkeleton) {
     return <Skeleton className={cn("h-8 w-full border border-border", className)} />;
@@ -532,6 +542,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     <AdaptivePopover open={effectiveOpen} onOpenChange={handleOpenChange}>
       <AdaptivePopoverTrigger asChild>
         <Button
+          id={id}
           variant="outline"
           aria-haspopup="listbox"
           aria-expanded={effectiveOpen}

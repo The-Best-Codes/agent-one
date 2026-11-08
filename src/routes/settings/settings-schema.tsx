@@ -49,6 +49,7 @@ import {
   TtsProviders,
 } from "@/components/settings-components/providers/provider-cards";
 import type { SettingsLayout } from "@/components/settings-components/setting-controls";
+import { AutoModeModelControl } from "@/components/settings-components/tools/auto-mode-controls";
 import { ComputerUsePermissions } from "@/components/settings-components/tools/computer-use-permissions";
 import {
   ChangeFilesApprovalToggle,
@@ -211,7 +212,8 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
           {
             id: "ask-before-settings-changes",
             label: "Ask before changing settings",
-            description: "Confirm each change AgentOne wants to make to your settings.",
+            description:
+              "Confirm each change AgentOne wants to make to your settings, unless in Auto mode.",
             keywords: ["settings", "approval", "confirm", "tool"],
             layout: "row",
             visible: toolsEnabledAtom(TOOL_SETS.settings),
@@ -370,7 +372,8 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
           {
             id: "ask-before-scheduled-agent-changes",
             label: "Ask before changing scheduled agents",
-            description: "Confirm before AgentOne creates, changes, or deletes a scheduled agent.",
+            description:
+              "Confirm before AgentOne creates, changes, or deletes a scheduled agent, unless in Auto mode.",
             keywords: ["schedule", "approval", "confirm", "tool"],
             layout: "row",
             visible: toolsEnabledAtom(TOOL_SETS.scheduledAgents),
@@ -557,6 +560,8 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     intro: ToolsIntro,
     cards: [
       {
+        title: "Configure",
+        description: "Approval settings may not apply in Auto mode.",
         items: [
           {
             id: "tools-web",
@@ -696,6 +701,21 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
             control: FeedbackApprovalToggle,
           },
           { id: "confirm-yolo-mode", key: "CONFIRM_YOLO_MODE" },
+        ],
+      },
+      {
+        id: "auto-mode",
+        title: "Auto Mode",
+        description:
+          "When a chat's tool behavior is set to Auto, a model checks each tool call that would need your approval and decides whether it can run.",
+        keywords: ["auto mode", "classifier", "approval", "tool behavior"],
+        items: [
+          {
+            id: "auto-mode-model",
+            key: "AUTO_MODE_MODEL",
+            control: AutoModeModelControl,
+          },
+          { id: "auto-mode-rules", key: "AUTO_MODE_RULES" },
         ],
       },
     ],

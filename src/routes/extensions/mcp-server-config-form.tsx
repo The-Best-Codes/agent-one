@@ -67,7 +67,8 @@ export function McpServerConfigForm({
     commandPlaceholder ?? "e.g., npx -y @modelcontextprotocol/server-everything";
   const resolvedUrlPlaceholder = urlPlaceholder ?? "https://mcp.example.com/api";
   const resolvedApprovalDescription =
-    approvalDescription ?? "Ask for confirmation before running tools from this server";
+    approvalDescription ??
+    "Ask for confirmation before running tools from this server, unless in Auto mode";
 
   return (
     <div className={className}>
