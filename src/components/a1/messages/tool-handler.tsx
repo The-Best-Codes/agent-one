@@ -21,6 +21,7 @@ import { MessagePartToolGetSetting } from "./tools/tool-getSetting";
 import { MessagePartToolGetUrlContent } from "./tools/tool-getUrlContent";
 import { MessagePartToolListScheduledAgents } from "./tools/tool-listScheduledAgents";
 import { MessagePartToolListSettings } from "./tools/tool-listSettings";
+import { MessagePartToolListSkills } from "./tools/tool-listSkills";
 import { MessagePartToolMemory } from "./tools/tool-memory";
 import { MessagePartToolReadChat } from "./tools/tool-readChat";
 import { MessagePartToolSearchChats } from "./tools/tool-searchChats";
@@ -91,6 +92,8 @@ function ToolPart({ part }: MessageToolHandlerProps) {
       return <MessagePartToolComputerUseObserve part={part} />;
     case "tool-computerUseAct":
       return <MessagePartToolComputerUseAct part={part} />;
+    case "tool-listSkills":
+      return <MessagePartToolListSkills part={part} />;
     default:
       return <MessagePartToolCall part={part as ToolUIPart} />;
   }

@@ -7,6 +7,7 @@ export { createExecuteCommandTool } from "./executeCommand";
 export { createGetUrlContentTool } from "./getUrlContent";
 export { createMemoryTool } from "./memory";
 export { createSubAgentTool } from "./subAgent";
+export { createListSkillsTool } from "./listSkills";
 export { createViewFileTool } from "./viewFile";
 export { createWaitTool } from "./waitNumberMilliseconds";
 export { createWebSearchTool } from "./webSearch";

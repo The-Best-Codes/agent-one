@@ -13,6 +13,7 @@ import {
   createGetUrlContentTool,
   createMemoryTool,
   createSubAgentTool,
+  createListSkillsTool,
   createViewFileTool,
   createWaitTool,
   createWebSearchTool,
@@ -87,8 +88,6 @@ function getServerLoadSignature(server: McpServerConfig): string {
   });
 }
 
-const ALWAYS_APPROVAL_FREE_TOOLS = new Set(["describeNextTool"]);
-
 function applyApprovalConfigToTools(
   tools: ToolSet,
   defaultNeedsApproval: boolean,
@@ -96,12 +95,7 @@ function applyApprovalConfigToTools(
 ): ToolSet {
   const wrappedTools: ToolSet = {};
   for (const [name, tool] of Object.entries(tools)) {
-    wrappedTools[name] = withApproval(
-      tool,
-      ALWAYS_APPROVAL_FREE_TOOLS.has(name)
-        ? false
-        : (toolApprovalOverrides[name] ?? defaultNeedsApproval),
-    );
+    wrappedTools[name] = withApproval(tool, toolApprovalOverrides[name] ?? defaultNeedsApproval);
   }
   return wrappedTools;
 }
@@ -589,6 +583,13 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         );
       }
 
+      if (mergedEnabledTools.viewFile) {
+        filteredStaticTools.listSkills = withApproval(
+          createListSkillsTool(chatContext.project),
+          mergedToolConfigs.viewFile.requiresApproval,
+        );
+      }
+
       if (!mcpLoadedRef.current && loadingPromiseRef.current) {
         await loadingPromiseRef.current;
       }
@@ -602,7 +603,9 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       };
 
       if (options?.toolBehavior === "ask" || options?.toolBehavior === "yolo") {
-        tools = applyApprovalConfigToTools(tools, options.toolBehavior === "ask");
+        tools = applyApprovalConfigToTools(tools, options.toolBehavior === "ask", {
+          describeNextTool: false,
+        });
       }
 
       return tools;

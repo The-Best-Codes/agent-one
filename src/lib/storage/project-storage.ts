@@ -8,6 +8,7 @@ export interface Project {
   separateMemory: boolean;
   memory: string[];
   agentsFiles?: string[];
+  skillsFolders?: string[];
   createdAt: number;
   updatedAt: number;
 }
@@ -20,6 +21,7 @@ interface ProjectRow {
   separate_memory: number;
   memory: string;
   agents_files: string | null;
+  skills_folders: string | null;
   created_at: number;
   updated_at: number;
 }
@@ -37,7 +39,7 @@ export const projectStorage = {
   async listProjects(): Promise<Project[]> {
     const d = await getDb();
     const rows = await d.select<ProjectRow[]>(
-      `SELECT id, name, instructions, folder, separate_memory, memory, agents_files, created_at, updated_at
+      `SELECT id, name, instructions, folder, separate_memory, memory, agents_files, skills_folders, created_at, updated_at
        FROM projects
        ORDER BY name COLLATE NOCASE, id`,
       [],
@@ -50,6 +52,7 @@ export const projectStorage = {
       separateMemory: row.separate_memory === 1,
       memory: parseStringList(row.memory),
       agentsFiles: row.agents_files === null ? undefined : parseStringList(row.agents_files),
+      skillsFolders: row.skills_folders === null ? undefined : parseStringList(row.skills_folders),
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     }));
@@ -58,8 +61,8 @@ export const projectStorage = {
   async saveProject(project: Project): Promise<void> {
     await enqueueWrite((d) =>
       d.execute(
-        `INSERT INTO projects (id, name, instructions, folder, separate_memory, memory, created_at, updated_at, agents_files)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        `INSERT INTO projects (id, name, instructions, folder, separate_memory, memory, created_at, updated_at, agents_files, skills_folders)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
          ON CONFLICT(id) DO UPDATE SET
            name = $2,
            instructions = $3,
@@ -67,7 +70,8 @@ export const projectStorage = {
            separate_memory = $5,
            memory = $6,
            updated_at = $8,
-           agents_files = $9`,
+           agents_files = $9,
+           skills_folders = $10`,
         [
           project.id,
           project.name,
@@ -78,6 +82,7 @@ export const projectStorage = {
           project.createdAt,
           project.updatedAt,
           project.agentsFiles ? JSON.stringify(project.agentsFiles) : null,
+          project.skillsFolders ? JSON.stringify(project.skillsFolders) : null,
         ],
       ),
     );

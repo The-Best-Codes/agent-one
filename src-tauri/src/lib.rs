@@ -158,6 +158,12 @@ pub fn run() {
                             sql: include_str!("../migrations/0009_add_projects.sql"),
                             kind: tauri_plugin_sql::MigrationKind::Up,
                         },
+                        tauri_plugin_sql::Migration {
+                            version: 10,
+                            description: "add_project_skills_folders",
+                            sql: include_str!("../migrations/0010_add_project_skills_folders.sql"),
+                            kind: tauri_plugin_sql::MigrationKind::Up,
+                        },
                     ],
                 )
                 .add_migrations(

@@ -5,7 +5,7 @@ import { useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
-import { AgentsFilesEditor } from "@/components/a1/agents-files-editor";
+import { PathListEditor } from "@/components/a1/path-list-editor";
 import { MemoryEditor } from "@/components/settings-components/account";
 import {
   Accordion,
@@ -26,7 +26,7 @@ import { Field, FieldContent, FieldDescription, FieldLabel } from "@/components/
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { globalAgentsFilesAtom } from "@/lib/jotai/unsynced-local-atoms";
+import { globalAgentsFilesAtom, globalSkillsFoldersAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
 import { sanitizeMemoryEntries } from "@/lib/memory";
 import {
@@ -35,6 +35,7 @@ import {
   type Project,
   updateProject,
 } from "@/lib/projects";
+import { getDefaultProjectSkillsFolders } from "@/lib/skills";
 import { cn } from "@/lib/utils";
 
 const logger = getLogger(import.meta.url);
@@ -71,6 +72,10 @@ const ProjectForm = ({ project, onClose }: { project?: Project; onClose: () => v
   const globalAgentsFiles = useAtomValue(globalAgentsFilesAtom);
   const [customAgentsFiles, setCustomAgentsFiles] = useState(project?.agentsFiles);
   const agentsFiles = customAgentsFiles ?? getDefaultProjectAgentsFiles(globalAgentsFiles, folder);
+  const globalSkillsFolders = useAtomValue(globalSkillsFoldersAtom);
+  const [customSkillsFolders, setCustomSkillsFolders] = useState(project?.skillsFolders);
+  const skillsFolders =
+    customSkillsFolders ?? getDefaultProjectSkillsFolders(globalSkillsFolders, folder);
   const [initialMemory] = useState(project?.memory ?? []);
   const [memory, setMemory] = useState(initialMemory);
 
@@ -98,6 +103,7 @@ const ProjectForm = ({ project, onClose }: { project?: Project; onClose: () => v
       folder,
       separateMemory,
       agentsFiles: customAgentsFiles,
+      skillsFolders: customSkillsFolders,
     };
     if (project) {
       updateProject(project.id, {
@@ -178,7 +184,7 @@ const ProjectForm = ({ project, onClose }: { project?: Project; onClose: () => v
         <Accordion type="single" collapsible className="rounded-md border px-3">
           <AccordionItem value="advanced" className="border-b-0">
             <AccordionTrigger className="py-3 text-sm">
-              Memory and instruction files
+              Memory, instruction files, and skills
             </AccordionTrigger>
             <AccordionContent className="h-auto pb-3">
               <div className="flex flex-col gap-5">
@@ -211,7 +217,7 @@ const ProjectForm = ({ project, onClose }: { project?: Project; onClose: () => v
                       ? "This project uses its own list."
                       : "Same as your instruction files in settings, plus AGENTS.md in the project folder."}
                   </FieldDescription>
-                  <AgentsFilesEditor
+                  <PathListEditor
                     files={agentsFiles}
                     setFiles={(update) => setCustomAgentsFiles(update(agentsFiles))}
                     folder={folder}
@@ -222,6 +228,32 @@ const ProjectForm = ({ project, onClose }: { project?: Project; onClose: () => v
                           variant="ghost"
                           size="sm"
                           onClick={() => setCustomAgentsFiles(undefined)}
+                        >
+                          Reset
+                        </Button>
+                      )
+                    }
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel>Skills</FieldLabel>
+                  <FieldDescription>
+                    {customSkillsFolders
+                      ? "This project uses its own list."
+                      : "Same as your skill folders in settings, plus .agents/skills and .claude/skills in the project folder."}
+                  </FieldDescription>
+                  <PathListEditor
+                    directory
+                    files={skillsFolders}
+                    setFiles={(update) => setCustomSkillsFolders(update(skillsFolders))}
+                    folder={folder}
+                    action={
+                      customSkillsFolders && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setCustomSkillsFolders(undefined)}
                         >
                           Reset
                         </Button>

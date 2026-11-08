@@ -5,6 +5,7 @@ import type { ComponentType } from "react";
 import {
   AccountStatus,
   GlobalAgentsFilesControl,
+  GlobalSkillsFoldersControl,
   HideAgentOneModelsControl,
   MemoryControl,
   SyncControl,
@@ -237,6 +238,15 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
             keywords: ["agents.md", "claude.md", "instructions", "rules", "system prompt", "file"],
             layout: "stacked",
             control: GlobalAgentsFilesControl,
+          },
+          {
+            id: "global-skills-folders",
+            label: "Skills",
+            description:
+              "AgentOne can use the skills in these folders when they help with a task. Projects can use a different list.",
+            keywords: ["skills", "skill.md", "agent skills", "folder", "instructions", "scripts"],
+            layout: "stacked",
+            control: GlobalSkillsFoldersControl,
           },
           { id: "memory", key: "MEMORY", layout: "stacked", control: MemoryControl },
           {
