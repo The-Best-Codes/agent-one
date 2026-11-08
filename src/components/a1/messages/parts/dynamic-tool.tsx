@@ -300,14 +300,14 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
                   {part?.input !== null && (
                     <div>
                       <span className="font-medium">Parameters:</span>
-                      <pre className="mt-1 overflow-x-auto rounded bg-transparent p-2 text-xs">
+                      <pre className="mt-1 overflow-x-auto rounded-sm bg-transparent p-2 text-xs">
                         {JSON.stringify(part.input, null, 2)}
                       </pre>
                     </div>
                   )}
                   <div>
                     <span className="font-medium">Result:</span>
-                    <div className="mt-1 rounded bg-transparent p-2">
+                    <div className="mt-1 rounded-sm bg-transparent p-2">
                       {isLongOutput ? (
                         <PerformantMarkdown maxHeight="200px" content={outputText} />
                       ) : (

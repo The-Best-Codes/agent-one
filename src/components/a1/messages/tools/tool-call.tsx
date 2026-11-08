@@ -105,7 +105,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
               {part.input && typeof part.input === "object" ? (
                 <div className="text-foreground/80 text-xs">
                   <span className="font-medium">Parameters:</span>
-                  <pre className="mt-1 overflow-x-auto rounded bg-transparent p-2 text-xs">
+                  <pre className="mt-1 overflow-x-auto rounded-sm bg-transparent p-2 text-xs">
                     {JSON.stringify(part.input, null, 2)}
                   </pre>
                 </div>

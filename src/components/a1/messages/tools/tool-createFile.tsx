@@ -93,7 +93,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
             </span>
           </div>
           {input?.content && (
-            <div className="border-border overflow-hidden rounded border">
+            <div className="border-border overflow-hidden rounded-sm border">
               <ContentPreview content={input.content} filePath={filePath} />
             </div>
           )}
@@ -205,7 +205,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
               {content ? (
-                <div className="border-border w-full overflow-hidden rounded border">
+                <div className="border-border w-full overflow-hidden rounded-sm border">
                   <ContentPreview content={content} filePath={filePath} />
                 </div>
               ) : (

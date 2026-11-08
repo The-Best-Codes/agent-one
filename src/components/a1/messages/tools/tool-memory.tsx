@@ -122,7 +122,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
               AgentOne wants to update memory
             </span>
           </div>
-          <pre className="text-muted-foreground overflow-x-auto rounded text-xs whitespace-pre-wrap">
+          <pre className="text-muted-foreground overflow-x-auto rounded-sm text-xs whitespace-pre-wrap">
             {JSON.stringify(input, null, 2)}
           </pre>
           <div className="flex items-center justify-end gap-2">

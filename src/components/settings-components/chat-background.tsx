@@ -358,7 +358,7 @@ export function ChatBackgroundPicker() {
                 <IconCheck className="size-8" data-icon="inline-start" />
               </span>
             )}
-            <span className="absolute right-2 bottom-2 text-xs font-medium text-white drop-shadow">
+            <span className="absolute right-2 bottom-2 text-xs font-medium text-white drop-shadow-sm">
               Custom
             </span>
           </Button>
@@ -379,7 +379,7 @@ export function ChatBackgroundPicker() {
                 <IconCheck className="size-8" data-icon="inline-start" />
               </span>
             )}
-            <span className="absolute right-2 bottom-2 text-xs font-medium text-white drop-shadow">
+            <span className="absolute right-2 bottom-2 text-xs font-medium text-white drop-shadow-sm">
               {preset.label}
             </span>
           </Button>

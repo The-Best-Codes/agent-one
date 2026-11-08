@@ -56,7 +56,7 @@ export const MessagePartToolSendFeedback = ({ part }: { part: ToolUIPart }) => {
               </p>
             )}
             {input.errorMessage && (
-              <pre className="bg-muted text-muted-foreground max-h-32 overflow-auto rounded p-1 text-xs whitespace-pre-wrap">
+              <pre className="bg-muted text-muted-foreground max-h-32 overflow-auto rounded-sm p-1 text-xs whitespace-pre-wrap">
                 {input.errorMessage}
               </pre>
             )}

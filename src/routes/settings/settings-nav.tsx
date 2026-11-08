@@ -202,7 +202,7 @@ function SettingsNavItem({ item, previous, next, active, onClick }: SettingsNavI
         aria-hidden
         xmlns="http://www.w3.org/2000/svg"
         className={cn(
-          "absolute start-0 -top-1.5 bottom-0 -z-1 h-[calc(100%+--spacing(1.5))]",
+          "absolute inset-s-0 -top-1.5 bottom-0 -z-1 h-[calc(100%+--spacing(1.5))]",
           l1 !== l2 && "bottom-1.5 h-full",
         )}
         style={{ width: Math.max(l0, l1) + 9 }}

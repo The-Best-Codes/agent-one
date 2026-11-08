@@ -234,7 +234,7 @@ function AccordionContent({
     <div
       data-slot="accordion-content"
       data-state={isOpen ? "open" : "closed"}
-      className={cn("accordion-content-grid text-sm", wrapperClassName)}
+      className={cn("text-sm", wrapperClassName)}
       {...props}
     >
       <div className={cn("accordion-content-grid-inner overflow-hidden pt-0 pb-4", className)}>
