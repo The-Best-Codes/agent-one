@@ -15,6 +15,7 @@ import {
   AdaptiveTooltipTrigger,
 } from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -106,15 +107,15 @@ export const ProjectItem = memo(
                   )}
                   <span className="truncate">{project.name}</span>
                 </button>
-                <div
+                <ButtonGroup
                   className={cn(
-                    "absolute top-1/2 right-1 flex -translate-y-1/2 items-center gap-0.5 opacity-0 transition-opacity duration-200 will-change-[opacity] group-hover/project-item:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100",
+                    "absolute top-1/2 right-1 -translate-y-1/2 opacity-0 transition-opacity duration-200 will-change-[opacity] group-hover/project-item:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100",
                     isDropdownOpen && "opacity-100",
                   )}
                 >
                   <AdaptiveTooltip>
                     <AdaptiveTooltipTrigger asChild>
-                      <Button size="icon" variant="ghost" className="size-6" asChild>
+                      <Button size="icon-xs" variant="secondary" asChild>
                         <Link
                           to={`/chat?project=${project.id}`}
                           onClick={onNewChat}
@@ -128,12 +129,7 @@ export const ProjectItem = memo(
                   </AdaptiveTooltip>
                   <DropdownMenu onOpenChange={setIsDropdownOpen}>
                     <DropdownMenuTrigger asChild>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="size-6"
-                        aria-label="Project options"
-                      >
+                      <Button size="icon-xs" variant="secondary" aria-label="Project options">
                         <IconDotsVertical />
                       </Button>
                     </DropdownMenuTrigger>
@@ -153,7 +149,7 @@ export const ProjectItem = memo(
                       </DropdownMenuGroup>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                </div>
+                </ButtonGroup>
               </div>
             </Button>
           </ContextMenuTrigger>
