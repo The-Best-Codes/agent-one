@@ -32,11 +32,20 @@ export const createEditFileTool = (baseDir?: string) =>
 
       abortSignal?.throwIfAborted();
 
-      if (!fileContent.includes(input.oldContent)) {
+      let { oldContent, newContent } = input;
+      if (!fileContent.includes(oldContent) && fileContent.includes("\r\n")) {
+        const toCrlf = (text: string) => text.replace(/\r?\n/g, "\r\n");
+        if (fileContent.includes(toCrlf(oldContent))) {
+          oldContent = toCrlf(oldContent);
+          newContent = toCrlf(newContent);
+        }
+      }
+
+      if (!fileContent.includes(oldContent)) {
         throw new Error("The specified oldContent was not found in the file.");
       }
 
-      const updatedContent = fileContent.replace(input.oldContent, input.newContent);
+      const updatedContent = fileContent.replace(oldContent, () => newContent);
       await raceWithAbort(writeTextFile(filePath, updatedContent), abortSignal);
 
       logger.verbose("File edited successfully:", filePath);

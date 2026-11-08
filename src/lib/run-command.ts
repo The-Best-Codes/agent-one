@@ -76,7 +76,7 @@ function createOutputDecoder(fallbackEncoding: string) {
   };
 }
 
-const POWERSHELL_COMMAND_ENV = "AGENT_ONE_COMMAND";
+const COMMAND_ENV = "AGENT_ONE_COMMAND";
 
 function buildShellArgs(
   command: string,
@@ -94,13 +94,16 @@ function buildShellArgs(
             "-ExecutionPolicy",
             "Bypass",
             "-Command",
-            `$ProgressPreference = 'SilentlyContinue'; [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; Invoke-Expression $env:${POWERSHELL_COMMAND_ENV}`,
+            `$ProgressPreference = 'SilentlyContinue'; [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; Invoke-Expression $env:${COMMAND_ENV}`,
           ],
           env: {
-            [POWERSHELL_COMMAND_ENV]: `${command}\nif (-not $?) { if ($LASTEXITCODE) { exit $LASTEXITCODE } else { exit 1 } }`,
+            [COMMAND_ENV]: `${command}\nif (-not $?) { if ($LASTEXITCODE) { exit $LASTEXITCODE } else { exit 1 } }`,
           },
         }
-      : { program: "cmd", args: ["/C", command] };
+      : command.includes('"')
+        ? // Arguments containing quotes get backslash-escaped, which cmd doesn't understand
+          { program: "cmd", args: ["/C", `%${COMMAND_ENV}%`], env: { [COMMAND_ENV]: command } }
+        : { program: "cmd", args: ["/C", command] };
   }
 
   return platform() === "macos"
