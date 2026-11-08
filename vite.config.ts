@@ -164,16 +164,24 @@ export default defineConfig(() => ({
   build: {
     rolldownOptions: {
       output: {
-        manualChunks(id: string) {
-          // Normalize to POSIX-style paths so checks work on Windows too
-          const normalizedId = id.replace(/\\/g, "/");
-          if (normalizedId.includes("/node_modules/")) {
-            for (const [chunkName, packages] of Object.entries(vendorManualChunks)) {
-              if (packages.some((pkg) => normalizedId.includes(`/node_modules/${pkg}/`))) {
-                return chunkName;
-              }
-            }
-          }
+        codeSplitting: {
+          groups: [
+            {
+              debugName: "vendor",
+              name(id: string) {
+                // Normalize to POSIX-style paths so checks work on Windows too
+                const normalizedId = id.replace(/\\/g, "/");
+                if (normalizedId.includes("/node_modules/")) {
+                  for (const [chunkName, packages] of Object.entries(vendorManualChunks)) {
+                    if (packages.some((pkg) => normalizedId.includes(`/node_modules/${pkg}/`))) {
+                      return chunkName;
+                    }
+                  }
+                }
+                return null;
+              },
+            },
+          ],
         },
       },
     },
