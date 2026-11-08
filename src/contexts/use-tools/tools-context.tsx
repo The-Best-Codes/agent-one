@@ -88,7 +88,7 @@ function getServerLoadSignature(server: McpServerConfig): string {
   });
 }
 
-const ALWAYS_APPROVAL_FREE_TOOLS = new Set(["describeNextTool", "useSkill"]);
+const ALWAYS_APPROVAL_FREE_TOOLS = new Set(["describeNextTool"]);
 
 function applyApprovalConfigToTools(
   tools: ToolSet,
@@ -591,7 +591,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       }
 
       if (mergedEnabledTools.viewFile) {
-        filteredStaticTools.useSkill = withApproval(createUseSkillTool(chatContext.project), false);
+        filteredStaticTools.useSkill = withApproval(
+          createUseSkillTool(chatContext.project),
+          mergedToolConfigs.viewFile.requiresApproval,
+        );
       }
 
       if (!mcpLoadedRef.current && loadingPromiseRef.current) {
