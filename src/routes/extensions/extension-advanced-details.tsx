@@ -158,7 +158,7 @@ function McpServerApprovalSettings({
             Require Approval By Default
           </Label>
           <span className="text-muted-foreground text-xs">
-            Ask for confirmation before running tools
+            Ask for confirmation before running tools, unless in Auto mode
           </span>
         </div>
         <Switch

@@ -212,7 +212,8 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
           {
             id: "ask-before-settings-changes",
             label: "Ask before changing settings",
-            description: "Confirm each change AgentOne wants to make to your settings.",
+            description:
+              "Confirm each change AgentOne wants to make to your settings, unless in Auto mode.",
             keywords: ["settings", "approval", "confirm", "tool"],
             layout: "row",
             visible: toolsEnabledAtom(TOOL_SETS.settings),
@@ -371,7 +372,8 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
           {
             id: "ask-before-scheduled-agent-changes",
             label: "Ask before changing scheduled agents",
-            description: "Confirm before AgentOne creates, changes, or deletes a scheduled agent.",
+            description:
+              "Confirm before AgentOne creates, changes, or deletes a scheduled agent, unless in Auto mode.",
             keywords: ["schedule", "approval", "confirm", "tool"],
             layout: "row",
             visible: toolsEnabledAtom(TOOL_SETS.scheduledAgents),
@@ -559,6 +561,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     cards: [
       {
         title: "Configure",
+        description: "Approval settings may not apply in Auto mode.",
         items: [
           {
             id: "tools-web",

@@ -302,7 +302,7 @@ function InstallExtensionDialogBody({
           showTransportEditors={false}
           commandPlaceholder="npx -y ..."
           urlPlaceholder="https://..."
-          approvalDescription="Ask before running tools from this extension"
+          approvalDescription="Ask before running tools from this extension, unless in Auto mode"
           stdioSupplement={detectedConfigurationContent}
           httpSupplement={detectedConfigurationContent}
           showStdioWarning

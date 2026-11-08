@@ -8,6 +8,7 @@ import {
   wrapLanguageModel,
 } from "ai";
 
+import { isCompactionSummaryPart } from "@/lib/ai/compaction";
 import { getAgentOneRequestHeaders } from "@/lib/ai/providers/agent-one-headers";
 import { toolApproval } from "@/lib/ai/tools/approval";
 import { getLogger } from "@/lib/logger";
@@ -91,7 +92,7 @@ function describeUserContent(content: ModelMessage["content"]): string {
     .map((part) => {
       switch (part.type) {
         case "text":
-          return part.text;
+          return isCompactionSummaryPart(part) ? "" : part.text;
         case "file":
           return `[attached file${"filename" in part && part.filename ? `: ${part.filename}` : ""}]`;
         case "image":
