@@ -9,6 +9,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -66,7 +67,7 @@ async function loadPreview(path: string): Promise<Loaded> {
 function PreviewBody({ loaded, name }: { loaded: Loaded; name: string }) {
   if (loaded.status === "text") {
     return (
-      <pre className="bg-muted/40 max-h-[60vh] overflow-auto rounded-md border p-2 font-mono text-xs whitespace-pre-wrap">
+      <pre className="bg-muted/40 size-full overflow-auto rounded-md border p-2 font-mono text-xs whitespace-pre-wrap">
         {loaded.text}
       </pre>
     );
@@ -74,15 +75,13 @@ function PreviewBody({ loaded, name }: { loaded: Loaded; name: string }) {
   if (loaded.status === "media") {
     switch (loaded.kind) {
       case "image":
-        return <img src={loaded.url} alt={name} className="max-h-[60vh] w-full object-contain" />;
+        return <img src={loaded.url} alt={name} className="size-full object-contain" />;
       case "video":
-        return <video src={loaded.url} controls className="max-h-[60vh] w-full rounded-md" />;
+        return <video src={loaded.url} controls className="size-full rounded-md" />;
       case "audio":
         return <audio src={loaded.url} controls className="w-full" />;
       case "pdf":
-        return (
-          <iframe src={loaded.url} title={name} className="h-[60vh] w-full rounded-md border" />
-        );
+        return <iframe src={loaded.url} title={name} className="size-full rounded-md border" />;
     }
   }
   const missing = loaded.status === "missing";
@@ -103,51 +102,55 @@ function PreviewBody({ loaded, name }: { loaded: Loaded; name: string }) {
 
 export function AttachmentPreviewDialog() {
   const [path, setPath] = useAtom(attachmentPreviewAtom);
+  const [shownPath, setShownPath] = useState(path);
   const [loaded, setLoaded] = useState<{ path: string; result: Loaded } | null>(null);
-  const name = path ? getFileName(path) : "";
+
+  if (path && path !== shownPath) setShownPath(path);
 
   useEffect(() => {
-    if (!path) return;
+    if (!shownPath) return;
     let cancelled = false;
     let url: string | undefined;
-    void loadPreview(path).then((result) => {
+    void loadPreview(shownPath).then((result) => {
       if (result.status === "media") url = result.url;
       if (cancelled) {
         if (url) URL.revokeObjectURL(url);
         return;
       }
-      setLoaded({ path, result });
+      setLoaded({ path: shownPath, result });
     });
     return () => {
       cancelled = true;
       if (url) URL.revokeObjectURL(url);
-      setLoaded(null);
     };
-  }, [path]);
+  }, [shownPath]);
 
-  const result = loaded?.path === path ? loaded.result : null;
+  const name = shownPath ? getFileName(shownPath) : "";
+  const result = loaded?.path === shownPath ? loaded.result : null;
 
   return (
     <Dialog open={!!path} onOpenChange={(open) => !open && setPath(null)}>
-      <DialogContent className="flex max-h-[90vh] flex-col sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl" onCloseAutoFocus={() => setShownPath(null)}>
         <DialogHeader className="min-w-0 pr-8">
           <DialogTitle className="truncate">{name}</DialogTitle>
-          <DialogDescription className="truncate" title={path ?? undefined}>
-            {path}
+          <DialogDescription className="truncate" title={shownPath ?? undefined}>
+            {shownPath}
           </DialogDescription>
         </DialogHeader>
-        {result ? (
-          <PreviewBody loaded={result} name={name} />
-        ) : (
-          <Skeleton className="h-64 w-full" />
-        )}
-        {path && result?.status !== "missing" && (
+        <div className="flex h-[min(60vh,36rem)] min-h-0 items-center justify-center">
+          {result ? (
+            <PreviewBody loaded={result} name={name} />
+          ) : (
+            <Skeleton className="size-full" />
+          )}
+        </div>
+        <DialogFooter>
           <Button
             variant="outline"
-            size="sm"
-            className="self-end"
+            disabled={!shownPath || !result || result.status === "missing"}
             onClick={() => {
-              void openPath(path).catch((error: unknown) => {
+              if (!shownPath) return;
+              void openPath(shownPath).catch((error: unknown) => {
                 logger.error("Failed to open attachment", error);
               });
             }}
@@ -155,7 +158,7 @@ export function AttachmentPreviewDialog() {
             <IconExternalLink data-icon="inline-start" />
             Open in default app
           </Button>
-        )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
