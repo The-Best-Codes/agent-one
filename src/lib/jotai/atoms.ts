@@ -30,6 +30,20 @@ export const onboardingReminderDismissedAtom = atomWithStorage(
   { getOnInit: true },
 );
 
+export const starReminderDismissedAtom = atomWithStorage(
+  "agent-one-star-reminder-dismissed",
+  false,
+  undefined,
+  { getOnInit: true },
+);
+
+export const completedResponseCountAtom = atomWithStorage(
+  "agent-one-completed-response-count",
+  0,
+  undefined,
+  { getOnInit: true },
+);
+
 export const tourActiveAtom = atom(false);
 
 export const recordingShortcutAtom = atom(false);
