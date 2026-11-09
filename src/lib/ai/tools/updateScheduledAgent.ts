@@ -13,13 +13,21 @@ import { describeSchedule } from "@/lib/cron-schedule";
 export const createUpdateScheduledAgentTool = () =>
   tool({
     description:
-      "Update, enable, or disable a scheduled agent. Use listScheduledAgents first when the ID is unknown.",
+      "Update, enable, or disable a scheduled agent. Only pass the fields you want to change; omitted fields keep their current values. Use listScheduledAgents first when the ID is unknown.",
     inputSchema: z.object({
-      id: z.string().min(1),
-      title: z.string().min(1).optional(),
-      schedule: z.string().min(1).optional(),
-      prompt: z.string().min(1).optional(),
-      enabled: z.boolean().optional(),
+      id: z.string().min(1).describe("The scheduled agent's ID, from listScheduledAgents."),
+      title: z.string().min(1).optional().describe("A new concise, descriptive title."),
+      schedule: z
+        .string()
+        .min(1)
+        .optional()
+        .describe("A new standard five-field cron expression, e.g. `0 9 * * 1`."),
+      prompt: z
+        .string()
+        .min(1)
+        .optional()
+        .describe("The new complete prompt sent to the agent on each run. Replaces the old one."),
+      enabled: z.boolean().optional().describe("true to enable the agent, false to pause it."),
       delayCutoffMinutes: z
         .number()
         .int()
