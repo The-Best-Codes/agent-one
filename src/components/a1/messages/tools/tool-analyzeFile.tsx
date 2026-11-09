@@ -10,7 +10,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
-import { parseChatMentionHref } from "@/lib/chat-mentions";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { getFileName } from "@/lib/file-icons";
 import { cn } from "@/lib/utils";
@@ -34,9 +33,7 @@ export const MessagePartToolAnalyzeFile = ({ part }: { part: ToolUIPart }) => {
   const [isOpen, setIsOpen] = useState<boolean | undefined>();
   const [isErrorOpen, setIsErrorOpen] = useState<boolean | undefined>();
 
-  const path = input?.path?.trim();
-  const mention = parseChatMentionHref(path);
-  const filePath = mention?.kind === "attachment" ? mention.path : path;
+  const filePath = input?.path?.trim();
   const name = output?.name ?? (filePath ? getFileName(filePath) : "");
 
   switch (part.state) {
@@ -94,7 +91,7 @@ export const MessagePartToolAnalyzeFile = ({ part }: { part: ToolUIPart }) => {
             <AccordionContent className="flex flex-col gap-2 p-0 pt-2">
               {filePath && (
                 <div>
-                  <MentionChip mention={{ kind: "attachment", path: filePath }} />
+                  <MentionChip mention={{ kind: "file", value: filePath }} />
                 </div>
               )}
               {input?.prompt && (

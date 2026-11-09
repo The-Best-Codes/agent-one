@@ -1,4 +1,4 @@
-import { IconExternalLink, IconFile, IconFileOff } from "@tabler/icons-react";
+import { IconExternalLink, IconFile, IconFileOff, IconFolder } from "@tabler/icons-react";
 import { readFile, stat } from "@tauri-apps/plugin-fs";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { useAtom } from "jotai";
@@ -32,6 +32,7 @@ const MAX_TEXT_CHARS = 200_000;
 
 type Loaded =
   | { status: "missing" }
+  | { status: "folder" }
   | { status: "none" }
   | { status: "text"; text: string }
   | { status: "media"; kind: "image" | "video" | "audio" | "pdf"; url: string };
@@ -39,7 +40,9 @@ type Loaded =
 async function loadPreview(path: string): Promise<Loaded> {
   let bytes: Uint8Array;
   try {
-    if ((await stat(path)).size > MAX_PREVIEW_BYTES) return { status: "none" };
+    const info = await stat(path);
+    if (info.isDirectory) return { status: "folder" };
+    if (info.size > MAX_PREVIEW_BYTES) return { status: "none" };
     bytes = await readFile(path);
   } catch (error) {
     logger.warn("Failed to load attachment preview", error);
@@ -78,6 +81,19 @@ function PreviewBody({ loaded, name }: { loaded: Loaded; name: string }) {
       case "pdf":
         return <iframe src={loaded.url} title={name} className="size-full rounded-md border" />;
     }
+  }
+  if (loaded.status === "folder") {
+    return (
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <IconFolder />
+          </EmptyMedia>
+          <EmptyTitle>This is a folder</EmptyTitle>
+          <EmptyDescription>Open it in your file manager to see what's inside.</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    );
   }
   const missing = loaded.status === "missing";
   return (

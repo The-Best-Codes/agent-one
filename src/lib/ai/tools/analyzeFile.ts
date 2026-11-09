@@ -4,7 +4,6 @@ import { z } from "zod";
 
 import { getAgentOneRequestHeaders } from "@/lib/ai/providers/agent-one-headers";
 import { type FileKind, getFileKind, getMediaType, isTextContent } from "@/lib/attachments";
-import { parseChatMentionHref } from "@/lib/chat-mentions";
 import { getFileName } from "@/lib/file-icons";
 
 const VIEW_TIMEOUT_MS = 120_000;
@@ -15,26 +14,24 @@ export interface AnalyzeFileContext {
   parentTurnId?: string;
 }
 
-function resolvePath(reference: string): string {
-  const trimmed = reference.trim();
-  const mention = parseChatMentionHref(trimmed);
-  return mention?.kind === "attachment" ? mention.path : trimmed;
-}
-
 export const createAnalyzeFileTool = (context: AnalyzeFileContext) =>
   tool({
     description:
-      "Analyze any file, like an image, video, audio, or PDF, by asking another model about it. Use this when you need to know what's in a file that you can't read yourself, whether the user attached it or not. Describe exactly what you need in the prompt, because the other model only sees the file and your prompt.",
+      "Analyze any file, like an image, video, audio, or PDF, by sending it to another AI model and asking about it. Use this when you need to know what's in a file that you can't read yourself, whether the user attached it or not. The other model costs the user money each time, so don't use this for files you can read with your other tools. Describe exactly what you need in the prompt, because the other model only sees the file and your prompt.",
     inputSchema: z.object({
-      path: z.string().describe("The path of the file."),
+      path: z
+        .string()
+        .describe(
+          "The file's absolute path on disk, like `/Users/me/report final.pdf`. Use a plain, decoded path, not a link like `attachment://...` or `mention://...`.",
+        ),
       prompt: z
         .string()
         .describe(
           "What you need from the file, like `Describe this screenshot and list any error messages in it.`",
         ),
     }),
-    execute: async ({ path: reference, prompt }, { abortSignal }) => {
-      const path = resolvePath(reference);
+    execute: async ({ path: rawPath, prompt }, { abortSignal }) => {
+      const path = rawPath.trim();
       const name = getFileName(path);
       let model: LanguageModel | undefined;
       try {

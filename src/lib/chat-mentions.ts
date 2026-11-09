@@ -38,6 +38,12 @@ export function getMentionDisplay(mention: ChatMention) {
   }
 }
 
+export function getMentionPath(mention: ChatMention): string | undefined {
+  if (mention.kind === "attachment") return mention.path;
+  if (mention.kind === "file") return mention.value;
+  return undefined;
+}
+
 export const CHAT_MENTION_PATTERN =
   /\[([^\]\n]*)\]\((?:mention:\/\/(file|skill|chat)\/|attachment:\/\/)([^\s)]+)\)/g;
 
@@ -67,7 +73,7 @@ export function formatChatMention(mention: ChatMention): string {
     case "chat":
       return `[${cleanLabel(mention.label)}](${MENTION_SCHEME}chat/${encodeMentionValue(mention.value)})`;
     default: {
-      const label = cleanLabel(mention.kind === "file" ? `@${mention.value}` : `/${mention.value}`);
+      const label = cleanLabel(getMentionText(mention));
       return `[${label}](${MENTION_SCHEME}${mention.kind}/${encodeMentionValue(mention.value)})`;
     }
   }
@@ -96,7 +102,7 @@ export function parseChatMentionHref(
 function getMentionText(mention: ChatMention): string {
   switch (mention.kind) {
     case "file":
-      return `@${mention.value}`;
+      return `@${getMentionDisplay(mention).label}`;
     case "skill":
       return `/${mention.value}`;
     case "chat":
