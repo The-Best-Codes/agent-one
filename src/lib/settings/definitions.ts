@@ -199,6 +199,20 @@ export const SETTINGS = {
     description: "Show markdown formatting styles while typing in the chat input.",
     default: true,
   }),
+  FILE_MENTION_COMPLETIONS: toggle({
+    keywords: ["mention", "@", "autocomplete", "files", "folders", "composer", "input", "editor"],
+    ai: "write",
+    label: "@ Mention Suggestions",
+    description: "Suggest project files and folders when typing @ in the chat input.",
+    default: true,
+  }),
+  SKILL_COMPLETIONS: toggle({
+    keywords: ["slash", "/", "autocomplete", "skills", "commands", "composer", "input", "editor"],
+    ai: "write",
+    label: "/ Skill Suggestions",
+    description: "Suggest skills when typing / in the chat input.",
+    default: true,
+  }),
   INPUT_STYLE: select({
     keywords: ["composer", "prompt box", "text box", "chat box", "position", "layout"],
     ai: "write",

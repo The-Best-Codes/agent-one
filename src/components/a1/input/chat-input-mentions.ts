@@ -158,8 +158,15 @@ function getSkillOptions(query: string, skills: Skill[]): MentionCompletion[] {
     }));
 }
 
-function matchTrigger(context: CompletionContext) {
-  const match = context.matchBefore(/@[^\s@[\]]*/) ?? context.matchBefore(/\/[^\s/[\]]*/);
+interface CompletionTriggers {
+  files: boolean;
+  skills: boolean;
+}
+
+function matchTrigger(context: CompletionContext, triggers: CompletionTriggers) {
+  const match =
+    (triggers.files ? context.matchBefore(/@[^\s@[\]]*/) : null) ??
+    (triggers.skills ? context.matchBefore(/\/[^\s/[\]]*/) : null);
   if (!match) return null;
   const before = context.state.sliceDoc(match.from - 1, match.from);
   return before && !/\s/.test(before) ? null : match;
@@ -246,9 +253,10 @@ const completionTheme = EditorView.theme({
 
 export function createChatInputMentions() {
   let getProject: () => Project | undefined = () => undefined;
+  let triggers: CompletionTriggers = { files: true, skills: true };
 
   const source = async (context: CompletionContext): Promise<CompletionResult | null> => {
-    const match = matchTrigger(context);
+    const match = matchTrigger(context, triggers);
     if (!match) return null;
     const query = match.text.slice(1);
     const project = getProject();
@@ -270,6 +278,9 @@ export function createChatInputMentions() {
   return {
     setProjectGetter: (next: () => Project | undefined) => {
       getProject = next;
+    },
+    setTriggers: (next: CompletionTriggers) => {
+      triggers = next;
     },
     extension: [
       autocompletion({
@@ -293,8 +304,8 @@ export function createChatInputMentions() {
       EditorView.domEventHandlers({
         focus: () => {
           const project = getProject();
-          void getSkills(project);
-          if (project?.folder) void listProjectEntries(project.folder);
+          if (triggers.skills) void getSkills(project);
+          if (triggers.files && project?.folder) void listProjectEntries(project.folder);
         },
       }),
       completionTheme,

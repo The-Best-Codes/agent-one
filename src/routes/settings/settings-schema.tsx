@@ -332,6 +332,8 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
         title: "Chat",
         items: [
           { id: "markdown-highlighting", key: "MARKDOWN_HIGHLIGHTING" },
+          { id: "file-mention-completions", key: "FILE_MENTION_COMPLETIONS" },
+          { id: "skill-completions", key: "SKILL_COMPLETIONS" },
           { id: "input-style", key: "INPUT_STYLE" },
           { id: "collapsed-sidebar-layout", key: "COLLAPSED_SIDEBAR_LAYOUT" },
         ],

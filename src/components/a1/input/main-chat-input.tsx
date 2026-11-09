@@ -138,6 +138,8 @@ export const MainChatInput = ({
   const { hasAvailableModels, isModelCatalogLoading } = useModelCatalog();
   const hasPendingApproval = usePendingToolApproval();
   const markdownHighlighting = useAtomValue(settingAtoms.MARKDOWN_HIGHLIGHTING);
+  const fileMentionCompletions = useAtomValue(settingAtoms.FILE_MENTION_COMPLETIONS);
+  const skillCompletions = useAtomValue(settingAtoms.SKILL_COMPLETIONS);
   const submitKey = useAtomValue(settingAtoms.SUBMIT_KEY);
   const interruptKey = useAtomValue(settingAtoms.INTERRUPT_KEY);
   const inputStyle = useAtomValue(settingAtoms.INPUT_STYLE);
@@ -579,6 +581,9 @@ export const MainChatInput = ({
   useLayoutEffect(() => {
     mentions.setProjectGetter(getProject ?? (() => undefined));
   }, [mentions, getProject]);
+  useLayoutEffect(() => {
+    mentions.setTriggers({ files: fileMentionCompletions, skills: skillCompletions });
+  }, [mentions, fileMentionCompletions, skillCompletions]);
 
   const editorExtensions = useMemo(
     () => [
