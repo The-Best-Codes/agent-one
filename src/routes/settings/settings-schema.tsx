@@ -17,7 +17,6 @@ import {
   ThemeControl,
   TintControl,
 } from "@/components/settings-components/appearance";
-import { AttachmentModelsControl } from "@/components/settings-components/chat-attachments";
 import {
   ChatBackgroundEffects,
   ChatBackgroundPicker,
@@ -32,6 +31,7 @@ import {
   TitleMethodControl,
 } from "@/components/settings-components/chat-titles";
 import { VirtualizationControl } from "@/components/settings-components/chat-virtualization";
+import { FileAnalysisModelsControl } from "@/components/settings-components/file-analysis";
 import {
   AppUpdates,
   DebugTools,
@@ -366,16 +366,16 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
         id: "attachments",
         title: "Attachments",
         description:
-          "The model gets the path of each file you attach. When it needs to know what's in a file it can't read, like an image or a PDF, it can ask another model to look at it.",
+          "The model gets the path of each file you attach. When it needs to know what's in a file it can't read, like an image or a PDF, it can ask another model to analyze it.",
         keywords: ["attachments", "files", "images", "pdf", "upload"],
         items: [
-          { id: "view-attachments-enabled", key: "VIEW_ATTACHMENTS_ENABLED" },
+          { id: "file-analysis-enabled", key: "FILE_ANALYSIS_ENABLED" },
           {
-            id: "attachment-models",
-            key: "ATTACHMENT_MODELS",
+            id: "file-analysis-models",
+            key: "FILE_ANALYSIS_MODELS",
             layout: "stacked",
-            visible: settingAtoms.VIEW_ATTACHMENTS_ENABLED,
-            control: AttachmentModelsControl,
+            visible: settingAtoms.FILE_ANALYSIS_ENABLED,
+            control: FileAnalysisModelsControl,
           },
         ],
       },

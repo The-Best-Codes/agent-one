@@ -3,19 +3,14 @@ import { generateText, type LanguageModel, tool } from "ai";
 import { z } from "zod";
 
 import { getAgentOneRequestHeaders } from "@/lib/ai/providers/agent-one-headers";
-import {
-  type AttachmentKind,
-  getAttachmentKind,
-  getMediaType,
-  isTextContent,
-} from "@/lib/attachments";
+import { type FileKind, getFileKind, getMediaType, isTextContent } from "@/lib/attachments";
 import { parseChatMentionHref } from "@/lib/chat-mentions";
 import { getFileName } from "@/lib/file-icons";
 
 const VIEW_TIMEOUT_MS = 120_000;
 
-export interface ViewAttachmentContext {
-  models: Record<AttachmentKind, LanguageModel>;
+export interface AnalyzeFileContext {
+  models: Record<FileKind, LanguageModel>;
   chatId?: string;
   parentTurnId?: string;
 }
@@ -26,12 +21,12 @@ function resolvePath(reference: string): string {
   return mention?.kind === "attachment" ? mention.path : trimmed;
 }
 
-export const createViewAttachmentTool = (context: ViewAttachmentContext) =>
+export const createAnalyzeFileTool = (context: AnalyzeFileContext) =>
   tool({
     description:
-      "Look at a file the user attached, like an image, video, audio, or PDF, by asking another model about it. Use this when you need to know what's in an attachment that you can't read yourself. Describe exactly what you need in the prompt, because the other model only sees the file and your prompt.",
+      "Analyze any file, like an image, video, audio, or PDF, by asking another model about it. Use this when you need to know what's in a file that you can't read yourself, whether the user attached it or not. Describe exactly what you need in the prompt, because the other model only sees the file and your prompt.",
     inputSchema: z.object({
-      path: z.string().describe("The path of the attached file."),
+      path: z.string().describe("The path of the file."),
       prompt: z
         .string()
         .describe(
@@ -47,7 +42,7 @@ export const createViewAttachmentTool = (context: ViewAttachmentContext) =>
         abortSignal?.throwIfAborted();
         const mediaType =
           getMediaType(name) ?? (isTextContent(data) ? "text/plain" : "application/octet-stream");
-        model = context.models[getAttachmentKind(mediaType)];
+        model = context.models[getFileKind(mediaType)];
         const result = await generateText({
           model,
           instructions:
@@ -65,7 +60,7 @@ export const createViewAttachmentTool = (context: ViewAttachmentContext) =>
           timeout: VIEW_TIMEOUT_MS,
           maxRetries: 1,
           headers: getAgentOneRequestHeaders(model, {
-            type: "view-attachment",
+            type: "analyze-file",
             chatId: context.chatId,
             parentTurnId: context.parentTurnId,
           }),
@@ -79,7 +74,7 @@ export const createViewAttachmentTool = (context: ViewAttachmentContext) =>
         if (abortSignal?.aborted) throw error;
         const message = error instanceof Error ? error.message : String(error);
         throw new Error(
-          `Couldn't look at ${name}: ${message}\n\nTry to understand the file another way instead, like reading it or inspecting it with commands. Don't change the original file; work on a copy if you need to convert or process it.`,
+          `Couldn't analyze ${name}: ${message}\n\nTry to understand the file another way instead, like reading it or inspecting it with commands. Don't change the original file; work on a copy if you need to convert or process it.`,
           { cause: error },
         );
       }

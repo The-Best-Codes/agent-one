@@ -21,12 +21,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  attachmentPreviewAtom,
-  getAttachmentKind,
-  getMediaType,
-  isTextContent,
-} from "@/lib/attachments";
+import { attachmentPreviewAtom, getFileKind, getMediaType, isTextContent } from "@/lib/attachments";
 import { getFileName } from "@/lib/file-icons";
 import { getLogger } from "@/lib/logger";
 
@@ -52,7 +47,7 @@ async function loadPreview(path: string): Promise<Loaded> {
   }
 
   const mediaType = getMediaType(path);
-  const kind = getAttachmentKind(mediaType);
+  const kind = getFileKind(mediaType);
   if (kind !== "other") {
     const url = URL.createObjectURL(new Blob([new Uint8Array(bytes)], { type: mediaType }));
     return { status: "media", kind, url };

@@ -28,7 +28,7 @@ import {
   MENTION_CHIP_CLASS,
   MENTION_ICON_CLASS,
 } from "@/lib/chat-mentions";
-import { getFileIconSvg, SKILL_ICON_SVG } from "@/lib/file-icons";
+import { getFileIconSvg, LOADING_ICON_SVG, SKILL_ICON_SVG } from "@/lib/file-icons";
 import { listProjectEntries, type ProjectEntry } from "@/lib/project-files";
 import { loadSkills, type Skill } from "@/lib/skills";
 import type { Project } from "@/lib/storage/project-storage";
@@ -48,6 +48,18 @@ function getSkills(project: Project | undefined): Promise<Skill[]> {
   const skills = loadSkills(project).catch(() => []);
   skillsCache = { key, loadedAt: Date.now(), skills };
   return skills;
+}
+
+export const savingAttachmentPaths = new Set<string>();
+
+export function markAttachmentSaved(view: EditorView | null, path: string) {
+  savingAttachmentPaths.delete(path);
+  view?.contentDOM.querySelectorAll<HTMLElement>("[data-attachment-path]").forEach((chip) => {
+    const icon = chip.firstElementChild;
+    if (chip.dataset.attachmentPath !== path || !icon) return;
+    icon.classList.remove("animate-spin");
+    icon.innerHTML = getFileIconSvg(path);
+  });
 }
 
 class MentionWidget extends WidgetType {
@@ -75,6 +87,10 @@ class MentionWidget extends WidgetType {
     if (this.mention.kind === "attachment") {
       chip.classList.add("cursor-pointer", "hover:bg-primary/25");
       chip.dataset.attachmentPath = this.mention.path;
+      if (savingAttachmentPaths.has(this.mention.path)) {
+        icon.classList.add("animate-spin");
+        icon.innerHTML = LOADING_ICON_SVG;
+      }
     }
     return chip;
   }

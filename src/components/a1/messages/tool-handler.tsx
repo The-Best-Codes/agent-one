@@ -7,6 +7,7 @@ import { getLogger } from "@/lib/logger";
 
 import { AutoModeVerdict } from "./parts/auto-mode-verdict";
 import { MessagePartFallback } from "./parts/fallback";
+import { MessagePartToolAnalyzeFile } from "./tools/tool-analyzeFile";
 import { MessagePartToolCall } from "./tools/tool-call";
 import { MessagePartToolComputerUseAct } from "./tools/tool-computerUseAct";
 import { MessagePartToolComputerUseObserve } from "./tools/tool-computerUseObserve";
@@ -29,7 +30,6 @@ import { MessagePartToolSendFeedback } from "./tools/tool-sendFeedback";
 import { MessagePartToolSubAgent } from "./tools/tool-subAgent";
 import { MessagePartToolUpdateScheduledAgent } from "./tools/tool-updateScheduledAgent";
 import { MessagePartToolUpdateSetting } from "./tools/tool-updateSetting";
-import { MessagePartToolViewAttachment } from "./tools/tool-viewAttachment";
 import { MessagePartToolViewFile } from "./tools/tool-viewFile";
 import { MessagePartToolWaitNumberMilliseconds } from "./tools/tool-waitNumberMilliseconds";
 import { MessagePartToolWebSearch } from "./tools/tool-webSearch";
@@ -65,8 +65,8 @@ function ToolPart({ part }: MessageToolHandlerProps) {
       return <MessagePartToolDeleteFile part={part} />;
     case "tool-viewFile":
       return <MessagePartToolViewFile part={part} />;
-    case "tool-viewAttachment":
-      return <MessagePartToolViewAttachment part={part} />;
+    case "tool-analyzeFile":
+      return <MessagePartToolAnalyzeFile part={part} />;
     case "tool-executeCommand":
       return <MessagePartToolExecuteCommand part={part} />;
     case "tool-subAgent":

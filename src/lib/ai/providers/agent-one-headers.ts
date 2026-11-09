@@ -9,7 +9,7 @@ export type AgentOneRequestType =
   | "compaction"
   | "sub-agent"
   | "auto-mode"
-  | "view-attachment";
+  | "analyze-file";
 
 export interface AgentOneRequestMetadata {
   type: AgentOneRequestType;

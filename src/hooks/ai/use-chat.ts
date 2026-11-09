@@ -8,7 +8,7 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useTools } from "@/contexts/use-tools/tools-hooks";
 import { type ModelConfig, useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { CustomChatTransport } from "@/lib/ai/custom-chat-transport";
-import { ATTACHMENT_KINDS, type AttachmentKind } from "@/lib/attachments";
+import { FILE_KINDS, type FileKind } from "@/lib/attachments";
 import { systemPromptAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
@@ -47,19 +47,19 @@ export function useChat(
     () => autoModeModelData?.getLanguageModel() ?? null,
     [autoModeModelData],
   );
-  const attachmentModelIds = useAtomValue(settingAtoms.ATTACHMENT_MODELS);
-  const viewAttachmentModels = useMemo(() => {
+  const analyzeFileModelIds = useAtomValue(settingAtoms.FILE_ANALYSIS_MODELS);
+  const analyzeFileModels = useMemo(() => {
     const ids =
-      attachmentModelIds && typeof attachmentModelIds === "object" ? attachmentModelIds : {};
+      analyzeFileModelIds && typeof analyzeFileModelIds === "object" ? analyzeFileModelIds : {};
     return Object.fromEntries(
-      ATTACHMENT_KINDS.flatMap((kind) => {
+      FILE_KINDS.flatMap((kind) => {
         const id = ids[kind];
         const languageModel =
           typeof id === "string" && id ? getChatModelById(id)?.getLanguageModel() : undefined;
         return languageModel ? [[kind, languageModel]] : [];
       }),
-    ) as Partial<Record<AttachmentKind, LanguageModel>>;
-  }, [attachmentModelIds, getChatModelById]);
+    ) as Partial<Record<FileKind, LanguageModel>>;
+  }, [analyzeFileModelIds, getChatModelById]);
   const getSystemPrompt = useAtomValue(systemPromptAtom);
   const { getApiKeysLoadedPromise } = useApiKeys();
   const { getTools } = useTools();
@@ -96,8 +96,8 @@ export function useChat(
   }, [autoModeModel, transport]);
 
   useEffect(() => {
-    transport.updateViewAttachmentModels(viewAttachmentModels);
-  }, [viewAttachmentModels, transport]);
+    transport.updateAnalyzeFileModels(analyzeFileModels);
+  }, [analyzeFileModels, transport]);
 
   useEffect(() => {
     transport.updateModelId(modelId);
@@ -158,7 +158,7 @@ export function useChat(
   const syncTransport = useCallback(() => {
     transport.updateModel(model, providerName);
     transport.updateAutoModeModel(autoModeModel);
-    transport.updateViewAttachmentModels(viewAttachmentModels);
+    transport.updateAnalyzeFileModels(analyzeFileModels);
     transport.updateModelId(modelId);
     transport.updateModelConfig(modelConfig);
     transport.updateContextWindow(contextWindow);
@@ -166,7 +166,7 @@ export function useChat(
   }, [
     model,
     autoModeModel,
-    viewAttachmentModels,
+    analyzeFileModels,
     modelId,
     providerName,
     modelConfig,

@@ -45,12 +45,12 @@ import {
   createAgentOneTurnId,
   getAgentOneRequestHeaders,
 } from "@/lib/ai/providers/agent-one-headers";
+import type { AnalyzeFileContext } from "@/lib/ai/tools/analyzeFile";
 import { toolApproval } from "@/lib/ai/tools/approval";
 import { createAutoModeApproval } from "@/lib/ai/tools/auto-mode";
 import type { ChatToolsContext } from "@/lib/ai/tools/readChat";
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
-import type { ViewAttachmentContext } from "@/lib/ai/tools/viewAttachment";
-import { ATTACHMENT_KINDS, type AttachmentKind } from "@/lib/attachments";
+import { FILE_KINDS, type FileKind } from "@/lib/attachments";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { getAgentsFilesPromptSection, type Project } from "@/lib/projects";
@@ -60,7 +60,7 @@ const logger = getLogger(import.meta.url);
 export class CustomChatTransport implements ChatTransport<UIMessage> {
   private model: LanguageModel | null;
   private autoModeModel: LanguageModel | null = null;
-  private viewAttachmentModels: Partial<Record<AttachmentKind, LanguageModel>> = {};
+  private analyzeFileModels: Partial<Record<FileKind, LanguageModel>> = {};
   private modelId: string | null;
   private providerName: string | null;
   private modelConfig: ModelConfig;
@@ -71,7 +71,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     subAgentContext?: SubAgentExecutionContext;
     toolBehavior?: ToolBehavior;
     chatContext?: ChatToolsContext;
-    viewAttachment?: ViewAttachmentContext;
+    analyzeFile?: AnalyzeFileContext;
   }) => Promise<ToolSet>;
   private getSystemPrompt: (project?: Project) => string;
   private getChatProject: (chatId: string) => Project | undefined;
@@ -87,7 +87,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       subAgentContext?: SubAgentExecutionContext;
       toolBehavior?: ToolBehavior;
       chatContext?: ChatToolsContext;
-      viewAttachment?: ViewAttachmentContext;
+      analyzeFile?: AnalyzeFileContext;
     }) => Promise<ToolSet>,
     getSystemPrompt: (project?: Project) => string,
     getChatProject: (chatId: string) => Project | undefined,
@@ -117,8 +117,8 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     this.autoModeModel = model;
   }
 
-  updateViewAttachmentModels(models: Partial<Record<AttachmentKind, LanguageModel>>) {
-    this.viewAttachmentModels = models;
+  updateAnalyzeFileModels(models: Partial<Record<FileKind, LanguageModel>>) {
+    this.analyzeFileModels = models;
   }
 
   updateModelId(modelId: string | null) {
@@ -227,13 +227,13 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
         delegatedTask: subAgent !== undefined,
         contextMessages: subAgent?.contextMessages,
       });
-    const viewAttachment: ViewAttachmentContext | undefined = getDefaultStore().get(
-      settingAtoms.VIEW_ATTACHMENTS_ENABLED,
+    const analyzeFile: AnalyzeFileContext | undefined = getDefaultStore().get(
+      settingAtoms.FILE_ANALYSIS_ENABLED,
     )
       ? {
           models: Object.fromEntries(
-            ATTACHMENT_KINDS.map((kind) => [kind, this.viewAttachmentModels[kind] ?? model]),
-          ) as Record<AttachmentKind, LanguageModel>,
+            FILE_KINDS.map((kind) => [kind, this.analyzeFileModels[kind] ?? model]),
+          ) as Record<FileKind, LanguageModel>,
           chatId: options.chatId,
           parentTurnId: turnId,
         }
@@ -245,7 +245,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       modelConfig,
       systemPrompt,
       extractReasoningEnabled,
-      getTools: () => this.getTools({ subAgentContext, toolBehavior, chatContext, viewAttachment }),
+      getTools: () => this.getTools({ subAgentContext, toolBehavior, chatContext, analyzeFile }),
       createToolApproval:
         toolBehavior === "auto"
           ? (abortSignal) => createAutoApproval(abortSignal, { contextMessages: messages })
@@ -254,7 +254,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     const tools =
       toolBehavior === "disable"
         ? {}
-        : await this.getTools({ subAgentContext, toolBehavior, chatContext, viewAttachment });
+        : await this.getTools({ subAgentContext, toolBehavior, chatContext, analyzeFile });
 
     const { compaction: existingCompaction, messages: uncompactedMessages } =
       getMessagesAfterCompaction(options.messages);

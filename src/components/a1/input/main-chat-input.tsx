@@ -29,12 +29,12 @@ import { ButtonGroup } from "@/components/ui/button-group";
 import { useChatFunctions, useChatLoading, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
-import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
+import { getToolBehavior, useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import useMobileDetection from "@/hooks/use-mobile-detection";
 import { usePendingToolApproval } from "@/hooks/use-pending-tool-approval";
 import { useTheme } from "@/hooks/use-theme";
-import { saveAttachmentFile } from "@/lib/attachments";
+import { createAttachmentPath, writeAttachmentFile } from "@/lib/attachments";
 import { loadChatInputDraft, saveChatInputDraft } from "@/lib/chat-input-drafts";
 import { formatChatMention } from "@/lib/chat-mentions";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
@@ -47,7 +47,11 @@ import { cn } from "@/lib/utils";
 import { ChatModelConfig } from "../chat-model-config";
 import { ModelSelector } from "../chat-model-selector";
 import { ShortcutKbd, ShortcutKeys } from "../shortcut-kbd";
-import { createChatInputMentions } from "./chat-input-mentions";
+import {
+  createChatInputMentions,
+  markAttachmentSaved,
+  savingAttachmentPaths,
+} from "./chat-input-mentions";
 import { MainInputErrorSection } from "./error-section";
 import { MainInputIncompleteSection } from "./incomplete-section";
 import { MainInputNoModelSection } from "./no-model-section";
@@ -57,6 +61,10 @@ const logger = getLogger(import.meta.url);
 
 const DRAFT_SAVE_DELAY_MS = 300;
 const CAN_PICK_FILE_PATHS = !["android", "ios"].includes(platform());
+
+function getAttachmentText(path: string) {
+  return formatChatMention({ kind: "attachment", path });
+}
 
 const EDITOR_BASIC_SETUP = {
   lineNumbers: false,
@@ -138,7 +146,8 @@ export const MainChatInput = ({
   const isChatLoading = useChatLoading();
   const { resolvedTheme } = useTheme();
   const { sendMessage, stop } = useChatFunctions();
-  const { currentModel } = useModel();
+  const { currentModel, currentModelConfig } = useModel();
+  const toolsDisabled = getToolBehavior(currentModelConfig) === "disable";
   const { hasAvailableModels, isModelCatalogLoading } = useModelCatalog();
   const hasPendingApproval = usePendingToolApproval();
   const markdownHighlighting = useAtomValue(settingAtoms.MARKDOWN_HIGHLIGHTING);
@@ -156,6 +165,7 @@ export const MainChatInput = ({
   });
 
   const [isEmpty, setIsEmpty] = useState(true);
+  const [savingPaths, setSavingPaths] = useState<string[]>([]);
   const [isInterruptSubmitting, setIsInterruptSubmitting] = useState(false);
   const [editorInitialValue] = useState(() => initialValue ?? loadChatInputDraft(draftKey));
   const [isDraggingFiles, setIsDraggingFiles] = useState(false);
@@ -257,6 +267,9 @@ export const MainChatInput = ({
       clearTimeout(draftSaveTimeoutRef.current);
     }
     draftSaveTimeoutRef.current = setTimeout(flushDraftSave, DRAFT_SAVE_DELAY_MS);
+    if (savingPaths.length > 0) {
+      setSavingPaths((paths) => paths.filter((path) => newValue.includes(getAttachmentText(path))));
+    }
     const newIsEmpty = !newValue.trim();
     if (newIsEmpty !== isEmpty) {
       setIsEmpty(newIsEmpty);
@@ -275,7 +288,12 @@ export const MainChatInput = ({
 
     const currentText = editorViewRef.current?.state.doc.toString() || "";
 
-    if (currentText.trim() && (status === "ready" || showInterruptButton) && !hasPendingApproval) {
+    if (
+      currentText.trim() &&
+      savingPaths.length === 0 &&
+      (status === "ready" || showInterruptButton) &&
+      !hasPendingApproval
+    ) {
       isSubmittingRef.current = true;
       logger.verbose("Submitting message", {
         textLength: currentText.length,
@@ -349,38 +367,46 @@ export const MainChatInput = ({
     view.focus();
   }, []);
 
-  const addAttachments = useCallback(
-    async (save: Promise<string>[]) => {
-      const results = await Promise.allSettled(save);
-      const saved = results.flatMap((result) =>
-        result.status === "fulfilled" ? [result.value] : [],
-      );
-      const failed = results.length - saved.length;
-      if (failed > 0) {
-        logger.error(
-          "Failed to attach files",
-          results.flatMap((result) => (result.status === "rejected" ? [result.reason] : [])),
-        );
-        toast.error(failed === 1 ? "Couldn't attach a file." : `Couldn't attach ${failed} files.`);
-      }
-      if (saved.length === 0) return;
-      insertMentions(
-        saved.map((path) => formatChatMention({ kind: "attachment", path })).join(" "),
-      );
-    },
-    [insertMentions],
-  );
+  const removeAttachmentMention = useCallback((path: string) => {
+    const view = editorViewRef.current;
+    const text = getAttachmentText(path);
+    const from = view?.state.doc.toString().indexOf(text) ?? -1;
+    if (!view || from === -1) return;
+    const to = from + text.length;
+    view.dispatch({ changes: { from, to: view.state.sliceDoc(to, to + 1) === " " ? to + 1 : to } });
+  }, []);
 
   const addFiles = useCallback(
     (newFiles: FileList) => {
-      if (newFiles.length === 0) return;
-      logger.verbose("Adding files", {
-        fileCount: newFiles.length,
-        fileNames: Array.from(newFiles).map((file) => file.name),
+      const files = Array.from(newFiles);
+      if (files.length === 0) return;
+      logger.verbose("Adding files", { fileNames: files.map((file) => file.name) });
+      void (async () => {
+        const paths = await Promise.all(files.map(createAttachmentPath));
+        paths.forEach((path) => savingAttachmentPaths.add(path));
+        setSavingPaths((current) => [...current, ...paths]);
+        insertMentions(paths.map(getAttachmentText).join(" "));
+        await Promise.all(
+          files.map(async (file, index) => {
+            const path = paths[index];
+            try {
+              await writeAttachmentFile(path, file);
+            } catch (error) {
+              logger.error("Failed to attach file", error);
+              toast.error(`Couldn't attach ${file.name}.`);
+              removeAttachmentMention(path);
+            } finally {
+              markAttachmentSaved(editorViewRef.current, path);
+              setSavingPaths((current) => current.filter((item) => item !== path));
+            }
+          }),
+        );
+      })().catch((error: unknown) => {
+        logger.error("Failed to attach files", error);
+        toast.error("Couldn't attach files.");
       });
-      void addAttachments(Array.from(newFiles).map(saveAttachmentFile));
     },
-    [addAttachments],
+    [insertMentions, removeAttachmentMention],
   );
 
   const handleAttachClick = async () => {
@@ -391,7 +417,7 @@ export const MainChatInput = ({
     try {
       const paths = await openFileDialog({ multiple: true });
       if (paths && paths.length > 0) {
-        void addAttachments(paths.map((path) => Promise.resolve(path)));
+        insertMentions(paths.map(getAttachmentText).join(" "));
       }
     } catch (error) {
       logger.error("Failed to pick files", error);
@@ -679,7 +705,8 @@ export const MainChatInput = ({
                     isModelCatalogLoading ||
                     !hasAvailableModels ||
                     !currentModel ||
-                    hasPendingApproval
+                    hasPendingApproval ||
+                    toolsDisabled
                   }
                   size="icon"
                   variant="outline"
@@ -689,7 +716,11 @@ export const MainChatInput = ({
                   <IconPaperclip />
                 </Button>
               </AdaptiveTooltipTrigger>
-              <AdaptiveTooltipContent>Attach files to your message</AdaptiveTooltipContent>
+              <AdaptiveTooltipContent>
+                {toolsDisabled
+                  ? "Turn on tools to attach files, so AgentOne can open them"
+                  : "Attach files to your message"}
+              </AdaptiveTooltipContent>
             </AdaptiveTooltip>
             {toolbarStart}
           </div>
@@ -757,6 +788,7 @@ export const MainChatInput = ({
                         disabled ||
                         (status !== "ready" && !showInterruptButton) ||
                         isEmpty ||
+                        savingPaths.length > 0 ||
                         isModelCatalogLoading ||
                         !hasAvailableModels ||
                         !currentModel ||

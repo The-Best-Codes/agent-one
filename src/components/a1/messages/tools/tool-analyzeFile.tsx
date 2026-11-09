@@ -17,20 +17,20 @@ import { cn } from "@/lib/utils";
 
 import { ToolErrorAccordion } from "./tool-error-accordion";
 
-interface ViewAttachmentInput {
+interface AnalyzeFileInput {
   path?: string;
   prompt?: string;
 }
 
-interface ViewAttachmentOutput {
+interface AnalyzeFileOutput {
   name?: string;
   description?: string;
 }
 
-export const MessagePartToolViewAttachment = ({ part }: { part: ToolUIPart }) => {
+export const MessagePartToolAnalyzeFile = ({ part }: { part: ToolUIPart }) => {
   const callId = part.toolCallId;
-  const input = part.input as ViewAttachmentInput | undefined;
-  const output = part.output as ViewAttachmentOutput | undefined;
+  const input = part.input as AnalyzeFileInput | undefined;
+  const output = part.output as AnalyzeFileOutput | undefined;
   const [isOpen, setIsOpen] = useState<boolean | undefined>();
   const [isErrorOpen, setIsErrorOpen] = useState<boolean | undefined>();
 
@@ -48,7 +48,7 @@ export const MessagePartToolViewAttachment = ({ part }: { part: ToolUIPart }) =>
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />
           <span className="text-foreground truncate text-sm font-bold">
-            {name ? `Looking at ${name}...` : "Looking at an attachment..."}
+            {name ? `Analyzing ${name}...` : "Analyzing a file..."}
           </span>
         </div>
       );
@@ -64,7 +64,7 @@ export const MessagePartToolViewAttachment = ({ part }: { part: ToolUIPart }) =>
           <AccordionItem
             value={callId}
             className={cn(
-              "group/view-attachment-accordion border-border w-full rounded-md border-0 transition-[padding] duration-200",
+              "group/analyze-file-accordion border-border w-full rounded-md border-0 transition-[padding] duration-200",
               isOpen && "border border-b! p-2",
             )}
           >
@@ -73,13 +73,13 @@ export const MessagePartToolViewAttachment = ({ part }: { part: ToolUIPart }) =>
                 <div className="relative">
                   <IconPhotoSearch
                     className={cn(
-                      "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/view-attachment-accordion:scale-0 group-hover/view-attachment-accordion:opacity-0",
+                      "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/analyze-file-accordion:scale-0 group-hover/analyze-file-accordion:opacity-0",
                       isOpen && "scale-0 opacity-0",
                     )}
                   />
                   <IconChevronDown
                     className={cn(
-                      "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/view-attachment-accordion:scale-100 group-hover/view-attachment-accordion:opacity-100",
+                      "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/analyze-file-accordion:scale-100 group-hover/analyze-file-accordion:opacity-100",
                       isOpen && "scale-100 opacity-100",
                     )}
                   />
@@ -89,7 +89,7 @@ export const MessagePartToolViewAttachment = ({ part }: { part: ToolUIPart }) =>
               shouldRotateIcon={true}
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
-              <span className="max-w-2xl truncate">{`Looked at ${name}`}</span>
+              <span className="max-w-2xl truncate">{`Analyzed ${name}`}</span>
             </AccordionTrigger>
             <AccordionContent className="flex flex-col gap-2 p-0 pt-2">
               {filePath && (
@@ -116,7 +116,7 @@ export const MessagePartToolViewAttachment = ({ part }: { part: ToolUIPart }) =>
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              Looking at the attachment was cancelled
+              Analyzing the file was cancelled
             </span>
           </div>
         );
@@ -127,7 +127,7 @@ export const MessagePartToolViewAttachment = ({ part }: { part: ToolUIPart }) =>
           errorText={part.errorText}
           isOpen={isErrorOpen}
           onOpenChange={setIsErrorOpen}
-          title={`Couldn't look at ${name}`}
+          title={`Couldn't analyze ${name}`}
         />
       );
 
@@ -135,10 +135,10 @@ export const MessagePartToolViewAttachment = ({ part }: { part: ToolUIPart }) =>
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconPhotoSearch className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{`Looked at ${name}`}</span>
+          <span className="text-foreground text-sm font-bold">{`Analyzed ${name}`}</span>
         </div>
       );
   }
 };
 
-MessagePartToolViewAttachment.displayName = "MessagePartToolViewAttachment";
+MessagePartToolAnalyzeFile.displayName = "MessagePartToolAnalyzeFile";

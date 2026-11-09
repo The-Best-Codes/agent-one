@@ -5,10 +5,10 @@ import { ModelSelector } from "@/components/a1/chat-model-selector";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
-import type { AttachmentKind } from "@/lib/attachments";
+import type { FileKind } from "@/lib/attachments";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 
-const KINDS: { kind: AttachmentKind; label: string }[] = [
+const KINDS: { kind: FileKind; label: string }[] = [
   { kind: "image", label: "Images" },
   { kind: "video", label: "Videos" },
   { kind: "audio", label: "Audio" },
@@ -16,8 +16,8 @@ const KINDS: { kind: AttachmentKind; label: string }[] = [
   { kind: "other", label: "Other files" },
 ];
 
-export function AttachmentModelsControl() {
-  const [value, setValue] = useAtom(settingAtoms.ATTACHMENT_MODELS);
+export function FileAnalysisModelsControl() {
+  const [value, setValue] = useAtom(settingAtoms.FILE_ANALYSIS_MODELS);
   const { getChatModelById } = useModelCatalog();
   const modelIds = value && typeof value === "object" ? value : {};
 
@@ -28,10 +28,10 @@ export function AttachmentModelsControl() {
         const model = modelId ? (getChatModelById(modelId) ?? null) : null;
         return (
           <Field key={kind} orientation="horizontal">
-            <FieldLabel htmlFor={`attachment-model-${kind}`}>{label}</FieldLabel>
+            <FieldLabel htmlFor={`file-analysis-model-${kind}`}>{label}</FieldLabel>
             <div className="flex min-w-0 items-center gap-1">
               <ModelSelector
-                id={`attachment-model-${kind}`}
+                id={`file-analysis-model-${kind}`}
                 value={model}
                 onValueChange={(id) => setValue({ ...modelIds, [kind]: id })}
                 placeholder={modelId ? "Unavailable, using chat model" : "Same as chat model"}

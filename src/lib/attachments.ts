@@ -3,9 +3,9 @@ import { mkdir, writeFile } from "@tauri-apps/plugin-fs";
 import { generateId } from "ai";
 import { atom } from "jotai";
 
-export const ATTACHMENT_KINDS = ["image", "video", "audio", "pdf", "other"] as const;
+export const FILE_KINDS = ["image", "video", "audio", "pdf", "other"] as const;
 
-export type AttachmentKind = (typeof ATTACHMENT_KINDS)[number];
+export type FileKind = (typeof FILE_KINDS)[number];
 
 export const attachmentPreviewAtom = atom<string | null>(null);
 
@@ -37,7 +37,7 @@ export function getMediaType(name: string): string | undefined {
   return dot > 0 ? MEDIA_TYPES[name.slice(dot + 1).toLowerCase()] : undefined;
 }
 
-export function getAttachmentKind(mediaType: string | undefined): AttachmentKind {
+export function getFileKind(mediaType: string | undefined): FileKind {
   if (!mediaType) return "other";
   if (mediaType === "application/pdf") return "pdf";
   const [type] = mediaType.split("/");
@@ -48,11 +48,13 @@ export function isTextContent(bytes: Uint8Array): boolean {
   return !bytes.subarray(0, 8000).includes(0);
 }
 
-export async function saveAttachmentFile(file: File): Promise<string> {
+export async function createAttachmentPath(file: File): Promise<string> {
   const name = file.name.replace(/[<>:"/\\|?*\p{Cc}]/gu, "_").trim() || "attachment";
   const dir = await join(await tempDir(), "agent-one", "attachments", generateId());
   await mkdir(dir, { recursive: true });
-  const path = await join(dir, name);
+  return join(dir, name);
+}
+
+export async function writeAttachmentFile(path: string, file: File) {
   await writeFile(path, new Uint8Array(await file.arrayBuffer()));
-  return path;
 }
