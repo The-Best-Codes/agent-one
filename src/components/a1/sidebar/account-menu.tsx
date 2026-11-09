@@ -14,6 +14,7 @@ import BoringAvatar from "boring-avatars";
 import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 
+import { ExternalLink } from "@/components/a1/external-link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -106,21 +107,19 @@ export function AccountMenu({ activeChatId }: { activeChatId?: string }) {
               <DropdownMenuGroup>
                 {customerState && (
                   <DropdownMenuItem asChild>
-                    <a
+                    <ExternalLink
                       href={activeSubscription ? AGENT_ONE_BILLING_URL : AGENT_ONE_UPGRADE_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
                     >
                       {activeSubscription ? <IconCreditCard /> : <IconRocket />}
                       {activeSubscription ? "Manage Billing" : "Upgrade Your Plan"}
-                    </a>
+                    </ExternalLink>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem asChild>
-                  <a href={AGENT_ONE_DASHBOARD_URL} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink href={AGENT_ONE_DASHBOARD_URL}>
                     <IconExternalLink />
                     Account Dashboard
-                  </a>
+                  </ExternalLink>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </>

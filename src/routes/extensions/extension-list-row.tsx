@@ -8,6 +8,7 @@ import {
 import type { ReactNode } from "react";
 import { cloneElement, isValidElement, memo, useState } from "react";
 
+import { ExternalLink } from "@/components/a1/external-link";
 import {
   Accordion,
   AccordionContent,
@@ -150,15 +151,13 @@ function ExtensionListRowComponent({
 
           <div className="flex flex-col">
             {websiteUrl ? (
-              <a
+              <ExternalLink
                 href={websiteUrl}
-                target="_blank"
-                rel="noreferrer"
                 className="inline-flex max-w-full min-w-0 cursor-pointer items-center gap-1 self-start text-xs text-blue-600 hover:underline dark:text-blue-400"
               >
                 <span className="truncate">{websiteUrl}</span>
                 <IconExternalLink className="size-3.5 shrink-0" />
-              </a>
+              </ExternalLink>
             ) : null}
             <p className="text-muted-foreground line-clamp-2 text-xs">{description}</p>
           </div>

@@ -2,6 +2,7 @@ import { IconX } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { type ReactNode, useCallback, useEffect, useId, useLayoutEffect, useState } from "react";
 
+import { ExternalLink } from "@/components/a1/external-link";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -76,10 +77,7 @@ const TOUR_STEPS: TourStep[] = [
       'Ask it to do something on a schedule, like "Summarize the news every morning."',
       <>
         Have a question? Check out the{" "}
-        <a href={AGENT_ONE_DOCS_URL} target="_blank" rel="noreferrer">
-          documentation
-        </a>
-        .
+        <ExternalLink href={AGENT_ONE_DOCS_URL}>documentation</ExternalLink>.
       </>,
       "You can take this tour again anytime from Settings under Help & Updates.",
     ],

@@ -1,6 +1,7 @@
 import { IconBook, IconExternalLink, IconMap } from "@tabler/icons-react";
 import { useState } from "react";
 
+import { ExternalLink } from "@/components/a1/external-link";
 import { Button } from "@/components/ui/button";
 import { AGENT_ONE_DOCS_URL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -44,13 +45,13 @@ export function WelcomeStep({ name, onComplete, onStartTour }: WelcomeStepProps)
           Take the Tour
         </Button>
         <Button asChild variant="outline" size="lg" className="h-14 justify-between px-6 text-lg">
-          <a href={AGENT_ONE_DOCS_URL} target="_blank" rel="noreferrer">
+          <ExternalLink href={AGENT_ONE_DOCS_URL}>
             <div className="flex items-center gap-2">
               <IconBook data-icon="inline-start" />
               Browse Documentation
             </div>
             <IconExternalLink className="size-5" />
-          </a>
+          </ExternalLink>
         </Button>
         <Button variant="link" onClick={() => exitThen(onComplete)} disabled={isExiting}>
           Skip and launch AgentOne

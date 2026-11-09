@@ -16,6 +16,7 @@ import { toast } from "sonner";
 
 import packageJson from "@/../package.json";
 import { getReleaseNotes, getReleaseNotesVersions } from "@/assets/release-notes";
+import { ExternalLink } from "@/components/a1/external-link";
 import { MemoizedMarkdown } from "@/components/a1/markdown/memoized-markdown";
 import { SettingsLink } from "@/components/a1/settings-link";
 import {
@@ -402,30 +403,27 @@ export function HelpLinks() {
         Take the tour
         <IconMap className="size-4" />
       </Link>
-      <a
-        target="_blank"
-        href="https://github.com/AgentOne-Dev/agent-one-public/issues/new"
+      <ExternalLink
+        href="https://github.com/The-Best-Codes/agent-one/issues/new"
         className="flex w-fit items-center gap-1 underline"
       >
         Report a bug
         <IconExternalLink className="size-4" />
-      </a>
-      <a
-        target="_blank"
+      </ExternalLink>
+      <ExternalLink
         href="https://www.agent-one.dev/discord"
         className="flex w-fit items-center gap-1 underline"
       >
         Get help on Discord
         <IconExternalLink className="size-4" />
-      </a>
-      <a
-        target="_blank"
+      </ExternalLink>
+      <ExternalLink
         href="https://docs.agent-one.dev/docs"
         className="flex w-fit items-center gap-1 underline"
       >
         Read the docs
         <IconExternalLink className="size-4" />
-      </a>
+      </ExternalLink>
     </div>
   );
 }

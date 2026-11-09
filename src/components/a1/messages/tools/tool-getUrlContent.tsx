@@ -9,6 +9,7 @@ import {
 import type { ToolUIPart } from "ai";
 import { memo, useState } from "react";
 
+import { ExternalLink } from "@/components/a1/external-link";
 import {
   AdaptiveTooltip,
   AdaptiveTooltipContent,
@@ -79,14 +80,12 @@ const UrlPendingDisplay = memo(({ url }: { url: string }) => {
       <Spinner className="text-foreground size-4 shrink-0" />
       <span className="text-foreground max-w-2xl truncate text-sm font-bold">
         {"Browsing"}{" "}
-        <a
+        <ExternalLink
           href={url}
-          target="_blank"
-          rel="noopener noreferrer"
           className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
         >
           {formatUrl(url)}
-        </a>
+        </ExternalLink>
         ...
       </span>
     </div>
@@ -101,14 +100,12 @@ const UrlCancelledDisplay = memo(({ url }: { url: string }) => {
       <IconCircleX className="text-muted-foreground size-4 shrink-0" />
       <span className="text-muted-foreground max-w-2xl truncate text-sm font-bold">
         {"Browsing"}{" "}
-        <a
+        <ExternalLink
           href={url}
-          target="_blank"
-          rel="noopener noreferrer"
           className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
         >
           {formatUrl(url)}
-        </a>{" "}
+        </ExternalLink>{" "}
         cancelled
       </span>
     </div>
@@ -125,14 +122,12 @@ const UrlResultDisplay = memo(
           <IconCircleX className="text-destructive size-4 shrink-0" />
           <span className="text-destructive max-w-2xl truncate text-sm font-bold">
             {"Failed to browse"}{" "}
-            <a
+            <ExternalLink
               href={result.url}
-              target="_blank"
-              rel="noopener noreferrer"
               className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
             >
               {formatUrl(result.url)}
-            </a>
+            </ExternalLink>
           </span>
         </div>
       );
@@ -145,14 +140,12 @@ const UrlResultDisplay = memo(
         <IconWorld className="text-foreground size-4 shrink-0" />
         <span className="text-foreground max-w-2xl truncate text-sm font-bold">
           {"Browsed"}{" "}
-          <a
+          <ExternalLink
             href={result.url}
-            target="_blank"
-            rel="noopener noreferrer"
             className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
           >
             {formatUrl(result.url)}
-          </a>
+          </ExternalLink>
         </span>
         <div className="flex items-center gap-1">
           <>
@@ -215,14 +208,12 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                 <>
                   {" "}
                   {input?.urls?.[0] ? (
-                    <a
+                    <ExternalLink
                       href={input.urls[0]}
-                      target="_blank"
-                      rel="noopener noreferrer"
                       className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
                     >
                       {formatUrl(input.urls[0])}
-                    </a>
+                    </ExternalLink>
                   ) : (
                     "a website"
                   )}
@@ -262,14 +253,12 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
               <>
                 {"Browsing"}{" "}
                 {input?.urls?.[0] ? (
-                  <a
+                  <ExternalLink
                     href={input.urls[0]}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
                   >
                     {formatUrl(input.urls[0])}
-                  </a>
+                  </ExternalLink>
                 ) : (
                   "a website"
                 )}{" "}
@@ -303,14 +292,12 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                 <>
                   {"Browsing"}{" "}
                   {input?.urls?.[0] ? (
-                    <a
+                    <ExternalLink
                       href={input.urls[0]}
-                      target="_blank"
-                      rel="noopener noreferrer"
                       className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
                     >
                       {formatUrl(input.urls[0])}
-                    </a>
+                    </ExternalLink>
                   ) : (
                     "a website"
                   )}{" "}
@@ -334,14 +321,12 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
               <>
                 {"Browsing"}{" "}
                 {input?.urls?.[0] ? (
-                  <a
+                  <ExternalLink
                     href={input.urls[0]}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
                   >
                     {formatUrl(input.urls[0])}
-                  </a>
+                  </ExternalLink>
                 ) : (
                   "a website"
                 )}
@@ -369,14 +354,12 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
               <span className="text-foreground text-sm font-bold">
                 {"Browsing"}{" "}
                 {results[0] ? (
-                  <a
+                  <ExternalLink
                     href={results[0].url}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
                   >
                     {formatUrl(results[0].url)}
-                  </a>
+                  </ExternalLink>
                 ) : (
                   "a website"
                 )}
@@ -470,14 +453,12 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
               <IconCircleX className="text-muted-foreground size-4 shrink-0" />
               <span className="text-muted-foreground text-sm font-bold">
                 {"Browsing"}{" "}
-                <a
+                <ExternalLink
                   href={singleUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
                 >
                   {formatUrl(singleUrl)}
-                </a>{" "}
+                </ExternalLink>{" "}
                 cancelled
               </span>
             </div>
