@@ -64,3 +64,28 @@ jobs:
               gh release upload "$TAG" $_.FullName --clobber
             }
           }
+
+      - name: Setup Microsoft Store CLI
+        uses: microsoft/microsoft-store-apppublisher@cc9910a8d59f2eb55cbb83df0a3800cf3b5300e0 # v1.4
+        with:
+          version: v0.4.4
+
+      - name: Submit to Microsoft Store
+        env:
+          PARTNER_CENTER_TENANT_ID: ${{ secrets.PARTNER_CENTER_TENANT_ID }}
+          PARTNER_CENTER_SELLER_ID: ${{ secrets.PARTNER_CENTER_SELLER_ID }}
+          PARTNER_CENTER_CLIENT_ID: ${{ secrets.PARTNER_CENTER_CLIENT_ID }}
+          PARTNER_CENTER_CLIENT_SECRET: ${{ secrets.PARTNER_CENTER_CLIENT_SECRET }}
+          MSSTORE_PRODUCT_ID: ${{ vars.MSSTORE_PRODUCT_ID }}
+        shell: pwsh
+        run: |
+          if (-not $env:PARTNER_CENTER_CLIENT_SECRET -or -not $env:MSSTORE_PRODUCT_ID) {
+            Write-Host "Store credentials not configured, skipping submission"
+            exit 0
+          }
+          $MSIX = Get-ChildItem -Path "src-tauri/target/msix" -Filter *_x64.msix -Recurse | Select-Object -First 1
+          if (-not $MSIX) { throw "No x64 .msix found" }
+          msstore reconfigure --tenantId $env:PARTNER_CENTER_TENANT_ID --sellerId $env:PARTNER_CENTER_SELLER_ID --clientId $env:PARTNER_CENTER_CLIENT_ID --clientSecret $env:PARTNER_CENTER_CLIENT_SECRET
+          if ($LASTEXITCODE -ne 0) { throw "msstore reconfigure failed" }
+          msstore publish $MSIX.FullName --appId $env:MSSTORE_PRODUCT_ID
+          if ($LASTEXITCODE -ne 0) { throw "msstore publish failed" }
