@@ -85,7 +85,7 @@ export NDK_HOME="$ANDROID_HOME/ndk/$(ls -1 $ANDROID_HOME/ndk)"
 
 When it says `export NDK_HOME="$ANDROID_HOME/ndk/$(ls -1 $ANDROID_HOME/ndk)"`, run that as-is, then run it with `ANDROID_NDK_HOME` in place of `NDK_HOME`.
 
-Before running `bun run tauri android dev`, run `export BINDGEN_EXTRA_CLANG_ARGS="-target x86_64-linux-android21"` to set the target SDK version. (While we target 21 as the minimum SDK version currently, this may change in the future. If so, this should be updated.)
+Before running `bun run tauri android dev`, run `export BINDGEN_EXTRA_CLANG_ARGS="-target x86_64-linux-android24"` to set the target SDK version. (While we target 24 as the minimum SDK version currently, this may change in the future. If so, this should be updated.)
 
 For my current Arch Linux setup, this amounts to:
 
@@ -94,7 +94,7 @@ export JAVA_HOME=/opt/android-studio/jbr
 export ANDROID_HOME="$HOME/Android/Sdk"
 export NDK_HOME="$ANDROID_HOME/ndk/$(ls -1 $ANDROID_HOME/ndk)"
 export ANDROID_NDK_HOME="$NDK_HOME"
-export BINDGEN_EXTRA_CLANG_ARGS="-target x86_64-linux-android21"
+export BINDGEN_EXTRA_CLANG_ARGS="-target x86_64-linux-android24"
 ```
 
 ### Signing Updates

@@ -11,6 +11,7 @@ export interface RunCommandOptions {
   onStdout?: (data: string) => void;
   onStderr?: (data: string) => void;
   signal?: AbortSignal;
+  windowsShell?: "cmd" | "powershell";
 }
 
 export interface RunCommandResult {
@@ -28,10 +29,81 @@ export interface RunCommandProcess {
   result: Promise<RunCommandResult>;
 }
 
-function buildShellArgs(command: string): { program: string; args: string[] } {
+const CODE_PAGE_ENCODINGS: Record<string, string> = {
+  "866": "ibm866",
+  "932": "shift_jis",
+  "936": "gbk",
+  "949": "euc-kr",
+  "950": "big5",
+  "65001": "utf-8",
+};
+
+let outputEncodingPromise: Promise<string> | null = null;
+
+async function detectOutputEncoding(): Promise<string> {
+  if (platform() !== "windows") return "utf-8";
+
+  try {
+    const output = await Command.create("cmd", ["/C", "chcp"], { encoding: "raw" }).execute();
+    const codePage = new TextDecoder().decode(new Uint8Array(output.stdout)).match(/\d+/)?.[0];
+    if (!codePage) return "utf-8";
+
+    const encoding = CODE_PAGE_ENCODINGS[codePage] ?? `windows-${codePage}`;
+    new TextDecoder(encoding);
+    return encoding;
+  } catch (err) {
+    logger.verbose("Failed to detect console code page:", err);
+    return "utf-8";
+  }
+}
+
+function getOutputEncoding(): Promise<string> {
+  outputEncodingPromise ??= detectOutputEncoding();
+  return outputEncodingPromise;
+}
+
+function createOutputDecoder(fallbackEncoding: string) {
+  let utf8 = new TextDecoder("utf-8", { fatal: true });
+  const fallback = new TextDecoder(fallbackEncoding);
+
+  return (chunk?: Uint8Array): string => {
+    try {
+      return utf8.decode(chunk, { stream: chunk !== undefined });
+    } catch {
+      utf8 = new TextDecoder("utf-8", { fatal: true });
+      return chunk ? fallback.decode(chunk) : "";
+    }
+  };
+}
+
+const COMMAND_ENV = "AGENT_ONE_COMMAND";
+
+function buildShellArgs(
+  command: string,
+  windowsShell: RunCommandOptions["windowsShell"] = "cmd",
+): { program: string; args: string[]; env?: Record<string, string> } {
   const isWindows = platform() === "windows";
   if (isWindows) {
-    return { program: "cmd", args: ["/C", command] };
+    return windowsShell === "powershell"
+      ? {
+          program: "powershell",
+          args: [
+            "-NoLogo",
+            "-NoProfile",
+            "-NonInteractive",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-Command",
+            `$ProgressPreference = 'SilentlyContinue'; [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; Invoke-Expression $env:${COMMAND_ENV}`,
+          ],
+          env: {
+            [COMMAND_ENV]: `${command}\nif (-not $?) { if ($LASTEXITCODE) { exit $LASTEXITCODE } else { exit 1 } }`,
+          },
+        }
+      : command.includes('"')
+        ? // Arguments containing quotes get backslash-escaped, which cmd doesn't understand
+          { program: "cmd", args: ["/C", `%${COMMAND_ENV}%`], env: { [COMMAND_ENV]: command } }
+        : { program: "cmd", args: ["/C", command] };
   }
 
   return platform() === "macos"
@@ -40,12 +112,15 @@ function buildShellArgs(command: string): { program: string; args: string[] } {
 }
 
 export function spawnCommand(command: string, options: RunCommandOptions = {}): RunCommandProcess {
-  const { program, args } = buildShellArgs(command);
+  const { program, args, env: shellEnv } = buildShellArgs(command, options.windowsShell);
+  const env = { ...options.env, ...shellEnv };
   const spawnOptions: { env?: Record<string, string>; cwd?: string } = {};
-  if (options.env && Object.keys(options.env).length > 0) spawnOptions.env = options.env;
+  if (Object.keys(env).length > 0) spawnOptions.env = env;
   if (options.cwd) spawnOptions.cwd = options.cwd;
 
-  const cmd = Command.create(program, args, spawnOptions);
+  const cmd = Command.create(program, args, { ...spawnOptions, encoding: "raw" });
+  let decodeStdout = createOutputDecoder("utf-8");
+  let decodeStderr = createOutputDecoder("utf-8");
 
   let child: Child | null = null;
   let killed = false;
@@ -57,15 +132,25 @@ export function spawnCommand(command: string, options: RunCommandOptions = {}): 
     rejectResult = reject;
   });
 
-  cmd.stdout.on("data", (data: string) => {
-    options.onStdout?.(data);
+  const emitStdout = (text: string) => {
+    if (text) options.onStdout?.(text);
+  };
+
+  const emitStderr = (text: string) => {
+    if (text) options.onStderr?.(text);
+  };
+
+  cmd.stdout.on("data", (data) => {
+    emitStdout(decodeStdout(new Uint8Array(data)));
   });
 
-  cmd.stderr.on("data", (data: string) => {
-    options.onStderr?.(data);
+  cmd.stderr.on("data", (data) => {
+    emitStderr(decodeStderr(new Uint8Array(data)));
   });
 
   cmd.on("close", (data: { code: number | null; signal: number | null }) => {
+    emitStdout(decodeStdout());
+    emitStderr(decodeStderr());
     resolveResult({ exitCode: data.code, signal: data.signal });
   });
 
@@ -106,12 +191,18 @@ export function spawnCommand(command: string, options: RunCommandOptions = {}): 
 
   options.signal?.addEventListener("abort", onAbort, { once: true });
 
-  const spawnPromise = cmd.spawn().then((c) => {
-    child = c;
-    if (options.signal?.aborted) {
-      void kill();
-    }
-  });
+  const spawnPromise = getOutputEncoding()
+    .then((encoding) => {
+      decodeStdout = createOutputDecoder(encoding);
+      decodeStderr = createOutputDecoder(encoding);
+      return cmd.spawn();
+    })
+    .then((c) => {
+      child = c;
+      if (options.signal?.aborted) {
+        void kill();
+      }
+    });
 
   spawnPromise.catch((err: unknown) => {
     rejectResult(err);

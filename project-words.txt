@@ -341,3 +341,4 @@ uncompacted
 defaultmaxchars
 unminimize
 srgb
+lastexitcode

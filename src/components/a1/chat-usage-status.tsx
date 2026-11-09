@@ -132,7 +132,7 @@ export const ChatUsageStatus = () => {
                 <>
                   <AdaptiveTooltip>
                     <AdaptiveTooltipTrigger
-                      className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-help rounded outline-none focus-visible:ring-[3px]"
+                      className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-help rounded-sm outline-none focus-visible:ring-[3px]"
                       tabIndex={isCollapsed ? -1 : 0}
                       asChild
                     >
@@ -164,7 +164,7 @@ export const ChatUsageStatus = () => {
                   {!isAgentOneModel && (
                     <AdaptiveTooltip>
                       <AdaptiveTooltipTrigger
-                        className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-help rounded outline-none focus-visible:ring-[3px]"
+                        className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-help rounded-sm outline-none focus-visible:ring-[3px]"
                         tabIndex={isCollapsed ? -1 : 0}
                         asChild
                       >

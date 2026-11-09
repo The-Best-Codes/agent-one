@@ -15,6 +15,9 @@ import {
 import { z } from "zod";
 
 import { getReasoningEffort, type ModelConfig } from "@/hooks/ai/use-model-catalog";
+import { getAgentOneRequestHeaders } from "@/lib/ai/providers/agent-one-headers";
+import { toolApproval } from "@/lib/ai/tools/approval";
+import type { AutoModeToolApproval } from "@/lib/ai/tools/auto-mode";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -33,11 +36,14 @@ export interface SubAgentInput {
 }
 
 export interface SubAgentExecutionContext {
+  chatId?: string;
+  parentTurnId?: string;
   model: LanguageModel;
   modelConfig: ModelConfig;
   systemPrompt: string;
   extractReasoningEnabled: boolean;
   getTools: () => Promise<ToolSet>;
+  createToolApproval?: (abortSignal?: AbortSignal) => AutoModeToolApproval;
 }
 
 export interface SubAgentLiveState {
@@ -115,7 +121,10 @@ function setLiveState(toolCallId: string, state: SubAgentLiveState) {
     if (throttle?.timeoutId) {
       clearTimeout(throttle.timeoutId);
     }
-    subAgentEmitThrottleMap.set(toolCallId, { lastEmitAt: now, timeoutId: null });
+    subAgentEmitThrottleMap.set(toolCallId, {
+      lastEmitAt: now,
+      timeoutId: null,
+    });
     emitLiveState(toolCallId);
     return;
   }
@@ -312,6 +321,7 @@ async function* streamSubAgentRun({
     { id: generateId(), role: "user", parts: [{ type: "text", text: task }] },
   ];
   let finalMessage: UIMessage | undefined;
+  const subAgentToolApproval = context.createToolApproval?.(abortSignal) ?? toolApproval;
 
   const wrappedModel =
     context.extractReasoningEnabled && typeof context.model !== "string"
@@ -342,7 +352,13 @@ async function* streamSubAgentRun({
       reasoning: getReasoningEffort(context.modelConfig),
       messages: promptMessages,
       abortSignal,
+      headers: getAgentOneRequestHeaders(wrappedModel, {
+        type: "sub-agent",
+        chatId: context.chatId,
+        parentTurnId: context.parentTurnId,
+      }),
       tools,
+      toolApproval: subAgentToolApproval,
       toolChoice: "auto",
       stopWhen: isStepCount(getSubAgentMaxSteps(maxSteps, context.modelConfig.maxSteps)),
       instructions: buildSubAgentInstructions(context.systemPrompt),
@@ -449,14 +465,10 @@ async function* streamSubAgentRun({
   return finalMessage;
 }
 
-export const createSubAgentTool = (
-  config: SubAgentToolConfig,
-  context: SubAgentExecutionContext,
-) => {
+export const createSubAgentTool = (context: SubAgentExecutionContext) => {
   return {
     description:
       "Spawn a subagent to work on a focused task. The subagent starts fresh and cannot see this conversation, so include all the context it needs in the task. It can use the same tools as you, except it cannot spawn more subagents.",
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       task: z
         .string()

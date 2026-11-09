@@ -126,10 +126,10 @@ export function McpServerStatus({
 
   return (
     <div className="flex items-center justify-between gap-3">
-      <div className="flex items-center gap-2">
-        <div className="flex flex-col gap-0.5">
+      <div className="flex min-w-0 items-center gap-2">
+        <div className="flex min-w-0 flex-col gap-0.5">
           <span className="text-foreground text-sm">{label}</span>
-          <span className="text-muted-foreground line-clamp-2 text-xs">
+          <span className="text-muted-foreground line-clamp-2 text-xs wrap-anywhere">
             {getStatusDescription(state, disabled, authState)}
           </span>
         </div>

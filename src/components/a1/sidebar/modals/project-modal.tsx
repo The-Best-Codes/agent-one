@@ -1,0 +1,295 @@
+import { IconFolder, IconX } from "@tabler/icons-react";
+import { open } from "@tauri-apps/plugin-dialog";
+import { exists } from "@tauri-apps/plugin-fs";
+import { useAtomValue } from "jotai";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
+
+import { PathListEditor } from "@/components/a1/path-list-editor";
+import { MemoryEditor } from "@/components/settings-components/account";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Field, FieldContent, FieldDescription, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { globalAgentsFilesAtom, globalSkillsFoldersAtom } from "@/lib/jotai/unsynced-local-atoms";
+import { getLogger } from "@/lib/logger";
+import { sanitizeMemoryEntries } from "@/lib/memory";
+import {
+  createProject,
+  getDefaultProjectAgentsFiles,
+  type Project,
+  updateProject,
+} from "@/lib/projects";
+import { getDefaultProjectSkillsFolders } from "@/lib/skills";
+import { cn } from "@/lib/utils";
+
+const logger = getLogger(import.meta.url);
+
+interface ProjectModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  project?: Project;
+}
+
+const ProjectForm = ({ project, onClose }: { project?: Project; onClose: () => void }) => {
+  const navigate = useNavigate();
+  const [name, setName] = useState(project?.name ?? "");
+  const [nameFromFolder, setNameFromFolder] = useState(false);
+  const [instructions, setInstructions] = useState(project?.instructions ?? "");
+  const [folder, setFolder] = useState(project?.folder);
+  const [savedFolderMissing, setSavedFolderMissing] = useState(false);
+  const folderMissing = savedFolderMissing && folder === project?.folder;
+
+  useEffect(() => {
+    const savedFolder = project?.folder;
+    if (!savedFolder) return;
+    let cancelled = false;
+    void exists(savedFolder)
+      .then((found) => {
+        if (!cancelled) setSavedFolderMissing(!found);
+      })
+      .catch((error) => logger.warn("Failed to check project folder", error));
+    return () => {
+      cancelled = true;
+    };
+  }, [project?.folder]);
+  const [separateMemory, setSeparateMemory] = useState(project?.separateMemory ?? false);
+  const globalAgentsFiles = useAtomValue(globalAgentsFilesAtom);
+  const [customAgentsFiles, setCustomAgentsFiles] = useState(project?.agentsFiles);
+  const agentsFiles = customAgentsFiles ?? getDefaultProjectAgentsFiles(globalAgentsFiles, folder);
+  const globalSkillsFolders = useAtomValue(globalSkillsFoldersAtom);
+  const [customSkillsFolders, setCustomSkillsFolders] = useState(project?.skillsFolders);
+  const skillsFolders =
+    customSkillsFolders ?? getDefaultProjectSkillsFolders(globalSkillsFolders, folder);
+  const [initialMemory] = useState(project?.memory ?? []);
+  const [memory, setMemory] = useState(initialMemory);
+
+  const chooseFolder = async () => {
+    try {
+      const selected = await open({ directory: true, defaultPath: folder });
+      if (typeof selected !== "string") return;
+      setFolder(selected);
+      const folderName = selected.split(/[\\/]/).filter(Boolean).at(-1);
+      if (folderName && (!name.trim() || nameFromFolder)) {
+        setName(folderName.slice(0, 100));
+        setNameFromFolder(true);
+      }
+    } catch (error) {
+      logger.error("Failed to choose project folder", error);
+    }
+  };
+
+  const handleSave = () => {
+    const trimmedName = name.trim();
+    if (!trimmedName) return;
+    const details = {
+      name: trimmedName,
+      instructions: instructions.trim(),
+      folder,
+      separateMemory,
+      agentsFiles: customAgentsFiles,
+      skillsFolders: customSkillsFolders,
+    };
+    if (project) {
+      updateProject(project.id, {
+        ...details,
+        ...(memory !== initialMemory && { memory: sanitizeMemoryEntries(memory) }),
+      });
+    } else {
+      const created = createProject(details);
+      void navigate(`/chat?project=${created.id}`);
+    }
+    onClose();
+  };
+
+  return (
+    <>
+      <div className="-mx-4 flex min-h-0 min-w-0 flex-col gap-5 overflow-y-auto px-4 py-1">
+        <Field>
+          <FieldLabel htmlFor="project-name">Name</FieldLabel>
+          <Input
+            id="project-name"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+              setNameFromFolder(false);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.nativeEvent.isComposing) handleSave();
+            }}
+            placeholder="e.g. Kitchen remodel"
+            maxLength={100}
+            autoFocus
+          />
+        </Field>
+        <Field>
+          <FieldLabel>
+            Folder <span className="text-muted-foreground font-normal">(optional)</span>
+          </FieldLabel>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="min-w-0 flex-1 justify-start"
+              onClick={() => void chooseFolder()}
+            >
+              <IconFolder data-icon="inline-start" />
+              <span className="truncate" title={folder}>
+                {folder ?? "Choose a folder"}
+              </span>
+            </Button>
+            {folder && (
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => setFolder(undefined)}
+                aria-label="Remove folder"
+              >
+                <IconX />
+              </Button>
+            )}
+          </div>
+          <FieldDescription className={cn(folderMissing && "text-destructive")}>
+            {folderMissing
+              ? "This folder can't be found. It may have been moved or deleted, so choose it again."
+              : "Chats in this project work inside this folder."}
+          </FieldDescription>
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="project-instructions">Instructions</FieldLabel>
+          <Textarea
+            id="project-instructions"
+            value={instructions}
+            onChange={(e) => setInstructions(e.target.value)}
+            placeholder="What should AgentOne know or do in this project?"
+            className="max-h-48 min-h-24"
+          />
+        </Field>
+        <Accordion type="single" collapsible className="rounded-md border px-3">
+          <AccordionItem value="advanced" className="border-b-0">
+            <AccordionTrigger className="py-3 text-sm">
+              Memory, instruction files, and skills
+            </AccordionTrigger>
+            <AccordionContent className="h-auto pb-3">
+              <div className="flex flex-col gap-5">
+                <Field
+                  orientation="horizontal"
+                  className="has-[>[data-slot=field-content]]:items-center"
+                >
+                  <FieldContent>
+                    <FieldLabel htmlFor="project-separate-memory">Separate memory</FieldLabel>
+                    <FieldDescription>
+                      Keep this project's memory and chats apart from your other chats.
+                    </FieldDescription>
+                  </FieldContent>
+                  <Switch
+                    id="project-separate-memory"
+                    checked={separateMemory}
+                    onCheckedChange={setSeparateMemory}
+                  />
+                </Field>
+                {project && separateMemory && (
+                  <Field>
+                    <FieldLabel>Project memory</FieldLabel>
+                    <MemoryEditor memory={memory} setMemory={setMemory} />
+                  </Field>
+                )}
+                <Field>
+                  <FieldLabel>Instruction files</FieldLabel>
+                  <FieldDescription>
+                    {customAgentsFiles
+                      ? "This project uses its own list."
+                      : "Same as your instruction files in settings, plus AGENTS.md in the project folder."}
+                  </FieldDescription>
+                  <PathListEditor
+                    files={agentsFiles}
+                    setFiles={(update) => setCustomAgentsFiles(update(agentsFiles))}
+                    folder={folder}
+                    action={
+                      customAgentsFiles && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setCustomAgentsFiles(undefined)}
+                        >
+                          Reset
+                        </Button>
+                      )
+                    }
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel>Skills</FieldLabel>
+                  <FieldDescription>
+                    {customSkillsFolders
+                      ? "This project uses its own list."
+                      : "Same as your skill folders in settings, plus .agents/skills and .claude/skills in the project folder."}
+                  </FieldDescription>
+                  <PathListEditor
+                    directory
+                    files={skillsFolders}
+                    setFiles={(update) => setCustomSkillsFolders(update(skillsFolders))}
+                    folder={folder}
+                    action={
+                      customSkillsFolders && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setCustomSkillsFolders(undefined)}
+                        >
+                          Reset
+                        </Button>
+                      )
+                    }
+                  />
+                </Field>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
+      <DialogFooter>
+        <Button variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button onClick={handleSave} disabled={!name.trim()}>
+          {project ? "Save" : "Create Project"}
+        </Button>
+      </DialogFooter>
+    </>
+  );
+};
+
+export const ProjectModal = ({ isOpen, onClose, project }: ProjectModalProps) => {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="flex max-h-[90svh] flex-col sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{project ? "Edit Project" : "New Project"}</DialogTitle>
+          <DialogDescription>
+            Group related chats and give them shared instructions.
+          </DialogDescription>
+        </DialogHeader>
+        {isOpen && <ProjectForm project={project} onClose={onClose} />}
+      </DialogContent>
+    </Dialog>
+  );
+};

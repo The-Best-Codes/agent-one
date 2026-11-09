@@ -69,7 +69,7 @@ const COLOR_PICKER_OPTIONS = Object.entries(SETTINGS.COLOR_THEME.options).map(([
 }));
 
 const ROUNDNESS_CLASSES: Record<SettingValue<"ROUNDNESS">, string> = {
-  none: "rounded-[0px]",
+  none: "rounded-none",
   sm: "rounded-[0.3125rem]",
   md: "rounded-[0.625rem]",
   lg: "rounded-[1.25rem]",

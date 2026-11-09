@@ -36,7 +36,6 @@ export interface GetUrlContentOutput {
 export const createGetUrlContentTool = (config: GetUrlContentToolConfig) =>
   tool({
     description: `Fetch and extract content from URLs (${config.minUrls} to ${config.maxUrls} at once). Can return content as markdown or raw text.`,
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       urls: z
         .array(z.string())

@@ -6,7 +6,6 @@ import type { WaitToolConfig } from "@/lib/settings/types";
 export const createWaitTool = (config: WaitToolConfig) =>
   tool({
     description: `Wait for a specified number of milliseconds (min ${config.minMs}ms, max ${config.maxMs}ms)`,
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       milliseconds: z
         .number()

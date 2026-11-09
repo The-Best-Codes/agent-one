@@ -206,7 +206,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
             <AccordionContent className="p-0 pt-2">
               {output.content ? (
                 <div className="flex w-full flex-col gap-1">
-                  <div className="border-border w-full overflow-hidden rounded border">
+                  <div className="border-border w-full overflow-hidden rounded-sm border">
                     <ContentPreview content={output.content} filePath={filePath} />
                   </div>
                   {output.truncated && (

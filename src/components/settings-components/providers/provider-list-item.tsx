@@ -136,7 +136,7 @@ const ProviderEditorItem = memo(function ProviderEditorItem({
             {showMissingKeyWarning && (
               <AdaptiveTooltip>
                 <AdaptiveTooltipTrigger asChild>
-                  <span className="inline-flex">
+                  <span className="-ml-1 inline-flex">
                     <IconAlertTriangle className="size-4" />
                   </span>
                 </AdaptiveTooltipTrigger>

@@ -49,7 +49,7 @@ export function ReleaseNotesDialog() {
 
   return (
     <Dialog open={true} onOpenChange={(isOpen) => !isOpen && handleClose()}>
-      <DialogContent className="max-w-xl" showCloseButton={false}>
+      <DialogContent className="flex flex-col overflow-hidden sm:max-w-xl" showCloseButton={false}>
         <DialogHeader>
           <div className="flex items-center gap-2">
             <IconRocket className="text-primary size-5" />
@@ -57,7 +57,7 @@ export function ReleaseNotesDialog() {
           </div>
           <DialogDescription>A quick look at what changed in this release.</DialogDescription>
         </DialogHeader>
-        <div className="max-h-[70vh] overflow-y-auto">
+        <div className="max-h-[70vh] min-h-0 flex-1 overflow-y-auto">
           <div className="prose prose-sm prose-neutral dark:prose-invert prose-quoteless px-1">
             <MemoizedMarkdown
               allowInternalLinks

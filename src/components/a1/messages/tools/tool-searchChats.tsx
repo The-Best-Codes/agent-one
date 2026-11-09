@@ -57,7 +57,10 @@ export const MessagePartToolSearchChats = ({ part }: { part: ToolUIPart }) => {
   switch (part.state) {
     case "approval-requested":
       return (
-        <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
+        <div
+          key={callId}
+          className="border-border flex w-fit max-w-full flex-col gap-2 rounded-md border p-2"
+        >
           <div className="flex items-center gap-1 text-sm font-bold">
             <IconMessageSearch className="text-foreground size-4 shrink-0" />
             <span className="max-w-2xl truncate">{`AgentOne wants to ${actionLabel}`}</span>
@@ -174,7 +177,7 @@ export const MessagePartToolSearchChats = ({ part }: { part: ToolUIPart }) => {
                   <div key={result.chatId} className="flex min-w-0 flex-col">
                     <Link
                       to={`/chat/${result.chatId}`}
-                      className="text-foreground truncate text-sm font-bold hover:underline"
+                      className="text-foreground max-w-full self-start truncate text-sm font-bold hover:underline"
                     >
                       {result.title || "Untitled chat"}
                       {result.isCurrent ? " (this chat)" : ""}

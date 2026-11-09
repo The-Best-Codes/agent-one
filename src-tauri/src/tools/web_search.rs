@@ -3,33 +3,36 @@ use super::constants::{DEFAULT_TIMEOUT_SECONDS, MAX_TIMEOUT_SECONDS};
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 use crate::utils::headless_webview::fetch_url_with_webview;
 
-use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+use std::sync::LazyLock;
 use tauri::AppHandle;
 use tokio::sync::Semaphore;
-use tokio::time::{timeout, Duration};
+use tokio::time::{Duration, timeout};
 use wreq::Client;
 use wreq_util::Emulation;
 
-static VQD_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r#"<input[^>]*name="vqd"[^>]*value="([^"]+)"[^>]*/?\s*>"#).unwrap());
-static VQD_REGEX_ALT: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r#"<input[^>]*value="([^"]+)"[^>]*name="vqd"[^>]*/?\s*>"#).unwrap());
-static RESULT_REGEX: Lazy<Regex> = Lazy::new(|| {
+static VQD_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"<input[^>]*name="vqd"[^>]*value="([^"]+)"[^>]*/?\s*>"#).unwrap()
+});
+static VQD_REGEX_ALT: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"<input[^>]*value="([^"]+)"[^>]*name="vqd"[^>]*/?\s*>"#).unwrap()
+});
+static RESULT_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r#"(?s)<div[^>]*class="[^"]*result[^"]*results_links[^"]*web-result[^"]*"[^>]*>(.*?)</div>\s*</div>"#).unwrap()
 });
-static TITLE_REGEX: Lazy<Regex> = Lazy::new(|| {
+static TITLE_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r#"(?s)<h2[^>]*class="[^"]*result__title[^"]*"[^>]*>.*?<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]*)"[^>]*>(.*?)</a>"#).unwrap()
 });
-static DISPLAY_URL_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r#"<a[^>]*class="[^"]*result__url[^"]*"[^>]*>([^<]*)</a>"#).unwrap());
-static SNIPPET_REGEX: Lazy<Regex> = Lazy::new(|| {
+static DISPLAY_URL_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"<a[^>]*class="[^"]*result__url[^"]*"[^>]*>([^<]*)</a>"#).unwrap()
+});
+static SNIPPET_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r#"(?s)<a[^>]*class="[^"]*result__snippet[^"]*"[^>]*>(.*?)</a>"#).unwrap()
 });
-static TAG_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"<[^>]*>").unwrap());
-static WHITESPACE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\s+").unwrap());
+static TAG_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"<[^>]*>").unwrap());
+static WHITESPACE_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\s+").unwrap());
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SearchResult {
@@ -100,57 +103,57 @@ pub async fn web_search(
 
             let mut all_results = parse_search_results(&first_html, max_results)?;
 
-            if max_pages > 1 && all_results.len() < max_results {
-                if let Some(vqd) = extract_vqd(&first_html) {
-                    let semaphore = Arc::new(Semaphore::new(max_concurrent));
-                    let mut page_urls = Vec::new();
-                    let mut offset = all_results.len();
+            if max_pages > 1
+                && all_results.len() < max_results
+                && let Some(vqd) = extract_vqd(&first_html)
+            {
+                let semaphore = Arc::new(Semaphore::new(max_concurrent));
+                let mut page_urls = Vec::new();
+                let mut offset = all_results.len();
 
-                    for _ in 1..max_pages {
-                        if offset >= max_results {
-                            break;
-                        }
-
-                        let page_url = format!(
-                            "https://html.duckduckgo.com/html/?q={}&s={}&dc={}&v=l&o=json&api=/d.js&vqd={}",
-                            urlencoding::encode(&query),
-                            offset,
-                            offset + 1,
-                            urlencoding::encode(&vqd)
-                        );
-                        page_urls.push((page_url, offset));
-                        offset += 10;
+                for _ in 1..max_pages {
+                    if offset >= max_results {
+                        break;
                     }
 
-                    let mut handles = Vec::new();
+                    let page_url = format!(
+                        "https://html.duckduckgo.com/html/?q={}&s={}&dc={}&v=l&o=json&api=/d.js&vqd={}",
+                        urlencoding::encode(&query),
+                        offset,
+                        offset + 1,
+                        urlencoding::encode(&vqd)
+                    );
+                    page_urls.push((page_url, offset));
+                    offset += 10;
+                }
 
-                    for (page_url, _) in page_urls {
-                        let semaphore = Arc::clone(&semaphore);
-                        let app_clone = app.clone();
-                        let url_clone = page_url.clone();
+                let mut handles = Vec::new();
 
-                        let handle = tokio::spawn(async move {
-                            let _permit = semaphore.acquire().await.unwrap();
-                            fetch_url_with_webview(app_clone, url_clone, timeout_seconds).await
-                        });
+                for (page_url, _) in page_urls {
+                    let semaphore = Arc::clone(&semaphore);
+                    let app_clone = app.clone();
+                    let url_clone = page_url.clone();
 
-                        handles.push(handle);
+                    let handle = tokio::spawn(async move {
+                        let _permit = semaphore.acquire().await.unwrap();
+                        fetch_url_with_webview(app_clone, url_clone, timeout_seconds).await
+                    });
+
+                    handles.push(handle);
+                }
+
+                for handle in handles {
+                    if all_results.len() >= max_results {
+                        break;
                     }
 
-                    for handle in handles {
-                        if all_results.len() >= max_results {
-                            break;
-                        }
-
-                        if let Ok(Ok(result)) = handle.await {
-                            if result.success {
-                                if let Some(html) = result.content {
-                                    let remaining = max_results - all_results.len();
-                                    let page_results = parse_search_results(&html, remaining)?;
-                                    all_results.extend(page_results);
-                                }
-                            }
-                        }
+                    if let Ok(Ok(result)) = handle.await
+                        && result.success
+                        && let Some(html) = result.content
+                    {
+                        let remaining = max_results - all_results.len();
+                        let page_results = parse_search_results(&html, remaining)?;
+                        all_results.extend(page_results);
                     }
                 }
             }
@@ -196,64 +199,65 @@ pub async fn web_search(
 
     let mut all_results = parse_search_results(&first_html, max_results)?;
 
-    if max_pages > 1 && all_results.len() < max_results {
-        if let Some(vqd) = extract_vqd(&first_html) {
-            let semaphore = Arc::new(Semaphore::new(max_concurrent));
-            let client = Arc::new(client);
-            let mut page_urls = Vec::new();
-            let mut offset = all_results.len();
+    if max_pages > 1
+        && all_results.len() < max_results
+        && let Some(vqd) = extract_vqd(&first_html)
+    {
+        let semaphore = Arc::new(Semaphore::new(max_concurrent));
+        let client = Arc::new(client);
+        let mut page_urls = Vec::new();
+        let mut offset = all_results.len();
 
-            for _ in 1..max_pages {
-                if offset >= max_results {
-                    break;
-                }
-
-                let page_url = format!(
-                    "https://html.duckduckgo.com/html/?q={}&s={}&dc={}&v=l&o=json&api=/d.js&vqd={}",
-                    urlencoding::encode(&query),
-                    offset,
-                    offset + 1,
-                    urlencoding::encode(&vqd)
-                );
-                page_urls.push((page_url, offset));
-                offset += 10;
+        for _ in 1..max_pages {
+            if offset >= max_results {
+                break;
             }
 
-            let mut handles = Vec::new();
+            let page_url = format!(
+                "https://html.duckduckgo.com/html/?q={}&s={}&dc={}&v=l&o=json&api=/d.js&vqd={}",
+                urlencoding::encode(&query),
+                offset,
+                offset + 1,
+                urlencoding::encode(&vqd)
+            );
+            page_urls.push((page_url, offset));
+            offset += 10;
+        }
 
-            for (page_url, _) in page_urls {
-                let semaphore = Arc::clone(&semaphore);
-                let client = Arc::clone(&client);
-                let url_clone = page_url.clone();
+        let mut handles = Vec::new();
 
-                let handle = tokio::spawn(async move {
-                    let _permit = semaphore.acquire().await.unwrap();
+        for (page_url, _) in page_urls {
+            let semaphore = Arc::clone(&semaphore);
+            let client = Arc::clone(&client);
+            let url_clone = page_url.clone();
 
-                    let response = timeout(
-                        Duration::from_secs(timeout_seconds + 5),
-                        client.get(&url_clone).send(),
-                    )
-                    .await;
+            let handle = tokio::spawn(async move {
+                let _permit = semaphore.acquire().await.unwrap();
 
-                    match response {
-                        Ok(Ok(resp)) if resp.status().is_success() => resp.text().await.ok(),
-                        _ => None,
-                    }
-                });
+                let response = timeout(
+                    Duration::from_secs(timeout_seconds + 5),
+                    client.get(&url_clone).send(),
+                )
+                .await;
 
-                handles.push(handle);
+                match response {
+                    Ok(Ok(resp)) if resp.status().is_success() => resp.text().await.ok(),
+                    _ => None,
+                }
+            });
+
+            handles.push(handle);
+        }
+
+        for handle in handles {
+            if all_results.len() >= max_results {
+                break;
             }
 
-            for handle in handles {
-                if all_results.len() >= max_results {
-                    break;
-                }
-
-                if let Ok(Some(html)) = handle.await {
-                    let remaining = max_results - all_results.len();
-                    let page_results = parse_search_results(&html, remaining)?;
-                    all_results.extend(page_results);
-                }
+            if let Ok(Some(html)) = handle.await {
+                let remaining = max_results - all_results.len();
+                let page_results = parse_search_results(&html, remaining)?;
+                all_results.extend(page_results);
             }
         }
     }

@@ -1,5 +1,5 @@
 import { IconBulb, IconPencil, IconRestore } from "@tabler/icons-react";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 import { useRecordHotkeys } from "react-hotkeys-hook";
 
@@ -17,6 +17,7 @@ import {
 import { Kbd } from "@/components/ui/kbd";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { recordingShortcutAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { type KeyboardShortcutId, keyboardShortcutDefinitions } from "@/lib/kbd-registry";
 import { DEFAULT_SETTINGS } from "@/lib/settings/definitions";
@@ -45,7 +46,14 @@ function ShortcutEditor({
   const [preventDefault, setPreventDefault] = useState(current.preventDefault);
   const [keys, { start, stop, resetKeys, isRecording }] = useRecordHotkeys();
 
+  const setRecordingShortcut = useSetAtom(recordingShortcutAtom);
+
   useEffect(() => () => stop(), [stop]);
+
+  useEffect(() => {
+    setRecordingShortcut(isRecording);
+    return () => setRecordingShortcut(false);
+  }, [isRecording, setRecordingShortcut]);
 
   const recordedShortcut = Array.from(keys).join("+");
   const nextShortcut = recordedShortcut || shortcut;

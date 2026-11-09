@@ -143,6 +143,7 @@ export type ToolId =
   | "deleteScheduledAgent"
   | "searchChats"
   | "readChat"
+  | "sendFeedback"
   | "computerUseObserve"
   | "computerUseAct";
 
@@ -234,6 +235,10 @@ export interface ReadChatToolConfig {
   maxChars: number;
 }
 
+export interface SendFeedbackToolConfig {
+  requiresApproval: boolean;
+}
+
 export interface ComputerUseObserveToolConfig {
   requiresApproval: boolean;
   includeScreenshots: boolean;
@@ -265,6 +270,7 @@ export interface ToolConfigs {
   deleteScheduledAgent: ScheduledAgentToolConfig;
   searchChats: SearchChatsToolConfig;
   readChat: ReadChatToolConfig;
+  sendFeedback: SendFeedbackToolConfig;
   computerUseObserve: ComputerUseObserveToolConfig;
   computerUseAct: ComputerUseActToolConfig;
 }

@@ -3,16 +3,14 @@ import { tool } from "ai";
 import { z } from "zod";
 
 import { raceWithAbort } from "@/lib/ai/tools/utils/abort";
-import { resolvePath } from "@/lib/ai/tools/utils/path";
+import { resolveToolPath } from "@/lib/ai/tools/utils/path";
 import { getLogger } from "@/lib/logger";
-import type { DeleteFileToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
-export const createDeleteFileTool = (config: DeleteFileToolConfig) =>
+export const createDeleteFileTool = (baseDir?: string) =>
   tool({
     description: "Delete a file from the filesystem.",
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       filePath: z
         .string()
@@ -23,7 +21,7 @@ export const createDeleteFileTool = (config: DeleteFileToolConfig) =>
 
       abortSignal?.throwIfAborted();
 
-      const filePath = await raceWithAbort(resolvePath(input.filePath), abortSignal);
+      const filePath = await raceWithAbort(resolveToolPath(input.filePath, baseDir), abortSignal);
 
       abortSignal?.throwIfAborted();
 

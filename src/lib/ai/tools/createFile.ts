@@ -4,17 +4,15 @@ import { tool } from "ai";
 import { z } from "zod";
 
 import { raceWithAbort } from "@/lib/ai/tools/utils/abort";
-import { resolvePath } from "@/lib/ai/tools/utils/path";
+import { resolveToolPath } from "@/lib/ai/tools/utils/path";
 import { getLogger } from "@/lib/logger";
-import type { CreateFileToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
-export const createCreateFileTool = (config: CreateFileToolConfig) =>
+export const createCreateFileTool = (baseDir?: string) =>
   tool({
     description:
       "Create a new file or overwrite an existing file with the given content. Prefer this tool over shell `cat`/`echo`/heredoc redirection for writing files.",
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       filePath: z
         .string()
@@ -38,7 +36,7 @@ export const createCreateFileTool = (config: CreateFileToolConfig) =>
 
       abortSignal?.throwIfAborted();
 
-      const filePath = await raceWithAbort(resolvePath(input.filePath), abortSignal);
+      const filePath = await raceWithAbort(resolveToolPath(input.filePath, baseDir), abortSignal);
 
       abortSignal?.throwIfAborted();
 
@@ -73,8 +71,6 @@ export const createCreateFileTool = (config: CreateFileToolConfig) =>
 
       logger.verbose("File created successfully:", filePath);
 
-      return {
-        overwritten: fileExists,
-      };
+      return fileExists ? { path: filePath, overwritten: true } : { path: filePath, created: true };
     },
   });

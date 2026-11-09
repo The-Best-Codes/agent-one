@@ -2,6 +2,7 @@ import { tool } from "ai";
 import { z } from "zod";
 
 import type { ChatToolsContext } from "@/lib/ai/tools/readChat";
+import { canAccessChat, getChatAccessScope } from "@/lib/projects";
 import type { SearchChatsToolConfig } from "@/lib/settings/types";
 import { chatStorage } from "@/lib/storage/chat-storage";
 
@@ -9,7 +10,6 @@ export const createSearchChatsTool = (config: SearchChatsToolConfig, context: Ch
   tool({
     description:
       "Search the user's past conversations with you by keyword, or list the most recent conversations when no query is given. Each result includes the chat's ID and how many messages it has (messageCount). The conversation you are currently in is marked with isCurrent: true.",
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       query: z
         .string()
@@ -31,10 +31,13 @@ export const createSearchChatsTool = (config: SearchChatsToolConfig, context: Ch
     }),
     execute: async ({ query, rawSyntax, limit }) => {
       const maxResults = limit ?? config.defaultMaxResults;
+      const scope = getChatAccessScope(context.project);
       const trimmedQuery = query?.trim();
 
       if (!trimmedQuery) {
-        const chats = (await chatStorage.listChats("updated-at")).slice(0, maxResults);
+        const chats = (await chatStorage.listChats("updated-at"))
+          .filter((chat) => canAccessChat(chat.metadata.projectId, scope))
+          .slice(0, maxResults);
         const messageCounts = await chatStorage.getChatMessageCounts(chats.map((chat) => chat.id));
         return {
           results: chats.map((chat) => ({
@@ -49,7 +52,10 @@ export const createSearchChatsTool = (config: SearchChatsToolConfig, context: Ch
         };
       }
 
-      const results = (await chatStorage.searchChats(trimmedQuery, rawSyntax)).slice(0, maxResults);
+      const results = (await chatStorage.searchChats(trimmedQuery, rawSyntax, scope)).slice(
+        0,
+        maxResults,
+      );
       const messageCounts = await chatStorage.getChatMessageCounts(
         results.map((result) => result.chatId),
       );

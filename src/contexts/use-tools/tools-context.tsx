@@ -1,4 +1,4 @@
-import type { Tool, ToolSet } from "ai";
+import type { ToolSet } from "ai";
 import { useAtom } from "jotai";
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -13,6 +13,7 @@ import {
   createGetUrlContentTool,
   createMemoryTool,
   createSubAgentTool,
+  createListSkillsTool,
   createViewFileTool,
   createWaitTool,
   createWebSearchTool,
@@ -28,7 +29,9 @@ import {
   createComputerUseObserveTool,
   createComputerUseActTool,
   createSearchChatsTool,
+  createSendFeedbackTool,
 } from "@/lib/ai/tools";
+import { withApproval } from "@/lib/ai/tools/approval";
 import {
   abortMcpServerLoad,
   buildMcpServerSlugMap,
@@ -47,7 +50,7 @@ import { mcpAuthStatesAtom, mcpServerLoadStatesAtom, mcpServersAtom } from "@/li
 import type { McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
-import { DEFAULT_SETTINGS } from "@/lib/settings/definitions";
+import { getMergedEnabledTools, getMergedToolConfigs } from "@/lib/settings/tools";
 import type { McpServerConfig } from "@/lib/settings/types";
 
 import { ToolsContext } from "./tools-contexts";
@@ -85,8 +88,6 @@ function getServerLoadSignature(server: McpServerConfig): string {
   });
 }
 
-const ALWAYS_APPROVAL_FREE_TOOLS = new Set(["describeNextTool"]);
-
 function applyApprovalConfigToTools(
   tools: ToolSet,
   defaultNeedsApproval: boolean,
@@ -94,12 +95,7 @@ function applyApprovalConfigToTools(
 ): ToolSet {
   const wrappedTools: ToolSet = {};
   for (const [name, tool] of Object.entries(tools)) {
-    wrappedTools[name] = {
-      ...tool,
-      needsApproval: ALWAYS_APPROVAL_FREE_TOOLS.has(name)
-        ? false
-        : (toolApprovalOverrides[name] ?? defaultNeedsApproval),
-    } as Tool<unknown, unknown>;
+    wrappedTools[name] = withApproval(tool, toolApprovalOverrides[name] ?? defaultNeedsApproval);
   }
   return wrappedTools;
 }
@@ -483,65 +479,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       chatContext?: ChatToolsContext;
     }): Promise<ToolSet> => {
       const filteredStaticTools: ToolSet = {};
-      const mergedEnabledTools = { ...DEFAULT_SETTINGS.ENABLED_TOOLS, ...enabledTools };
-      const mergedToolConfigs = {
-        dateTime: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.dateTime, ...toolConfigs.dateTime },
-        waitNumberMilliseconds: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.waitNumberMilliseconds,
-          ...toolConfigs.waitNumberMilliseconds,
-        },
-        getUrlContent: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.getUrlContent,
-          ...toolConfigs.getUrlContent,
-        },
-        webSearch: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.webSearch, ...toolConfigs.webSearch },
-        wikipedia: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.wikipedia, ...toolConfigs.wikipedia },
-        memory: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.memory, ...toolConfigs.memory },
-        editFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.editFile, ...toolConfigs.editFile },
-        createFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.createFile, ...toolConfigs.createFile },
-        deleteFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.deleteFile, ...toolConfigs.deleteFile },
-        viewFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.viewFile, ...toolConfigs.viewFile },
-        executeCommand: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.executeCommand,
-          ...toolConfigs.executeCommand,
-        },
-        subAgent: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.subAgent, ...toolConfigs.subAgent },
-        listSettings: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.listSettings,
-          ...toolConfigs.listSettings,
-        },
-        getSetting: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.getSetting, ...toolConfigs.getSetting },
-        updateSetting: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.updateSetting,
-          ...toolConfigs.updateSetting,
-        },
-        listScheduledAgents: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.listScheduledAgents,
-          ...toolConfigs.listScheduledAgents,
-        },
-        createScheduledAgent: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.createScheduledAgent,
-          ...toolConfigs.createScheduledAgent,
-        },
-        updateScheduledAgent: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.updateScheduledAgent,
-          ...toolConfigs.updateScheduledAgent,
-        },
-        deleteScheduledAgent: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.deleteScheduledAgent,
-          ...toolConfigs.deleteScheduledAgent,
-        },
-        searchChats: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.searchChats, ...toolConfigs.searchChats },
-        readChat: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.readChat, ...toolConfigs.readChat },
-        computerUseObserve: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.computerUseObserve,
-          ...toolConfigs.computerUseObserve,
-        },
-        computerUseAct: {
-          ...DEFAULT_SETTINGS.TOOL_CONFIGS.computerUseAct,
-          ...toolConfigs.computerUseAct,
-        },
-      };
+      const chatContext = options?.chatContext ?? {};
+      const projectFolder = chatContext.project?.folder;
+      const mergedEnabledTools = getMergedEnabledTools(enabledTools);
+      const mergedToolConfigs = getMergedToolConfigs(toolConfigs);
 
       if (mergedEnabledTools.dateTime) {
         filteredStaticTools.dateTime = createDateTimeTool(mergedToolConfigs.dateTime);
@@ -563,74 +504,65 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         filteredStaticTools.wikipedia = createWikipediaTool(mergedToolConfigs.wikipedia);
       }
       if (mergedEnabledTools.memory) {
-        filteredStaticTools.memory = createMemoryTool(mergedToolConfigs.memory);
+        filteredStaticTools.memory = createMemoryTool(chatContext);
       }
       if (mergedEnabledTools.editFile) {
-        filteredStaticTools.editFile = createEditFileTool(mergedToolConfigs.editFile);
+        filteredStaticTools.editFile = createEditFileTool(projectFolder);
       }
       if (mergedEnabledTools.createFile) {
-        filteredStaticTools.createFile = createCreateFileTool(mergedToolConfigs.createFile);
+        filteredStaticTools.createFile = createCreateFileTool(projectFolder);
       }
       if (mergedEnabledTools.deleteFile) {
-        filteredStaticTools.deleteFile = createDeleteFileTool(mergedToolConfigs.deleteFile);
+        filteredStaticTools.deleteFile = createDeleteFileTool(projectFolder);
       }
       if (mergedEnabledTools.viewFile) {
-        filteredStaticTools.viewFile = createViewFileTool(mergedToolConfigs.viewFile);
+        filteredStaticTools.viewFile = createViewFileTool(
+          mergedToolConfigs.viewFile,
+          projectFolder,
+        );
       }
       if (mergedEnabledTools.executeCommand) {
         filteredStaticTools.executeCommand = createExecuteCommandTool(
           mergedToolConfigs.executeCommand,
+          projectFolder,
         );
       }
       if (mergedEnabledTools.subAgent && options?.subAgentContext) {
-        filteredStaticTools.subAgent = createSubAgentTool(
-          mergedToolConfigs.subAgent,
-          options.subAgentContext,
-        );
+        filteredStaticTools.subAgent = createSubAgentTool(options.subAgentContext);
       }
       if (mergedEnabledTools.listSettings) {
-        filteredStaticTools.listSettings = createListSettingsTool(mergedToolConfigs.listSettings);
+        filteredStaticTools.listSettings = createListSettingsTool();
       }
       if (mergedEnabledTools.getSetting) {
-        filteredStaticTools.getSetting = createGetSettingTool(mergedToolConfigs.getSetting);
+        filteredStaticTools.getSetting = createGetSettingTool();
       }
       if (mergedEnabledTools.updateSetting) {
-        filteredStaticTools.updateSetting = createUpdateSettingTool(
-          mergedToolConfigs.updateSetting,
-        );
+        filteredStaticTools.updateSetting = createUpdateSettingTool();
       }
       if (mergedEnabledTools.listScheduledAgents) {
-        filteredStaticTools.listScheduledAgents = createListScheduledAgentsTool(
-          mergedToolConfigs.listScheduledAgents,
-        );
+        filteredStaticTools.listScheduledAgents = createListScheduledAgentsTool();
       }
       if (mergedEnabledTools.createScheduledAgent) {
-        filteredStaticTools.createScheduledAgent = createCreateScheduledAgentTool(
-          mergedToolConfigs.createScheduledAgent,
-        );
+        filteredStaticTools.createScheduledAgent = createCreateScheduledAgentTool();
       }
       if (mergedEnabledTools.updateScheduledAgent) {
-        filteredStaticTools.updateScheduledAgent = createUpdateScheduledAgentTool(
-          mergedToolConfigs.updateScheduledAgent,
-        );
+        filteredStaticTools.updateScheduledAgent = createUpdateScheduledAgentTool();
       }
       if (mergedEnabledTools.deleteScheduledAgent) {
-        filteredStaticTools.deleteScheduledAgent = createDeleteScheduledAgentTool(
-          mergedToolConfigs.deleteScheduledAgent,
-        );
+        filteredStaticTools.deleteScheduledAgent = createDeleteScheduledAgentTool();
       }
 
       if (mergedEnabledTools.searchChats) {
         filteredStaticTools.searchChats = createSearchChatsTool(
           mergedToolConfigs.searchChats,
-          options?.chatContext ?? {},
+          chatContext,
         );
       }
       if (mergedEnabledTools.readChat) {
-        filteredStaticTools.readChat = createReadChatTool(
-          mergedToolConfigs.readChat,
-          options?.chatContext ?? {},
-        );
+        filteredStaticTools.readChat = createReadChatTool(mergedToolConfigs.readChat, chatContext);
+      }
+      if (mergedEnabledTools.sendFeedback) {
+        filteredStaticTools.sendFeedback = createSendFeedbackTool(chatContext);
       }
 
       if (isComputerUseSupported()) {
@@ -640,10 +572,22 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
           );
         }
         if (mergedEnabledTools.computerUseAct) {
-          filteredStaticTools.computerUseAct = createComputerUseActTool(
-            mergedToolConfigs.computerUseAct,
-          );
+          filteredStaticTools.computerUseAct = createComputerUseActTool();
         }
+      }
+
+      for (const [name, tool] of Object.entries(filteredStaticTools)) {
+        filteredStaticTools[name] = withApproval(
+          tool,
+          mergedToolConfigs[name as keyof typeof mergedToolConfigs]?.requiresApproval ?? true,
+        );
+      }
+
+      if (mergedEnabledTools.viewFile) {
+        filteredStaticTools.listSkills = withApproval(
+          createListSkillsTool(chatContext.project),
+          mergedToolConfigs.viewFile.requiresApproval,
+        );
       }
 
       if (!mcpLoadedRef.current && loadingPromiseRef.current) {
@@ -659,7 +603,9 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       };
 
       if (options?.toolBehavior === "ask" || options?.toolBehavior === "yolo") {
-        tools = applyApprovalConfigToTools(tools, options.toolBehavior === "ask");
+        tools = applyApprovalConfigToTools(tools, options.toolBehavior === "ask", {
+          describeNextTool: false,
+        });
       }
 
       return tools;

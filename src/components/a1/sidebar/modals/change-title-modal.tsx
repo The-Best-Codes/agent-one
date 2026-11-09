@@ -57,7 +57,7 @@ const ChangeTitleForm = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.nativeEvent.isComposing) {
       handleSave();
     }
   };
@@ -76,6 +76,7 @@ const ChangeTitleForm = ({
           "none",
           extractReasoningEnabled,
           titleGenerationSettings.characterLimit,
+          { chatId, trigger: "manual" },
         );
         setTitle(generatedTitle);
       }

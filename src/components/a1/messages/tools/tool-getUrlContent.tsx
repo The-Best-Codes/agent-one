@@ -203,7 +203,10 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
   switch (part.state) {
     case "approval-requested":
       return (
-        <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
+        <div
+          key={callId}
+          className="border-border flex w-fit max-w-full flex-col gap-2 rounded-md border p-2"
+        >
           <div className="flex items-center gap-1">
             <IconWorld className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
@@ -216,7 +219,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                       href={input.urls[0]}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="max-w-2xl cursor-pointer truncate text-blue-500 hover:text-blue-600 hover:underline"
+                      className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
                     >
                       {formatUrl(input.urls[0])}
                     </a>
@@ -370,7 +373,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                     href={results[0].url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="max-w-2xl cursor-pointer truncate text-blue-500 hover:text-blue-600 hover:underline"
+                    className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
                   >
                     {formatUrl(results[0].url)}
                   </a>

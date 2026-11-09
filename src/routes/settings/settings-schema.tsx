@@ -4,6 +4,8 @@ import type { ComponentType } from "react";
 
 import {
   AccountStatus,
+  GlobalAgentsFilesControl,
+  GlobalSkillsFoldersControl,
   HideAgentOneModelsControl,
   MemoryControl,
   SyncControl,
@@ -48,10 +50,32 @@ import {
   TtsProviders,
 } from "@/components/settings-components/providers/provider-cards";
 import type { SettingsLayout } from "@/components/settings-components/setting-controls";
+import { AutoModeModelControl } from "@/components/settings-components/tools/auto-mode-controls";
 import { ComputerUsePermissions } from "@/components/settings-components/tools/computer-use-permissions";
-import { ToolRow } from "@/components/settings-components/tools/tool-row";
+import {
+  ChangeFilesApprovalToggle,
+  ChangeFilesToolToggle,
+  ChatHistoryToolToggle,
+  CommandsApprovalToggle,
+  CommandsToolToggle,
+  ComputerUseApprovalToggle,
+  ComputerUseToolToggle,
+  FeedbackApprovalToggle,
+  FeedbackToolToggle,
+  MemoryToolToggle,
+  OpenScheduledAgentsButton,
+  ReadFilesToolToggle,
+  ScheduledAgentsApprovalToggle,
+  ScheduledAgentsToolToggle,
+  SettingsApprovalToggle,
+  SettingsToolToggle,
+  SubAgentsToolToggle,
+  ToolGroupHeading,
+  ToolGroupSeparator,
+  WebToolToggle,
+} from "@/components/settings-components/tools/tool-controls";
 import { ToolsIntro } from "@/components/settings-components/tools/tools-intro";
-import { TOOL_GROUPS, TOOL_INFO } from "@/components/settings-components/tools/tools-metadata";
+import { TOOL_SETS, toolsEnabledAtom } from "@/components/settings-components/tools/tools-metadata";
 import { PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
 import { TTS_PROVIDER_OPTIONS } from "@/lib/ai/tts";
 import { isComputerUseSupported } from "@/lib/computer-use";
@@ -62,9 +86,9 @@ import type { SettingKey } from "@/lib/settings/definitions";
 
 const computerUseSupportedAtom = atom(() => isComputerUseSupported());
 
-const isLinuxAtom = atom(() => platform() === "linux");
-
 const computerUsePermissionsVisibleAtom = atom(() => platform() === "macos");
+
+const computerUseEnabledAtom = toolsEnabledAtom(TOOL_SETS.computerUse);
 
 const isVirtualizationEnabledAtom = atom(
   (get) => get(settingAtoms.CHAT_VIRTUALIZATION_MODE) !== "off",
@@ -178,6 +202,24 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
             layout: "row",
             control: HideAgentOneModelsControl,
           },
+          {
+            id: "allow-settings-changes",
+            label: "Allow AgentOne to change settings",
+            description: "AgentOne can look up and change your AgentOne settings when you ask.",
+            keywords: ["settings", "tool", "configure", "preferences"],
+            layout: "row",
+            control: SettingsToolToggle,
+          },
+          {
+            id: "ask-before-settings-changes",
+            label: "Ask before changing settings",
+            description:
+              "Confirm each change AgentOne wants to make to your settings, unless in Auto mode.",
+            keywords: ["settings", "approval", "confirm", "tool"],
+            layout: "row",
+            visible: toolsEnabledAtom(TOOL_SETS.settings),
+            control: SettingsApprovalToggle,
+          },
         ],
       },
       {
@@ -188,7 +230,41 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
             id: "ai-instructions",
             key: "SYSTEM_PROMPT_APPENDIX",
           },
+          {
+            id: "global-agents-files",
+            label: "Instruction files",
+            description:
+              "AgentOne follows the instructions in these files in every chat, like AGENTS.md or CLAUDE.md. Projects can use a different list.",
+            keywords: ["agents.md", "claude.md", "instructions", "rules", "system prompt", "file"],
+            layout: "stacked",
+            control: GlobalAgentsFilesControl,
+          },
+          {
+            id: "global-skills-folders",
+            label: "Skills",
+            description:
+              "AgentOne can use the skills in these folders when they help with a task. Projects can use a different list.",
+            keywords: ["skills", "skill.md", "agent skills", "folder", "instructions", "scripts"],
+            layout: "stacked",
+            control: GlobalSkillsFoldersControl,
+          },
           { id: "memory", key: "MEMORY", layout: "stacked", control: MemoryControl },
+          {
+            id: "allow-memory-edits",
+            label: "Allow AgentOne to edit memories",
+            description: "AgentOne can add, change, and remove memories on its own as you chat.",
+            keywords: ["memory", "remember", "tool", "personalize"],
+            layout: "row",
+            control: MemoryToolToggle,
+          },
+          {
+            id: "allow-chat-history",
+            label: "Allow AgentOne to read past chats",
+            description: "AgentOne can search and read your earlier conversations for context.",
+            keywords: ["chat history", "recall", "search chats", "read chat", "tool", "past"],
+            layout: "row",
+            control: ChatHistoryToolToggle,
+          },
         ],
       },
     ],
@@ -281,6 +357,38 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
           { id: "show-scroll-to-bottom-button", key: "SHOW_CHAT_TO_BOTTOM_BUTTON" },
           { id: "show-message-preview-rail", key: "SHOW_MESSAGE_PREVIEW_RAIL" },
           { id: "chat-status-indicators", key: "SHOW_CHAT_STATUS_INDICATOR" },
+        ],
+      },
+      {
+        title: "Scheduled Agents",
+        description: "Agents that run on their own on a schedule.",
+        items: [
+          {
+            id: "manage-scheduled-agents",
+            label: "Scheduled agents",
+            description: "Create, edit, and run your scheduled agents.",
+            keywords: ["schedule", "cron", "automation", "recurring"],
+            layout: "row",
+            control: OpenScheduledAgentsButton,
+          },
+          {
+            id: "allow-scheduled-agents",
+            label: "Allow AgentOne to manage scheduled agents",
+            description: "AgentOne can view, create, and change scheduled agents when you ask.",
+            keywords: ["schedule", "cron", "automation", "tool"],
+            layout: "row",
+            control: ScheduledAgentsToolToggle,
+          },
+          {
+            id: "ask-before-scheduled-agent-changes",
+            label: "Ask before changing scheduled agents",
+            description:
+              "Confirm before AgentOne creates, changes, or deletes a scheduled agent, unless in Auto mode.",
+            keywords: ["schedule", "approval", "confirm", "tool"],
+            layout: "row",
+            visible: toolsEnabledAtom(TOOL_SETS.scheduledAgents),
+            control: ScheduledAgentsApprovalToggle,
+          },
         ],
       },
       {
@@ -462,44 +570,164 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     intro: ToolsIntro,
     cards: [
       {
-        title: "Approvals",
-        items: [{ id: "confirm-yolo-mode", key: "CONFIRM_YOLO_MODE" }],
-      },
-      ...TOOL_GROUPS.map((group) => ({
-        title: group.title,
-        description: group.description,
-        visible: group.desktopOnly
-          ? atom((get) => get(computerUseSupportedAtom) || get(isLinuxAtom))
-          : undefined,
+        title: "Configure",
+        description: "Approval settings may not apply in Auto mode.",
         items: [
-          ...(group.desktopOnly
-            ? [
-                {
-                  id: "computer-use-unsupported",
-                  label: "Not available on Linux yet",
-                  description: "Computer use works on macOS and Windows for now.",
-                  visible: isLinuxAtom,
-                },
-                {
-                  id: "computer-use-permissions",
-                  label: "Computer use permissions",
-                  description: "Allow AgentOne to see and control other apps on your Mac.",
-                  keywords: ["accessibility", "screen recording", "permission", "privacy"],
-                  visible: computerUsePermissionsVisibleAtom,
-                  render: ComputerUsePermissions,
-                },
-              ]
-            : []),
-          ...group.toolIds.map((toolId) => ({
-            id: `tool-${TOOL_INFO[toolId].anchor}`,
-            label: TOOL_INFO[toolId].name,
-            description: TOOL_INFO[toolId].description,
-            keywords: ["tool"],
-            visible: group.desktopOnly ? computerUseSupportedAtom : undefined,
-            render: () => <ToolRow toolId={toolId} />,
-          })),
+          {
+            id: "tools-web",
+            render: () => (
+              <ToolGroupHeading
+                title="Web"
+                description="Let AgentOne look things up online and read the pages it finds."
+                first
+              />
+            ),
+          },
+          {
+            id: "allow-web-access",
+            label: "Allow web access",
+            description: "Search the web, read web pages, and look things up on Wikipedia.",
+            keywords: ["internet", "browse", "search", "wikipedia", "tool", "online"],
+            layout: "row",
+            control: WebToolToggle,
+          },
+          {
+            id: "tools-files",
+            render: () => (
+              <ToolGroupHeading
+                title="Files"
+                description="Read and change files on your computer."
+              />
+            ),
+          },
+          {
+            id: "allow-read-files",
+            label: "Allow AgentOne to read files",
+            keywords: ["view file", "open file", "tool"],
+            layout: "row",
+            control: ReadFilesToolToggle,
+          },
+          {
+            id: "allow-change-files",
+            label: "Allow AgentOne to change files",
+            description: "Create, edit, and delete files.",
+            keywords: ["edit file", "create file", "delete file", "write", "tool"],
+            layout: "row",
+            control: ChangeFilesToolToggle,
+          },
+          {
+            id: "ask-before-file-changes",
+            label: "Ask before changing files",
+            keywords: ["approval", "confirm", "tool"],
+            layout: "row",
+            visible: toolsEnabledAtom(TOOL_SETS.changeFiles),
+            control: ChangeFilesApprovalToggle,
+          },
+          {
+            id: "tools-system",
+            render: () => (
+              <ToolGroupHeading
+                title="System"
+                description="Reach outside AgentOne by running commands or delegating to subagents."
+              />
+            ),
+          },
+          {
+            id: "allow-run-commands",
+            label: "Allow AgentOne to run commands",
+            description: "Run terminal commands on your computer.",
+            keywords: ["terminal", "shell", "execute", "command", "tool"],
+            layout: "row",
+            control: CommandsToolToggle,
+          },
+          {
+            id: "ask-before-commands",
+            label: "Ask before running commands",
+            keywords: ["approval", "confirm", "terminal", "tool"],
+            layout: "row",
+            visible: toolsEnabledAtom(TOOL_SETS.commands),
+            control: CommandsApprovalToggle,
+          },
+          {
+            id: "allow-subagents",
+            label: "Allow AgentOne to use subagents",
+            description:
+              "Hand focused work to a subagent that uses your current model and enabled tools.",
+            keywords: ["subagent", "delegate", "spawn", "tool"],
+            layout: "row",
+            control: SubAgentsToolToggle,
+          },
+          {
+            id: "tools-computer-use",
+            visible: computerUseSupportedAtom,
+            render: () => (
+              <ToolGroupHeading
+                title="Computer Use"
+                description="Let AgentOne see and use the other apps on your computer, like a person at the keyboard."
+              />
+            ),
+          },
+          {
+            id: "computer-use-permissions",
+            label: "Computer use permissions",
+            description: "Allow AgentOne to see and control other apps on your Mac.",
+            keywords: ["accessibility", "screen recording", "permission", "privacy"],
+            visible: computerUsePermissionsVisibleAtom,
+            render: ComputerUsePermissions,
+          },
+          {
+            id: "allow-computer-use",
+            label: "Allow AgentOne to use apps",
+            description: "See what's on screen in other apps, and click, type, and scroll in them.",
+            keywords: ["computer use", "apps", "screen", "click", "type", "tool"],
+            layout: "row",
+            visible: computerUseSupportedAtom,
+            control: ComputerUseToolToggle,
+          },
+          {
+            id: "ask-before-computer-use",
+            label: "Ask before using apps",
+            keywords: ["computer use", "approval", "confirm", "tool"],
+            layout: "row",
+            visible: atom((get) => get(computerUseSupportedAtom) && get(computerUseEnabledAtom)),
+            control: ComputerUseApprovalToggle,
+          },
+          { id: "tools-other", render: ToolGroupSeparator },
+          {
+            id: "allow-feedback",
+            label: "Allow AgentOne to report problems",
+            description:
+              "When something goes wrong, AgentOne can send a short report about it to the AgentOne developers.",
+            keywords: ["feedback", "bug", "report", "issue", "telemetry", "tool"],
+            layout: "row",
+            control: FeedbackToolToggle,
+          },
+          {
+            id: "ask-before-feedback",
+            label: "Ask before reporting problems",
+            keywords: ["feedback", "bug", "report", "approval", "confirm", "tool"],
+            layout: "row",
+            visible: toolsEnabledAtom(TOOL_SETS.feedback),
+            control: FeedbackApprovalToggle,
+          },
+          { id: "confirm-yolo-mode", key: "CONFIRM_YOLO_MODE" },
         ],
-      })),
+      },
+      {
+        id: "auto-mode",
+        title: "Auto Mode",
+        description:
+          "When a chat's tool behavior is set to Auto, a model checks each tool call that would need your approval and decides whether it can run.",
+        keywords: ["auto mode", "classifier", "approval", "tool behavior"],
+        items: [
+          {
+            id: "auto-mode-model",
+            key: "AUTO_MODE_MODEL",
+            control: AutoModeModelControl,
+          },
+          { id: "auto-mode-rules", key: "AUTO_MODE_RULES" },
+        ],
+      },
     ],
   },
   {

@@ -7,6 +7,7 @@ import { FileDropGuard } from "@/components/a1/file-drop-guard";
 import { LocalProviderStartupSync } from "@/components/a1/local-provider-startup-sync";
 import { ModelDirectoryStartupSync } from "@/components/a1/model-directory-startup-sync";
 import { OnboardingReminder } from "@/components/a1/onboarding-reminder";
+import { StarReminder } from "@/components/a1/star-reminder";
 import { Spinner } from "@/components/ui/spinner";
 import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
 import ChatRoute from "@/routes/chat";
@@ -34,6 +35,7 @@ function AppLayout() {
     <MultiChatProvider>
       <DeepLinkHandler />
       <NotificationClickHandler />
+      <StarReminder />
       {/* This essentially lets MultiChatProvider wrap all the <Route> components while being a child of <Routes> */}
       <Outlet />
     </MultiChatProvider>

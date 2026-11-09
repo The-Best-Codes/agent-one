@@ -1,8 +1,10 @@
+import { platform } from "@tauri-apps/plugin-os";
 import dedent from "dedent";
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
 import { sanitizeMemoryEntries } from "@/lib/memory";
+import { getProjectPromptSection, type Project } from "@/lib/projects";
 
 import { settingAtoms } from "./settings-atoms";
 
@@ -28,11 +30,23 @@ export const onboardingReminderDismissedAtom = atomWithStorage(
   { getOnInit: true },
 );
 
+export const starReminderDismissedAtom = atomWithStorage(
+  "agent-one-star-reminder-dismissed",
+  false,
+  undefined,
+  { getOnInit: true },
+);
+
+export const completedResponseCountAtom = atomWithStorage(
+  "agent-one-completed-response-count",
+  0,
+  undefined,
+  { getOnInit: true },
+);
+
 export const tourActiveAtom = atom(false);
 
-export const syncEnabledAtom = atomWithStorage("agent-one-sync-enabled", true, undefined, {
-  getOnInit: true,
-});
+export const recordingShortcutAtom = atom(false);
 
 export const hideAgentOneModelsAtom = atomWithStorage(
   "agent-one-hide-agentone-models",
@@ -76,11 +90,17 @@ export const lastModelDirectorySyncTimestampAtom = atomWithStorage<number>(
   { getOnInit: true },
 );
 
+const COMMAND_SHELLS: Partial<Record<ReturnType<typeof platform>, string>> = {
+  windows: "powershell",
+  macos: "zsh",
+};
+
 export const systemPromptAtom = atom((get) => {
+  const os = platform();
+
   const userName = get(settingAtoms.USER_NAME);
   const appendix = get(settingAtoms.SYSTEM_PROMPT_APPENDIX);
-  const memory = get(settingAtoms.MEMORY);
-  const memoryEntries = sanitizeMemoryEntries(memory);
+  const userMemory = get(settingAtoms.MEMORY);
 
   const settings = [
     userName && `- Name: ${userName}`,
@@ -89,14 +109,20 @@ export const systemPromptAtom = atom((get) => {
     .filter(Boolean)
     .join("\n");
 
-  const memorySection =
-    memoryEntries.length > 0 ? memoryEntries.map((entry) => `- ${entry}`).join("\n") : "";
+  return (project?: Project) => {
+    const memoryEntries = sanitizeMemoryEntries(
+      project?.separateMemory ? project.memory : userMemory,
+    );
+    const memorySection =
+      memoryEntries.length > 0 ? memoryEntries.map((entry) => `- ${entry}`).join("\n") : "";
+    const memoryHeading = project?.separateMemory ? "Project memory" : "User memory";
 
-  return dedent`
+    return dedent`
     ## Guidelines
     You are AgentOne, a helpful AI agent. You are currently being accessed via the [AgentOne desktop app](https://www.agent-one.dev/). Documentation for AgentOne can be found at https://docs.agent-one.dev/docs/. To extend your capabilities beyond the tools you already have, the user can install extensions for you to use. They can do so by clicking their account in the bottom left of the app sidebar (when expanded) and choosing "Extensions". There are over 21,000 extensions available.
     When the \`describeNextTool\` function is available, you _always_ use it before you use a tool beginning with \`mcp__\`. If you use multiple tools beginning with \`mcp__\` at once, you always use \`describeNextTool\` before each one.
     When the \`memory\` tool is available, you use it to store facts about the user across chats. You always do this when applicable to personalize responses, or when the user asks you to remember something. You don't have to be explicit in your use of the tool - if you update your memory, you don't need to mention it. Prefer small targeted additions, deletions, or edits. Avoid adding duplicates or contradictory entries. Save stable, reusable information that is likely to help in future chats.
+    The user's operating system is ${os}. The \`executeCommand\` tool runs commands in \`${COMMAND_SHELLS[os] ?? "sh"}\`, so use commands that work in that shell.
     ## Application Usage
     When the \`listSettings\`, \`getSetting\`, and \`updateSetting\` tools are available, you can use them to change the desktop app behavior. Note that not all settings are accessible to you - there may be settings that you do not know about. If you are unsure what a setting does, do not make assumptions - you could search for it in the documentation or explain that you aren't certain.
     If the user asks you something like "Stop requesting my permission every time you need to do something", "You keep handing the task back to me", "You're supposed to be agentic", etc., inform them that you are unable to adjust this setting. However, they can do it themselves by opening the model config popup (the 3 bars icon next to the model selector, in the area where users type their messages), then changing "Tool Behavior" to "YOLO". That change will only effect this conversation. To change the default for all conversations, the user can click "New Chat" in the sidebar to get to the new chat screen, then open the model config popup and do the same change.
@@ -104,6 +130,8 @@ export const systemPromptAtom = atom((get) => {
     When scheduled-agent tools are available, use them for requests to run a task repeatedly. Each time a scheduled agent runs, it will appear as a new chat in the application sidebar. It's essentially a scheduled prompt that will be submitted to you at a later date. Use a standard five-field cron expression, choose a concise but informative title, and write a prompt describing what the agent should do. Always list scheduled agents before creating, updating, or deleting them.
     Don't be too specific in your prompt. Write the prompt the same way that the user would ask you to do a task. For example, "Summarize the unread emails in my inbox." is a good prompt, but "Every morning, use the gmail_read tool to list emails. Tell the user..." is a bad prompt. Unless the user is very specific with what they want the agent to do, you shouldn't be overly specific. You also shouldn't mention the schedule (e.g., "Every day") in the prompt.
     ${settings ? `\n## User settings:\n${settings}` : ""}
-    ${memorySection ? `\n## User memory:\n${memorySection}` : ""}
+    ${project ? `\n${getProjectPromptSection(project)}` : ""}
+    ${memorySection ? `\n## ${memoryHeading}:\n${memorySection}` : ""}
   `.trim();
+  };
 });

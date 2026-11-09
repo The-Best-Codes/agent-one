@@ -3,17 +3,15 @@ import { tool } from "ai";
 import { z } from "zod";
 
 import { raceWithAbort } from "@/lib/ai/tools/utils/abort";
-import { resolvePath } from "@/lib/ai/tools/utils/path";
+import { resolveToolPath } from "@/lib/ai/tools/utils/path";
 import { getLogger } from "@/lib/logger";
-import type { EditFileToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
-export const createEditFileTool = (config: EditFileToolConfig) =>
+export const createEditFileTool = (baseDir?: string) =>
   tool({
     description:
       "Edit a file by applying a text replacement. Provide the file path, the old text to find, and the new text to replace it with.",
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       filePath: z
         .string()
@@ -26,7 +24,7 @@ export const createEditFileTool = (config: EditFileToolConfig) =>
 
       abortSignal?.throwIfAborted();
 
-      const filePath = await raceWithAbort(resolvePath(input.filePath), abortSignal);
+      const filePath = await raceWithAbort(resolveToolPath(input.filePath, baseDir), abortSignal);
 
       abortSignal?.throwIfAborted();
 
@@ -34,11 +32,20 @@ export const createEditFileTool = (config: EditFileToolConfig) =>
 
       abortSignal?.throwIfAborted();
 
-      if (!fileContent.includes(input.oldContent)) {
+      let { oldContent, newContent } = input;
+      if (!fileContent.includes(oldContent) && fileContent.includes("\r\n")) {
+        const toCrlf = (text: string) => text.replace(/\r?\n/g, "\r\n");
+        if (fileContent.includes(toCrlf(oldContent))) {
+          oldContent = toCrlf(oldContent);
+          newContent = toCrlf(newContent);
+        }
+      }
+
+      if (!fileContent.includes(oldContent)) {
         throw new Error("The specified oldContent was not found in the file.");
       }
 
-      const updatedContent = fileContent.replace(input.oldContent, input.newContent);
+      const updatedContent = fileContent.replace(oldContent, () => newContent);
       await raceWithAbort(writeTextFile(filePath, updatedContent), abortSignal);
 
       logger.verbose("File edited successfully:", filePath);

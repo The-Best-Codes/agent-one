@@ -7,6 +7,7 @@ import { DEFAULT_MODEL_CONFIG, type ModelConfig } from "@/hooks/ai/use-model-cat
 import { chatIdsAtom, chatUpdateTriggerAtom, lastVacuumTimestampAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
+import { loadProjects } from "@/lib/projects";
 import { type ChatSearchResult, chatStorage } from "@/lib/storage/chat-storage";
 
 import { PersistenceContext } from "./persistence-contexts";
@@ -21,6 +22,7 @@ export interface ChatMetadata {
   branchOf?: string;
   scheduledAgentId?: string;
   scheduledAgentTitle?: string;
+  projectId?: string;
   createdAt?: number;
   updatedAt?: number;
   lastMessageAt?: number;
@@ -39,7 +41,7 @@ export interface PersistenceContextType {
   createChat: (
     modelId: string,
     modelConfig?: ModelConfig,
-    provenance?: { scheduledAgentId: string; scheduledAgentTitle: string },
+    extra?: Pick<ChatMetadata, "scheduledAgentId" | "scheduledAgentTitle" | "projectId">,
   ) => string;
   loadChatMessages: (id: string) => Promise<UIMessage[]>;
   loadChatMetadata: (id: string) => ChatMetadata;
@@ -54,6 +56,7 @@ export interface PersistenceContextType {
     title?: string;
   }) => void;
   saveChatTitle: (params: { chatId: string; title: string }) => void;
+  setChatsProject: (chatIds: string[], projectId: string | undefined) => void;
   deleteChat: (chatId: string) => void;
   bulkDeleteChats: (chatIds: string[]) => void;
   bulkExportChats: (chatIds: string[]) => Promise<ChatData[]>;
@@ -77,6 +80,7 @@ function getDefaultMetadata(): ChatMetadata {
     branchOf: undefined,
     scheduledAgentId: undefined,
     scheduledAgentTitle: undefined,
+    projectId: undefined,
     createdAt: undefined,
     updatedAt: undefined,
   };
@@ -113,7 +117,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     let cancelled = false;
 
     const loadInitialData = async () => {
-      const storedChats = await chatStorage.listChats(chatSort);
+      const [storedChats] = await Promise.all([chatStorage.listChats(chatSort), loadProjects()]);
 
       if (cancelled) return;
 
@@ -224,7 +228,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     (
       modelId: string,
       modelConfig: ModelConfig = DEFAULT_MODEL_CONFIG,
-      provenance?: { scheduledAgentId: string; scheduledAgentTitle: string },
+      extra?: Pick<ChatMetadata, "scheduledAgentId" | "scheduledAgentTitle" | "projectId">,
     ) => {
       const id = generateId();
       const metadata = createTimestampedMetadata({
@@ -233,7 +237,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         modelId,
         modelConfig,
         branchOf: undefined,
-        ...provenance,
+        ...extra,
       });
       setMetadata(id, metadata);
       persistMetadata(id, metadata);
@@ -397,6 +401,18 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     [getMetadata, setMetadata, persistMetadata, setChatUpdateTrigger],
   );
 
+  const setChatsProject = useCallback(
+    (chatIds: string[], projectId: string | undefined) => {
+      for (const chatId of chatIds) {
+        const updated = { ...getMetadata(chatId), projectId };
+        setMetadata(chatId, updated);
+        persistMetadata(chatId, updated);
+      }
+      setChatUpdateTrigger((prev) => prev + 1);
+    },
+    [getMetadata, setMetadata, persistMetadata, setChatUpdateTrigger],
+  );
+
   const deleteChat = useCallback(
     (chatId: string) => {
       try {
@@ -479,6 +495,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
           modelId: originalMetadata.modelId,
           modelConfig: originalMetadata.modelConfig || DEFAULT_MODEL_CONFIG,
           branchOf: originalChatId,
+          projectId: originalMetadata.projectId,
         });
 
         setMetadata(newId, newMetadata);
@@ -522,6 +539,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
       saveChatModelConfig,
       saveChatTitleState,
       saveChatTitle,
+      setChatsProject,
       deleteChat,
       bulkDeleteChats,
       bulkExportChats,
@@ -544,6 +562,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
       saveChatModelConfig,
       saveChatTitleState,
       saveChatTitle,
+      setChatsProject,
       deleteChat,
       bulkDeleteChats,
       bulkExportChats,

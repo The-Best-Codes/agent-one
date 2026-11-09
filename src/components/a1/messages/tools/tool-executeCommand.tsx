@@ -60,7 +60,7 @@ function applyCarriageReturns(text: string): string {
   let result = "";
   let lineBuffer = "";
 
-  for (const char of text) {
+  for (const char of text.replaceAll("\r\n", "\n")) {
     if (char === "\r") {
       lineBuffer = "";
       continue;
@@ -223,7 +223,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
               AgentOne wants to run a command
             </span>
           </div>
-          <code className="bg-secondary text-foreground rounded px-2 py-1 text-xs break-all">
+          <code className="bg-secondary text-foreground rounded-sm px-2 py-1 text-xs break-all">
             {command}
           </code>
           <div className="flex items-center justify-end gap-2">

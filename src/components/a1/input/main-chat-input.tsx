@@ -5,7 +5,15 @@ import { EditorView, keymap } from "@codemirror/view";
 import { IconArrowUp, IconPaperclip, IconPlayerStopFilled } from "@tabler/icons-react";
 import CodeMirror from "@uiw/react-codemirror";
 import { useAtomValue, useAtomValueRawSync } from "jotai";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import {
   AdaptiveTooltip,
@@ -32,6 +40,7 @@ import { cn } from "@/lib/utils";
 
 import { ChatModelConfig } from "../chat-model-config";
 import { ModelSelector } from "../chat-model-selector";
+import { ShortcutKbd, ShortcutKeys } from "../shortcut-kbd";
 import { Attachments } from "./attachments";
 import { MainInputErrorSection } from "./error-section";
 import { MainInputIncompleteSection } from "./incomplete-section";
@@ -107,12 +116,14 @@ export const MainChatInput = ({
   initialValueKey,
   draftKey,
   disabled = false,
+  toolbarStart,
 }: {
   onScrollNeededAction?: () => void;
   initialValue?: string;
   initialValueKey?: string;
   draftKey: string;
   disabled?: boolean;
+  toolbarStart?: ReactNode;
 }) => {
   const { status } = useChatStatus();
   const isChatLoading = useChatLoading();
@@ -688,8 +699,8 @@ export const MainChatInput = ({
             basicSetup={EDITOR_BASIC_SETUP}
           />
         </div>
-        <div className="bg-secondary dark:bg-secondary flex items-center justify-between rounded-t-none rounded-b-md p-2 pr-0">
-          <div className="relative">
+        <div className="bg-secondary dark:bg-secondary flex items-center justify-between gap-2 rounded-t-none rounded-b-md p-2 pr-0">
+          <div className="relative flex min-w-0 items-center gap-2">
             <AdaptiveTooltip>
               <AdaptiveTooltipTrigger asChild>
                 <Button
@@ -722,12 +733,13 @@ export const MainChatInput = ({
               </AdaptiveTooltipTrigger>
               <AdaptiveTooltipContent>Attach files to your message</AdaptiveTooltipContent>
             </AdaptiveTooltip>
+            {toolbarStart}
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex flex-row" data-tour="model-selector">
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="flex min-w-0 flex-row" data-tour="model-selector">
               <ModelSelector
                 loading={isChatLoading}
-                className="w-40 min-w-0 flex-1 rounded-r-none sm:w-60"
+                className="w-40 min-w-0 flex-1 shrink rounded-r-none sm:w-60"
                 popoverClassName="w-60"
               />
 
@@ -765,7 +777,10 @@ export const MainChatInput = ({
                       <IconPlayerStopFilled />
                     </Button>
                   </AdaptiveTooltipTrigger>
-                  <AdaptiveTooltipContent>Stop the current response</AdaptiveTooltipContent>
+                  <AdaptiveTooltipContent>
+                    Stop the current response
+                    <ShortcutKbd id="stopResponse" />
+                  </AdaptiveTooltipContent>
                 </AdaptiveTooltip>
                 <AdaptiveTooltip>
                   <AdaptiveTooltipTrigger asChild>
@@ -800,6 +815,9 @@ export const MainChatInput = ({
                     {showInterruptButton
                       ? "Stop the response and send your message"
                       : "Send your message"}
+                    {!(isMobile && chatShortcutKey === "enter") && (
+                      <ShortcutKeys shortcut={getChatShortcut(chatShortcutKey)} />
+                    )}
                   </AdaptiveTooltipContent>
                 </AdaptiveTooltip>
               </ButtonGroup>

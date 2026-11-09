@@ -26,7 +26,6 @@ export const createWebSearchTool = (config: WebSearchToolConfig) =>
   tool({
     description:
       "Search the web for current information, news, and answers to questions using DuckDuckGo. Returns real-time search results with titles, URLs, and snippets.",
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       query: z.string().min(1).max(512).describe("Search query to find information on the web"),
       maxResults: z

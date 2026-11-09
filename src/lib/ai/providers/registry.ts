@@ -1,5 +1,6 @@
 import type { LanguageModel } from "ai";
 
+import { AGENT_ONE_CLIENT_HEADERS } from "./agent-one-headers";
 import { getAnthropic } from "./factories/anthropic";
 import { getCohere } from "./factories/cohere";
 import { getDeepInfra } from "./factories/deepinfra";
@@ -19,7 +20,7 @@ import { getXai } from "./factories/xai";
 const getAgentOne = createOpenAICompatibleFactory(
   "agent-one",
   "https://www.agent-one.dev/api/openai-compat/v1",
-  undefined,
+  AGENT_ONE_CLIENT_HEADERS,
   {
     emptyApiKey: "not-authenticated",
   },

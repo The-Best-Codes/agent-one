@@ -4,12 +4,10 @@ import { z } from "zod";
 
 import { type SettingAtom, settingAtoms } from "@/lib/jotai/settings-atoms";
 import { SETTINGS, type SettingKey } from "@/lib/settings/definitions";
-import type { UpdateSettingToolConfig } from "@/lib/settings/types";
 
-export const createUpdateSettingTool = (config: UpdateSettingToolConfig) =>
+export const createUpdateSettingTool = () =>
   tool({
     description: "Update a specific AI-accessible setting key's value.",
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       key: z
         .string()

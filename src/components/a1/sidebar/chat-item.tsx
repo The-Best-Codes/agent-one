@@ -5,8 +5,13 @@ import {
   IconDownload,
   IconEdit,
   IconClockPlay,
+  IconCheck,
+  IconFolder,
+  IconFolderOff,
+  IconFolderShare,
   IconTrash,
 } from "@tabler/icons-react";
+import { useAtomValue } from "jotai";
 import { memo, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 
@@ -24,6 +29,9 @@ import {
   ContextMenuGroup,
   ContextMenuItem,
   ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import {
@@ -32,9 +40,14 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { getLogger } from "@/lib/logger";
+import { projectsAtom } from "@/lib/projects";
 import { cn } from "@/lib/utils";
 
 import { ChatStatusIndicator } from "./chat-status-indicator";
@@ -146,6 +159,8 @@ interface ChatItemProps {
   branchOf?: string;
   branchParentTitle?: string;
   scheduledAgentTitle?: string;
+  projectId?: string;
+  showProject?: boolean;
   snippet?: string;
   selectionMode?: boolean;
   isSelected?: boolean;
@@ -162,6 +177,8 @@ export const ChatItem = memo(
     branchOf,
     branchParentTitle,
     scheduledAgentTitle,
+    projectId,
+    showProject,
     snippet,
     selectionMode,
     isSelected,
@@ -172,8 +189,18 @@ export const ChatItem = memo(
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const projects = useAtomValue(projectsAtom);
+    const { setChatsProject } = usePersistence();
 
     const isSelectedChat = activeChatId === id;
+    const projectName = showProject
+      ? projects.find((project) => project.id === projectId)?.name
+      : undefined;
+    const hasSubtitle = Boolean(snippet || projectName);
+    const moveToProject = (targetProjectId: string | undefined) => {
+      logger.verbose("Moving chat to project", { chatId: id, projectId: targetProjectId });
+      setChatsProject([id], targetProjectId);
+    };
 
     if (selectionMode) {
       return (
@@ -204,7 +231,7 @@ export const ChatItem = memo(
               variant={isSelectedChat ? "secondary" : "ghost"}
               className={cn(
                 "group/chat-item w-full justify-between pr-1 pl-2 transition-none",
-                snippet ? "h-auto items-start py-1" : "py-2",
+                hasSubtitle ? "h-auto items-start py-1" : "py-2",
                 isSelectedChat && "border border-border",
               )}
               asChild
@@ -247,6 +274,12 @@ export const ChatItem = memo(
                     {scheduledAgentTitle && <ScheduledAgentIcon title={scheduledAgentTitle} />}
                     <MarqueeText contentClassName="pe-7">{title}</MarqueeText>
                   </span>
+                  {projectName && (
+                    <span className="text-muted-foreground mt-0.5 flex min-w-0 items-center gap-1 text-xs font-normal">
+                      <IconFolder className="size-3 shrink-0" />
+                      <span className="truncate">{projectName}</span>
+                    </span>
+                  )}
                   {snippet && (
                     <span className="text-muted-foreground [&_mark]:text-foreground mt-0.5 truncate text-xs italic [&_mark]:bg-yellow-500/30">
                       {renderSnippet(snippet)}
@@ -305,6 +338,39 @@ export const ChatItem = memo(
                           <IconDownload />
                           Export Chat
                         </DropdownMenuItem>
+                        {(projects.length > 0 || projectId) && (
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger onClick={(e) => e.stopPropagation()}>
+                              <IconFolderShare />
+                              Move to Project
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent>
+                              {projects.map((project) => (
+                                <DropdownMenuItem
+                                  key={project.id}
+                                  onClick={(e) => e.stopPropagation()}
+                                  onSelect={() => moveToProject(project.id)}
+                                  disabled={project.id === projectId}
+                                >
+                                  {project.id === projectId ? <IconCheck /> : <IconFolder />}
+                                  <span className="max-w-60 truncate">{project.name}</span>
+                                </DropdownMenuItem>
+                              ))}
+                              {projectId && (
+                                <>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    onClick={(e) => e.stopPropagation()}
+                                    onSelect={() => moveToProject(undefined)}
+                                  >
+                                    <IconFolderOff />
+                                    Remove from Project
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+                        )}
                         <DropdownMenuItem
                           onClick={(e) => {
                             e.stopPropagation();
@@ -368,6 +434,35 @@ export const ChatItem = memo(
                 <IconDownload />
                 Export Chat
               </ContextMenuItem>
+              {(projects.length > 0 || projectId) && (
+                <ContextMenuSub>
+                  <ContextMenuSubTrigger>
+                    <IconFolderShare />
+                    Move to Project
+                  </ContextMenuSubTrigger>
+                  <ContextMenuSubContent>
+                    {projects.map((project) => (
+                      <ContextMenuItem
+                        key={project.id}
+                        onClick={() => moveToProject(project.id)}
+                        disabled={project.id === projectId}
+                      >
+                        {project.id === projectId ? <IconCheck /> : <IconFolder />}
+                        <span className="max-w-60 truncate">{project.name}</span>
+                      </ContextMenuItem>
+                    ))}
+                    {projectId && (
+                      <>
+                        <ContextMenuSeparator />
+                        <ContextMenuItem onClick={() => moveToProject(undefined)}>
+                          <IconFolderOff />
+                          Remove from Project
+                        </ContextMenuItem>
+                      </>
+                    )}
+                  </ContextMenuSubContent>
+                </ContextMenuSub>
+              )}
               <ContextMenuItem
                 variant="destructive"
                 onClick={() => {

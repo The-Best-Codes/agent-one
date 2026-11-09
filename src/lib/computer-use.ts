@@ -12,6 +12,7 @@ export interface ComputerUseAppInfo {
   name: string;
   pid?: number;
   windows: string[];
+  needsRestart?: boolean;
 }
 
 export interface ComputerUseInstalledApp {
@@ -30,6 +31,7 @@ export interface ComputerUseAppState {
   app: string;
   pid: number;
   window?: string;
+  windowId?: number;
   tree: string;
   elementCount: number;
   truncated: boolean;
@@ -52,16 +54,24 @@ export type ComputerUseAction =
   | {
       type: "scroll";
       direction: "up" | "down" | "left" | "right";
-      amount?: number;
+      pages?: number;
       elementIndex?: number;
       x?: number;
       y?: number;
     }
   | { type: "drag"; fromX: number; fromY: number; toX: number; toY: number }
   | { type: "setValue"; elementIndex: number; value: string }
+  | {
+      type: "selectText";
+      elementIndex: number;
+      text: string;
+      prefix?: string;
+      suffix?: string;
+      mode?: "select" | "before" | "after";
+    }
   | { type: "performAction"; elementIndex: number; action: string };
 
-export const isComputerUseSupported = () => ["macos", "windows"].includes(platform());
+export const isComputerUseSupported = () => ["macos", "windows", "linux"].includes(platform());
 
 export const getComputerUsePermissions = () =>
   invoke<ComputerUsePermissions>("computer_use_permissions");

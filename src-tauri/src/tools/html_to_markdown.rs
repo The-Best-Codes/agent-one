@@ -1,8 +1,8 @@
-use htmd::{element_handler::Handlers, Element, HtmlToMarkdown};
-use once_cell::sync::Lazy;
+use htmd::{Element, HtmlToMarkdown, element_handler::Handlers};
 use regex::Regex;
+use std::sync::LazyLock;
 
-static BLANK_LINE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\n\s*\n\s*\n+").unwrap());
+static BLANK_LINE_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\n\s*\n\s*\n+").unwrap());
 
 const NORMAL_URL_LIMIT: usize = 2_000;
 const DATA_URL_LIMIT: usize = 200;

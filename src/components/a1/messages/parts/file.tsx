@@ -22,7 +22,7 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
         {file.filename && (
           <div className="bg-background border-t p-2">
             <div className="text-muted-foreground flex items-center gap-1 text-xs">
-              <IconPolaroid />
+              <IconPolaroid className="shrink-0" />
               <span className="truncate">{file.filename}</span>
             </div>
           </div>
@@ -44,7 +44,7 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
         {file.filename && (
           <div className="bg-background border-t p-2">
             <div className="text-muted-foreground flex items-center gap-1 text-xs">
-              <IconFileTypePdf />
+              <IconFileTypePdf className="shrink-0" />
               <span className="truncate">{file.filename} &middot; PDF</span>
             </div>
           </div>

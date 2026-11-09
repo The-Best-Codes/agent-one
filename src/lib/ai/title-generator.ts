@@ -1,6 +1,7 @@
 import type { LanguageModel, TextPart, UIMessage } from "ai";
 import { extractReasoningMiddleware, generateText, wrapLanguageModel } from "ai";
 
+import { getAgentOneRequestHeaders } from "@/lib/ai/providers/agent-one-headers";
 import { getLogger } from "@/lib/logger";
 import type { TitleGenerationSettings } from "@/lib/settings/types";
 
@@ -47,6 +48,7 @@ export async function generateChatTitleAI(
   maxTokens?: number | "none",
   extractReasoningEnabled = false,
   characterLimit = 50,
+  requestMetadata?: { chatId?: string; trigger?: "auto" | "manual" },
 ): Promise<string> {
   logger.verbose(`Generating AI title for chat with ${messages.length} messages`);
   try {
@@ -82,6 +84,10 @@ Even if the transcript seems very short or empty, generate a title based on the 
 
 ${conversationText}`,
       maxOutputTokens: calculateMaxOutputTokens(maxTokens),
+      headers: getAgentOneRequestHeaders(titleModel, {
+        type: "title-generation",
+        ...requestMetadata,
+      }),
     });
 
     const title = result.text.trim().replace(/^["']|["']$/g, "");
@@ -141,6 +147,7 @@ export async function generateChatTitle(
   settings: TitleGenerationSettings,
   maxTokens?: number | "none",
   extractReasoningEnabled = false,
+  chatId?: string,
 ): Promise<string> {
   const syncTitle = generateChatTitleFromSettings(messages, settings);
   if (syncTitle !== null) {
@@ -154,5 +161,6 @@ export async function generateChatTitle(
     maxTokens ?? settings.maxOutputTokens,
     extractReasoningEnabled,
     settings.characterLimit,
+    { chatId, trigger: "auto" },
   );
 }

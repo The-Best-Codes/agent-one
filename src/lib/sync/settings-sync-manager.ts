@@ -2,7 +2,7 @@ import { getDefaultStore } from "jotai";
 import debounce from "lodash.debounce";
 
 import { authClient, getAuthToken, SERVER_URL } from "@/lib/auth/auth-client";
-import { syncEnabledAtom } from "@/lib/jotai/atoms";
+import { syncEnabledAtom } from "@/lib/jotai/sync-atoms";
 import { getLogger } from "@/lib/logger";
 import { DEFAULT_SETTINGS, SETTING_KEYS, type SettingKey } from "@/lib/settings/definitions";
 

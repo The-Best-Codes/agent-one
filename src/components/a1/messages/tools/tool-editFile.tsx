@@ -110,7 +110,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
             </span>
           </div>
           {input?.oldContent && input?.newContent && (
-            <div className="border-border overflow-hidden rounded border">
+            <div className="border-border overflow-hidden rounded-sm border">
               <DiffView
                 oldContent={input.oldContent}
                 newContent={input.newContent}
@@ -227,7 +227,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
               {oldContent && newContent ? (
-                <div className="border-border w-full overflow-hidden rounded border">
+                <div className="border-border w-full overflow-hidden rounded-sm border">
                   <DiffView oldContent={oldContent} newContent={newContent} filePath={filePath} />
                 </div>
               ) : (

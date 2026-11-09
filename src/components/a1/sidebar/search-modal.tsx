@@ -19,7 +19,7 @@ export const SearchModal = ({ isOpen, onClose, activeChatId }: SearchModalProps)
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         showCloseButton={false}
-        className="flex max-h-[80svh] max-w-2xl flex-col gap-0 p-2"
+        className="flex max-h-[80svh] flex-col gap-0 p-2 sm:max-w-xl"
       >
         <DialogHeader>
           <DialogTitle className="sr-only flex items-center gap-2">Chat search dialog</DialogTitle>

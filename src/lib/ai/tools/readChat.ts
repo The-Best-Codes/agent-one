@@ -2,11 +2,13 @@ import { isToolUIPart, tool, type UIMessage } from "ai";
 import { z } from "zod";
 
 import formatBytes from "@/lib/format-bytes";
+import { canAccessChat, getChatAccessScope, type Project } from "@/lib/projects";
 import type { ReadChatToolConfig } from "@/lib/settings/types";
 import { chatStorage } from "@/lib/storage/chat-storage";
 
 export interface ChatToolsContext {
   currentChatId?: string;
+  project?: Project;
 }
 
 function reduceTranscript(messages: UIMessage[], includeToolCalls: boolean) {
@@ -34,7 +36,6 @@ export const createReadChatTool = (config: ReadChatToolConfig, context: ChatTool
   return tool({
     description:
       "Read part of one of the user's past conversations with you, by chat ID (from the searchChats tool). The chat is turned into a JSON transcript of its messages (reasoning and tool calls are left out unless includeToolCalls is true, and attachment data is replaced with a short description); this returns a range of that transcript starting at a character offset. If hasMore is true, you haven't read the whole chat: keep reading from end, and don't assume anything about parts you haven't read. The conversation you are currently in is marked with isCurrent: true, and its latest messages may not be saved yet.",
-    needsApproval: config.requiresApproval,
     inputSchema: z.object({
       chatId: z.string().min(1).describe("The ID of the chat to read."),
       start: z
@@ -66,7 +67,10 @@ export const createReadChatTool = (config: ReadChatToolConfig, context: ChatTool
         chatStorage.getChatMessages(chatId),
       ]);
 
-      if (!metadata && messages === null) {
+      if (
+        (!metadata && messages === null) ||
+        !canAccessChat(metadata?.projectId, getChatAccessScope(context.project))
+      ) {
         throw new Error(`No chat found with ID "${chatId}".`);
       }
 

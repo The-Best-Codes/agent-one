@@ -15,6 +15,7 @@ import {
   type UIMessageChunk,
   wrapLanguageModel,
 } from "ai";
+import { getDefaultStore } from "jotai";
 
 import {
   getReasoningEffort,
@@ -40,14 +41,23 @@ import {
   UIMessageChunkInjector,
   withCompactionSummary,
 } from "@/lib/ai/compaction";
+import {
+  createAgentOneTurnId,
+  getAgentOneRequestHeaders,
+} from "@/lib/ai/providers/agent-one-headers";
+import { toolApproval } from "@/lib/ai/tools/approval";
+import { createAutoModeApproval } from "@/lib/ai/tools/auto-mode";
 import type { ChatToolsContext } from "@/lib/ai/tools/readChat";
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
+import { getAgentsFilesPromptSection, type Project } from "@/lib/projects";
 
 const logger = getLogger(import.meta.url);
 
 export class CustomChatTransport implements ChatTransport<UIMessage> {
   private model: LanguageModel | null;
+  private autoModeModel: LanguageModel | null = null;
   private modelId: string | null;
   private providerName: string | null;
   private modelConfig: ModelConfig;
@@ -59,7 +69,8 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     toolBehavior?: ToolBehavior;
     chatContext?: ChatToolsContext;
   }) => Promise<ToolSet>;
-  private getSystemPrompt: () => string;
+  private getSystemPrompt: (project?: Project) => string;
+  private getChatProject: (chatId: string) => Project | undefined;
   private getApiKeysLoadedPromise: () => Promise<void>;
 
   constructor(
@@ -73,7 +84,8 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       toolBehavior?: ToolBehavior;
       chatContext?: ChatToolsContext;
     }) => Promise<ToolSet>,
-    getSystemPrompt: () => string,
+    getSystemPrompt: (project?: Project) => string,
+    getChatProject: (chatId: string) => Project | undefined,
     getApiKeysLoadedPromise: () => Promise<void>,
   ) {
     this.model = model;
@@ -83,6 +95,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     this.extractReasoningEnabled = extractReasoningEnabled;
     this.getTools = getTools;
     this.getSystemPrompt = getSystemPrompt;
+    this.getChatProject = getChatProject;
     this.getApiKeysLoadedPromise = getApiKeysLoadedPromise;
   }
 
@@ -93,6 +106,10 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       "CustomChatTransport model updated to:",
       typeof model === "string" ? model : model?.modelId,
     );
+  }
+
+  updateAutoModeModel(model: LanguageModel | null) {
+    this.autoModeModel = model;
   }
 
   updateModelId(modelId: string | null) {
@@ -118,7 +135,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     );
   }
 
-  updateSystemPrompt(getSystemPrompt: () => string) {
+  updateSystemPrompt(getSystemPrompt: (project?: Project) => string) {
     this.getSystemPrompt = getSystemPrompt;
     logger.verbose("CustomChatTransport system prompt updated");
   }
@@ -173,19 +190,46 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
         : baseModel;
 
     await this.getApiKeysLoadedPromise();
-    const systemPrompt = this.getSystemPrompt();
+    const project = this.getChatProject(options.chatId);
+    const agentsSection = await getAgentsFilesPromptSection(project);
+    const basePrompt = this.getSystemPrompt(project);
+    const systemPrompt = agentsSection ? `${basePrompt}\n\n${agentsSection}` : basePrompt;
     const toolBehavior = getToolBehavior(modelConfig);
     const mcpAppContextInstructions = this.getMcpAppModelContextInstructions();
     const instructions = mcpAppContextInstructions
       ? `${systemPrompt}\n\n${mcpAppContextInstructions}`
       : systemPrompt;
-    const chatContext: ChatToolsContext = { currentChatId: options.chatId };
+    const chatContext: ChatToolsContext = { currentChatId: options.chatId, project };
+    const turnId = createAgentOneTurnId();
+    const autoModeModel = this.autoModeModel ?? baseModel;
+    const autoModeRules = getDefaultStore().get(settingAtoms.AUTO_MODE_RULES);
+    const createAutoApproval = (
+      abortSignal: AbortSignal | undefined,
+      subAgent?: { contextMessages: ModelMessage[] },
+    ) =>
+      createAutoModeApproval({
+        model: autoModeModel,
+        extractReasoningEnabled,
+        rules: autoModeRules,
+        projectFolder: project?.folder,
+        chatId: options.chatId,
+        parentTurnId: turnId,
+        abortSignal,
+        delegatedTask: subAgent !== undefined,
+        contextMessages: subAgent?.contextMessages,
+      });
     const subAgentContext: SubAgentExecutionContext = {
+      chatId: options.chatId,
+      parentTurnId: turnId,
       model: baseModel,
       modelConfig,
       systemPrompt,
       extractReasoningEnabled,
       getTools: () => this.getTools({ subAgentContext, toolBehavior, chatContext }),
+      createToolApproval:
+        toolBehavior === "auto"
+          ? (abortSignal) => createAutoApproval(abortSignal, { contextMessages: messages })
+          : undefined,
     };
     const tools =
       toolBehavior === "disable"
@@ -223,7 +267,10 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     const compact = async (
       messagesToSummarize: ModelMessage[],
       writeChunk: (chunk: UIMessageChunk) => void,
-      { fallbackOnError = false }: { fallbackOnError?: boolean } = {},
+      {
+        fallbackOnError = false,
+        trigger = "manual",
+      }: { fallbackOnError?: boolean; trigger?: "manual" | "auto" } = {},
     ) => {
       const compactionId = generateId();
       writeChunk(createCompactionChunk(compactionId, { status: "compacting" }));
@@ -235,6 +282,12 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
           messages: messagesToSummarize,
           startsWithSummary: activeCompactionId !== undefined,
           abortSignal: options.abortSignal,
+          headers: getAgentOneRequestHeaders(model, {
+            type: "compaction",
+            chatId: options.chatId,
+            trigger,
+            parentTurnId: turnId,
+          }),
         });
       } catch (error) {
         if (options.abortSignal?.aborted) {
@@ -322,7 +375,14 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       reasoning: getReasoningEffort(modelConfig),
       messages,
       abortSignal: options.abortSignal,
+      headers: getAgentOneRequestHeaders(
+        model,
+        { type: "chat", chatId: options.chatId, trigger: options.trigger },
+        turnId,
+      ),
       tools,
+      toolApproval:
+        toolBehavior === "auto" ? createAutoApproval(options.abortSignal) : toolApproval,
       toolChoice: toolBehavior === "disable" ? "none" : "auto",
       stopWhen: stopWhenCondition,
       instructions,
@@ -367,7 +427,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
         const { compactionId, summary } = await compact(
           stepMessages,
           (chunk) => chunkInjector.write(chunk),
-          { fallbackOnError: true },
+          { fallbackOnError: true, trigger: "auto" },
         );
 
         activeCompactionId = compactionId;

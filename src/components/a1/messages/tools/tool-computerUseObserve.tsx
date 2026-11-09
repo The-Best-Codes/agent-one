@@ -144,7 +144,7 @@ export const MessagePartToolComputerUseObserve = ({ part }: { part: ToolUIPart }
           </div>
           {input.view === "app" && input.includeScreenshot ? (
             <span className="text-muted-foreground text-sm">
-              This brings the window to the front and takes a screenshot.
+              This takes a screenshot of the window.
             </span>
           ) : null}
           <div className="flex items-center justify-end gap-2">

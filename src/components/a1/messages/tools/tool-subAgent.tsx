@@ -117,7 +117,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
               AgentOne wants to spawn a subagent
             </span>
           </div>
-          <div className="bg-secondary rounded px-2 py-1 text-xs wrap-break-word">{task}</div>
+          <div className="bg-secondary rounded-sm px-2 py-1 text-xs wrap-break-word">{task}</div>
           <div className="flex items-center justify-end gap-2">
             <Button
               size="sm"

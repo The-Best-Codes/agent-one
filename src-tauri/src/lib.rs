@@ -1,5 +1,5 @@
 use tauri::{Listener, Manager};
-use tauri_plugin_log::{log::LevelFilter, FileOpenStrategy, RotationStrategy, Target, TargetKind};
+use tauri_plugin_log::{FileOpenStrategy, RotationStrategy, Target, TargetKind, log::LevelFilter};
 
 const LOG_FILE_NAME: &str = "agent-one-logs";
 const LOG_LEVEL_ENV: &str = "AGENT_ONE_LOG_LEVEL";
@@ -20,7 +20,7 @@ fn log_level() -> LevelFilter {
     }
 }
 
-#[cfg(any(target_os = "macos", target_os = "windows"))]
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 mod computer_use;
 mod keyring;
 mod mcp_auth;
@@ -152,6 +152,18 @@ pub fn run() {
                             ),
                             kind: tauri_plugin_sql::MigrationKind::Up,
                         },
+                        tauri_plugin_sql::Migration {
+                            version: 9,
+                            description: "add_projects",
+                            sql: include_str!("../migrations/0009_add_projects.sql"),
+                            kind: tauri_plugin_sql::MigrationKind::Up,
+                        },
+                        tauri_plugin_sql::Migration {
+                            version: 10,
+                            description: "add_project_skills_folders",
+                            sql: include_str!("../migrations/0010_add_project_skills_folders.sql"),
+                            kind: tauri_plugin_sql::MigrationKind::Up,
+                        },
                     ],
                 )
                 .add_migrations(
@@ -254,17 +266,11 @@ pub fn run() {
                     utils::delete_scheduled_agent,
                     utils::list_webviews,
                     utils::force_close_webview,
-                    #[cfg(any(target_os = "macos", target_os = "windows"))]
                     computer_use::computer_use_permissions,
-                    #[cfg(any(target_os = "macos", target_os = "windows"))]
                     computer_use::computer_use_request_permission,
-                    #[cfg(any(target_os = "macos", target_os = "windows"))]
                     computer_use::computer_use_list_apps,
-                    #[cfg(any(target_os = "macos", target_os = "windows"))]
                     computer_use::computer_use_search_installed_apps,
-                    #[cfg(any(target_os = "macos", target_os = "windows"))]
                     computer_use::computer_use_get_state,
-                    #[cfg(any(target_os = "macos", target_os = "windows"))]
                     computer_use::computer_use_act,
                     keyring::storage_get_item,
                     keyring::storage_set_item,
