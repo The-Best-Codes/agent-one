@@ -4,6 +4,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import { useAtomValue } from "jotai";
 import { memo } from "react";
 
+import { chatMentionChips } from "@/components/a1/input/chat-input-mentions";
 import { useTheme } from "@/hooks/use-theme";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 
@@ -41,6 +42,7 @@ export const PerformantMarkdown = memo(
             editorTheme,
             EditorView.lineWrapping,
             EditorView.editable.of(false),
+            chatMentionChips,
           ]}
           readOnly={true}
           basicSetup={{

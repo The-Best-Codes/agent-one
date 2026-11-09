@@ -7,6 +7,7 @@ import type { UIMessage } from "ai";
 import { useAtom, useAtomValue } from "jotai";
 import { useState } from "react";
 
+import { chatMentionChips } from "@/components/a1/input/chat-input-mentions";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
@@ -96,6 +97,7 @@ export function UserMessageEditor({
           ...(markdownHighlighting ? [markdown({ base: markdownLanguage })] : []),
           editorTheme,
           EditorView.lineWrapping,
+          chatMentionChips,
           EditorView.contentAttributes.of({ spellcheck: "true", "aria-label": "Edit message" }),
           Prec.highest(
             keymap.of([

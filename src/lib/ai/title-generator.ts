@@ -2,6 +2,7 @@ import type { LanguageModel, TextPart, UIMessage } from "ai";
 import { extractReasoningMiddleware, generateText, wrapLanguageModel } from "ai";
 
 import { getAgentOneRequestHeaders } from "@/lib/ai/providers/agent-one-headers";
+import { formatChatMentionsAsText } from "@/lib/chat-mentions";
 import { getLogger } from "@/lib/logger";
 import type { TitleGenerationSettings } from "@/lib/settings/types";
 
@@ -19,11 +20,12 @@ function calculateMaxOutputTokens(maxTokens?: number | "none"): number | undefin
 }
 
 function extractTextFromMessage(message: UIMessage): string {
-  return message.parts
-    .filter((part) => part.type === "text")
-    .map((part) => (part as TextPart).text)
-    .join(" ")
-    .trim();
+  return formatChatMentionsAsText(
+    message.parts
+      .filter((part) => part.type === "text")
+      .map((part) => (part as TextPart).text)
+      .join(" "),
+  ).trim();
 }
 
 export function hasMessageTextContent(message: UIMessage): boolean {
@@ -64,7 +66,7 @@ export async function generateChatTitleAI(
           .filter((part) => part.type === "text")
           .map((part) => (part as TextPart).text)
           .join(" ");
-        return `${msg.role}: ${textParts}`;
+        return `${msg.role}: ${formatChatMentionsAsText(textParts)}`;
       })
       .join("\n")
       .slice(0, 1000);

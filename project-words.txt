@@ -342,3 +342,5 @@ defaultmaxchars
 unminimize
 srgb
 lastexitcode
+Prec
+activedescendant
