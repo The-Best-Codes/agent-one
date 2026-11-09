@@ -14,7 +14,6 @@ import BoringAvatar from "boring-avatars";
 import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 
-import { ExternalLink } from "@/components/a1/external-link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,6 +36,7 @@ import {
   AGENT_ONE_DASHBOARD_URL,
   AGENT_ONE_UPGRADE_URL,
 } from "@/lib/constants";
+import { openExternalUrl } from "@/lib/open-external-url";
 
 import { SettingsLink } from "../settings-link";
 import { SignOutModal } from "./modals";
@@ -106,20 +106,20 @@ export function AccountMenu({ activeChatId }: { activeChatId?: string }) {
               <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
               <DropdownMenuGroup>
                 {customerState && (
-                  <DropdownMenuItem asChild>
-                    <ExternalLink
-                      href={activeSubscription ? AGENT_ONE_BILLING_URL : AGENT_ONE_UPGRADE_URL}
-                    >
-                      {activeSubscription ? <IconCreditCard /> : <IconRocket />}
-                      {activeSubscription ? "Manage Billing" : "Upgrade Your Plan"}
-                    </ExternalLink>
+                  <DropdownMenuItem
+                    onSelect={() =>
+                      openExternalUrl(
+                        activeSubscription ? AGENT_ONE_BILLING_URL : AGENT_ONE_UPGRADE_URL,
+                      )
+                    }
+                  >
+                    {activeSubscription ? <IconCreditCard /> : <IconRocket />}
+                    {activeSubscription ? "Manage Billing" : "Upgrade Your Plan"}
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem asChild>
-                  <ExternalLink href={AGENT_ONE_DASHBOARD_URL}>
-                    <IconExternalLink />
-                    Account Dashboard
-                  </ExternalLink>
+                <DropdownMenuItem onSelect={() => openExternalUrl(AGENT_ONE_DASHBOARD_URL)}>
+                  <IconExternalLink />
+                  Account Dashboard
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </>

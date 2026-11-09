@@ -1,9 +1,9 @@
-import { openUrl } from "@tauri-apps/plugin-opener";
+// Don't use this inside menu items (DropdownMenuItem, ContextMenuItem, etc.) via asChild.
+// On macOS the menu never receives the click, so nothing happens and the menu stays open.
+// Use the item's onSelect with openExternalUrl from "@/lib/open-external-url" instead.
 import type { ComponentProps, MouseEvent } from "react";
 
-import { getLogger } from "@/lib/logger";
-
-const logger = getLogger(import.meta.url);
+import { openExternalUrl } from "@/lib/open-external-url";
 
 type ExternalLinkProps = Omit<ComponentProps<"a">, "target"> & {
   openWith?: string;
@@ -14,9 +14,7 @@ export function ExternalLink({ href, openWith, onClick, rel, ...props }: Externa
     onClick?.(event);
     if (event.defaultPrevented || !href) return;
     event.preventDefault();
-    void openUrl(href, openWith).catch((error: unknown) => {
-      logger.error("Failed to open external link", error);
-    });
+    openExternalUrl(href, openWith);
   };
 
   return (
