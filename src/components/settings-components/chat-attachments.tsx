@@ -3,6 +3,7 @@ import { useAtom } from "jotai";
 
 import { ModelSelector } from "@/components/a1/chat-model-selector";
 import { Button } from "@/components/ui/button";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import type { AttachmentKind } from "@/lib/attachments";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
@@ -21,13 +22,13 @@ export function AttachmentModelsControl() {
   const modelIds = value && typeof value === "object" ? value : {};
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <FieldGroup className="gap-1.5">
       {KINDS.map(({ kind, label }) => {
         const modelId = typeof modelIds[kind] === "string" ? modelIds[kind] : "";
         const model = modelId ? (getChatModelById(modelId) ?? null) : null;
         return (
-          <div key={kind} className="flex items-center justify-between gap-2">
-            <span className="text-sm">{label}</span>
+          <Field key={kind} orientation="horizontal">
+            <FieldLabel htmlFor={`attachment-model-${kind}`}>{label}</FieldLabel>
             <div className="flex min-w-0 items-center gap-1">
               <ModelSelector
                 id={`attachment-model-${kind}`}
@@ -47,9 +48,9 @@ export function AttachmentModelsControl() {
                 <IconRestore />
               </Button>
             </div>
-          </div>
+          </Field>
         );
       })}
-    </div>
+    </FieldGroup>
   );
 }
