@@ -344,3 +344,5 @@ srgb
 lastexitcode
 Prec
 activedescendant
+matroska
+quicktime

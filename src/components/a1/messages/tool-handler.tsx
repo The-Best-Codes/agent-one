@@ -29,6 +29,7 @@ import { MessagePartToolSendFeedback } from "./tools/tool-sendFeedback";
 import { MessagePartToolSubAgent } from "./tools/tool-subAgent";
 import { MessagePartToolUpdateScheduledAgent } from "./tools/tool-updateScheduledAgent";
 import { MessagePartToolUpdateSetting } from "./tools/tool-updateSetting";
+import { MessagePartToolViewAttachment } from "./tools/tool-viewAttachment";
 import { MessagePartToolViewFile } from "./tools/tool-viewFile";
 import { MessagePartToolWaitNumberMilliseconds } from "./tools/tool-waitNumberMilliseconds";
 import { MessagePartToolWebSearch } from "./tools/tool-webSearch";
@@ -64,6 +65,8 @@ function ToolPart({ part }: MessageToolHandlerProps) {
       return <MessagePartToolDeleteFile part={part} />;
     case "tool-viewFile":
       return <MessagePartToolViewFile part={part} />;
+    case "tool-viewAttachment":
+      return <MessagePartToolViewAttachment part={part} />;
     case "tool-executeCommand":
       return <MessagePartToolExecuteCommand part={part} />;
     case "tool-subAgent":

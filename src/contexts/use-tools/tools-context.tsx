@@ -14,6 +14,7 @@ import {
   createMemoryTool,
   createSubAgentTool,
   createListSkillsTool,
+  createViewAttachmentTool,
   createViewFileTool,
   createWaitTool,
   createWebSearchTool,
@@ -45,6 +46,7 @@ import {
 import { clearMcpOAuthCredentials, dismissMcpLoginToasts } from "@/lib/ai/tools/mcp/oauth";
 import type { ChatToolsContext } from "@/lib/ai/tools/readChat";
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
+import type { ViewAttachmentContext } from "@/lib/ai/tools/viewAttachment";
 import { isComputerUseSupported } from "@/lib/computer-use";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom, mcpServersAtom } from "@/lib/jotai/mcp-atoms";
 import type { McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
@@ -62,6 +64,7 @@ export interface ToolsContextType {
     subAgentContext?: SubAgentExecutionContext;
     toolBehavior?: ToolBehavior;
     chatContext?: ChatToolsContext;
+    viewAttachment?: ViewAttachmentContext;
   }) => Promise<ToolSet>;
   isMcpLoading: boolean;
   mcpLoaded: boolean;
@@ -477,6 +480,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       subAgentContext?: SubAgentExecutionContext;
       toolBehavior?: ToolBehavior;
       chatContext?: ChatToolsContext;
+      viewAttachment?: ViewAttachmentContext;
     }): Promise<ToolSet> => {
       const filteredStaticTools: ToolSet = {};
       const chatContext = options?.chatContext ?? {};
@@ -587,6 +591,13 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         filteredStaticTools.listSkills = withApproval(
           createListSkillsTool(chatContext.project),
           mergedToolConfigs.viewFile.requiresApproval,
+        );
+      }
+
+      if (options?.viewAttachment) {
+        filteredStaticTools.viewAttachment = withApproval(
+          createViewAttachmentTool(options.viewAttachment),
+          false,
         );
       }
 

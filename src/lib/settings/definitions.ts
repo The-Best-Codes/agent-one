@@ -4,6 +4,7 @@
 import { defaultKeyboardShortcuts, type KeyboardShortcutSettings } from "@/lib/kbd-registry";
 
 import type {
+  AttachmentModelSettings,
   ChatBackgroundSettings,
   TitleGenerationSettings,
   ToolConfigs,
@@ -212,6 +213,21 @@ export const SETTINGS = {
     label: "/ Skill Suggestions",
     description: "Suggest skills when typing / in the chat input.",
     default: true,
+  }),
+  VIEW_ATTACHMENTS_ENABLED: toggle({
+    keywords: ["attachments", "images", "video", "audio", "pdf", "vision", "files", "tool"],
+    ai: "write",
+    label: "Let AgentOne look at attachments",
+    description:
+      "When AgentOne needs to know what's in a file you attached, like an image or a PDF, it can send the file to another model to look at it.",
+    default: true,
+  }),
+  ATTACHMENT_MODELS: data<AttachmentModelSettings>({
+    keywords: ["attachments", "images", "video", "audio", "pdf", "vision", "files", "model"],
+    label: "Models for looking at attachments",
+    description:
+      "When the chat model needs to know what's in an attached file, it asks one of these models to look at it. Pick a model that can read that type of file. By default, the chat's own model is used.",
+    default: {},
   }),
   INPUT_STYLE: select({
     keywords: ["composer", "prompt box", "text box", "chat box", "position", "layout"],

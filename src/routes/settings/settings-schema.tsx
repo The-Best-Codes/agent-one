@@ -17,6 +17,7 @@ import {
   ThemeControl,
   TintControl,
 } from "@/components/settings-components/appearance";
+import { AttachmentModelsControl } from "@/components/settings-components/chat-attachments";
 import {
   ChatBackgroundEffects,
   ChatBackgroundPicker,
@@ -359,6 +360,23 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
           { id: "show-scroll-to-bottom-button", key: "SHOW_CHAT_TO_BOTTOM_BUTTON" },
           { id: "show-message-preview-rail", key: "SHOW_MESSAGE_PREVIEW_RAIL" },
           { id: "chat-status-indicators", key: "SHOW_CHAT_STATUS_INDICATOR" },
+        ],
+      },
+      {
+        id: "attachments",
+        title: "Attachments",
+        description:
+          "The model gets the path of each file you attach. When it needs to know what's in a file it can't read, like an image or a PDF, it can ask another model to look at it.",
+        keywords: ["attachments", "files", "images", "pdf", "upload"],
+        items: [
+          { id: "view-attachments-enabled", key: "VIEW_ATTACHMENTS_ENABLED" },
+          {
+            id: "attachment-models",
+            key: "ATTACHMENT_MODELS",
+            layout: "stacked",
+            visible: settingAtoms.VIEW_ATTACHMENTS_ENABLED,
+            control: AttachmentModelsControl,
+          },
         ],
       },
       {

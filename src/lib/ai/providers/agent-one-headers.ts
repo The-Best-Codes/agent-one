@@ -8,7 +8,8 @@ export type AgentOneRequestType =
   | "title-generation"
   | "compaction"
   | "sub-agent"
-  | "auto-mode";
+  | "auto-mode"
+  | "view-attachment";
 
 export interface AgentOneRequestMetadata {
   type: AgentOneRequestType;

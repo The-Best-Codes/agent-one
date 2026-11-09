@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import { Toaster } from "sonner";
 
+import { AttachmentPreviewDialog } from "@/components/a1/attachment-preview-dialog";
 import { ExtensionListStartupSync } from "@/components/a1/extension-list-startup-sync";
 import { FileDropGuard } from "@/components/a1/file-drop-guard";
 import { LocalProviderStartupSync } from "@/components/a1/local-provider-startup-sync";
@@ -52,6 +53,7 @@ function App() {
       <FileDropGuard />
       <ReleaseNotesDialog />
       <UpdateAvailableDialog />
+      <AttachmentPreviewDialog />
       <OnboardingReminder />
       <Toaster className="pointer-events-auto!" position="top-right" richColors closeButton />
       <Routes>

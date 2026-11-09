@@ -33,6 +33,7 @@ import folder from "@tabler/icons/outline/folder.svg?raw";
 import json from "@tabler/icons/outline/json.svg?raw";
 import lock from "@tabler/icons/outline/lock.svg?raw";
 import markdown from "@tabler/icons/outline/markdown.svg?raw";
+import messageCircle from "@tabler/icons/outline/message-circle.svg?raw";
 import movie from "@tabler/icons/outline/movie.svg?raw";
 import music from "@tabler/icons/outline/music.svg?raw";
 import photo from "@tabler/icons/outline/photo.svg?raw";
@@ -41,6 +42,7 @@ import sparkles from "@tabler/icons/outline/sparkles.svg?raw";
 import terminal from "@tabler/icons/outline/terminal-2.svg?raw";
 
 export const SKILL_ICON_SVG = sparkles;
+export const CHAT_ICON_SVG = messageCircle;
 
 const ICON_EXTENSIONS: [string, string[]][] = [
   [fileTypeTs, ["ts", "mts", "cts"]],

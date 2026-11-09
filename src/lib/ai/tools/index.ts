@@ -9,6 +9,7 @@ export { createMemoryTool } from "./memory";
 export { createSubAgentTool } from "./subAgent";
 export { createListSkillsTool } from "./listSkills";
 export { createViewFileTool } from "./viewFile";
+export { createViewAttachmentTool } from "./viewAttachment";
 export { createWaitTool } from "./waitNumberMilliseconds";
 export { createWebSearchTool } from "./webSearch";
 export { createWikipediaTool } from "./wikipedia";

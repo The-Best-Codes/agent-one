@@ -145,7 +145,13 @@ function createMarkdownOptions(
     },
     overrides: {
       a(props: ComponentProps<"a">) {
-        const mention = parseChatMentionHref(props.href);
+        const mention = parseChatMentionHref(
+          props.href,
+          [props.children]
+            .flat()
+            .filter((child) => typeof child === "string")
+            .join(""),
+        );
         if (mention) {
           return <MentionChip mention={mention} />;
         }

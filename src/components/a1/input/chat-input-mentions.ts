@@ -16,7 +16,9 @@ import {
   WidgetType,
 } from "@codemirror/view";
 import fuzzysort from "fuzzysort";
+import { getDefaultStore } from "jotai";
 
+import { attachmentPreviewAtom } from "@/lib/attachments";
 import {
   CHAT_MENTION_PATTERN,
   type ChatMention,
@@ -54,7 +56,7 @@ class MentionWidget extends WidgetType {
   }
 
   eq(other: MentionWidget) {
-    return other.mention.kind === this.mention.kind && other.mention.value === this.mention.value;
+    return formatChatMention(other.mention) === formatChatMention(this.mention);
   }
 
   toDOM() {
@@ -70,7 +72,15 @@ class MentionWidget extends WidgetType {
     text.className = "truncate";
     text.textContent = label;
     chip.append(icon, text);
+    if (this.mention.kind === "attachment") {
+      chip.classList.add("cursor-pointer", "hover:bg-primary/25");
+      chip.dataset.attachmentPath = this.mention.path;
+    }
     return chip;
+  }
+
+  ignoreEvent() {
+    return false;
   }
 }
 
@@ -102,7 +112,20 @@ const mentionChipsTheme = EditorView.theme({
   },
 });
 
-export const chatMentionChips = [mentionChipsPlugin, mentionChipsTheme];
+const attachmentChipClicks = EditorView.domEventHandlers({
+  click: (event) => {
+    const path =
+      event.target instanceof Element
+        ? event.target.closest<HTMLElement>("[data-attachment-path]")?.dataset.attachmentPath
+        : undefined;
+    if (!path) return false;
+    event.preventDefault();
+    getDefaultStore().set(attachmentPreviewAtom, path);
+    return true;
+  },
+});
+
+export const chatMentionChips = [mentionChipsPlugin, mentionChipsTheme, attachmentChipClicks];
 
 interface MentionCompletion extends Completion {
   mention: ChatMention;
