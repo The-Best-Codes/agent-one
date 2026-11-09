@@ -16,6 +16,7 @@ export function createOpenAICompatibleFactory(
       apiKey: apiKey || options?.emptyApiKey || "unset",
       baseURL,
       fetch: providerFetch,
+      includeUsage: true,
       headers: {
         ...defaultHeaders,
         ...headers,

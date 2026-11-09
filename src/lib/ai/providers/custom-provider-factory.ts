@@ -30,6 +30,7 @@ export function createCustomProvider(provider: CustomProvider, apiKey: string) {
     baseURL: provider.baseUrl,
     fetch: providerFetch,
     headers: provider.headers,
+    includeUsage: true,
   });
 }
 
