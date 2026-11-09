@@ -6,6 +6,7 @@ import type { ChatToolsContext } from "@/lib/ai/tools/readChat";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import {
+  MAX_MEMORY_ENTRIES,
   hasMemoryEntry,
   removeMemoryEntries,
   sanitizeMemoryEntries,
@@ -17,15 +18,25 @@ const logger = getLogger(import.meta.url);
 
 const memoryOperationSchema = z.object({
   operation: z.enum(["add", "remove", "replace"]),
-  entries: z.array(z.string().min(1)).max(20).optional(),
-  oldEntry: z.string().optional(),
-  newEntry: z.string().optional(),
+  entries: z
+    .array(z.string().min(1))
+    .max(20)
+    .optional()
+    .describe("Entries to add or remove. Used by the add and remove operations."),
+  oldEntry: z.string().optional().describe("The existing entry to replace. Used by replace."),
+  newEntry: z.string().optional().describe("The new entry text. Used by replace."),
 });
+
+function collectEntries(entries: string[] | undefined, single: string | undefined) {
+  return [...(entries ?? []), ...(single ? [single] : [])]
+    .map((entry) => sanitizeMemoryEntry(entry))
+    .filter(Boolean);
+}
 
 function getMemorySummary(entries: string[]) {
   return entries.length === 0
     ? "Memory is empty."
-    : `${entries.length} memory entr${entries.length === 1 ? "y" : "ies"}.`;
+    : `${entries.length} of ${MAX_MEMORY_ENTRIES} memory entr${entries.length === 1 ? "y" : "ies"} used.`;
 }
 
 function getMemoryStore(context: ChatToolsContext) {
@@ -55,13 +66,23 @@ export const createMemoryTool = (context: ChatToolsContext) =>
       let entries = sanitizeMemoryEntries(memoryStore.get());
 
       if (input.operation === "add") {
-        const added: string[] = [];
+        const toAdd = collectEntries(input.entries, input.newEntry);
+        if (toAdd.length === 0) {
+          throw new Error("No entries to add. Pass the new entries in the `entries` array.");
+        }
 
-        for (const rawEntry of input.entries ?? []) {
-          const entry = sanitizeMemoryEntry(rawEntry);
-          if (!entry || hasMemoryEntry(entries, entry)) continue;
-          entries = sanitizeMemoryEntries([...entries, entry]);
-          added.push(entry);
+        const added: string[] = [];
+        const skipped: { entry: string; reason: string }[] = [];
+
+        for (const entry of toAdd) {
+          if (hasMemoryEntry(entries, entry)) {
+            skipped.push({ entry, reason: "already in memory" });
+          } else if (entries.length >= MAX_MEMORY_ENTRIES) {
+            skipped.push({ entry, reason: `memory is full (${MAX_MEMORY_ENTRIES} entries)` });
+          } else {
+            entries = [...entries, entry];
+            added.push(entry);
+          }
         }
 
         const nextMemory = entries;
@@ -70,13 +91,17 @@ export const createMemoryTool = (context: ChatToolsContext) =>
         return {
           action: "add",
           added,
+          ...(skipped.length > 0 && { skipped }),
           memory: nextMemory,
           summary: getMemorySummary(entries),
         };
       }
 
       if (input.operation === "remove") {
-        const normalizedEntries = (input.entries ?? []).map((entry) => sanitizeMemoryEntry(entry));
+        const normalizedEntries = collectEntries(input.entries, input.oldEntry);
+        if (normalizedEntries.length === 0) {
+          throw new Error("No entries to remove. Pass the entries in the `entries` array.");
+        }
         const nextEntries = sanitizeMemoryEntries(removeMemoryEntries(entries, normalizedEntries));
         const removed = entries.filter((entry) => !hasMemoryEntry(nextEntries, entry));
         const nextMemory = nextEntries;

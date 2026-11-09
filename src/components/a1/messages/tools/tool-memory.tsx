@@ -32,6 +32,7 @@ interface MemoryToolInput {
 interface MemoryToolOutput {
   action: "add" | "remove" | "replace";
   added?: string[];
+  skipped?: { entry: string; reason: string }[];
   removed?: string[];
   replaced?: boolean;
   oldEntry?: string;
@@ -60,6 +61,11 @@ function formatOutput(output: MemoryToolOutput) {
   if (output.added?.length) {
     details.push(`Added:
 ${output.added.map((entry) => `- ${entry}`).join("\n")}`);
+  }
+
+  if (output.skipped?.length) {
+    details.push(`Skipped:
+${output.skipped.map(({ entry, reason }) => `- ${entry} (${reason})`).join("\n")}`);
   }
 
   if (output.removed?.length) {
