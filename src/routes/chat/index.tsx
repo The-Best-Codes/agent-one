@@ -14,6 +14,7 @@ import { ProjectPicker } from "@/components/a1/project-picker";
 import { Sidebar } from "@/components/a1/sidebar";
 import { Spinner } from "@/components/ui/spinner";
 import { useChatLoading, useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
+import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { cssImageUrl, getChatBackgroundUrl } from "@/lib/chat-backgrounds";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import {
@@ -39,7 +40,11 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
   const chatVirtualizationThreshold = useAtomValue(settingAtoms.CHAT_VIRTUALIZATION_THRESHOLD);
   const showMessagePreviewRail = useAtomValue(settingAtoms.SHOW_MESSAGE_PREVIEW_RAIL);
   const clearEditingMessages = useSetAtom(clearEditingMessagesAtom);
-  const hasProjects = useAtomValue(projectsAtom).length > 0;
+  const projects = useAtomValue(projectsAtom);
+  const hasProjects = projects.length > 0;
+  const { loadChatMetadata } = usePersistence();
+  const projectId = chatId ? loadChatMetadata(chatId).projectId : searchParams.get("project");
+  const project = projects.find((entry) => entry.id === projectId);
 
   useEffect(() => {
     clearEditingMessages();
@@ -205,6 +210,7 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
             initialValueKey={chatId ? undefined : location.key}
             disabled={isChatLoading}
             toolbarStart={!chatId && hasProjects ? <ProjectPicker /> : undefined}
+            project={project}
             onScrollNeededAction={() => {
               scrollRef.current?.scrollToBottom();
             }}

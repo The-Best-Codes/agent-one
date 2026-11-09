@@ -1,4 +1,5 @@
 "use client";
+import { completionStatus } from "@codemirror/autocomplete";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
@@ -36,12 +37,14 @@ import { chatIdsAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import type { SettingValue } from "@/lib/settings/definitions";
+import type { Project } from "@/lib/storage/project-storage";
 import { cn } from "@/lib/utils";
 
 import { ChatModelConfig } from "../chat-model-config";
 import { ModelSelector } from "../chat-model-selector";
 import { ShortcutKbd, ShortcutKeys } from "../shortcut-kbd";
 import { Attachments } from "./attachments";
+import { createChatInputMentions } from "./chat-input-mentions";
 import { MainInputErrorSection } from "./error-section";
 import { MainInputIncompleteSection } from "./incomplete-section";
 import { MainInputNoModelSection } from "./no-model-section";
@@ -117,6 +120,7 @@ export const MainChatInput = ({
   draftKey,
   disabled = false,
   toolbarStart,
+  project,
 }: {
   onScrollNeededAction?: () => void;
   initialValue?: string;
@@ -124,6 +128,7 @@ export const MainChatInput = ({
   draftKey: string;
   disabled?: boolean;
   toolbarStart?: ReactNode;
+  project?: Project;
 }) => {
   const { status } = useChatStatus();
   const isChatLoading = useChatLoading();
@@ -570,11 +575,16 @@ export const MainChatInput = ({
   useLayoutEffect(() => {
     editorHandlersRef.current = { disabled, isMobile, addFiles, submitMessage };
   });
+  const [mentions] = useState(createChatInputMentions);
+  useLayoutEffect(() => {
+    mentions.setProject(project);
+  }, [mentions, project]);
 
   const editorExtensions = useMemo(
     () => [
       ...(markdownHighlighting ? [markdown({ base: markdownLanguage })] : []),
       editorTheme,
+      mentions.extension,
       EditorView.lineWrapping,
       EditorView.updateListener.of((update) => {
         if (update.geometryChanged) {
@@ -612,7 +622,7 @@ export const MainChatInput = ({
           {
             key: getChatShortcut(chatShortcutKey),
             run: (view) => {
-              if (view.composing) {
+              if (view.composing || completionStatus(view.state) === "active") {
                 return false;
               }
               if (editorHandlersRef.current.isMobile && chatShortcutKey === "enter") {
@@ -625,7 +635,7 @@ export const MainChatInput = ({
         ]),
       ),
     ],
-    [markdownHighlighting, chatShortcutKey],
+    [markdownHighlighting, chatShortcutKey, mentions],
   );
 
   return (
@@ -669,7 +679,7 @@ export const MainChatInput = ({
         />
 
         {files && files.length > 0 && <Attachments files={files} onRemove={handleRemoveFile} />}
-        <div className="grow overflow-hidden">
+        <div className="min-w-0 grow">
           <CodeMirror
             autoFocus
             editable={!disabled}

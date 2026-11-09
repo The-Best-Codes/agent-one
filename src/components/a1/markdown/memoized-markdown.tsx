@@ -15,6 +15,7 @@ import { Link } from "react-router";
 import remend from "remend";
 
 import { ExternalLink } from "@/components/a1/external-link";
+import { MentionChip } from "@/components/a1/mention-chip";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import {
   Table,
@@ -24,6 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { parseChatMentionHref } from "@/lib/chat-mentions";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 
 import { CodeBlock } from "./codeblock";
@@ -143,6 +145,11 @@ function createMarkdownOptions(
     },
     overrides: {
       a(props: ComponentProps<"a">) {
+        const mention = parseChatMentionHref(props.href);
+        if (mention) {
+          return <MentionChip mention={mention} />;
+        }
+
         if (allowInternalLinks && props.href?.startsWith("/")) {
           return <Link to={props.href} {...props} />;
         }

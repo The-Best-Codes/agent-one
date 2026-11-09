@@ -35,6 +35,7 @@
     "@ai-sdk/react": "^4.0.169",
     "@ai-sdk/togetherai": "^3.0.88",
     "@ai-sdk/xai": "^5.0.40",
+    "@codemirror/autocomplete": "^6.20.4",
     "@codemirror/lang-markdown": "^6.5.2",
     "@codemirror/merge": "^6.12.3",
     "@codemirror/state": "6.7.6",
