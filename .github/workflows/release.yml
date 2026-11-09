@@ -31,7 +31,7 @@ jobs:
             gh release create "$TAG" \
               --draft \
               --title "AgentOne v${VERSION}" \
-              --notes "See the assets below this release to download and install this version."
+              --notes "# [Click to Download AgentOne](https://www.agent-one.dev/download)"
           fi
 
   release-tauri:
@@ -165,7 +165,7 @@ jobs:
         with:
           tagName: agent-one-v__VERSION__
           releaseName: "AgentOne v__VERSION__"
-          releaseBody: "See the assets below this release to download and install this version."
+          releaseBody: "# [Click to Download AgentOne](https://www.agent-one.dev/download)"
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
