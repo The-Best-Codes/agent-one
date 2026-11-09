@@ -22,7 +22,7 @@ import {
   editingMessageIdsAtom,
 } from "@/lib/jotai/chat-message-editing-atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
-import { projectsAtom } from "@/lib/projects";
+import { getProject, projectsAtom } from "@/lib/projects";
 import { cn } from "@/lib/utils";
 
 const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
@@ -40,11 +40,13 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
   const chatVirtualizationThreshold = useAtomValue(settingAtoms.CHAT_VIRTUALIZATION_THRESHOLD);
   const showMessagePreviewRail = useAtomValue(settingAtoms.SHOW_MESSAGE_PREVIEW_RAIL);
   const clearEditingMessages = useSetAtom(clearEditingMessagesAtom);
-  const projects = useAtomValue(projectsAtom);
-  const hasProjects = projects.length > 0;
+  const hasProjects = useAtomValue(projectsAtom).length > 0;
   const { loadChatMetadata } = usePersistence();
-  const projectId = chatId ? loadChatMetadata(chatId).projectId : searchParams.get("project");
-  const project = projects.find((entry) => entry.id === projectId);
+  const requestedProjectId = searchParams.get("project") ?? undefined;
+  const getChatProject = useCallback(
+    () => getProject(chatId ? loadChatMetadata(chatId).projectId : requestedProjectId),
+    [chatId, loadChatMetadata, requestedProjectId],
+  );
 
   useEffect(() => {
     clearEditingMessages();
@@ -210,7 +212,7 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
             initialValueKey={chatId ? undefined : location.key}
             disabled={isChatLoading}
             toolbarStart={!chatId && hasProjects ? <ProjectPicker /> : undefined}
-            project={project}
+            getProject={getChatProject}
             onScrollNeededAction={() => {
               scrollRef.current?.scrollToBottom();
             }}

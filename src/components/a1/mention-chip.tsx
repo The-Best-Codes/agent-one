@@ -1,22 +1,15 @@
-import { IconSparkles, type IconProps } from "@tabler/icons-react";
-import { createElement } from "react";
-
-import type { ChatMention } from "@/lib/chat-mentions";
-import { getFileIcon, getFileName } from "@/lib/file-icons";
-
-const ICON_PROPS: IconProps = { className: "text-primary size-[1em] shrink-0 self-center" };
+import {
+  type ChatMention,
+  getMentionDisplay,
+  MENTION_CHIP_CLASS,
+  MENTION_ICON_CLASS,
+} from "@/lib/chat-mentions";
 
 export const MentionChip = ({ mention }: { mention: ChatMention }) => {
-  const isFile = mention.kind === "file";
-  const isFolder = isFile && /[/\\]$/.test(mention.value);
-  const label = isFile ? `${getFileName(mention.value)}${isFolder ? "/" : ""}` : mention.value;
+  const { label, title, iconSvg } = getMentionDisplay(mention);
   return (
-    <span
-      title={isFile ? mention.value : `Skill: ${mention.value}`}
-      data-mention={mention.kind}
-      className="bg-primary/15 text-foreground inline-flex max-w-64 items-baseline gap-1 rounded-sm px-1 align-baseline font-medium"
-    >
-      {createElement(isFile ? getFileIcon(mention.value) : IconSparkles, ICON_PROPS)}
+    <span title={title} data-mention={mention.kind} className={MENTION_CHIP_CLASS}>
+      <span className={MENTION_ICON_CLASS} dangerouslySetInnerHTML={{ __html: iconSvg }} />
       <span className="truncate">{label}</span>
     </span>
   );

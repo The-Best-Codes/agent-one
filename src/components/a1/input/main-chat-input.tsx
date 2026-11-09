@@ -120,7 +120,7 @@ export const MainChatInput = ({
   draftKey,
   disabled = false,
   toolbarStart,
-  project,
+  getProject,
 }: {
   onScrollNeededAction?: () => void;
   initialValue?: string;
@@ -128,7 +128,7 @@ export const MainChatInput = ({
   draftKey: string;
   disabled?: boolean;
   toolbarStart?: ReactNode;
-  project?: Project;
+  getProject?: () => Project | undefined;
 }) => {
   const { status } = useChatStatus();
   const isChatLoading = useChatLoading();
@@ -577,8 +577,8 @@ export const MainChatInput = ({
   });
   const [mentions] = useState(createChatInputMentions);
   useLayoutEffect(() => {
-    mentions.setProject(project);
-  }, [mentions, project]);
+    mentions.setProjectGetter(getProject ?? (() => undefined));
+  }, [mentions, getProject]);
 
   const editorExtensions = useMemo(
     () => [

@@ -1,9 +1,27 @@
+import { getFileIconSvg, getFileName, SKILL_ICON_SVG } from "@/lib/file-icons";
+
 export interface ChatMention {
   kind: "file" | "skill";
   value: string;
 }
 
 const MENTION_SCHEME = "mention://";
+
+export const MENTION_CHIP_CLASS =
+  "bg-primary/15 text-foreground inline-flex max-w-64 items-baseline gap-1 rounded-sm px-1 align-baseline font-medium";
+export const MENTION_ICON_CLASS = "text-primary flex shrink-0 self-center [&>svg]:size-[1em]";
+
+export function getMentionDisplay(mention: ChatMention) {
+  if (mention.kind === "skill") {
+    return { label: mention.value, title: `Skill: ${mention.value}`, iconSvg: SKILL_ICON_SVG };
+  }
+  const isFolder = /[/\\]$/.test(mention.value);
+  return {
+    label: `${getFileName(mention.value)}${isFolder ? "/" : ""}`,
+    title: mention.value,
+    iconSvg: getFileIconSvg(mention.value),
+  };
+}
 
 export const CHAT_MENTION_PATTERN = /\[[^\]\n]*\]\(mention:\/\/(file|skill)\/([^\s)]+)\)/g;
 

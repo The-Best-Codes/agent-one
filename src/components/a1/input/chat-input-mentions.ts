@@ -15,26 +15,26 @@ import {
   type ViewUpdate,
   WidgetType,
 } from "@codemirror/view";
-import { IconSparkles } from "@tabler/icons-react";
 import fuzzysort from "fuzzysort";
-import { createElement, type ReactElement } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
 
-import { MentionChip } from "@/components/a1/mention-chip";
 import {
   CHAT_MENTION_PATTERN,
   type ChatMention,
   formatChatMention,
   getChatMention,
+  getMentionDisplay,
+  MENTION_CHIP_CLASS,
+  MENTION_ICON_CLASS,
 } from "@/lib/chat-mentions";
-import { getFileIcon } from "@/lib/file-icons";
+import { getFileIconSvg, SKILL_ICON_SVG } from "@/lib/file-icons";
 import { listProjectEntries, type ProjectEntry } from "@/lib/project-files";
 import { loadSkills, type Skill } from "@/lib/skills";
 import type { Project } from "@/lib/storage/project-storage";
 
 const SKILLS_CACHE_TTL_MS = 30_000;
 const MAX_RESULTS = 30;
-const MATCH_THRESHOLD = 0.2;
+const FILE_MATCH_THRESHOLD = 0.2;
+const SKILL_MATCH_THRESHOLD = 0.5;
 
 let skillsCache: { key: string; loadedAt: number; skills: Promise<Skill[]> } | undefined;
 
@@ -48,17 +48,6 @@ function getSkills(project: Project | undefined): Promise<Skill[]> {
   return skills;
 }
 
-const markupCache = new Map<string, string>();
-
-function renderMarkup(key: string, element: () => ReactElement): string {
-  let markup = markupCache.get(key);
-  if (markup === undefined) {
-    markup = renderToStaticMarkup(element());
-    markupCache.set(key, markup);
-  }
-  return markup;
-}
-
 class MentionWidget extends WidgetType {
   constructor(readonly mention: ChatMention) {
     super();
@@ -69,12 +58,19 @@ class MentionWidget extends WidgetType {
   }
 
   toDOM() {
-    const wrap = document.createElement("span");
-    wrap.className = "cm-chat-mention";
-    wrap.innerHTML = renderMarkup(formatChatMention(this.mention), () =>
-      createElement(MentionChip, { mention: this.mention }),
-    );
-    return wrap;
+    const { label, title, iconSvg } = getMentionDisplay(this.mention);
+    const chip = document.createElement("span");
+    chip.className = `cm-chat-mention ${MENTION_CHIP_CLASS}`;
+    chip.title = title;
+    chip.dataset.mention = this.mention.kind;
+    const icon = document.createElement("span");
+    icon.className = MENTION_ICON_CLASS;
+    icon.innerHTML = iconSvg;
+    const text = document.createElement("span");
+    text.className = "truncate";
+    text.textContent = label;
+    chip.append(icon, text);
+    return chip;
   }
 }
 
@@ -102,7 +98,7 @@ const mentionChipsPlugin = ViewPlugin.fromClass(
 
 const mentionChipsTheme = EditorView.theme({
   ".cm-chat-mention": {
-    padding: "0 1px",
+    margin: "0 1px",
   },
 });
 
@@ -133,7 +129,7 @@ function getFileOptions(query: string, entries: ProjectEntry[]): MentionCompleti
     .go(query, entries, {
       keys: ["name", "path"],
       limit: MAX_RESULTS,
-      threshold: MATCH_THRESHOLD,
+      threshold: FILE_MATCH_THRESHOLD,
       scoreFn: (result) => Math.max(result[0]?.score ?? 0, (result[1]?.score ?? 0) * 0.8),
     })
     .map((result) => {
@@ -143,7 +139,7 @@ function getFileOptions(query: string, entries: ProjectEntry[]): MentionCompleti
         detail: getParentPath(result.obj),
         apply: insertMention,
         mention: { kind: "file", value: result.obj.path },
-        icon: renderMarkup(`icon:${label}`, () => createElement(getFileIcon(label))),
+        icon: getFileIconSvg(label),
         matchIndexes: result[0]?.indexes ?? [],
       };
     });
@@ -151,13 +147,13 @@ function getFileOptions(query: string, entries: ProjectEntry[]): MentionCompleti
 
 function getSkillOptions(query: string, skills: Skill[]): MentionCompletion[] {
   return fuzzysort
-    .go(query, skills, { key: "name", limit: MAX_RESULTS, threshold: MATCH_THRESHOLD })
+    .go(query, skills, { key: "name", limit: MAX_RESULTS, threshold: SKILL_MATCH_THRESHOLD })
     .map((result) => ({
       label: result.obj.name,
       info: result.obj.description || undefined,
       apply: insertMention,
       mention: { kind: "skill", value: result.obj.name },
-      icon: renderMarkup("icon:skill", () => createElement(IconSparkles)),
+      icon: SKILL_ICON_SVG,
       matchIndexes: result.indexes ?? [],
     }));
 }
@@ -249,12 +245,13 @@ const completionTheme = EditorView.theme({
 });
 
 export function createChatInputMentions() {
-  let project: Project | undefined;
+  let getProject: () => Project | undefined = () => undefined;
 
   const source = async (context: CompletionContext): Promise<CompletionResult | null> => {
     const match = matchTrigger(context);
     if (!match) return null;
     const query = match.text.slice(1);
+    const project = getProject();
     const options = match.text.startsWith("/")
       ? getSkillOptions(query, await getSkills(project))
       : project?.folder
@@ -271,8 +268,8 @@ export function createChatInputMentions() {
   };
 
   return {
-    setProject: (next: Project | undefined) => {
-      project = next;
+    setProjectGetter: (next: () => Project | undefined) => {
+      getProject = next;
     },
     extension: [
       autocompletion({
@@ -295,6 +292,7 @@ export function createChatInputMentions() {
       tooltips({ position: "absolute" }),
       EditorView.domEventHandlers({
         focus: () => {
+          const project = getProject();
           void getSkills(project);
           if (project?.folder) void listProjectEntries(project.folder);
         },

@@ -4,6 +4,7 @@ use ignore::WalkBuilder;
 use serde::Serialize;
 
 const MAX_ENTRIES: usize = 20_000;
+const MAX_SCANNED_ENTRIES: usize = 200_000;
 const MAX_DEPTH: usize = 8;
 
 #[derive(Serialize)]
@@ -28,8 +29,9 @@ fn to_relative_path(root: &Path, path: &Path) -> Option<String> {
     Some(parts.join("/"))
 }
 
-fn walk_project(folder: &str) -> Vec<ProjectEntry> {
+fn walk_project(folder: &str) -> Result<Vec<ProjectEntry>, String> {
     let root = Path::new(folder);
+    std::fs::read_dir(root).map_err(|error| format!("Can't read {folder}: {error}"))?;
     let walker = WalkBuilder::new(root)
         .hidden(false)
         .require_git(false)
@@ -53,15 +55,16 @@ fn walk_project(folder: &str) -> Vec<ProjectEntry> {
                 depth: entry.depth(),
             })
         })
-        .take(MAX_ENTRIES)
+        .take(MAX_SCANNED_ENTRIES)
         .collect();
     entries.sort_by(|a, b| a.depth.cmp(&b.depth).then_with(|| a.path.cmp(&b.path)));
-    entries
+    entries.truncate(MAX_ENTRIES);
+    Ok(entries)
 }
 
 #[tauri::command]
 pub async fn list_project_files(folder: String) -> Result<Vec<ProjectEntry>, String> {
     tauri::async_runtime::spawn_blocking(move || walk_project(&folder))
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| error.to_string())?
 }
