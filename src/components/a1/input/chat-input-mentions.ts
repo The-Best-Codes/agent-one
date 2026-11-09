@@ -15,6 +15,7 @@ import {
   type ViewUpdate,
   WidgetType,
 } from "@codemirror/view";
+import { sep } from "@tauri-apps/api/path";
 import fuzzysort from "fuzzysort";
 import { getDefaultStore } from "jotai";
 
@@ -184,7 +185,10 @@ function getFileOptions(
         label,
         detail: getParentPath(result.obj),
         apply: insertMention,
-        mention: { kind: "file", value: `${root}/${result.obj.path}` },
+        mention: {
+          kind: "file",
+          value: `${root}${sep()}${result.obj.path.split("/").join(sep())}`,
+        },
         icon: getFileIconSvg(label),
         matchIndexes: result[0]?.indexes ?? [],
       };

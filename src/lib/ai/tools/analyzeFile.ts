@@ -1,12 +1,14 @@
-import { readFile } from "@tauri-apps/plugin-fs";
+import { readFile, stat } from "@tauri-apps/plugin-fs";
 import { generateText, type LanguageModel, tool } from "ai";
 import { z } from "zod";
 
 import { getAgentOneRequestHeaders } from "@/lib/ai/providers/agent-one-headers";
 import { type FileKind, getFileKind, getMediaType, isTextContent } from "@/lib/attachments";
 import { getFileName } from "@/lib/file-icons";
+import formatBytes from "@/lib/format-bytes";
 
 const VIEW_TIMEOUT_MS = 120_000;
+const MAX_FILE_BYTES = 500 * 1024 * 1024;
 
 export interface AnalyzeFileContext {
   models: Record<FileKind, LanguageModel>;
@@ -35,6 +37,12 @@ export const createAnalyzeFileTool = (context: AnalyzeFileContext) =>
       const name = getFileName(path);
       let model: LanguageModel | undefined;
       try {
+        const { size } = await stat(path);
+        if (size > MAX_FILE_BYTES) {
+          throw new Error(
+            `The file is ${formatBytes(size)}, which is over the ${formatBytes(MAX_FILE_BYTES)} limit.`,
+          );
+        }
         const data = await readFile(path);
         abortSignal?.throwIfAborted();
         const mediaType =
