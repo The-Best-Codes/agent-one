@@ -32,6 +32,7 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { getToolBehavior, useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import useMobileDetection from "@/hooks/use-mobile-detection";
+import { useNativeFileDrop } from "@/hooks/use-native-file-drop";
 import { usePendingToolApproval } from "@/hooks/use-pending-tool-approval";
 import { useTheme } from "@/hooks/use-theme";
 import { createAttachmentPath, writeAttachmentFile } from "@/lib/attachments";
@@ -367,6 +368,12 @@ export const MainChatInput = ({
     view.focus();
   }, []);
 
+  const attachPaths = useCallback(
+    (paths: string[]) => insertMentions(paths.map(getAttachmentText).join(" ")),
+    [insertMentions],
+  );
+  useNativeFileDrop(setIsDraggingFiles, attachPaths);
+
   const removeAttachmentMention = useCallback((path: string) => {
     const view = editorViewRef.current;
     const text = getAttachmentText(path);
@@ -417,7 +424,7 @@ export const MainChatInput = ({
     try {
       const paths = await openFileDialog({ multiple: true });
       if (paths && paths.length > 0) {
-        insertMentions(paths.map(getAttachmentText).join(" "));
+        attachPaths(paths);
       }
     } catch (error) {
       logger.error("Failed to pick files", error);
