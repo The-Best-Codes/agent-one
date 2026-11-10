@@ -4,6 +4,8 @@ import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import { IconArrowUp, IconPaperclip, IconPlayerStopFilled } from "@tabler/icons-react";
+import { open as openFileDialog } from "@tauri-apps/plugin-dialog";
+import { platform } from "@tauri-apps/plugin-os";
 import CodeMirror from "@uiw/react-codemirror";
 import { useAtomValue, useAtomValueRawSync } from "jotai";
 import {
@@ -15,24 +17,26 @@ import {
   useRef,
   useState,
 } from "react";
+import { toast } from "sonner";
 
 import {
   AdaptiveTooltip,
   AdaptiveTooltipContent,
   AdaptiveTooltipTrigger,
 } from "@/components/ui/adaptive-tooltip";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { useChatFunctions, useChatLoading, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
-import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
+import { getToolBehavior, useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import useMobileDetection from "@/hooks/use-mobile-detection";
 import { usePendingToolApproval } from "@/hooks/use-pending-tool-approval";
 import { useTheme } from "@/hooks/use-theme";
+import { createAttachmentPath, writeAttachmentFile } from "@/lib/attachments";
 import { loadChatInputDraft, saveChatInputDraft } from "@/lib/chat-input-drafts";
+import { formatChatMention } from "@/lib/chat-mentions";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
@@ -43,8 +47,11 @@ import { cn } from "@/lib/utils";
 import { ChatModelConfig } from "../chat-model-config";
 import { ModelSelector } from "../chat-model-selector";
 import { ShortcutKbd, ShortcutKeys } from "../shortcut-kbd";
-import { Attachments } from "./attachments";
-import { createChatInputMentions } from "./chat-input-mentions";
+import {
+  createChatInputMentions,
+  markAttachmentSaved,
+  savingAttachmentPaths,
+} from "./chat-input-mentions";
 import { MainInputErrorSection } from "./error-section";
 import { MainInputIncompleteSection } from "./incomplete-section";
 import { MainInputNoModelSection } from "./no-model-section";
@@ -53,6 +60,11 @@ import { MainInputProvisioningSection } from "./provisioning-section";
 const logger = getLogger(import.meta.url);
 
 const DRAFT_SAVE_DELAY_MS = 300;
+const CAN_PICK_FILE_PATHS = !["android", "ios"].includes(platform());
+
+function getAttachmentText(path: string) {
+  return formatChatMention({ kind: "attachment", path });
+}
 
 const EDITOR_BASIC_SETUP = {
   lineNumbers: false,
@@ -134,7 +146,8 @@ export const MainChatInput = ({
   const isChatLoading = useChatLoading();
   const { resolvedTheme } = useTheme();
   const { sendMessage, stop } = useChatFunctions();
-  const { currentModel } = useModel();
+  const { currentModel, currentModelConfig } = useModel();
+  const toolsDisabled = getToolBehavior(currentModelConfig) === "disable";
   const { hasAvailableModels, isModelCatalogLoading } = useModelCatalog();
   const hasPendingApproval = usePendingToolApproval();
   const markdownHighlighting = useAtomValue(settingAtoms.MARKDOWN_HIGHLIGHTING);
@@ -152,9 +165,9 @@ export const MainChatInput = ({
   });
 
   const [isEmpty, setIsEmpty] = useState(true);
+  const [savingPaths, setSavingPaths] = useState<string[]>([]);
   const [isInterruptSubmitting, setIsInterruptSubmitting] = useState(false);
   const [editorInitialValue] = useState(() => initialValue ?? loadChatInputDraft(draftKey));
-  const [files, setFiles] = useState<FileList | undefined>(undefined);
   const [isDraggingFiles, setIsDraggingFiles] = useState(false);
   const [isDraggingChat, setIsDraggingChat] = useState(false);
   const [isEditorOverflowing, setIsEditorOverflowing] = useState(false);
@@ -217,9 +230,8 @@ export const MainChatInput = ({
 
   const showStopButton = status === "streaming" || status === "submitted" || isInterruptSubmitting;
   // TODO: Consider this approach in the future
-  // const showInterruptButton = (status === "streaming" || status === "submitted") && (!isEmpty || !!files);
-  const showInterruptButton =
-    status === "streaming" && (!isEmpty || !!files) && !isInterruptSubmitting;
+  // const showInterruptButton = (status === "streaming" || status === "submitted") && !isEmpty;
+  const showInterruptButton = status === "streaming" && !isEmpty && !isInterruptSubmitting;
 
   useKeyboardShortcut("focusMainChatInput", () => {
     editorViewRef.current?.focus();
@@ -255,6 +267,9 @@ export const MainChatInput = ({
       clearTimeout(draftSaveTimeoutRef.current);
     }
     draftSaveTimeoutRef.current = setTimeout(flushDraftSave, DRAFT_SAVE_DELAY_MS);
+    if (savingPaths.length > 0) {
+      setSavingPaths((paths) => paths.filter((path) => newValue.includes(getAttachmentText(path))));
+    }
     const newIsEmpty = !newValue.trim();
     if (newIsEmpty !== isEmpty) {
       setIsEmpty(newIsEmpty);
@@ -274,15 +289,14 @@ export const MainChatInput = ({
     const currentText = editorViewRef.current?.state.doc.toString() || "";
 
     if (
-      (currentText.trim() || files) &&
+      currentText.trim() &&
+      savingPaths.length === 0 &&
       (status === "ready" || showInterruptButton) &&
       !hasPendingApproval
     ) {
       isSubmittingRef.current = true;
       logger.verbose("Submitting message", {
         textLength: currentText.length,
-        hasFiles: !!files,
-        fileCount: files?.length || 0,
       });
       try {
         if (showInterruptButton) {
@@ -298,7 +312,7 @@ export const MainChatInput = ({
         if (showInterruptButton) {
           hasSentInterruptRef.current = true;
         }
-        void sendMessage({ text: currentText, files }).catch((error: unknown) => {
+        void sendMessage({ text: currentText }).catch((error: unknown) => {
           hasSentInterruptRef.current = false;
           setIsInterruptSubmitting(false);
           logger.error("Message submission failed", error);
@@ -324,16 +338,11 @@ export const MainChatInput = ({
         });
       }
       setIsEmpty(true);
-      setFiles(undefined);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
       onScrollNeededAction?.();
       logger.verbose("Message submitted successfully");
     } else {
       logger.verbose("Message submission blocked", {
         hasText: !!currentText.trim(),
-        hasFiles: !!files,
         status,
       });
     }
@@ -344,82 +353,81 @@ export const MainChatInput = ({
     void submitMessage();
   };
 
+  const insertMentions = useCallback((text: string) => {
+    const view = editorViewRef.current;
+    if (!view) return;
+    const { from, to } = view.state.selection.main;
+    const before = view.state.sliceDoc(from - 1, from);
+    const insert = `${before && !/\s/.test(before) ? " " : ""}${text} `;
+    view.dispatch({
+      changes: { from, to, insert },
+      selection: { anchor: from + insert.length },
+      userEvent: "input",
+    });
+    view.focus();
+  }, []);
+
+  const removeAttachmentMention = useCallback((path: string) => {
+    const view = editorViewRef.current;
+    const text = getAttachmentText(path);
+    const from = view?.state.doc.toString().indexOf(text) ?? -1;
+    if (!view || from === -1) return;
+    const to = from + text.length;
+    view.dispatch({ changes: { from, to: view.state.sliceDoc(to, to + 1) === " " ? to + 1 : to } });
+  }, []);
+
   const addFiles = useCallback(
     (newFiles: FileList) => {
-      if (!newFiles || newFiles.length === 0) {
-        logger.verbose("No files to add");
-        return;
-      }
-
-      const currentFiles = files ? Array.from(files) : [];
-      const newFilesArray = Array.from(newFiles);
-
-      logger.verbose("Adding files", {
-        newFileCount: newFilesArray.length,
-        currentFileCount: currentFiles.length,
-        newFileNames: newFilesArray.map((f) => f.name),
-      });
-
-      const combined = [...currentFiles, ...newFilesArray];
-
-      const uniqueFiles: File[] = [];
-      const seen = new Set<string>();
-
-      for (const file of combined) {
-        const key = `${file.name}-${file.size}-${file.lastModified}`;
-        if (!seen.has(key)) {
-          seen.add(key);
-          uniqueFiles.push(file);
-        }
-      }
-
-      const dt = new DataTransfer();
-      uniqueFiles.forEach((file) => dt.items.add(file));
-      const updatedFileList = dt.files;
-
-      setFiles(updatedFileList.length > 0 ? updatedFileList : undefined);
-      if (fileInputRef.current) {
-        fileInputRef.current.files = updatedFileList;
-      }
-
-      logger.verbose("Files added successfully", {
-        totalFileCount: updatedFileList.length,
+      const files = Array.from(newFiles);
+      if (files.length === 0) return;
+      logger.verbose("Adding files", { fileNames: files.map((file) => file.name) });
+      void (async () => {
+        const paths = await Promise.all(files.map(createAttachmentPath));
+        paths.forEach((path) => savingAttachmentPaths.add(path));
+        setSavingPaths((current) => [...current, ...paths]);
+        insertMentions(paths.map(getAttachmentText).join(" "));
+        await Promise.all(
+          files.map(async (file, index) => {
+            const path = paths[index];
+            try {
+              await writeAttachmentFile(path, file);
+            } catch (error) {
+              logger.error("Failed to attach file", error);
+              toast.error(`Couldn't attach ${file.name}.`);
+              removeAttachmentMention(path);
+            } finally {
+              markAttachmentSaved(editorViewRef.current, path);
+              setSavingPaths((current) => current.filter((item) => item !== path));
+            }
+          }),
+        );
+      })().catch((error: unknown) => {
+        logger.error("Failed to attach files", error);
+        toast.error("Couldn't attach files.");
       });
     },
-    [files],
+    [insertMentions, removeAttachmentMention],
   );
+
+  const handleAttachClick = async () => {
+    if (!CAN_PICK_FILE_PATHS) {
+      fileInputRef.current?.click();
+      return;
+    }
+    try {
+      const paths = await openFileDialog({ multiple: true });
+      if (paths && paths.length > 0) {
+        insertMentions(paths.map(getAttachmentText).join(" "));
+      }
+    } catch (error) {
+      logger.error("Failed to pick files", error);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const newFiles = e.target.files;
-      logger.verbose("File input changed", {
-        fileCount: newFiles.length,
-        fileNames: Array.from(newFiles).map((f) => f.name),
-      });
-      addFiles(newFiles);
-    } else {
-      // Undesired behavior, so disabled for now
-      // logger.verbose("File input cleared");
-      // setFiles(undefined);
-    }
-  };
-  const handleRemoveFile = (index: number) => {
-    if (!files) {
-      logger.verbose("No files to remove");
-      return;
-    }
-
-    const filesArray = Array.from(files);
-    filesArray.splice(index, 1);
-
-    const dt = new DataTransfer();
-    filesArray.forEach((file) => dt.items.add(file));
-
-    const newFileList = dt.files;
-    setFiles(newFileList.length > 0 ? newFileList : undefined);
-
-    if (fileInputRef.current) {
-      fileInputRef.current.files = newFileList;
+      addFiles(e.target.files);
+      e.target.value = "";
     }
   };
 
@@ -463,38 +471,10 @@ export const MainChatInput = ({
           return;
         }
 
-        const chatData = {
-          id: chatId,
-          title,
-          info: `The user attached this past chat (ID "${chatId}") for you to reference. Its messages are not included here. If the readChat tool is available, use it with this chat ID to read the chat. If the readChat tool is not available, tell the user you can't read the attached chat, and that they can turn on the Chat History tools in Settings > Tools to let you read it.`,
-          messageCount: messages.length,
-          attachedAt: new Date().toISOString(),
-        };
-
-        const blob = new Blob([JSON.stringify(chatData, null, 2)], {
-          type: "application/json",
-        });
-        const file = new File(
-          [blob],
-          `${title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_agent-one_chat.txt`,
-          {
-            type: "text/plain",
-          },
-        );
-
-        const dt = new DataTransfer();
-        dt.items.add(file);
-        const fileList = dt.files;
-
-        logger.verbose("Chat exported and attached as file", {
-          chatId,
-          title,
-          fileName: file.name,
-        });
-        addFiles(fileList);
+        insertMentions(formatChatMention({ kind: "chat", value: chatId, label: title }));
       });
     },
-    [loadChatMessages, chatIds, addFiles],
+    [loadChatMessages, chatIds, insertMentions],
   );
 
   const handleDrop = useCallback(
@@ -680,10 +660,7 @@ export const MainChatInput = ({
           onChange={handleFileChange}
           multiple
           className="hidden"
-          accept="image/*,text/*,video/*,application/pdf,.pdf,.doc,.docx,.txt,.md,.csv,.json,.xml,.html,.css,.js,.ts,.tsx,.jsx,.py,.java,.cpp,.c,.h,.rs,.go,.rb,.php,.swift,.kt"
         />
-
-        {files && files.length > 0 && <Attachments files={files} onRemove={handleRemoveFile} />}
         <div className="min-w-0 grow">
           <CodeMirror
             autoFocus
@@ -728,25 +705,22 @@ export const MainChatInput = ({
                     isModelCatalogLoading ||
                     !hasAvailableModels ||
                     !currentModel ||
-                    hasPendingApproval
+                    hasPendingApproval ||
+                    toolsDisabled
                   }
                   size="icon"
                   variant="outline"
-                  onClick={() => {
-                    fileInputRef.current?.click();
-                  }}
-                  className="relative"
+                  onClick={() => void handleAttachClick()}
                   aria-label="Attach files"
                 >
-                  {files && files?.length > 0 && (
-                    <Badge variant="default" className="absolute -top-2 -right-2 z-10 shadow-md">
-                      {files?.length}
-                    </Badge>
-                  )}
                   <IconPaperclip />
                 </Button>
               </AdaptiveTooltipTrigger>
-              <AdaptiveTooltipContent>Attach files to your message</AdaptiveTooltipContent>
+              <AdaptiveTooltipContent>
+                {toolsDisabled
+                  ? "Turn on tools to attach files, so AgentOne can open them"
+                  : "Attach files to your message"}
+              </AdaptiveTooltipContent>
             </AdaptiveTooltip>
             {toolbarStart}
           </div>
@@ -813,7 +787,8 @@ export const MainChatInput = ({
                       disabled={
                         disabled ||
                         (status !== "ready" && !showInterruptButton) ||
-                        (isEmpty && !files) ||
+                        isEmpty ||
+                        savingPaths.length > 0 ||
                         isModelCatalogLoading ||
                         !hasAvailableModels ||
                         !currentModel ||

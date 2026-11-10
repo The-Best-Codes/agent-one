@@ -14,6 +14,7 @@ import {
   createMemoryTool,
   createSubAgentTool,
   createListSkillsTool,
+  createAnalyzeFileTool,
   createViewFileTool,
   createWaitTool,
   createWebSearchTool,
@@ -31,6 +32,7 @@ import {
   createSearchChatsTool,
   createSendFeedbackTool,
 } from "@/lib/ai/tools";
+import type { AnalyzeFileContext } from "@/lib/ai/tools/analyzeFile";
 import { withApproval } from "@/lib/ai/tools/approval";
 import {
   abortMcpServerLoad,
@@ -62,6 +64,7 @@ export interface ToolsContextType {
     subAgentContext?: SubAgentExecutionContext;
     toolBehavior?: ToolBehavior;
     chatContext?: ChatToolsContext;
+    analyzeFile?: AnalyzeFileContext;
   }) => Promise<ToolSet>;
   isMcpLoading: boolean;
   mcpLoaded: boolean;
@@ -477,6 +480,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       subAgentContext?: SubAgentExecutionContext;
       toolBehavior?: ToolBehavior;
       chatContext?: ChatToolsContext;
+      analyzeFile?: AnalyzeFileContext;
     }): Promise<ToolSet> => {
       const filteredStaticTools: ToolSet = {};
       const chatContext = options?.chatContext ?? {};
@@ -587,6 +591,13 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         filteredStaticTools.listSkills = withApproval(
           createListSkillsTool(chatContext.project),
           mergedToolConfigs.viewFile.requiresApproval,
+        );
+      }
+
+      if (options?.analyzeFile) {
+        filteredStaticTools.analyzeFile = withApproval(
+          createAnalyzeFileTool(options.analyzeFile),
+          false,
         );
       }
 

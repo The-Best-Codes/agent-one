@@ -15,18 +15,22 @@ import {
   type ViewUpdate,
   WidgetType,
 } from "@codemirror/view";
+import { sep } from "@tauri-apps/api/path";
 import fuzzysort from "fuzzysort";
+import { getDefaultStore } from "jotai";
 
+import { attachmentPreviewAtom } from "@/lib/attachments";
 import {
   CHAT_MENTION_PATTERN,
   type ChatMention,
   formatChatMention,
   getChatMention,
   getMentionDisplay,
+  getMentionPath,
   MENTION_CHIP_CLASS,
   MENTION_ICON_CLASS,
 } from "@/lib/chat-mentions";
-import { getFileIconSvg, SKILL_ICON_SVG } from "@/lib/file-icons";
+import { getFileIconSvg, LOADING_ICON_SVG, SKILL_ICON_SVG } from "@/lib/file-icons";
 import { listProjectEntries, type ProjectEntry } from "@/lib/project-files";
 import { loadSkills, type Skill } from "@/lib/skills";
 import type { Project } from "@/lib/storage/project-storage";
@@ -48,13 +52,25 @@ function getSkills(project: Project | undefined): Promise<Skill[]> {
   return skills;
 }
 
+export const savingAttachmentPaths = new Set<string>();
+
+export function markAttachmentSaved(view: EditorView | null, path: string) {
+  savingAttachmentPaths.delete(path);
+  view?.contentDOM.querySelectorAll<HTMLElement>("[data-preview-path]").forEach((chip) => {
+    const icon = chip.firstElementChild;
+    if (chip.dataset.previewPath !== path || !icon) return;
+    icon.classList.remove("animate-spin");
+    icon.innerHTML = getFileIconSvg(path);
+  });
+}
+
 class MentionWidget extends WidgetType {
   constructor(readonly mention: ChatMention) {
     super();
   }
 
   eq(other: MentionWidget) {
-    return other.mention.kind === this.mention.kind && other.mention.value === this.mention.value;
+    return formatChatMention(other.mention) === formatChatMention(this.mention);
   }
 
   toDOM() {
@@ -70,7 +86,20 @@ class MentionWidget extends WidgetType {
     text.className = "truncate";
     text.textContent = label;
     chip.append(icon, text);
+    const path = getMentionPath(this.mention);
+    if (path) {
+      chip.classList.add("cursor-pointer", "hover:bg-primary/25");
+      chip.dataset.previewPath = path;
+      if (this.mention.kind === "attachment" && savingAttachmentPaths.has(path)) {
+        icon.classList.add("animate-spin");
+        icon.innerHTML = LOADING_ICON_SVG;
+      }
+    }
     return chip;
+  }
+
+  ignoreEvent() {
+    return false;
   }
 }
 
@@ -102,7 +131,20 @@ const mentionChipsTheme = EditorView.theme({
   },
 });
 
-export const chatMentionChips = [mentionChipsPlugin, mentionChipsTheme];
+const previewChipClicks = EditorView.domEventHandlers({
+  click: (event) => {
+    const path =
+      event.target instanceof Element
+        ? event.target.closest<HTMLElement>("[data-preview-path]")?.dataset.previewPath
+        : undefined;
+    if (!path) return false;
+    event.preventDefault();
+    getDefaultStore().set(attachmentPreviewAtom, path);
+    return true;
+  },
+});
+
+export const chatMentionChips = [mentionChipsPlugin, mentionChipsTheme, previewChipClicks];
 
 interface MentionCompletion extends Completion {
   mention: ChatMention;
@@ -124,7 +166,12 @@ function getParentPath(entry: ProjectEntry): string {
   return path.slice(0, Math.max(0, path.length - entry.name.length - 1));
 }
 
-function getFileOptions(query: string, entries: ProjectEntry[]): MentionCompletion[] {
+function getFileOptions(
+  query: string,
+  entries: ProjectEntry[],
+  folder: string,
+): MentionCompletion[] {
+  const root = folder.replace(/[/\\]+$/, "");
   return fuzzysort
     .go(query, entries, {
       keys: ["name", "path"],
@@ -138,7 +185,10 @@ function getFileOptions(query: string, entries: ProjectEntry[]): MentionCompleti
         label,
         detail: getParentPath(result.obj),
         apply: insertMention,
-        mention: { kind: "file", value: result.obj.path },
+        mention: {
+          kind: "file",
+          value: `${root}${sep()}${result.obj.path.split("/").join(sep())}`,
+        },
         icon: getFileIconSvg(label),
         matchIndexes: result[0]?.indexes ?? [],
       };
@@ -263,7 +313,7 @@ export function createChatInputMentions() {
     const options = match.text.startsWith("/")
       ? getSkillOptions(query, await getSkills(project))
       : project?.folder
-        ? getFileOptions(query, await listProjectEntries(project.folder))
+        ? getFileOptions(query, await listProjectEntries(project.folder), project.folder)
         : [];
     if (context.aborted || options.length === 0) return null;
     return {

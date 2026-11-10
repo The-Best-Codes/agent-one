@@ -1,9 +1,9 @@
-import { getFileIconSvg, getFileName, SKILL_ICON_SVG } from "@/lib/file-icons";
+import { CHAT_ICON_SVG, getFileIconSvg, getFileName, SKILL_ICON_SVG } from "@/lib/file-icons";
 
-export interface ChatMention {
-  kind: "file" | "skill";
-  value: string;
-}
+export type ChatMention =
+  | { kind: "file" | "skill"; value: string }
+  | { kind: "chat"; value: string; label: string }
+  | { kind: "attachment"; path: string };
 
 const MENTION_SCHEME = "mention://";
 
@@ -12,18 +12,40 @@ export const MENTION_CHIP_CLASS =
 export const MENTION_ICON_CLASS = "text-primary flex shrink-0 self-center [&>svg]:size-[1em]";
 
 export function getMentionDisplay(mention: ChatMention) {
-  if (mention.kind === "skill") {
-    return { label: mention.value, title: `Skill: ${mention.value}`, iconSvg: SKILL_ICON_SVG };
+  switch (mention.kind) {
+    case "skill":
+      return { label: mention.value, title: `Skill: ${mention.value}`, iconSvg: SKILL_ICON_SVG };
+    case "chat":
+      return {
+        label: mention.label || "Chat",
+        title: `Chat: ${mention.label || mention.value}`,
+        iconSvg: CHAT_ICON_SVG,
+      };
+    case "attachment":
+      return {
+        label: getFileName(mention.path),
+        title: mention.path,
+        iconSvg: getFileIconSvg(mention.path),
+      };
+    default: {
+      const isFolder = /[/\\]$/.test(mention.value);
+      return {
+        label: `${getFileName(mention.value)}${isFolder ? "/" : ""}`,
+        title: mention.value,
+        iconSvg: getFileIconSvg(mention.value),
+      };
+    }
   }
-  const isFolder = /[/\\]$/.test(mention.value);
-  return {
-    label: `${getFileName(mention.value)}${isFolder ? "/" : ""}`,
-    title: mention.value,
-    iconSvg: getFileIconSvg(mention.value),
-  };
 }
 
-export const CHAT_MENTION_PATTERN = /\[[^\]\n]*\]\(mention:\/\/(file|skill)\/([^\s)]+)\)/g;
+export function getMentionPath(mention: ChatMention): string | undefined {
+  if (mention.kind === "attachment") return mention.path;
+  if (mention.kind === "file") return mention.value;
+  return undefined;
+}
+
+export const CHAT_MENTION_PATTERN =
+  /\[([^\]\n]*)\]\((?:mention:\/\/(file|skill|chat)\/|attachment:\/\/)([^\s)]+)\)/g;
 
 function encodeMentionValue(value: string): string {
   return value
@@ -40,28 +62,59 @@ function decodeMentionValue(value: string): string {
   }
 }
 
+function cleanLabel(label: string): string {
+  return label.replace(/[[\]\n]/g, "");
+}
+
 export function formatChatMention(mention: ChatMention): string {
-  const label = (mention.kind === "file" ? `@${mention.value}` : `/${mention.value}`).replace(
-    /[[\]\n]/g,
-    "",
-  );
-  return `[${label}](${MENTION_SCHEME}${mention.kind}/${encodeMentionValue(mention.value)})`;
+  switch (mention.kind) {
+    case "attachment":
+      return `[${cleanLabel(getFileName(mention.path))}](attachment://${encodeMentionValue(mention.path)})`;
+    case "chat":
+      return `[${cleanLabel(mention.label)}](${MENTION_SCHEME}chat/${encodeMentionValue(mention.value)})`;
+    default: {
+      const label = cleanLabel(getMentionText(mention));
+      return `[${label}](${MENTION_SCHEME}${mention.kind}/${encodeMentionValue(mention.value)})`;
+    }
+  }
+}
+
+function toChatMention(label: string, kind: string | undefined, value: string): ChatMention {
+  if (!kind) return { kind: "attachment", path: decodeMentionValue(value) };
+  if (kind === "chat") return { kind, value: decodeMentionValue(value), label };
+  return { kind: kind as "file" | "skill", value: decodeMentionValue(value) };
 }
 
 export function getChatMention(match: RegExpMatchArray): ChatMention {
-  return { kind: match[1] as ChatMention["kind"], value: decodeMentionValue(match[2]) };
+  return toChatMention(match[1], match[2], match[3]);
 }
 
-export function parseChatMentionHref(href: string | undefined): ChatMention | undefined {
-  const match = href ? /^mention:\/\/(file|skill)\/(.+)$/.exec(href) : null;
-  return match ? getChatMention(match) : undefined;
+export function parseChatMentionHref(
+  href: string | undefined,
+  label = "",
+): ChatMention | undefined {
+  const match = href
+    ? /^(?:mention:\/\/(file|skill|chat)\/|attachment:\/\/)(\S+)$/.exec(href)
+    : null;
+  return match ? toChatMention(label, match[1], match[2]) : undefined;
+}
+
+function getMentionText(mention: ChatMention): string {
+  switch (mention.kind) {
+    case "file":
+      return `@${getMentionDisplay(mention).label}`;
+    case "skill":
+      return `/${mention.value}`;
+    case "chat":
+      return mention.label;
+    case "attachment":
+      return getFileName(mention.path);
+  }
 }
 
 export function formatChatMentionsAsText(text: string): string {
-  return text.replace(
-    CHAT_MENTION_PATTERN,
-    (_match, kind: string, value: string) =>
-      `${kind === "file" ? "@" : "/"}${decodeMentionValue(value)}`,
+  return text.replace(CHAT_MENTION_PATTERN, (_match, label: string, kind: string, value: string) =>
+    getMentionText(toChatMention(label, kind, value)),
   );
 }
 
