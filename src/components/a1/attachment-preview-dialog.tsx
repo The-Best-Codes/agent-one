@@ -133,6 +133,7 @@ export function AttachmentPreviewDialog() {
     return () => {
       cancelled = true;
       if (url) URL.revokeObjectURL(url);
+      setLoaded(null);
     };
   }, [shownPath]);
 
