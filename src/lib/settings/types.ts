@@ -1,3 +1,5 @@
+import type { FileKind } from "@/lib/attachments";
+
 export type ChatBackgroundPresetOption =
   | "none"
   | "custom"
@@ -274,3 +276,5 @@ export interface ToolConfigs {
   computerUseObserve: ComputerUseObserveToolConfig;
   computerUseAct: ComputerUseActToolConfig;
 }
+
+export type FileAnalysisModelSettings = Partial<Record<FileKind, string>>;

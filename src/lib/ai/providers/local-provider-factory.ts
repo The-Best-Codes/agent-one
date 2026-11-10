@@ -10,5 +10,6 @@ export function createLocalProvider(provider: LocalProvider) {
     baseURL: provider.baseUrl,
     fetch: providerFetch,
     headers: provider.headers,
+    includeUsage: true,
   });
 }

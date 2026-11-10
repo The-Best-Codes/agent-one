@@ -9,6 +9,7 @@ import {
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
 
+import { ExternalLink } from "@/components/a1/external-link";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -179,28 +180,24 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                 <div className="flex flex-col gap-2">
                   <div>
                     {result.search_url && (
-                      <a
+                      <ExternalLink
                         href={result.search_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
                         className="text-muted-foreground hover:text-foreground text-xs"
                       >
                         {`View "${result.query}" on DuckDuckGo`}
                         <IconExternalLink className="ml-1 inline size-3" />
-                      </a>
+                      </ExternalLink>
                     )}
                   </div>
                   {result.results?.map((searchResult, index) => (
                     <div key={index} className="rounded-md border p-2">
                       <div className="flex flex-col gap-1">
-                        <a
+                        <ExternalLink
                           href={searchResult.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
                           className="text-foreground inline-block text-sm font-medium hover:underline"
                         >
                           {searchResult.title}
-                        </a>
+                        </ExternalLink>
                         <div className="text-muted-foreground font-mono text-xs">
                           {searchResult.display_url}
                         </div>

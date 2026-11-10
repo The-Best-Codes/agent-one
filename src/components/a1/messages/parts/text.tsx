@@ -3,7 +3,9 @@ import { useAtomValue } from "jotai";
 
 import { MemoizedMarkdown } from "@/components/a1/markdown/memoized-markdown";
 import { PerformantMarkdown } from "@/components/a1/markdown/performant-markdown";
+import { MentionChip } from "@/components/a1/mention-chip";
 import { useChatStatus } from "@/contexts/use-chat/chat-hooks";
+import { splitChatMentions } from "@/lib/chat-mentions";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
@@ -60,7 +62,9 @@ export const MessagePartText = ({
             fontFamily: "inherit",
           }}
         >
-          {text}
+          {splitChatMentions(text).map((part, index) =>
+            typeof part === "string" ? part : <MentionChip key={index} mention={part} />,
+          )}
         </pre>
       )}
     </div>

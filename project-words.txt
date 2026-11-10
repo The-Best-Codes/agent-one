@@ -342,3 +342,7 @@ defaultmaxchars
 unminimize
 srgb
 lastexitcode
+Prec
+activedescendant
+matroska
+quicktime

@@ -14,6 +14,7 @@ import { ProjectPicker } from "@/components/a1/project-picker";
 import { Sidebar } from "@/components/a1/sidebar";
 import { Spinner } from "@/components/ui/spinner";
 import { useChatLoading, useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
+import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { cssImageUrl, getChatBackgroundUrl } from "@/lib/chat-backgrounds";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import {
@@ -21,7 +22,7 @@ import {
   editingMessageIdsAtom,
 } from "@/lib/jotai/chat-message-editing-atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
-import { projectsAtom } from "@/lib/projects";
+import { getProject, projectsAtom } from "@/lib/projects";
 import { cn } from "@/lib/utils";
 
 const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
@@ -40,6 +41,12 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
   const showMessagePreviewRail = useAtomValue(settingAtoms.SHOW_MESSAGE_PREVIEW_RAIL);
   const clearEditingMessages = useSetAtom(clearEditingMessagesAtom);
   const hasProjects = useAtomValue(projectsAtom).length > 0;
+  const { loadChatMetadata } = usePersistence();
+  const requestedProjectId = searchParams.get("project") ?? undefined;
+  const getChatProject = useCallback(
+    () => getProject(chatId ? loadChatMetadata(chatId).projectId : requestedProjectId),
+    [chatId, loadChatMetadata, requestedProjectId],
+  );
 
   useEffect(() => {
     clearEditingMessages();
@@ -205,6 +212,7 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
             initialValueKey={chatId ? undefined : location.key}
             disabled={isChatLoading}
             toolbarStart={!chatId && hasProjects ? <ProjectPicker /> : undefined}
+            getProject={getChatProject}
             onScrollNeededAction={() => {
               scrollRef.current?.scrollToBottom();
             }}

@@ -1,12 +1,14 @@
 import type { UIMessage } from "ai";
 
+import { formatChatMentionsAsText } from "@/lib/chat-mentions";
+
 export const NOTIFICATION_PREVIEW_MAX_LENGTH = 200;
 
 export function getLastTextPart(message: UIMessage): string | undefined {
   for (let index = message.parts.length - 1; index >= 0; index--) {
     const part = message.parts[index];
     if (part.type === "text") {
-      const text = part.text.replace(/\s+/g, " ").trim();
+      const text = formatChatMentionsAsText(part.text).replace(/\s+/g, " ").trim();
       if (text) return text;
     }
   }

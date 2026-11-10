@@ -4,6 +4,7 @@
 import { defaultKeyboardShortcuts, type KeyboardShortcutSettings } from "@/lib/kbd-registry";
 
 import type {
+  FileAnalysisModelSettings,
   ChatBackgroundSettings,
   TitleGenerationSettings,
   ToolConfigs,
@@ -198,6 +199,35 @@ export const SETTINGS = {
     label: "Markdown Highlighting",
     description: "Show markdown formatting styles while typing in the chat input.",
     default: true,
+  }),
+  FILE_MENTION_COMPLETIONS: toggle({
+    keywords: ["mention", "@", "autocomplete", "files", "folders", "composer", "input", "editor"],
+    ai: "write",
+    label: "@ Mention Suggestions",
+    description: "Suggest project files and folders when typing @ in the chat input.",
+    default: true,
+  }),
+  SKILL_COMPLETIONS: toggle({
+    keywords: ["slash", "/", "autocomplete", "skills", "commands", "composer", "input", "editor"],
+    ai: "write",
+    label: "/ Skill Suggestions",
+    description: "Suggest skills when typing / in the chat input.",
+    default: true,
+  }),
+  FILE_ANALYSIS_ENABLED: toggle({
+    keywords: ["attachments", "images", "video", "audio", "pdf", "vision", "files", "tool"],
+    ai: "write",
+    label: "Let AgentOne analyze files",
+    description:
+      "When AgentOne needs to know what's in a file it can't read itself, like an image or a PDF, it can send the file to another model to analyze it.",
+    default: true,
+  }),
+  FILE_ANALYSIS_MODELS: data<FileAnalysisModelSettings>({
+    keywords: ["attachments", "images", "video", "audio", "pdf", "vision", "files", "model"],
+    label: "Models for analyzing files",
+    description:
+      "The model AgentOne uses to analyze each type of file. Pick a model that can read that type of file. By default, the chat's own model is used.",
+    default: {},
   }),
   INPUT_STYLE: select({
     keywords: ["composer", "prompt box", "text box", "chat box", "position", "layout"],

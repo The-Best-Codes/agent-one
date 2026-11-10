@@ -31,6 +31,7 @@ import {
   TitleMethodControl,
 } from "@/components/settings-components/chat-titles";
 import { VirtualizationControl } from "@/components/settings-components/chat-virtualization";
+import { FileAnalysisModelsControl } from "@/components/settings-components/file-analysis";
 import {
   AppUpdates,
   DebugTools,
@@ -332,6 +333,8 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
         title: "Chat",
         items: [
           { id: "markdown-highlighting", key: "MARKDOWN_HIGHLIGHTING" },
+          { id: "file-mention-completions", key: "FILE_MENTION_COMPLETIONS" },
+          { id: "skill-completions", key: "SKILL_COMPLETIONS" },
           { id: "input-style", key: "INPUT_STYLE" },
           { id: "collapsed-sidebar-layout", key: "COLLAPSED_SIDEBAR_LAYOUT" },
         ],
@@ -357,6 +360,23 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
           { id: "show-scroll-to-bottom-button", key: "SHOW_CHAT_TO_BOTTOM_BUTTON" },
           { id: "show-message-preview-rail", key: "SHOW_MESSAGE_PREVIEW_RAIL" },
           { id: "chat-status-indicators", key: "SHOW_CHAT_STATUS_INDICATOR" },
+        ],
+      },
+      {
+        id: "attachments",
+        title: "Attachments",
+        description:
+          "The model gets the path of each file you attach. When it needs to know what's in a file it can't read, like an image or a PDF, it can ask another model to analyze it.",
+        keywords: ["attachments", "files", "images", "pdf", "upload"],
+        items: [
+          { id: "file-analysis-enabled", key: "FILE_ANALYSIS_ENABLED" },
+          {
+            id: "file-analysis-models",
+            key: "FILE_ANALYSIS_MODELS",
+            layout: "stacked",
+            visible: settingAtoms.FILE_ANALYSIS_ENABLED,
+            control: FileAnalysisModelsControl,
+          },
         ],
       },
       {
