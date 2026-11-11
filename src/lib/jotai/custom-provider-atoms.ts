@@ -103,6 +103,24 @@ export function getCustomProviderAtom(providerId: string) {
   return providerAtom;
 }
 
+function parseSyncedProvider(id: string, value: unknown): CustomProvider | null {
+  if (!value || typeof value !== "object") return null;
+  const p = value as Partial<CustomProvider>;
+  if (typeof p.name !== "string" || typeof p.baseUrl !== "string" || !Array.isArray(p.models)) {
+    return null;
+  }
+  return {
+    id,
+    name: p.name,
+    baseUrl: p.baseUrl,
+    headers: p.headers && typeof p.headers === "object" ? p.headers : {},
+    enabled: p.enabled !== false,
+    models: p.models
+      .filter((model) => typeof model?.id === "string")
+      .map(normalizeProviderModelMetadata),
+  };
+}
+
 encryptedSyncManager.registerSource({
   prefix: SYNC_PREFIX,
   readAll: async () =>
@@ -112,12 +130,14 @@ encryptedSyncManager.registerSource({
         .map((p) => [p.id, p]),
     ),
   write: async (providerId, value) => {
+    const provider = parseSyncedProvider(providerId, value);
+    if (value != null && !provider) return;
     const store = getDefaultStore();
     const existing = store.get(customProvidersAtom);
     const next = existing.filter((p) => p.id !== providerId);
-    if (value && typeof value === "object") {
+    if (provider) {
       const index = existing.findIndex((p) => p.id === providerId);
-      next.splice(Math.max(index, 0), 0, { ...(value as CustomProvider), id: providerId });
+      next.splice(Math.max(index, 0), 0, provider);
     }
     store.set(customProvidersAtom, next);
   },
