@@ -32,18 +32,13 @@ const EnableSyncDialogBody = ({
       <DialogHeader>
         <DialogTitle>Turn on settings sync?</DialogTitle>
         <DialogDescription>
-          Your settings will be kept in sync across every device signed in to your AgentOne account.
+          Keep your settings the same on every device you're signed in to.
         </DialogDescription>
       </DialogHeader>
       <ul className="text-muted-foreground list-disc space-y-1.5 pl-5 text-sm">
-        <li>Settings you've changed on this device are uploaded to your account.</li>
-        <li>Settings changed on your other devices are pulled down and applied here.</li>
-        <li>If a setting was changed in more than one place, the most recent change wins.</li>
-        <li>
-          Other devices pick up changes when they start or sign in, and about once an hour after
-          that.
-        </li>
-        <li>Device-specific things like extensions and local folders stay on this device.</li>
+        <li>If a setting is different on two devices, the most recent change is kept.</li>
+        <li>Other devices update when they open, then about once an hour.</li>
+        <li>Extensions and local folders stay on this device only.</li>
       </ul>
       <Field orientation="horizontal">
         <Checkbox
@@ -53,12 +48,11 @@ const EnableSyncDialogBody = ({
         />
         <FieldContent>
           <FieldLabel htmlFor="sync-overwrite-remote">
-            Apply this device's settings to all my devices
+            Make my other devices match this one
           </FieldLabel>
           <FieldDescription>
-            Treats every setting here as the newest, including ones you haven't changed from the
-            default, so your other devices are updated to match this one instead of this device
-            pulling their changes.
+            Copies all of this device's settings everywhere, just this once. After that, sync works
+            as usual.
           </FieldDescription>
         </FieldContent>
       </Field>
