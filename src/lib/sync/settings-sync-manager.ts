@@ -72,6 +72,7 @@ class SettingsSyncManager {
     store.sub(syncEnabledAtom, () => {
       if (store.get(syncEnabledAtom)) {
         logger.verbose("Sync enabled, pushing modified local settings and pulling remote settings");
+        this.timestamps = loadTimestamps();
         this.queueModifiedSettings();
         void this.push();
         void this.pull();
@@ -79,6 +80,20 @@ class SettingsSyncManager {
         this.clearRetry();
       }
     });
+  }
+
+  enable({ overwriteRemote }: { overwriteRemote: boolean }): void {
+    const store = getDefaultStore();
+    if (store.get(syncEnabledAtom)) return;
+
+    if (overwriteRemote) {
+      const now = Date.now();
+      for (const key of SETTING_KEYS) this.timestamps[key] = now;
+      saveTimestamps(this.timestamps);
+      logger.verbose("Marked all local settings as newest before enabling sync");
+    }
+
+    store.set(syncEnabledAtom, true);
   }
 
   registerAtomSetter(key: SettingKey, setter: (value: unknown) => void): void {

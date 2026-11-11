@@ -10,6 +10,7 @@ import {
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 
+import { EnableSyncDialog } from "@/components/a1/enable-sync-dialog";
 import { ExternalLink } from "@/components/a1/external-link";
 import { PathListEditor } from "@/components/a1/path-list-editor";
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
@@ -52,6 +53,7 @@ import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { syncEnabledAtom } from "@/lib/jotai/sync-atoms";
 import { globalAgentsFilesAtom, globalSkillsFoldersAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { MAX_MEMORY_ENTRIES, MAX_MEMORY_ENTRY_CHARS } from "@/lib/memory";
+import { settingsSyncManager } from "@/lib/sync/settings-sync-manager";
 
 import { SettingsTarget } from "./settings-target";
 
@@ -276,14 +278,25 @@ function AccountSwitch({
 
 export function SyncControl() {
   const [syncEnabled, setSyncEnabled] = useAtom(syncEnabledAtom);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
-    <AccountSwitch
-      label="Synchronize my settings"
-      checked={syncEnabled}
-      onCheckedChange={setSyncEnabled}
-      signedOutHint="Sign in to enable sync"
-    />
+    <>
+      <AccountSwitch
+        label="Synchronize my settings"
+        checked={syncEnabled}
+        onCheckedChange={(checked) => {
+          if (checked) setDialogOpen(true);
+          else setSyncEnabled(false);
+        }}
+        signedOutHint="Sign in to enable sync"
+      />
+      <EnableSyncDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onConfirm={(overwriteRemote) => settingsSyncManager.enable({ overwriteRemote })}
+      />
+    </>
   );
 }
 
