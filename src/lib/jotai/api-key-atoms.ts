@@ -1,4 +1,4 @@
-import { atom } from "jotai";
+import { atom, getDefaultStore } from "jotai";
 import { atomFamily } from "jotai-family";
 import { atomWithStorage, unwrap } from "jotai/utils";
 
@@ -10,6 +10,7 @@ import {
 import { loadable } from "@/lib/jotai/loadable";
 import type { TtsProviderId } from "@/lib/settings/types";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
+import { encryptedSyncManager } from "@/lib/sync/encrypted-sync-manager";
 
 type ApiKeyStorageKey =
   | ProviderStorageKey
@@ -27,8 +28,28 @@ const TTS_API_KEY_STORAGE_KEYS = {
   "tts-google": "GOOGLE_GENERATIVE_AI_TTS_API_KEY",
 } as const satisfies Record<`tts-${TtsProviderId}`, ApiKeyStorageKey>;
 
+const API_KEY_SYNC_PREFIX = "apiKey:";
+const UNSYNCED_API_KEYS = new Set<ApiKeyStorageKey>(["AGENT_ONE_API_KEY"]);
+
+function syncedKeyringStorage(storageKey: ApiKeyStorageKey): typeof keyringStorage {
+  if (UNSYNCED_API_KEYS.has(storageKey)) return keyringStorage;
+
+  const name = `${API_KEY_SYNC_PREFIX}${storageKey}`;
+  return {
+    ...keyringStorage,
+    setItem: async (key, value) => {
+      await keyringStorage.setItem(key, value);
+      encryptedSyncManager.markDirty(name);
+    },
+    removeItem: async (key) => {
+      await keyringStorage.removeItem(key);
+      encryptedSyncManager.markDirty(name);
+    },
+  };
+}
+
 function createApiKeyAtoms(storageKey: ApiKeyStorageKey) {
-  const baseAtom = atomWithStorage<string>(storageKey, "", keyringStorage, {
+  const baseAtom = atomWithStorage<string>(storageKey, "", syncedKeyringStorage(storageKey), {
     getOnInit: true,
   });
 
@@ -62,4 +83,32 @@ export function getApiKeyBaseAtom(providerId: ApiKeyId) {
 
 export const apiKeysLoadingAtom = atom((get) => {
   return PROVIDER_REGISTRY.some((p) => get(apiKeyAtoms[p.id].loadableAtom).state === "loading");
+});
+
+const syncedApiKeyAtoms = new Map(
+  [
+    ...PROVIDER_REGISTRY.map(
+      (provider) => [provider.storageKey, apiKeyAtoms[provider.id]] as const,
+    ),
+    ...Object.entries(TTS_API_KEY_STORAGE_KEYS).map(
+      ([id, storageKey]) => [storageKey, apiKeyAtoms[id as ApiKeyId]] as const,
+    ),
+  ].filter(([storageKey]) => !UNSYNCED_API_KEYS.has(storageKey)),
+);
+
+encryptedSyncManager.registerSource({
+  prefix: API_KEY_SYNC_PREFIX,
+  readAll: async () => {
+    const store = getDefaultStore();
+    const entries = await Promise.all(
+      [...syncedApiKeyAtoms].map(
+        async ([storageKey, atoms]) => [storageKey, await store.get(atoms.baseAtom)] as const,
+      ),
+    );
+    return Object.fromEntries(entries);
+  },
+  write: async (storageKey, value) => {
+    const atoms = syncedApiKeyAtoms.get(storageKey as ApiKeyStorageKey);
+    if (atoms) await getDefaultStore().set(atoms.baseAtom, value);
+  },
 });

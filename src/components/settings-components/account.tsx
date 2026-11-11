@@ -7,10 +7,11 @@ import {
   IconRocket,
   IconX,
 } from "@tabler/icons-react";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 
 import { EnableSyncDialog } from "@/components/a1/enable-sync-dialog";
+import { EncryptedSyncDialog } from "@/components/a1/encrypted-sync-dialog";
 import { ExternalLink } from "@/components/a1/external-link";
 import { PathListEditor } from "@/components/a1/path-list-editor";
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
@@ -50,9 +51,10 @@ import {
 } from "@/lib/constants";
 import { hideAgentOneModelsAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
-import { syncEnabledAtom } from "@/lib/jotai/sync-atoms";
+import { encryptedSyncStatusAtom, syncEnabledAtom } from "@/lib/jotai/sync-atoms";
 import { globalAgentsFilesAtom, globalSkillsFoldersAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { MAX_MEMORY_ENTRIES, MAX_MEMORY_ENTRY_CHARS } from "@/lib/memory";
+import { encryptedSyncManager } from "@/lib/sync/encrypted-sync-manager";
 import { settingsSyncManager } from "@/lib/sync/settings-sync-manager";
 
 import { SettingsTarget } from "./settings-target";
@@ -297,6 +299,32 @@ export function SyncControl() {
         onConfirm={(overwriteRemote) => settingsSyncManager.enable({ overwriteRemote })}
       />
     </>
+  );
+}
+
+export function EncryptedSyncControl() {
+  const status = useAtomValue(encryptedSyncStatusAtom);
+  const { user } = useWebAuth();
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  return (
+    <div className="flex items-center gap-2">
+      {status === "locked" && user && (
+        <Button variant="outline" size="sm" onClick={() => setDialogOpen(true)}>
+          Unlock
+        </Button>
+      )}
+      <AccountSwitch
+        label="Sync API keys"
+        checked={status !== "off"}
+        onCheckedChange={(checked) => {
+          if (checked) setDialogOpen(true);
+          else void encryptedSyncManager.disable();
+        }}
+        signedOutHint="Sign in to sync API keys"
+      />
+      <EncryptedSyncDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+    </div>
   );
 }
 

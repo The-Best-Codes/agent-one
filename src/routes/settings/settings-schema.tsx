@@ -9,6 +9,7 @@ import {
   HideAgentOneModelsControl,
   MemoryControl,
   SyncControl,
+  EncryptedSyncControl,
 } from "@/components/settings-components/account";
 import {
   ColorThemeControl,
@@ -195,6 +196,15 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
             keywords: ["sync", "devices", "cloud", "backup"],
             layout: "row",
             control: SyncControl,
+          },
+          {
+            id: "sync-api-keys",
+            label: "Sync API keys",
+            description:
+              "Keep your API keys on every device. They're encrypted with a passphrase only you know.",
+            keywords: ["sync", "api key", "encrypted", "passphrase", "devices", "recovery key"],
+            layout: "row",
+            control: EncryptedSyncControl,
           },
           {
             id: "hide-agentone-models",
