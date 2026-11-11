@@ -104,8 +104,8 @@ class SettingsSyncManager {
     for (const key of SETTING_KEYS) {
       const value = readLocalSetting(key);
       if (
-        value === undefined ||
-        (this.timestamps[key] === undefined && isDefaultSetting(key, value))
+        this.timestamps[key] === undefined &&
+        (value === undefined || isDefaultSetting(key, value))
       ) {
         continue;
       }
@@ -163,10 +163,9 @@ class SettingsSyncManager {
 
     const payload: ServerSettings = {};
     for (const key of keys) {
-      const value = readLocalSetting(key);
       const updatedAt = this.timestamps[key];
-      if (value !== undefined && updatedAt !== undefined) {
-        payload[key] = { value, updatedAt };
+      if (updatedAt !== undefined) {
+        payload[key] = { value: readLocalSetting(key) ?? DEFAULT_SETTINGS[key], updatedAt };
       }
     }
 
