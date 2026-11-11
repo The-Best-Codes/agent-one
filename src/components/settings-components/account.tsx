@@ -315,13 +315,13 @@ export function EncryptedSyncControl() {
         </Button>
       )}
       <AccountSwitch
-        label="Sync API keys"
+        label="Sync keys and providers"
         checked={status !== "off"}
         onCheckedChange={(checked) => {
           if (checked) setDialogOpen(true);
           else void encryptedSyncManager.disable();
         }}
-        signedOutHint="Sign in to sync API keys"
+        signedOutHint="Sign in to use encrypted sync"
       />
       <EncryptedSyncDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>

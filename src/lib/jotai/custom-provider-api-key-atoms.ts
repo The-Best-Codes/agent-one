@@ -5,7 +5,6 @@ import { loadable } from "@/lib/jotai/loadable";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
 import { encryptedSyncManager } from "@/lib/sync/encrypted-sync-manager";
 
-// TODO: sync the custom providers themselves (base URL, models, etc.); until then their synced API keys are useless on other devices
 const STORAGE_KEY = "agent-one-custom-provider-api-keys";
 const SYNC_PREFIX = "customProviderKey:";
 
@@ -56,6 +55,9 @@ encryptedSyncManager.registerSource({
     const store = getDefaultStore();
     const { [providerId]: _removed, ...rest } = await store.get(baseAtom);
     void _removed;
-    await store.set(baseAtom, apiKey ? { ...rest, [providerId]: apiKey } : rest);
+    await store.set(
+      baseAtom,
+      typeof apiKey === "string" && apiKey ? { ...rest, [providerId]: apiKey } : rest,
+    );
   },
 });

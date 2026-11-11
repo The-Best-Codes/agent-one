@@ -69,12 +69,6 @@ pub struct CreatedVault {
     recovery_key: String,
 }
 
-#[derive(Deserialize)]
-pub struct PlainItem {
-    name: String,
-    value: serde_json::Value,
-}
-
 #[derive(Serialize, Deserialize)]
 pub struct SealedItem {
     id: String,
@@ -97,7 +91,7 @@ struct StoredVault {
 }
 
 #[derive(Serialize, Deserialize)]
-struct ItemPayload {
+pub struct ItemPayload {
     name: String,
     value: serde_json::Value,
 }
@@ -441,7 +435,7 @@ pub async fn encrypted_sync_vault_id(
 pub async fn encrypted_sync_seal(
     app: tauri::AppHandle,
     state: State<'_, EncryptedSyncState>,
-    items: Vec<PlainItem>,
+    items: Vec<ItemPayload>,
 ) -> Result<Vec<SealedItem>, String> {
     let vault = require_unlocked(&app, &state).await?;
     let enc_key = hkdf_expand(&vault.key, None, ENC_KEY_INFO)?;
@@ -455,11 +449,7 @@ pub async fn encrypted_sync_seal(
             mac.update(item.name.as_bytes());
             let id = URL_SAFE_NO_PAD.encode(mac.finalize().into_bytes());
 
-            let plaintext = serde_json::to_vec(&ItemPayload {
-                name: item.name,
-                value: item.value,
-            })
-            .map_err(|e| e.to_string())?;
+            let plaintext = serde_json::to_vec(&item).map_err(|e| e.to_string())?;
             let (nonce, ciphertext) = seal(&enc_key, &plaintext, &item_aad(&vault.vault_id, &id))?;
             Ok(SealedItem {
                 id,

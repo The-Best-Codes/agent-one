@@ -21,7 +21,11 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { encryptedSyncManager, type EncryptedVault } from "@/lib/sync/encrypted-sync-manager";
+import {
+  encryptedSyncManager,
+  errorMessage,
+  type EncryptedVault,
+} from "@/lib/sync/encrypted-sync-manager";
 
 const MIN_PASSPHRASE_LENGTH = 8;
 
@@ -33,8 +37,22 @@ type Step =
   | { kind: "unlock"; vault: EncryptedVault }
   | { kind: "reset"; vault: EncryptedVault };
 
-function errorMessage(error: unknown) {
-  return error instanceof Error ? error.message : String(error);
+function useAction() {
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+
+  const run = async (action: () => Promise<void>) => {
+    setPending(true);
+    setError(null);
+    try {
+      await action();
+    } catch (actionError) {
+      setError(errorMessage(actionError));
+      setPending(false);
+    }
+  };
+
+  return { error, setError, pending, run };
 }
 
 interface EncryptedSyncDialogProps {
@@ -80,7 +98,7 @@ const EncryptedSyncDialogBody = ({ onDone }: { onDone: () => void }) => {
       return (
         <>
           <DialogHeader>
-            <DialogTitle>Sync API keys</DialogTitle>
+            <DialogTitle>Sync keys and providers</DialogTitle>
             <DialogDescription>Checking your account…</DialogDescription>
           </DialogHeader>
           <div className="flex justify-center py-6">
@@ -92,7 +110,7 @@ const EncryptedSyncDialogBody = ({ onDone }: { onDone: () => void }) => {
       return (
         <>
           <DialogHeader>
-            <DialogTitle>Sync API keys</DialogTitle>
+            <DialogTitle>Sync keys and providers</DialogTitle>
             <DialogDescription>We couldn't reach your AgentOne account.</DialogDescription>
           </DialogHeader>
           <FieldError>{step.message}</FieldError>
@@ -145,10 +163,9 @@ const CreateStep = ({
 }) => {
   const [passphrase, setPassphrase] = useState("");
   const [confirmation, setConfirmation] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const { error, setError, pending, run } = useAction();
 
-  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (passphrase.length < MIN_PASSPHRASE_LENGTH) {
       setError(`Use at least ${MIN_PASSPHRASE_LENGTH} characters.`);
@@ -159,28 +176,23 @@ const CreateStep = ({
       return;
     }
 
-    setSubmitting(true);
-    setError(null);
-    try {
-      onCreated(await encryptedSyncManager.createVault(passphrase));
-    } catch (createError) {
-      const existing = await encryptedSyncManager.getServerVault().catch(() => null);
-      if (existing) {
+    void run(async () => {
+      try {
+        onCreated(await encryptedSyncManager.createVault(passphrase));
+      } catch (createError) {
+        if (!(await encryptedSyncManager.getServerVault().catch(() => null))) throw createError;
         onVaultExists();
-        return;
       }
-      setError(errorMessage(createError));
-      setSubmitting(false);
-    }
+    });
   };
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={(event) => void handleSubmit(event)}>
+    <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
       <DialogHeader>
         <DialogTitle>Create a sync passphrase</DialogTitle>
         <DialogDescription>
-          Your API keys are locked with this passphrase before they leave this device. AgentOne
-          can't read them or reset the passphrase for you.
+          Everything is encrypted with this passphrase before it leaves this device. AgentOne can't
+          read it or reset the passphrase for you.
         </DialogDescription>
       </DialogHeader>
       <FieldGroup>
@@ -214,9 +226,9 @@ const CreateStep = ({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" disabled={submitting}>
-          {submitting && <Spinner data-icon="inline-start" />}
-          Turn on sync
+        <Button type="submit" disabled={pending}>
+          {pending && <Spinner data-icon="inline-start" />}
+          Turn on encrypted sync
         </Button>
       </DialogFooter>
     </form>
@@ -231,8 +243,8 @@ const RecoveryKeyStep = ({ recoveryKey, onDone }: { recoveryKey: string; onDone:
       <DialogHeader>
         <DialogTitle>Save your recovery key</DialogTitle>
         <DialogDescription>
-          If you forget your passphrase, this key is the only way to unlock your synced API keys.
-          Store it somewhere safe, like a password manager.
+          If you forget your passphrase, this key is the only way to unlock encrypted sync. Store it
+          somewhere safe, like a password manager.
         </DialogDescription>
       </DialogHeader>
       <div className="flex items-center gap-2">
@@ -286,32 +298,26 @@ const UnlockStep = ({
 }) => {
   const [useRecoveryKey, setUseRecoveryKey] = useState(false);
   const [secret, setSecret] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const { error, setError, pending, run } = useAction();
 
-  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!secret.trim()) return;
 
-    setSubmitting(true);
-    setError(null);
-    try {
+    void run(async () => {
       await encryptedSyncManager.unlock(vault, secret, useRecoveryKey);
       onUnlocked();
-    } catch (unlockError) {
-      setError(errorMessage(unlockError));
-      setSubmitting(false);
-    }
+    });
   };
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={(event) => void handleSubmit(event)}>
+    <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
       <DialogHeader>
-        <DialogTitle>Unlock synced API keys</DialogTitle>
+        <DialogTitle>Unlock encrypted sync</DialogTitle>
         <DialogDescription>
           {useRecoveryKey
-            ? "Enter the recovery key you saved when you set up sync."
-            : "Enter the sync passphrase you created on your other device."}
+            ? "Enter the recovery key you saved when you set up encrypted sync."
+            : "Enter the passphrase you created when you set up encrypted sync."}
         </DialogDescription>
       </DialogHeader>
       <FieldGroup>
@@ -354,8 +360,8 @@ const UnlockStep = ({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" disabled={submitting || !secret.trim()}>
-          {submitting && <Spinner data-icon="inline-start" />}
+        <Button type="submit" disabled={pending || !secret.trim()}>
+          {pending && <Spinner data-icon="inline-start" />}
           Unlock
         </Button>
       </DialogFooter>
@@ -372,29 +378,21 @@ const ResetStep = ({
   onBack: () => void;
   onReset: () => void;
 }) => {
-  const [error, setError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const { error, pending, run } = useAction();
 
-  const handleReset = async () => {
-    setSubmitting(true);
-    setError(null);
-    try {
+  const handleReset = () =>
+    run(async () => {
       await encryptedSyncManager.resetVault(vault.vaultId);
       onReset();
-    } catch (resetError) {
-      setError(errorMessage(resetError));
-      setSubmitting(false);
-    }
-  };
+    });
 
   return (
     <>
       <DialogHeader>
         <DialogTitle>Start over?</DialogTitle>
         <DialogDescription>
-          This deletes the encrypted API keys stored in your AgentOne account. Keys saved on this
-          device and your other devices stay where they are. Your other devices will need the new
-          passphrase to keep syncing.
+          This deletes your encrypted data from your AgentOne account. Nothing on your devices is
+          removed, but they'll need the new passphrase to keep using encrypted sync.
         </DialogDescription>
       </DialogHeader>
       {error && <FieldError>{error}</FieldError>}
@@ -402,8 +400,8 @@ const ResetStep = ({
         <Button variant="outline" onClick={onBack}>
           Back
         </Button>
-        <Button variant="destructive" onClick={() => void handleReset()} disabled={submitting}>
-          {submitting && <Spinner data-icon="inline-start" />}
+        <Button variant="destructive" onClick={() => void handleReset()} disabled={pending}>
+          {pending && <Spinner data-icon="inline-start" />}
           Delete and start over
         </Button>
       </DialogFooter>

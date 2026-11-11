@@ -199,10 +199,9 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
           },
           {
             id: "sync-api-keys",
-            label: "Sync API keys",
-            description:
-              "Keep your API keys on every device. They're encrypted with a passphrase only you know.",
-            keywords: ["sync", "api key", "encrypted", "passphrase", "devices", "recovery key"],
+            label: "Sync keys and providers",
+            description: "Encrypted with a passphrase only you know.",
+            keywords: ["sync", "api key", "provider", "encrypted", "passphrase", "recovery key"],
             layout: "row",
             control: EncryptedSyncControl,
           },

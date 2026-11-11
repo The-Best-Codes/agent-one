@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
-import { getDefaultStore } from "jotai";
+import { getDefaultStore, type WritableAtom } from "jotai";
+import { RESET } from "jotai/utils";
 import debounce from "lodash.debounce";
 
 import { authClient, getAuthToken, SERVER_URL } from "@/lib/auth/auth-client";
@@ -56,8 +57,8 @@ interface SyncState {
 
 export interface EncryptedSyncSource {
   prefix: string;
-  readAll: () => Promise<Record<string, string>>;
-  write: (key: string, value: string) => Promise<void>;
+  readAll: () => Promise<Record<string, unknown>>;
+  write: (key: string, value: unknown) => Promise<void>;
 }
 
 class VaultChangedError extends Error {}
@@ -80,7 +81,7 @@ function loadState(): SyncState {
   return { vaultId: null, rev: 0, timestamps: {}, synced: {} };
 }
 
-function errorMessage(error: unknown): string {
+export function errorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   if (typeof error === "string") return error;
   return "Something went wrong";
@@ -303,7 +304,7 @@ class EncryptedSyncManager {
 
       for (const item of opened) {
         const serverTime = updatedAtById.get(item.id);
-        if (serverTime === undefined || typeof item.value !== "string") continue;
+        if (serverTime === undefined) continue;
         await this.applyRemote(item.name, item.value, serverTime);
       }
 
@@ -317,7 +318,7 @@ class EncryptedSyncManager {
     }
   }
 
-  private async applyRemote(name: string, value: string, serverTime: number): Promise<void> {
+  private async applyRemote(name: string, value: unknown, serverTime: number): Promise<void> {
     const localTime = this.state.timestamps[name];
     if (localTime !== undefined && localTime > serverTime) return;
 
@@ -345,8 +346,8 @@ class EncryptedSyncManager {
     return undefined;
   }
 
-  private async readLocalValues(): Promise<Map<string, string>> {
-    const values = new Map<string, string>();
+  private async readLocalValues(): Promise<Map<string, unknown>> {
+    const values = new Map<string, unknown>();
     for (const source of this.sources.values()) {
       const entries = await source.readAll();
       for (const [key, value] of Object.entries(entries)) {
@@ -357,13 +358,13 @@ class EncryptedSyncManager {
   }
 
   private stampUntrackedValues(
-    localValues: Map<string, string>,
+    localValues: Map<string, unknown>,
     timestamps: Record<string, number>,
   ): void {
     const now = Date.now();
     let changed = false;
-    for (const [name, value] of localValues) {
-      if (value && timestamps[name] === undefined && this.state.timestamps[name] === undefined) {
+    for (const name of localValues.keys()) {
+      if (timestamps[name] === undefined && this.state.timestamps[name] === undefined) {
         timestamps[name] = now;
         this.state.timestamps[name] = now;
         changed = true;
@@ -373,7 +374,7 @@ class EncryptedSyncManager {
   }
 
   private async push(
-    localValues: Map<string, string>,
+    localValues: Map<string, unknown>,
     timestamps: Record<string, number>,
   ): Promise<void> {
     const pending = Object.entries(timestamps).filter(
@@ -383,7 +384,7 @@ class EncryptedSyncManager {
     for (let i = 0; i < pending.length; i += PUSH_BATCH_SIZE) {
       const batch = pending.slice(i, i + PUSH_BATCH_SIZE);
       const sealed = await invoke<SealedItem[]>("encrypted_sync_seal", {
-        items: batch.map(([name]) => ({ name, value: localValues.get(name) ?? "" })),
+        items: batch.map(([name]) => ({ name, value: localValues.get(name) ?? null })),
       });
 
       await serverFetch("/api/sync/encrypted", {
@@ -402,3 +403,57 @@ class EncryptedSyncManager {
 }
 
 export const encryptedSyncManager = new EncryptedSyncManager();
+
+interface TrackableStorage {
+  setItem: (key: string, value: never) => unknown;
+  removeItem: (key: string) => unknown;
+}
+
+type SyncedAtom = WritableAtom<unknown, [unknown], unknown>;
+
+export function createEncryptedSyncGroup<T>(prefix: string, initialValue: T) {
+  const atoms = new Map<string, SyncedAtom>();
+  const isInitial = (value: unknown) => JSON.stringify(value) === JSON.stringify(initialValue);
+
+  encryptedSyncManager.registerSource({
+    prefix,
+    readAll: async () => {
+      const store = getDefaultStore();
+      const entries = await Promise.all(
+        [...atoms].map(async ([id, atom]) => [id, await store.get(atom)] as const),
+      );
+      return Object.fromEntries(entries.filter(([, value]) => !isInitial(value)));
+    },
+    write: async (id, value) => {
+      const atom = atoms.get(id);
+      if (!atom) return;
+      if (value == null) await getDefaultStore().set(atom, RESET);
+      else if (typeof value === typeof initialValue) await getDefaultStore().set(atom, value);
+    },
+  });
+
+  return {
+    atom<S extends TrackableStorage, A extends WritableAtom<unknown, never[], unknown>>(
+      id: string,
+      storage: S,
+      create: (storage: S) => A,
+    ): A {
+      const name = `${prefix}${id}`;
+      const created = create({
+        ...storage,
+        setItem: (key: string, value: never) => {
+          const result = storage.setItem(key, value);
+          encryptedSyncManager.markDirty(name);
+          return result;
+        },
+        removeItem: (key: string) => {
+          const result = storage.removeItem(key);
+          encryptedSyncManager.markDirty(name);
+          return result;
+        },
+      });
+      atoms.set(id, created as unknown as SyncedAtom);
+      return created;
+    },
+  };
+}

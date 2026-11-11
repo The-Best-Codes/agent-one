@@ -1,12 +1,13 @@
 import { atom } from "jotai";
 import { atomFamily } from "jotai-family";
-import { atomWithStorage } from "jotai/utils";
+import { atomWithStorage, createJSONStorage } from "jotai/utils";
 
 import {
   normalizeProviderModelMetadata,
   type ProviderModelMetadata,
 } from "@/lib/ai/providers/provider-models";
 import { PROVIDER_REGISTRY, type ProviderId } from "@/lib/ai/providers/registry";
+import { createEncryptedSyncGroup } from "@/lib/sync/encrypted-sync-manager";
 
 import { hasEnabledCustomProviderAtom } from "./custom-provider-atoms";
 import { hasEnabledLocalProviderAtom } from "./local-provider-atoms";
@@ -34,11 +35,16 @@ function normalizeProviderConfig(config: Partial<ProviderConfig> | undefined): P
   };
 }
 
+const providerConfigSync = createEncryptedSyncGroup("providerConfig:", DEFAULT_PROVIDER_CONFIG);
+
 function createProviderConfigAtom(providerId: ProviderId) {
   const key = `${SETTING_PREFIX}PROVIDER_CONFIG_${providerId.toUpperCase()}`;
-  return atomWithStorage<ProviderConfig>(key, DEFAULT_PROVIDER_CONFIG, undefined, {
-    getOnInit: true,
-  });
+  const storage = createJSONStorage<ProviderConfig>();
+  const create = (s: typeof storage) =>
+    atomWithStorage<ProviderConfig>(key, DEFAULT_PROVIDER_CONFIG, s, { getOnInit: true });
+  return providerId === "agent-one"
+    ? create(storage)
+    : providerConfigSync.atom(providerId, storage, create);
 }
 
 type ProviderConfigAtom = ReturnType<typeof createProviderConfigAtom>;

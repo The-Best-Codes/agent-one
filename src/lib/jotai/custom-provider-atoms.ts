@@ -1,12 +1,14 @@
-import { atom, type Atom } from "jotai";
+import { atom, getDefaultStore, type Atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
 import {
   normalizeProviderModelMetadata,
   type ProviderModelMetadata,
 } from "@/lib/ai/providers/provider-models";
+import { encryptedSyncManager } from "@/lib/sync/encrypted-sync-manager";
 
 const STORAGE_KEY = "agent-one-custom-providers";
+const SYNC_PREFIX = "customProvider:";
 
 export interface CustomProvider {
   id: string;
@@ -42,6 +44,7 @@ export const addCustomProviderAtom = atom(null, (get, set, provider: NewCustomPr
     enabled: true,
   };
   set(customProvidersAtom, [newProvider, ...existing]);
+  encryptedSyncManager.markDirty(`${SYNC_PREFIX}${newProvider.id}`);
   return newProvider.id;
 });
 
@@ -60,6 +63,7 @@ export const updateCustomProviderAtom = atom(
       customProvidersAtom,
       existing.map((p) => (p.id === id ? { ...p, ...sanitizedUpdates } : p)),
     );
+    encryptedSyncManager.markDirty(`${SYNC_PREFIX}${id}`);
   },
 );
 
@@ -69,6 +73,7 @@ export const deleteCustomProviderAtom = atom(null, (get, set, id: string) => {
     customProvidersAtom,
     existing.filter((p) => p.id !== id),
   );
+  encryptedSyncManager.markDirty(`${SYNC_PREFIX}${id}`);
 });
 
 export const normalizedCustomProvidersAtom = atom((get) => {
@@ -97,3 +102,23 @@ export function getCustomProviderAtom(providerId: string) {
   customProviderAtomCache.set(providerId, providerAtom);
   return providerAtom;
 }
+
+encryptedSyncManager.registerSource({
+  prefix: SYNC_PREFIX,
+  readAll: async () =>
+    Object.fromEntries(
+      getDefaultStore()
+        .get(customProvidersAtom)
+        .map((p) => [p.id, p]),
+    ),
+  write: async (providerId, value) => {
+    const store = getDefaultStore();
+    const existing = store.get(customProvidersAtom);
+    const next = existing.filter((p) => p.id !== providerId);
+    if (value && typeof value === "object") {
+      const index = existing.findIndex((p) => p.id === providerId);
+      next.splice(Math.max(index, 0), 0, { ...(value as CustomProvider), id: providerId });
+    }
+    store.set(customProvidersAtom, next);
+  },
+});
