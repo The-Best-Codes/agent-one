@@ -60,16 +60,35 @@ interface EncryptedSyncDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export const EncryptedSyncDialog = ({ open, onOpenChange }: EncryptedSyncDialogProps) => (
-  <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent>
-      {open && <EncryptedSyncDialogBody onDone={() => onOpenChange(false)} />}
-    </DialogContent>
-  </Dialog>
-);
+export const EncryptedSyncDialog = ({ open, onOpenChange }: EncryptedSyncDialogProps) => {
+  const [locked, setLocked] = useState(false);
 
-const EncryptedSyncDialogBody = ({ onDone }: { onDone: () => void }) => {
+  return (
+    <Dialog open={open} onOpenChange={(next) => (next || !locked) && onOpenChange(next)}>
+      <DialogContent showCloseButton={!locked}>
+        {open && (
+          <EncryptedSyncDialogBody onDone={() => onOpenChange(false)} onLockedChange={setLocked} />
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const EncryptedSyncDialogBody = ({
+  onDone,
+  onLockedChange,
+}: {
+  onDone: () => void;
+  onLockedChange: (locked: boolean) => void;
+}) => {
   const [step, setStep] = useState<Step>({ kind: "loading" });
+  const [creating, setCreating] = useState(false);
+  const locked = step.kind === "recovery-key" || (step.kind === "create" && creating);
+
+  useEffect(() => {
+    onLockedChange(locked);
+    return () => onLockedChange(false);
+  }, [locked, onLockedChange]);
 
   const [loadCount, setLoadCount] = useState(0);
 
@@ -128,6 +147,7 @@ const EncryptedSyncDialogBody = ({ onDone }: { onDone: () => void }) => {
           onCancel={onDone}
           onCreated={(recoveryKey) => setStep({ kind: "recovery-key", recoveryKey })}
           onVaultExists={loadVault}
+          onPendingChange={setCreating}
         />
       );
     case "recovery-key":
@@ -156,14 +176,21 @@ const CreateStep = ({
   onCancel,
   onCreated,
   onVaultExists,
+  onPendingChange,
 }: {
   onCancel: () => void;
   onCreated: (recoveryKey: string) => void;
   onVaultExists: () => void;
+  onPendingChange: (pending: boolean) => void;
 }) => {
   const [passphrase, setPassphrase] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const { error, setError, pending, run } = useAction();
+
+  useEffect(() => {
+    onPendingChange(pending);
+    return () => onPendingChange(false);
+  }, [pending, onPendingChange]);
 
   const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -223,7 +250,7 @@ const CreateStep = ({
         {error && <FieldError>{error}</FieldError>}
       </FieldGroup>
       <DialogFooter>
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={onCancel} disabled={pending}>
           Cancel
         </Button>
         <Button type="submit" disabled={pending}>

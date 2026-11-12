@@ -63,6 +63,8 @@ export interface EncryptedSyncSource {
 
 class VaultChangedError extends Error {}
 
+class SyncStoppedError extends Error {}
+
 function loadState(): SyncState {
   try {
     const raw = localStorage.getItem(STATE_LS_KEY);
@@ -279,6 +281,7 @@ class EncryptedSyncManager {
       await this.push(localValues, timestamps);
       this.clearRetry();
     } catch (error) {
+      if (error instanceof SyncStoppedError) return;
       if (error instanceof VaultChangedError) {
         logger.info("Encrypted sync vault changed on the server, locking");
         await this.lockLocally();
@@ -301,8 +304,12 @@ class EncryptedSyncManager {
         items: page.items.map(({ id, nonce, ciphertext }) => ({ id, nonce, ciphertext })),
       });
       const updatedAtById = new Map(page.items.map((item) => [item.id, item.updatedAt]));
+      const ensureActive = () => {
+        if (this.state.vaultId !== page.vaultId) throw new SyncStoppedError();
+      };
 
       for (const item of opened) {
+        ensureActive();
         const serverTime = updatedAtById.get(item.id);
         if (serverTime === undefined) continue;
         await this.applyRemote(item.name, item.value, serverTime);
@@ -312,6 +319,7 @@ class EncryptedSyncManager {
         logger.warn(`Skipped ${page.items.length - opened.length} items that failed to decrypt`);
       }
 
+      ensureActive();
       this.state.rev = page.rev;
       this.saveState();
       hasMore = page.hasMore;
@@ -327,12 +335,15 @@ class EncryptedSyncManager {
       if (!source) return;
 
       this.applying.add(name);
+      let write: Promise<void>;
       try {
-        await source.write(name.slice(source.prefix.length), value);
+        write = source.write(name.slice(source.prefix.length), value);
       } finally {
         this.applying.delete(name);
       }
+      await write;
       logger.verbose(`Applied encrypted item ${name} from server`);
+      if (this.state.timestamps[name] !== localTime) return;
     }
 
     this.state.timestamps[name] = serverTime;
@@ -407,6 +418,8 @@ export const encryptedSyncManager = new EncryptedSyncManager();
 interface TrackableStorage {
   setItem: (key: string, value: never) => unknown;
   removeItem: (key: string) => unknown;
+  trySetItem?: (key: string, value: never) => Promise<boolean>;
+  tryRemoveItem?: (key: string) => Promise<boolean>;
 }
 
 type SyncedAtom = WritableAtom<unknown, [unknown], unknown>;
@@ -427,8 +440,11 @@ export function createEncryptedSyncGroup<T>(prefix: string, initialValue: T) {
     write: async (id, value) => {
       const atom = atoms.get(id);
       if (!atom) return;
-      if (value == null) await getDefaultStore().set(atom, RESET);
-      else if (typeof value === typeof initialValue) await getDefaultStore().set(atom, value);
+      let saved: unknown;
+      if (value == null) saved = await getDefaultStore().set(atom, RESET);
+      else if (typeof value === typeof initialValue)
+        saved = await getDefaultStore().set(atom, value);
+      if (saved === false) throw new Error(`Failed to save ${prefix}${id}`);
     },
   });
 
@@ -442,12 +458,16 @@ export function createEncryptedSyncGroup<T>(prefix: string, initialValue: T) {
       const created = create({
         ...storage,
         setItem: (key: string, value: never) => {
-          const result = storage.setItem(key, value);
+          const result = storage.trySetItem
+            ? storage.trySetItem(key, value)
+            : storage.setItem(key, value);
           encryptedSyncManager.markDirty(name);
           return result;
         },
         removeItem: (key: string) => {
-          const result = storage.removeItem(key);
+          const result = storage.tryRemoveItem
+            ? storage.tryRemoveItem(key)
+            : storage.removeItem(key);
           encryptedSyncManager.markDirty(name);
           return result;
         },

@@ -31,22 +31,34 @@ export const keyringStorage = {
   },
 
   setItem: async <T>(key: string, value: T): Promise<void> => {
+    await keyringStorage.trySetItem(key, value);
+  },
+
+  trySetItem: async <T>(key: string, value: T): Promise<boolean> => {
     try {
       const jsonValue = JSON.stringify(value);
       await invoke("storage_set_item", {
         key,
         valueJson: jsonValue,
       });
+      return true;
     } catch (error) {
       logger.error(`Error setting key "${key}" in keyring:`, error);
+      return false;
     }
   },
 
   removeItem: async (key: string): Promise<void> => {
+    await keyringStorage.tryRemoveItem(key);
+  },
+
+  tryRemoveItem: async (key: string): Promise<boolean> => {
     try {
       await invoke("storage_remove_item", { key });
+      return true;
     } catch (error) {
       logger.error(`Error removing key "${key}" from keyring:`, error);
+      return false;
     }
   },
 
