@@ -1,10 +1,12 @@
-import { atom, type Atom } from "jotai";
+import { atom, getDefaultStore, type Atom } from "jotai";
 import { atomWithStorage, unwrap } from "jotai/utils";
 
 import { loadable } from "@/lib/jotai/loadable";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
+import { encryptedSyncManager } from "@/lib/sync/encrypted-sync-manager";
 
 const STORAGE_KEY = "agent-one-custom-provider-api-keys";
+const SYNC_PREFIX = "customProviderKey:";
 
 type CustomProviderApiKeys = Record<string, string>;
 
@@ -34,6 +36,7 @@ export const setCustomProviderApiKeyAtom = atom(
   async (get, set, providerId: string, apiKey: string) => {
     const current = get(customProviderApiKeysAtom);
     await set(baseAtom, { ...current, [providerId]: apiKey });
+    encryptedSyncManager.markDirty(`${SYNC_PREFIX}${providerId}`);
   },
 );
 
@@ -42,4 +45,19 @@ export const deleteCustomProviderApiKeyAtom = atom(null, async (get, set, provid
   const { [providerId]: _removed, ...rest } = current;
   void _removed;
   await set(baseAtom, rest);
+  encryptedSyncManager.markDirty(`${SYNC_PREFIX}${providerId}`);
+});
+
+encryptedSyncManager.registerSource({
+  prefix: SYNC_PREFIX,
+  readAll: async () => getDefaultStore().get(baseAtom),
+  write: async (providerId, apiKey) => {
+    const store = getDefaultStore();
+    const { [providerId]: _removed, ...rest } = await store.get(baseAtom);
+    void _removed;
+    await store.set(
+      baseAtom,
+      typeof apiKey === "string" && apiKey ? { ...rest, [providerId]: apiKey } : rest,
+    );
+  },
 });

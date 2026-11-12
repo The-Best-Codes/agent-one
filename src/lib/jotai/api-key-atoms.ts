@@ -10,6 +10,7 @@ import {
 import { loadable } from "@/lib/jotai/loadable";
 import type { TtsProviderId } from "@/lib/settings/types";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
+import { createEncryptedSyncGroup } from "@/lib/sync/encrypted-sync-manager";
 
 type ApiKeyStorageKey =
   | ProviderStorageKey
@@ -27,10 +28,15 @@ const TTS_API_KEY_STORAGE_KEYS = {
   "tts-google": "GOOGLE_GENERATIVE_AI_TTS_API_KEY",
 } as const satisfies Record<`tts-${TtsProviderId}`, ApiKeyStorageKey>;
 
+const apiKeySync = createEncryptedSyncGroup("apiKey:", "");
+
 function createApiKeyAtoms(storageKey: ApiKeyStorageKey) {
-  const baseAtom = atomWithStorage<string>(storageKey, "", keyringStorage, {
-    getOnInit: true,
-  });
+  const create = (storage: typeof keyringStorage) =>
+    atomWithStorage<string>(storageKey, "", storage, { getOnInit: true });
+  const baseAtom =
+    storageKey === "AGENT_ONE_API_KEY"
+      ? create(keyringStorage)
+      : apiKeySync.atom(storageKey, keyringStorage, create);
 
   const unwrappedAtom = unwrap(baseAtom, (prev) => prev ?? "");
   const loadableAtom = loadable(baseAtom);
