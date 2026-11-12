@@ -52,7 +52,7 @@ export function AddServerDialog({
     url: initialValues?.url ?? "",
     headers: {},
     timeoutSec: 30,
-    requiresApproval: false,
+    requiresApproval: true,
   });
   const [isFromDeepLink, setIsFromDeepLink] = useState(!!initialValues);
 
@@ -79,7 +79,7 @@ export function AddServerDialog({
       url: "",
       headers: {},
       timeoutSec: 30,
-      requiresApproval: false,
+      requiresApproval: true,
     });
     setIsFromDeepLink(false);
   };
@@ -136,6 +136,7 @@ export function AddServerDialog({
             onChange={(updates) => setFormValues((current) => ({ ...current, ...updates }))}
             namePlaceholder="e.g., Everything Server"
             showStdioWarning
+            showApprovalControls
           />
         </div>
 

@@ -3,7 +3,6 @@ import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import { Toaster } from "sonner";
 
 import { AttachmentPreviewDialog } from "@/components/a1/attachment-preview-dialog";
-import { ExtensionListStartupSync } from "@/components/a1/extension-list-startup-sync";
 import { FileDropGuard } from "@/components/a1/file-drop-guard";
 import { LocalProviderStartupSync } from "@/components/a1/local-provider-startup-sync";
 import { ModelDirectoryStartupSync } from "@/components/a1/model-directory-startup-sync";
@@ -12,7 +11,9 @@ import { StarReminder } from "@/components/a1/star-reminder";
 import { Spinner } from "@/components/ui/spinner";
 import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
 import ChatRoute from "@/routes/chat";
-import ExtensionsRoute from "@/routes/extensions";
+import ExtensionDetailRoute from "@/routes/extensions/detail";
+import InstalledExtensionsRoute from "@/routes/extensions/installed";
+import ExtensionsLayout from "@/routes/extensions/layout";
 import IndexRoute from "@/routes/index";
 import NotFoundRoute from "@/routes/not-found";
 import OnboardingRoute from "@/routes/onboarding";
@@ -47,7 +48,6 @@ function App() {
   return (
     <BrowserRouter>
       <ModelDirectoryStartupSync />
-      <ExtensionListStartupSync />
       <LocalProviderStartupSync />
       <KbdRegistry />
       <FileDropGuard />
@@ -62,7 +62,10 @@ function App() {
           <Route path="/chat" element={<ChatRoute />} />
           <Route path="/chat/:id" element={<ChatRoute />} />
           <Route path="/onboarding" element={<OnboardingRoute />} />
-          <Route path="/extensions" element={<ExtensionsRoute />} />
+          <Route path="/extensions" element={<ExtensionsLayout />}>
+            <Route index element={<InstalledExtensionsRoute />} />
+            <Route path="view/*" element={<ExtensionDetailRoute />} />
+          </Route>
           <Route path="/settings" element={<SettingsRoute />} />
           <Route path="/scheduled-agents" element={<ScheduledAgentsRoute />} />
           <Route
