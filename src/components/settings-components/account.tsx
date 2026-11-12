@@ -310,7 +310,7 @@ export function EncryptedSyncControl() {
   return (
     <div className="flex items-center gap-2">
       {status === "locked" && user && (
-        <Button variant="outline" size="sm" onClick={() => setDialogOpen(true)}>
+        <Button variant="outline" size="xs" onClick={() => setDialogOpen(true)}>
           Unlock
         </Button>
       )}
