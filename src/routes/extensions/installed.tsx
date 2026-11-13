@@ -88,8 +88,28 @@ export default function InstalledRoute() {
         </Button>
       </div>
 
-      {text && visible.length === 0 ? (
-        <Empty className="border py-16">
+      {rows.length === 0 ? (
+        <Empty className="border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <IconPuzzle />
+            </EmptyMedia>
+            <EmptyTitle>No extensions yet</EmptyTitle>
+            <EmptyDescription>
+              Extensions give your agent new tools. Find some on the AgentOne website.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button asChild>
+              <ExternalLink href={AGENT_ONE_EXTENSIONS_URL}>
+                <IconSearch data-icon="inline-start" />
+                Browse extensions
+              </ExternalLink>
+            </Button>
+          </EmptyContent>
+        </Empty>
+      ) : text && visible.length === 0 ? (
+        <Empty className="border">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <IconPuzzle />
@@ -124,11 +144,7 @@ export default function InstalledRoute() {
                       <IconPlus />
                     </EmptyMedia>
                     <EmptyTitle>Add extension</EmptyTitle>
-                    <EmptyDescription>
-                      {rows.length === 0
-                        ? "Nothing installed yet. Find extensions on the AgentOne website."
-                        : "Find more on the AgentOne website."}
-                    </EmptyDescription>
+                    <EmptyDescription>Find more on the AgentOne website.</EmptyDescription>
                   </EmptyHeader>
                 </Empty>
               </ExternalLink>

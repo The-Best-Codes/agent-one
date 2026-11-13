@@ -63,7 +63,7 @@ export default function ExtensionsLayout() {
       </header>
 
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
-        <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 p-4 md:p-6">
+        <div className="mx-auto flex min-h-full w-full max-w-4xl flex-col gap-4 p-4 md:p-6">
           <Outlet context={openAddDialog} />
         </div>
       </div>
