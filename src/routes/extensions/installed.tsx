@@ -1,12 +1,25 @@
-import { IconArrowUpRight, IconPuzzle } from "@tabler/icons-react";
+import { IconBulb, IconPlus, IconPuzzle, IconSettings } from "@tabler/icons-react";
 import fuzzysort from "fuzzysort";
 import { useMemo, useState } from "react";
-import { Link } from "react-router";
+import { Link, useOutletContext } from "react-router";
 
 import { ExternalLink } from "@/components/a1/external-link";
 import { SearchInput } from "@/components/a1/search-input";
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { Switch } from "@/components/ui/switch";
 import { AGENT_ONE_EXTENSIONS_URL } from "@/lib/constants";
 import { getExtensionSourceLabel, getInstalledExtensionMetadata } from "@/lib/extensions/metadata";
@@ -16,22 +29,10 @@ import { ServerStatusDot } from "./components/server-status";
 import { getExtensionPath, getServerStatus, useExtensionsLink } from "./model";
 import { useExtensionActions } from "./use-extension-actions";
 
-const SEARCH_THRESHOLD = 6;
-
-function FindExtensionsButton({ variant }: { variant?: "default" | "outline" }) {
-  return (
-    <Button asChild variant={variant} className="shrink-0">
-      <ExternalLink href={AGENT_ONE_EXTENSIONS_URL}>
-        Find extensions
-        <IconArrowUpRight data-icon="inline-end" />
-      </ExternalLink>
-    </Button>
-  );
-}
-
 export default function InstalledRoute() {
   const link = useExtensionsLink();
   const { servers, loadStates, authStates, updateServer } = useExtensionActions();
+  const openAddDialog = useOutletContext<() => void>();
   const [query, setQuery] = useState("");
 
   const rows = useMemo(
@@ -63,39 +64,47 @@ export default function InstalledRoute() {
         .map((item) => item.row)
     : rows;
 
-  if (!rows.length) {
-    return (
-      <div className="flex flex-col items-center gap-3 py-20 text-center">
-        <IconPuzzle className="text-muted-foreground size-12" />
-        <div className="flex flex-col gap-1">
-          <h2 className="text-base font-semibold">No extensions installed</h2>
-          <p className="text-muted-foreground max-w-sm text-sm">
-            Extensions connect AgentOne to the apps you use. Find one on the AgentOne website and
-            install it in a click, or add your own with Add custom.
-          </p>
-        </div>
-        <FindExtensionsButton />
-      </div>
-    );
-  }
-
   return (
     <>
-      {rows.length >= SEARCH_THRESHOLD ? (
+      <Alert>
+        <IconBulb />
+        <AlertTitle>Find more extensions</AlertTitle>
+        <AlertDescription>
+          Browse the <ExternalLink href={AGENT_ONE_EXTENSIONS_URL}>AgentOne website</ExternalLink>{" "}
+          to find extensions and install any of them in a click.
+        </AlertDescription>
+      </Alert>
+
+      <div className="flex items-center gap-2">
         <SearchInput
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search installed extensions"
           aria-label="Search installed extensions"
+          containerClassName="flex-1"
         />
-      ) : (
-        <p className="text-muted-foreground text-sm">
-          {rows.length === 1 ? "1 extension installed" : `${rows.length} extensions installed`}
-        </p>
-      )}
+        <Button onClick={openAddDialog}>
+          <IconPlus data-icon="inline-start" />
+          Add Custom
+        </Button>
+      </div>
 
-      {visible.length ? (
-        <ul className="flex flex-col gap-2">
+      {visible.length === 0 ? (
+        <Empty className="border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <IconPuzzle />
+            </EmptyMedia>
+            <EmptyTitle>{text ? "No matching extensions" : "No extensions installed"}</EmptyTitle>
+            <EmptyDescription>
+              {text
+                ? "Try a different search."
+                : "Extensions connect AgentOne to the apps you use. Find one on the AgentOne website, or add your own."}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      ) : (
+        <ul className="rounded-md border px-2">
           {visible.map((row) => {
             const { server } = row;
             const status = getServerStatus(
@@ -104,34 +113,42 @@ export default function InstalledRoute() {
               server.enabled,
             );
             return (
-              <li
-                key={server.id}
-                className="bg-muted/40 hover:bg-muted/80 flex items-center gap-3 rounded-xl pr-4 transition-colors not-dark:border"
-              >
+              <li key={server.id} className="flex items-center gap-2 px-1 py-2 not-last:border-b">
                 <Link
                   to={link(getExtensionPath(server.id))}
-                  className="focus-visible:ring-ring/50 flex min-w-0 flex-1 items-center gap-3 rounded-xl py-3 pl-4 outline-none focus-visible:ring-3"
+                  className="focus-visible:border-ring focus-visible:ring-ring/50 flex min-w-0 flex-1 items-center gap-2 rounded-md outline-none focus-visible:ring-[3px]"
                 >
-                  <ExtensionIcon name={row.name} src={row.iconUrl} />
-                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                    <div className="flex min-w-0 items-center gap-1.5">
+                  <ExtensionIcon name={row.name} src={row.iconUrl} className="size-9" />
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="flex min-w-0 items-center gap-2">
                       <span className="truncate text-sm font-medium">{row.name}</span>
                       {row.source ? (
-                        <Badge variant="outline" className="shrink-0">
+                        <Badge variant="outline" className="not-sm:hidden">
                           {row.source}
                         </Badge>
                       ) : null}
-                    </div>
-                    <p className="text-muted-foreground truncate text-sm">{row.description}</p>
-                  </div>
-                  <span
-                    className="text-muted-foreground flex max-w-40 shrink-0 items-center gap-1.5 text-xs"
-                    title={status.description}
-                  >
-                    <ServerStatusDot tone={status.tone} />
-                    <span className="truncate not-sm:sr-only">{status.label}</span>
+                    </span>
+                    <span className="text-muted-foreground truncate text-xs">
+                      {row.description}
+                    </span>
                   </span>
                 </Link>
+                <AdaptiveTooltip>
+                  <AdaptiveTooltipTrigger asChild>
+                    <span className="text-muted-foreground flex shrink-0 items-center gap-1.5 text-xs">
+                      <ServerStatusDot tone={status.tone} />
+                      <span className="not-sm:sr-only">{status.label}</span>
+                    </span>
+                  </AdaptiveTooltipTrigger>
+                  <AdaptiveTooltipContent className="max-w-xs wrap-anywhere">
+                    {status.description}
+                  </AdaptiveTooltipContent>
+                </AdaptiveTooltip>
+                <Button asChild variant="outline" size="icon-xs">
+                  <Link to={link(getExtensionPath(server.id))} aria-label={`Configure ${row.name}`}>
+                    <IconSettings />
+                  </Link>
+                </Button>
                 <Switch
                   checked={server.enabled}
                   aria-label={`Turn ${row.name} on or off`}
@@ -141,22 +158,7 @@ export default function InstalledRoute() {
             );
           })}
         </ul>
-      ) : (
-        <p className="text-muted-foreground py-16 text-center text-sm">
-          No installed extensions match your search.
-        </p>
       )}
-
-      <div className="bg-muted/40 flex flex-col gap-3 rounded-xl p-4 not-dark:border sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <p className="text-sm font-medium">Looking for more?</p>
-          <p className="text-muted-foreground text-sm">
-            Browse thousands of extensions on the AgentOne website and install any of them in a
-            click.
-          </p>
-        </div>
-        <FindExtensionsButton variant="outline" />
-      </div>
     </>
   );
 }

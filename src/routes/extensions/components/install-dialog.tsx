@@ -1,7 +1,8 @@
-import { IconAlertTriangle, IconEye, IconEyeClosed, IconInfoCircle } from "@tabler/icons-react";
+import { IconAlertTriangle, IconInfoCircle } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 
 import { ExternalLink } from "@/components/a1/external-link";
+import { SecretInput } from "@/components/a1/input/secret-input";
 import {
   Accordion,
   AccordionContent,
@@ -18,8 +19,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -61,7 +62,6 @@ function InstallField({
   value: string;
   onChange: (value: string) => void;
 }) {
-  const [showSecret, setShowSecret] = useState(false);
   const options: NonNullable<ExtensionInstallField["options"]> | undefined =
     field.options ?? field.choices?.map((choice) => ({ value: choice, label: choice }));
   const error = getFieldError(field, value);
@@ -69,11 +69,11 @@ function InstallField({
     options?.find((option) => option.value === value)?.description ?? field.description;
 
   return (
-    <div className="grid gap-1.5">
-      <Label htmlFor={field.id}>
+    <Field data-invalid={error ? true : undefined}>
+      <FieldLabel htmlFor={field.id}>
         {field.label}
         {field.required ? <span className="text-muted-foreground">(required)</span> : null}
-      </Label>
+      </FieldLabel>
       {options?.length ? (
         <Select value={value || options[0].value} onValueChange={onChange}>
           <SelectTrigger id={field.id} className="w-full">
@@ -89,44 +89,35 @@ function InstallField({
             </SelectGroup>
           </SelectContent>
         </Select>
+      ) : field.secret ? (
+        <SecretInput
+          id={field.id}
+          value={value}
+          onChange={onChange}
+          placeholder={field.placeholder ?? ""}
+        />
       ) : (
-        <div className="flex items-center gap-2">
-          <Input
-            id={field.id}
-            value={value}
-            onChange={(event) => onChange(event.target.value)}
-            placeholder={field.placeholder}
-            type={field.secret && !showSecret ? "password" : "text"}
-            autoComplete="off"
-            spellCheck={false}
-            aria-invalid={Boolean(error)}
-          />
-          {field.secret ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              aria-label={showSecret ? "Hide value" : "Show value"}
-              onClick={() => setShowSecret((previous) => !previous)}
-            >
-              {showSecret ? <IconEyeClosed /> : <IconEye />}
-            </Button>
-          ) : null}
-        </div>
+        <Input
+          id={field.id}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={field.placeholder}
+          autoComplete="off"
+          spellCheck={false}
+          aria-invalid={Boolean(error)}
+        />
       )}
-      {error ? <p className="text-destructive text-xs">{error}</p> : null}
+      {error ? <FieldError>{error}</FieldError> : null}
       {description || field.helpUrl ? (
-        <p className="text-muted-foreground text-xs wrap-anywhere">
+        <FieldDescription className="wrap-anywhere">
           {description}
           {description && field.helpUrl ? " " : null}
           {field.helpUrl ? (
-            <ExternalLink href={field.helpUrl} className="underline underline-offset-2">
-              Where do I find this?
-            </ExternalLink>
+            <ExternalLink href={field.helpUrl}>Where do I find this?</ExternalLink>
           ) : null}
-        </p>
+        </FieldDescription>
       ) : null}
-    </div>
+    </Field>
   );
 }
 
@@ -238,7 +229,7 @@ function InstallDialogBody({
       </DialogHeader>
 
       <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
-        <div className="flex flex-col gap-4 py-1">
+        <FieldGroup className="py-1">
           {notes.map((note) => (
             <Alert key={note}>
               <IconInfoCircle />
@@ -247,8 +238,8 @@ function InstallDialogBody({
           ))}
 
           {templates.length > 1 ? (
-            <div className="grid gap-1.5">
-              <Label htmlFor="install-method">Install method</Label>
+            <Field>
+              <FieldLabel htmlFor="install-method">Install method</FieldLabel>
               <Select value={template.id} onValueChange={selectTemplate}>
                 <SelectTrigger id="install-method" className="w-full">
                   <SelectValue />
@@ -263,7 +254,7 @@ function InstallDialogBody({
                   </SelectGroup>
                 </SelectContent>
               </Select>
-            </div>
+            </Field>
           ) : null}
 
           {template.type === "stdio" ? (
@@ -300,9 +291,9 @@ function InstallDialogBody({
           ))}
 
           <Accordion type="single" collapsible className="rounded-md border px-3">
-            <AccordionItem value="advanced" className="border-b-0">
-              <AccordionTrigger className="py-3 text-sm">Advanced settings</AccordionTrigger>
-              <AccordionContent className="pb-3">
+            <AccordionItem value="advanced">
+              <AccordionTrigger>Advanced settings</AccordionTrigger>
+              <AccordionContent>
                 <McpServerConfigForm
                   idPrefix="install-extension"
                   values={formValues}
@@ -316,7 +307,7 @@ function InstallDialogBody({
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-        </div>
+        </FieldGroup>
       </div>
 
       <DialogFooter>

@@ -130,7 +130,7 @@ export function AddServerDialog({
         <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
           <McpServerConfigForm
             idPrefix="new-server-dialog"
-            className="grid gap-4 py-4"
+            className="py-1"
             showTypeSelector
             values={formValues}
             onChange={(updates) => setFormValues((current) => ({ ...current, ...updates }))}

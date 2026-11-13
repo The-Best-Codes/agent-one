@@ -1,42 +1,34 @@
-import { IconLogin, IconLogout, IconRefresh } from "@tabler/icons-react";
+import { IconLogin, IconLogout, IconPencil } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { SettingsRow } from "@/components/settings-components/setting-controls";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { getToolDisplayName } from "@/lib/ai/tools/mcp";
 import { mcpCheckAuth, mcpLogin, mcpLogout } from "@/lib/ai/tools/mcp/oauth";
-import type { McpAuthState, McpServerLoadState } from "@/lib/jotai/mcp-atoms";
+import type { McpAuthState, McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
 import type { McpHttpServerConfig, McpServerConfig } from "@/lib/settings/types";
 
-import { McpServerConfigForm } from "../mcp-server-config-form";
+import { McpServerConfigForm, type McpServerConfigFormValues } from "../mcp-server-config-form";
 import { getServerStatus } from "../model";
 import { useExtensionActions } from "../use-extension-actions";
-import { ServerStatusDot } from "./server-status";
-
-function Row({ children }: { children: React.ReactNode }) {
-  return <div className="flex items-center justify-between gap-4 px-4 py-3">{children}</div>;
-}
-
-function RowText({ title, description }: { title: React.ReactNode; description?: string }) {
-  return (
-    <div className="flex min-w-0 flex-col gap-0.5">
-      <span className="flex items-center gap-2 text-sm font-medium">{title}</span>
-      {description ? (
-        <span className="text-muted-foreground line-clamp-3 text-xs wrap-anywhere">
-          {description}
-        </span>
-      ) : null}
-    </div>
-  );
-}
 
 function AccountRow({
   server,
@@ -63,26 +55,25 @@ function AccountRow({
   };
 
   return (
-    <Row>
-      <RowText
-        title="Account"
-        description={
-          authState === undefined
-            ? "Checking sign-in status..."
-            : authState === "logged-in"
-              ? "Connected"
-              : authState === "supports-oauth"
-                ? "Connect your account for full access"
-                : "Not connected"
-        }
-      />
+    <SettingsRow
+      layout="row"
+      label="Account"
+      description={
+        authState === undefined
+          ? "Checking sign-in status..."
+          : authState === "logged-in"
+            ? "Connected"
+            : authState === "supports-oauth"
+              ? "Connect your account for full access."
+              : "Not connected"
+      }
+    >
       {authState === undefined ? (
-        <Spinner className="text-muted-foreground shrink-0" />
+        <Spinner />
       ) : authState === "logged-in" ? (
         <Button
           variant="outline"
           size="sm"
-          className="shrink-0"
           disabled={busy}
           onClick={() => run(() => mcpLogout(server.id, server.name))}
         >
@@ -92,7 +83,6 @@ function AccountRow({
       ) : (
         <Button
           size="sm"
-          className="shrink-0"
           disabled={busy}
           onClick={() => run(() => mcpLogin(server.id, server.url, server.name))}
         >
@@ -100,65 +90,32 @@ function AccountRow({
           Connect
         </Button>
       )}
-    </Row>
+    </SettingsRow>
   );
 }
 
 function ToolApprovals({
   server,
-  loadState,
+  tools,
   onChange,
 }: {
   server: McpServerConfig;
-  loadState: McpServerLoadState | undefined;
+  tools: McpServerToolInfo[];
   onChange: (overrides: Record<string, boolean>) => void;
 }) {
-  const tools = loadState?.tools ?? [];
-  if (!server.enabled) {
-    return (
-      <p className="text-muted-foreground text-sm">
-        Turn this extension on to set approvals per tool.
-      </p>
-    );
-  }
-  if (loadState?.status === "error") {
-    return (
-      <p className="text-muted-foreground text-sm">
-        Tools couldn't be loaded. Fix the error above to set approvals per tool.
-      </p>
-    );
-  }
-  if (loadState?.status !== "loaded") {
-    return (
-      <p className="text-muted-foreground flex items-center gap-2 text-sm">
-        <Spinner className="size-4" />
-        Tools will appear once the extension finishes loading.
-      </p>
-    );
-  }
-  if (!tools.length) {
-    return <p className="text-muted-foreground text-sm">This extension has no tools right now.</p>;
-  }
   return (
-    <div className="flex flex-col gap-3">
+    <ul className="max-h-96 overflow-x-hidden overflow-y-auto">
       {tools.map((tool) => {
         const displayName = getToolDisplayName(tool.name, tool.title);
         const override = server.toolApprovalOverrides?.[tool.name];
         const requiresApproval = override ?? server.requiresApproval;
         return (
-          <div key={tool.name} className="flex items-center justify-between gap-3">
-            <div className="flex min-w-0 flex-col">
-              <span className="truncate text-sm">{displayName}</span>
-              <span className="text-muted-foreground text-xs">
-                {override === undefined
-                  ? "Using default"
-                  : requiresApproval
-                    ? "Always ask"
-                    : "Never ask"}
-              </span>
-            </div>
+          <li key={tool.name} className="flex items-center gap-2 px-1 py-2 not-last:border-b">
+            <span className="min-w-0 flex-1 truncate text-sm font-medium">{displayName}</span>
+            <span className="text-muted-foreground shrink-0 text-xs">
+              {override === undefined ? "Default" : requiresApproval ? "Always ask" : "Never ask"}
+            </span>
             <Switch
-              size="sm"
               checked={requiresApproval}
               aria-label={`Ask before running ${displayName}`}
               onCheckedChange={(checked) => {
@@ -168,172 +125,194 @@ function ToolApprovals({
                 onChange(next);
               }}
             />
-          </div>
+          </li>
         );
       })}
-    </div>
+    </ul>
   );
 }
 
-function ConnectionForm({
+function getConnectionValues(server: McpServerConfig): McpServerConfigFormValues {
+  return {
+    type: server.type,
+    name: server.name,
+    command: server.type === "stdio" ? server.command : "",
+    env: server.type === "stdio" ? server.env : {},
+    url: server.type === "http" ? server.url : "",
+    headers: server.type === "http" ? server.headers : {},
+    timeoutSec: server.timeoutMs / 1000,
+    requiresApproval: server.requiresApproval,
+  };
+}
+
+function ConnectionDialogBody({
   server,
+  onClose,
   onSave,
 }: {
   server: McpServerConfig;
+  onClose: () => void;
   onSave: (updates: Partial<McpServerConfig>) => void;
 }) {
-  const [draft, setDraft] = useState(server);
-  const hasChanges = JSON.stringify(draft) !== JSON.stringify(server);
-  const update = (updates: Partial<McpServerConfig>) =>
-    setDraft((previous) => ({ ...previous, ...updates }) as McpServerConfig);
+  const [values, setValues] = useState(() => getConnectionValues(server));
+  const hasChanges = JSON.stringify(values) !== JSON.stringify(getConnectionValues(server));
   const isValid =
-    draft.name.trim() !== "" &&
-    draft.timeoutMs >= 100 &&
-    (draft.type === "stdio" ? draft.command.trim() !== "" : draft.url.trim() !== "");
+    values.name.trim() !== "" &&
+    Number.isFinite(values.timeoutSec) &&
+    values.timeoutSec >= 0.1 &&
+    (values.type === "stdio" ? values.command.trim() !== "" : values.url.trim() !== "");
+
+  const save = () => {
+    if (!isValid) return;
+    const shared = { name: values.name.trim(), timeoutMs: values.timeoutSec * 1000 };
+    onSave(
+      values.type === "stdio"
+        ? { ...shared, command: values.command.trim(), env: values.env }
+        : { ...shared, url: values.url.trim(), headers: values.headers },
+    );
+    onClose();
+  };
 
   return (
-    <div className="flex flex-col gap-4">
-      <McpServerConfigForm
-        idPrefix={`settings-${server.id}`}
-        values={{
-          type: draft.type,
-          name: draft.name,
-          command: draft.type === "stdio" ? draft.command : "",
-          env: draft.type === "stdio" ? draft.env : {},
-          url: draft.type === "http" ? draft.url : "",
-          headers: draft.type === "http" ? draft.headers : {},
-          timeoutSec: draft.timeoutMs / 1000,
-          requiresApproval: draft.requiresApproval,
-        }}
-        onChange={(updates) => {
-          if (updates.name !== undefined) update({ name: updates.name });
-          if (updates.timeoutSec !== undefined) update({ timeoutMs: updates.timeoutSec * 1000 });
-          if (draft.type === "stdio") {
-            if (updates.command !== undefined) update({ command: updates.command });
-            if (updates.env !== undefined) update({ env: updates.env });
-          } else {
-            if (updates.url !== undefined) update({ url: updates.url });
-            if (updates.headers !== undefined) update({ headers: updates.headers });
-          }
-        }}
-      />
-      {hasChanges ? (
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" size="sm" onClick={() => setDraft(server)}>
-            Discard
-          </Button>
-          <Button
-            size="sm"
-            disabled={!isValid}
-            onClick={() =>
-              onSave(
-                draft.type === "stdio"
-                  ? {
-                      name: draft.name.trim(),
-                      timeoutMs: draft.timeoutMs,
-                      command: draft.command.trim(),
-                      env: draft.env,
-                    }
-                  : {
-                      name: draft.name.trim(),
-                      timeoutMs: draft.timeoutMs,
-                      url: draft.url.trim(),
-                      headers: draft.headers,
-                    },
-              )
-            }
-          >
-            Save changes
-          </Button>
-        </div>
-      ) : null}
-    </div>
+    <>
+      <DialogHeader>
+        <DialogTitle>Edit connection</DialogTitle>
+        <DialogDescription>
+          Change how AgentOne connects to this extension. Nothing changes until you save.
+        </DialogDescription>
+      </DialogHeader>
+      <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
+        <McpServerConfigForm
+          idPrefix={`settings-${server.id}`}
+          className="py-1"
+          values={values}
+          onChange={(updates) => setValues((current) => ({ ...current, ...updates }))}
+        />
+      </div>
+      <DialogFooter>
+        <Button variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button onClick={save} disabled={!hasChanges || !isValid}>
+          Save
+        </Button>
+      </DialogFooter>
+    </>
   );
 }
 
 export function ExtensionSettings({ server }: { server: McpServerConfig }) {
-  const { loadStates, authStates, updateServer, restartServer } = useExtensionActions();
+  const { loadStates, authStates, updateServer } = useExtensionActions();
   const loadState = loadStates[server.id];
   const authState = authStates[server.id];
   const status = getServerStatus(loadState, authState, server.enabled);
-  const connectionKey = JSON.stringify([
-    server.name,
-    server.timeoutMs,
-    server.type === "stdio" ? [server.command, server.env] : [server.url, server.headers],
-  ]);
+  const tools = server.enabled && loadState?.status === "loaded" ? (loadState.tools ?? []) : [];
+  const [editingConnection, setEditingConnection] = useState(false);
 
   return (
-    <section
-      aria-label="Extension settings"
-      className="bg-muted/40 divide-y rounded-xl not-dark:border"
-    >
-      <Row>
-        <RowText
-          title={
-            <>
-              <ServerStatusDot tone={status.tone} />
-              {status.label}
-            </>
-          }
-          description={status.description}
-        />
-        <div className="flex shrink-0 items-center gap-2">
-          {server.enabled && status.tone !== "loading" ? (
-            <Button variant="outline" size="sm" onClick={() => restartServer(server.id)}>
-              <IconRefresh data-icon="inline-start" />
-              Restart
-            </Button>
-          ) : null}
-          <Switch
-            checked={server.enabled}
-            aria-label="Turn extension on or off"
-            onCheckedChange={(enabled) => updateServer(server.id, { enabled })}
-          />
-        </div>
-      </Row>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>General</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          <SettingsRow
+            layout="row"
+            htmlFor={`enabled-${server.id}`}
+            label="Turn on"
+            description="Lets AgentOne use this extension's tools."
+          >
+            <Switch
+              id={`enabled-${server.id}`}
+              checked={server.enabled}
+              onCheckedChange={(enabled) => updateServer(server.id, { enabled })}
+            />
+          </SettingsRow>
 
-      {server.type === "http" ? <AccountRow server={server} authState={authState} /> : null}
+          {server.type === "http" ? <AccountRow server={server} authState={authState} /> : null}
 
-      <Row>
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <Label htmlFor={`approval-${server.id}`} className="text-sm font-medium">
-            Ask before running tools
-          </Label>
-          <span className="text-muted-foreground text-xs">
-            Asks for confirmation before each tool runs, unless in Auto mode
-          </span>
-        </div>
-        <Switch
-          id={`approval-${server.id}`}
-          checked={server.requiresApproval}
-          onCheckedChange={(requiresApproval) => updateServer(server.id, { requiresApproval })}
-        />
-      </Row>
+          <SettingsRow
+            layout="row"
+            htmlFor={`approval-${server.id}`}
+            label="Ask before running tools"
+            description="Asks for confirmation before each tool runs, unless in Auto mode."
+          >
+            <Switch
+              id={`approval-${server.id}`}
+              checked={server.requiresApproval}
+              onCheckedChange={(requiresApproval) => updateServer(server.id, { requiresApproval })}
+            />
+          </SettingsRow>
+        </CardContent>
+      </Card>
 
-      <Accordion type="multiple" className="px-4">
-        <AccordionItem value="tools">
-          <AccordionTrigger className="py-3 text-sm">Approvals per tool</AccordionTrigger>
-          <AccordionContent className="pb-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Tools</CardTitle>
+          <CardDescription>
+            {!server.enabled
+              ? "Turn this extension on to set approvals per tool."
+              : status.tone === "warn"
+                ? status.description
+                : status.tone === "error"
+                  ? "Tools couldn't be loaded."
+                  : loadState?.status !== "loaded"
+                    ? "Tools will appear once the extension finishes loading."
+                    : tools.length
+                      ? "Choose which tools ask before running. Tools you haven't changed follow the setting above."
+                      : "This extension has no tools right now."}
+          </CardDescription>
+        </CardHeader>
+        {server.enabled && status.tone === "error" ? (
+          <CardContent>
+            <p className="bg-muted rounded-md p-3 font-mono text-xs wrap-anywhere">
+              {status.description}
+            </p>
+          </CardContent>
+        ) : tools.length ? (
+          <CardContent>
             <ToolApprovals
               server={server}
-              loadState={loadState}
+              tools={tools}
               onChange={(toolApprovalOverrides) =>
                 updateServer(server.id, { toolApprovalOverrides })
               }
             />
-          </AccordionContent>
-        </AccordionItem>
-        <AccordionItem value="connection" className="border-b-0">
-          <AccordionTrigger className="py-3 text-sm">Connection settings</AccordionTrigger>
-          <AccordionContent className="pb-4">
-            <ConnectionForm
-              key={connectionKey}
+          </CardContent>
+        ) : null}
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Connection</CardTitle>
+          <CardDescription>
+            {server.type === "stdio" ? "Runs on this device" : "Connects online"}
+          </CardDescription>
+          <CardAction className="self-center">
+            <Button variant="outline" size="sm" onClick={() => setEditingConnection(true)}>
+              <IconPencil data-icon="inline-start" />
+              Edit
+            </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          <p className="bg-muted rounded-md p-3 font-mono text-xs wrap-anywhere">
+            {server.type === "stdio" ? server.command : server.url}
+          </p>
+        </CardContent>
+      </Card>
+
+      <Dialog open={editingConnection} onOpenChange={setEditingConnection}>
+        <DialogContent>
+          {editingConnection ? (
+            <ConnectionDialogBody
               server={server}
+              onClose={() => setEditingConnection(false)}
               onSave={(updates) => updateServer(server.id, updates)}
             />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </section>
+          ) : null}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

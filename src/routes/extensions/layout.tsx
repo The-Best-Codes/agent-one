@@ -1,5 +1,5 @@
-import { IconArrowLeft, IconPlus } from "@tabler/icons-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { IconArrowLeft } from "@tabler/icons-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate, useSearchParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ export default function ExtensionsLayout() {
   const { installServer } = useExtensionActions();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const openAddDialog = useCallback(() => setShowAddDialog(true), []);
   const chatId = searchParams.get("chatId");
   const isList = location.pathname === "/extensions";
 
@@ -38,7 +39,7 @@ export default function ExtensionsLayout() {
 
   return (
     <main className="flex h-svh min-h-0 flex-col" role="main">
-      <header className="bg-background z-10 flex flex-wrap items-center gap-x-3 gap-y-2 border-b p-4">
+      <header className="bg-background z-10 flex items-center gap-3 border-b p-4">
         <Button
           variant="outline"
           size="sm"
@@ -59,20 +60,11 @@ export default function ExtensionsLayout() {
             </Link>
           )}
         </h1>
-        <Button
-          variant="outline"
-          size="sm"
-          className="ml-auto"
-          onClick={() => setShowAddDialog(true)}
-        >
-          <IconPlus data-icon="inline-start" />
-          Add custom
-        </Button>
       </header>
 
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
-        <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 md:p-6">
-          <Outlet />
+        <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 p-4 md:p-6">
+          <Outlet context={openAddDialog} />
         </div>
       </div>
 

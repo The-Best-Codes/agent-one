@@ -1,50 +1,30 @@
-import { useState } from "react";
-
-import { cn } from "@/lib/utils";
-
-import { getExtensionHue } from "../model";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function ExtensionIcon({
   name,
   src,
+  size = "default",
   className,
 }: {
   name: string;
   src?: string;
+  size?: "default" | "sm" | "lg";
   className?: string;
 }) {
-  const [failedSrc, setFailedSrc] = useState<string>();
-  const showImage = Boolean(src) && failedSrc !== src;
   const letter = (name.match(/[\p{L}\p{N}]/u)?.[0] ?? "?").toUpperCase();
 
   return (
-    <div
-      aria-hidden
-      className={cn(
-        "flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border text-base",
-        showImage && "bg-white",
-        className,
-      )}
-    >
-      {showImage ? (
-        <img
+    <Avatar aria-hidden size={size} className={className}>
+      {src ? (
+        <AvatarImage
           src={src}
           alt=""
-          loading="lazy"
-          decoding="async"
           referrerPolicy="no-referrer"
           draggable={false}
-          className="size-full object-contain p-[12%]"
-          onError={() => setFailedSrc(src)}
+          className="bg-white object-contain p-1"
         />
-      ) : (
-        <span
-          className="flex size-full items-center justify-center font-semibold text-white"
-          style={{ backgroundColor: `oklch(0.52 0.11 ${getExtensionHue(name)})` }}
-        >
-          {letter}
-        </span>
-      )}
-    </div>
+      ) : null}
+      <AvatarFallback className="font-medium">{letter}</AvatarFallback>
+    </Avatar>
   );
 }

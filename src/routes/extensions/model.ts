@@ -16,12 +16,6 @@ export function useExtensionsLink() {
   );
 }
 
-export function getExtensionHue(name: string): number {
-  let hash = 0;
-  for (const character of name) hash = (hash * 31 + character.charCodeAt(0)) % 360;
-  return hash;
-}
-
 export type ServerStatusTone = "ok" | "warn" | "error" | "off" | "loading";
 
 export interface ServerStatus {
