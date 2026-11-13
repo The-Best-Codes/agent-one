@@ -1,25 +1,22 @@
-import { IconAlertTriangle, IconLogin, IconLogout, IconPencil } from "@tabler/icons-react";
-import { Fragment, useEffect, useState } from "react";
+import { IconLogin, IconLogout } from "@tabler/icons-react";
+import { Fragment, type ReactNode, useEffect, useState } from "react";
 
 import { SettingsRow } from "@/components/settings-components/setting-controls";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Field, FieldGroup, FieldLabel, FieldSeparator } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
@@ -154,17 +151,17 @@ function getConnectionValues(server: McpServerConfig): McpServerConfigFormValues
   };
 }
 
-function ConnectionDialogBody({
+function ConnectionCard({
   server,
-  onClose,
   onSave,
 }: {
   server: McpServerConfig;
-  onClose: () => void;
   onSave: (updates: Partial<McpServerConfig>) => void;
 }) {
-  const [values, setValues] = useState(() => getConnectionValues(server));
-  const hasChanges = JSON.stringify(values) !== JSON.stringify(getConnectionValues(server));
+  const saved = getConnectionValues(server);
+  const [draft, setDraft] = useState(saved);
+  const values = { ...draft, requiresApproval: saved.requiresApproval };
+  const hasChanges = JSON.stringify(values) !== JSON.stringify(saved);
   const isValid =
     values.name.trim() !== "" &&
     Number.isFinite(values.timeoutSec) &&
@@ -172,51 +169,84 @@ function ConnectionDialogBody({
     (values.type === "stdio" ? values.command.trim() !== "" : values.url.trim() !== "");
 
   const save = () => {
-    if (!isValid) return;
-    const shared = { name: values.name.trim(), timeoutMs: values.timeoutSec * 1000 };
+    if (!hasChanges || !isValid) return;
+    const name = values.name.trim();
+    const command = values.command.trim();
+    const url = values.url.trim();
+    const shared = { name, timeoutMs: values.timeoutSec * 1000 };
     onSave(
       values.type === "stdio"
-        ? { ...shared, command: values.command.trim(), env: values.env }
-        : { ...shared, url: values.url.trim(), headers: values.headers },
+        ? { ...shared, command, env: values.env }
+        : { ...shared, url, headers: values.headers },
     );
-    onClose();
+    setDraft({ ...values, name, command, url });
   };
 
   return (
-    <>
-      <DialogHeader>
-        <DialogTitle>Edit connection</DialogTitle>
-        <DialogDescription>
-          Change how AgentOne connects to this extension. Nothing changes until you save.
-        </DialogDescription>
-      </DialogHeader>
-      <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
-        <McpServerConfigForm
-          idPrefix={`settings-${server.id}`}
-          className="py-1"
-          values={values}
-          onChange={(updates) => setValues((current) => ({ ...current, ...updates }))}
-        />
-      </div>
-      <DialogFooter>
-        <Button variant="outline" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button onClick={save} disabled={!hasChanges || !isValid}>
-          Save
-        </Button>
-      </DialogFooter>
-    </>
+    <Card className="py-0">
+      <Accordion type="single" collapsible>
+        <AccordionItem value="advanced">
+          <AccordionTrigger className="items-center gap-3 rounded-xl p-4 hover:no-underline">
+            <span className="flex min-w-0 flex-col gap-1">
+              <span className="text-base leading-snug font-medium">Advanced</span>
+              <span className="text-muted-foreground text-sm font-normal">
+                Only change these settings if you know what you're doing.
+              </span>
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="pb-0">
+            <form
+              id={`connection-${server.id}`}
+              className="px-4 pt-1 pb-4"
+              onSubmit={(event) => {
+                event.preventDefault();
+                save();
+              }}
+            >
+              <McpServerConfigForm
+                idPrefix={`settings-${server.id}`}
+                values={values}
+                onChange={(updates) => setDraft((current) => ({ ...current, ...updates }))}
+              />
+            </form>
+            <CardFooter className="justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={!hasChanges}
+                onClick={() => setDraft(saved)}
+              >
+                Discard
+              </Button>
+              <Button
+                type="submit"
+                form={`connection-${server.id}`}
+                size="sm"
+                disabled={!hasChanges || !isValid}
+              >
+                Save
+              </Button>
+            </CardFooter>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </Card>
   );
 }
 
-export function ExtensionSettings({ server }: { server: McpServerConfig }) {
+export function ExtensionSettings({
+  server,
+  about,
+}: {
+  server: McpServerConfig;
+  about: ReactNode;
+}) {
   const { loadStates, authStates, updateServer } = useExtensionActions();
   const loadState = loadStates[server.id];
   const authState = authStates[server.id];
   const status = getServerStatus(loadState, authState, server.enabled);
   const tools = server.enabled && loadState?.status === "loaded" ? (loadState.tools ?? []) : [];
-  const [editingConnection, setEditingConnection] = useState(false);
 
   return (
     <>
@@ -255,6 +285,8 @@ export function ExtensionSettings({ server }: { server: McpServerConfig }) {
         </CardContent>
       </Card>
 
+      {about}
+
       <Card>
         <CardHeader>
           <CardTitle>Tools</CardTitle>
@@ -272,14 +304,7 @@ export function ExtensionSettings({ server }: { server: McpServerConfig }) {
                       : "This extension has no tools right now."}
           </CardDescription>
         </CardHeader>
-        {server.enabled && status.tone === "error" ? (
-          <CardContent>
-            <Alert variant="destructive">
-              <IconAlertTriangle />
-              <AlertDescription className="wrap-anywhere">{status.description}</AlertDescription>
-            </Alert>
-          </CardContent>
-        ) : tools.length ? (
+        {tools.length ? (
           <CardContent>
             <ToolApprovals
               server={server}
@@ -292,37 +317,7 @@ export function ExtensionSettings({ server }: { server: McpServerConfig }) {
         ) : null}
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Connection</CardTitle>
-          <CardDescription>
-            {server.type === "stdio" ? "Runs on this device" : "Connects online"}
-          </CardDescription>
-          <CardAction>
-            <Button variant="outline" size="sm" onClick={() => setEditingConnection(true)}>
-              <IconPencil data-icon="inline-start" />
-              Edit
-            </Button>
-          </CardAction>
-        </CardHeader>
-        <CardContent>
-          <p className="bg-muted rounded-md p-3 font-mono text-xs wrap-anywhere">
-            {server.type === "stdio" ? server.command : server.url}
-          </p>
-        </CardContent>
-      </Card>
-
-      <Dialog open={editingConnection} onOpenChange={setEditingConnection}>
-        <DialogContent>
-          {editingConnection ? (
-            <ConnectionDialogBody
-              server={server}
-              onClose={() => setEditingConnection(false)}
-              onSave={(updates) => updateServer(server.id, updates)}
-            />
-          ) : null}
-        </DialogContent>
-      </Dialog>
+      <ConnectionCard server={server} onSave={(updates) => updateServer(server.id, updates)} />
     </>
   );
 }

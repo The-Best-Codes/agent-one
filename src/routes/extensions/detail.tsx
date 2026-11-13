@@ -1,4 +1,5 @@
 import {
+  IconAlertTriangle,
   IconArrowLeft,
   IconArrowUpRight,
   IconPuzzleOff,
@@ -15,6 +16,7 @@ import {
   AdaptiveTooltipContent,
   AdaptiveTooltipTrigger,
 } from "@/components/ui/adaptive-tooltip";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -65,7 +67,7 @@ function ExtensionDetail({ server }: { server: McpServerConfig }) {
 
   const metadata = getInstalledExtensionMetadata(server);
   const name = server.name || metadata?.displayName || "Custom extension";
-  const tagline = metadata ? metadata.description : "Custom extension added by you";
+  const tagline = metadata?.description;
   const pageUrl = getExtensionPageUrl(server);
   const isWebsite = /^https?:\/\//i.test(metadata?.websiteUrl ?? "");
   const source = getExtensionSourceLabel(metadata);
@@ -74,13 +76,13 @@ function ExtensionDetail({ server }: { server: McpServerConfig }) {
   return (
     <>
       <header className="flex items-start gap-3">
-        <ExtensionIcon name={name} src={metadata?.iconUrl} size="lg" />
+        {metadata?.iconUrl ? <ExtensionIcon name={name} src={metadata.iconUrl} size="lg" /> : null}
         <div className="flex min-w-0 flex-1 flex-col">
           <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
             <h2 className="min-w-0 text-xl leading-6 font-semibold wrap-anywhere">{name}</h2>
             {source ? <Badge variant="outline">{source}</Badge> : null}
           </div>
-          <p
+          <div
             className="text-muted-foreground flex min-w-0 items-center gap-1.5 text-sm leading-4"
             title={status.description}
           >
@@ -88,7 +90,7 @@ function ExtensionDetail({ server }: { server: McpServerConfig }) {
             <span className="truncate">
               {status.tone === "error" ? status.label : `${status.label} · ${status.description}`}
             </span>
-          </p>
+          </div>
         </div>
         <div className="flex shrink-0 items-center gap-2 self-center">
           {server.enabled && status.tone !== "loading" ? (
@@ -118,51 +120,64 @@ function ExtensionDetail({ server }: { server: McpServerConfig }) {
         </div>
       </header>
 
-      <ExtensionSettings server={server} />
+      {status.tone === "error" ? (
+        <Alert variant="destructive">
+          <IconAlertTriangle />
+          <AlertTitle>This extension couldn't load</AlertTitle>
+          <AlertDescription className="wrap-anywhere">Error: {status.description}</AlertDescription>
+        </Alert>
+      ) : null}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>About</CardTitle>
-          {tagline ? <CardDescription className="wrap-anywhere">{tagline}</CardDescription> : null}
-        </CardHeader>
-        {metadata || pageUrl ? (
-          <CardContent>
-            <dl className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
-              {metadata?.author ? (
-                <Fact label="Made by">
-                  {isWebsite && metadata.websiteUrl ? (
-                    <OutLink href={metadata.websiteUrl}>{metadata.author}</OutLink>
-                  ) : (
-                    metadata.author
-                  )}
-                </Fact>
-              ) : null}
-              {metadata?.version ? <Fact label="Version">{metadata.version}</Fact> : null}
-              {metadata?.badges.length ? (
-                <Fact label="Categories">
-                  <span className="flex flex-wrap gap-1.5">
-                    {metadata.badges.map((badge) => (
-                      <Badge key={badge} variant="outline" className="max-w-full">
-                        <span className="truncate">{badge}</span>
-                      </Badge>
-                    ))}
-                  </span>
-                </Fact>
-              ) : null}
-              {pageUrl || (isWebsite && !metadata?.author) ? (
-                <Fact label="More info">
-                  <span className="flex flex-col items-start gap-1">
-                    {pageUrl ? <OutLink href={pageUrl}>View on agent-one.dev</OutLink> : null}
-                    {isWebsite && !metadata?.author && metadata?.websiteUrl ? (
-                      <OutLink href={metadata.websiteUrl}>Website</OutLink>
-                    ) : null}
-                  </span>
-                </Fact>
-              ) : null}
-            </dl>
-          </CardContent>
-        ) : null}
-      </Card>
+      <ExtensionSettings
+        server={server}
+        about={
+          metadata || pageUrl ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>About</CardTitle>
+                {tagline ? (
+                  <CardDescription className="wrap-anywhere">{tagline}</CardDescription>
+                ) : null}
+              </CardHeader>
+              <CardContent>
+                <dl className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
+                  {metadata?.author ? (
+                    <Fact label="Made by">
+                      {isWebsite && metadata.websiteUrl ? (
+                        <OutLink href={metadata.websiteUrl}>{metadata.author}</OutLink>
+                      ) : (
+                        metadata.author
+                      )}
+                    </Fact>
+                  ) : null}
+                  {metadata?.version ? <Fact label="Version">{metadata.version}</Fact> : null}
+                  {metadata?.badges.length ? (
+                    <Fact label="Categories">
+                      <span className="flex flex-wrap gap-1.5">
+                        {metadata.badges.map((badge) => (
+                          <Badge key={badge} variant="outline" className="max-w-full">
+                            <span className="truncate">{badge}</span>
+                          </Badge>
+                        ))}
+                      </span>
+                    </Fact>
+                  ) : null}
+                  {pageUrl || (isWebsite && !metadata?.author) ? (
+                    <Fact label="More info">
+                      <span className="flex flex-col items-start gap-1">
+                        {pageUrl ? <OutLink href={pageUrl}>View on agent-one.dev</OutLink> : null}
+                        {isWebsite && !metadata?.author && metadata?.websiteUrl ? (
+                          <OutLink href={metadata.websiteUrl}>Website</OutLink>
+                        ) : null}
+                      </span>
+                    </Fact>
+                  ) : null}
+                </dl>
+              </CardContent>
+            </Card>
+          ) : null
+        }
+      />
 
       <UninstallExtensionDialog
         serverName={name}
