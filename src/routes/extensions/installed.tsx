@@ -1,4 +1,4 @@
-import { IconBulb, IconPlus, IconPuzzle, IconSettings } from "@tabler/icons-react";
+import { IconPlus, IconPuzzle, IconSearch } from "@tabler/icons-react";
 import fuzzysort from "fuzzysort";
 import { useMemo, useState } from "react";
 import { Link, useOutletContext } from "react-router";
@@ -10,11 +10,12 @@ import {
   AdaptiveTooltipContent,
   AdaptiveTooltipTrigger,
 } from "@/components/ui/adaptive-tooltip";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -66,15 +67,6 @@ export default function InstalledRoute() {
 
   return (
     <>
-      <Alert>
-        <IconBulb />
-        <AlertTitle>Find more extensions</AlertTitle>
-        <AlertDescription>
-          Browse the <ExternalLink href={AGENT_ONE_EXTENSIONS_URL}>AgentOne website</ExternalLink>{" "}
-          to find extensions and install any of them in a click.
-        </AlertDescription>
-      </Alert>
-
       <div className="flex items-center gap-2">
         <SearchInput
           value={query}
@@ -89,22 +81,52 @@ export default function InstalledRoute() {
         </Button>
       </div>
 
-      {visible.length === 0 ? (
-        <Empty className="border">
+      {text && visible.length === 0 ? (
+        <Empty className="border py-16">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <IconPuzzle />
             </EmptyMedia>
-            <EmptyTitle>{text ? "No matching extensions" : "No extensions installed"}</EmptyTitle>
+            <EmptyTitle>No matching extensions</EmptyTitle>
             <EmptyDescription>
-              {text
-                ? "Try a different search."
-                : "Extensions connect AgentOne to the apps you use. Find one on the AgentOne website, or add your own."}
+              Nothing installed matches your search. Try looking for it on the AgentOne website.
             </EmptyDescription>
           </EmptyHeader>
+          <EmptyContent>
+            <Button asChild>
+              <ExternalLink
+                href={`${AGENT_ONE_EXTENSIONS_URL}?${new URLSearchParams({ q: text }).toString()}`}
+              >
+                <IconSearch data-icon="inline-start" />
+                Search for new extensions
+              </ExternalLink>
+            </Button>
+          </EmptyContent>
         </Empty>
       ) : (
-        <ul className="rounded-md border px-2">
+        <ul className="grid gap-4 sm:grid-cols-2">
+          {text ? null : (
+            <li className="min-w-0">
+              <ExternalLink
+                href={AGENT_ONE_EXTENSIONS_URL}
+                className="group focus-visible:ring-ring/50 flex h-full rounded-xl outline-none focus-visible:ring-3"
+              >
+                <Empty className="group-hover:bg-muted/50 border p-4 transition-colors">
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <IconPlus />
+                    </EmptyMedia>
+                    <EmptyTitle>Add extension</EmptyTitle>
+                    <EmptyDescription>
+                      {rows.length === 0
+                        ? "Nothing installed yet. Find extensions on the AgentOne website."
+                        : "Find more on the AgentOne website."}
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              </ExternalLink>
+            </li>
+          )}
           {visible.map((row) => {
             const { server } = row;
             const status = getServerStatus(
@@ -112,48 +134,52 @@ export default function InstalledRoute() {
               authStates[server.id],
               server.enabled,
             );
+            const path = link(getExtensionPath(server.id));
             return (
-              <li key={server.id} className="flex items-center gap-2 px-1 py-2 not-last:border-b">
-                <Link
-                  to={link(getExtensionPath(server.id))}
-                  className="focus-visible:border-ring focus-visible:ring-ring/50 flex min-w-0 flex-1 items-center gap-2 rounded-md outline-none focus-visible:ring-[3px]"
-                >
-                  <ExtensionIcon name={row.name} src={row.iconUrl} className="size-9" />
-                  <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="flex min-w-0 items-center gap-2">
-                      <span className="truncate text-sm font-medium">{row.name}</span>
-                      {row.source ? (
-                        <Badge variant="outline" className="not-sm:hidden">
-                          {row.source}
-                        </Badge>
-                      ) : null}
-                    </span>
-                    <span className="text-muted-foreground truncate text-xs">
-                      {row.description}
-                    </span>
-                  </span>
-                </Link>
-                <AdaptiveTooltip>
-                  <AdaptiveTooltipTrigger asChild>
-                    <span className="text-muted-foreground flex shrink-0 items-center gap-1.5 text-xs">
-                      <ServerStatusDot tone={status.tone} />
-                      <span className="not-sm:sr-only">{status.label}</span>
-                    </span>
-                  </AdaptiveTooltipTrigger>
-                  <AdaptiveTooltipContent className="max-w-xs wrap-anywhere">
-                    {status.description}
-                  </AdaptiveTooltipContent>
-                </AdaptiveTooltip>
-                <Button asChild variant="outline" size="icon-xs">
-                  <Link to={link(getExtensionPath(server.id))} aria-label={`Configure ${row.name}`}>
-                    <IconSettings />
-                  </Link>
-                </Button>
-                <Switch
-                  checked={server.enabled}
-                  aria-label={`Turn ${row.name} on or off`}
-                  onCheckedChange={(enabled) => updateServer(server.id, { enabled })}
-                />
+              <li key={server.id} className="min-w-0">
+                <Card className="h-full">
+                  <CardContent className="flex flex-1 items-start gap-4">
+                    <ExtensionIcon name={row.name} src={row.iconUrl} className="size-12" />
+                    <div className="flex min-w-0 flex-1 flex-col gap-1">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <Link
+                          to={path}
+                          className="focus-visible:ring-ring/50 truncate rounded-sm text-base font-medium outline-none hover:underline focus-visible:ring-3"
+                        >
+                          {row.name}
+                        </Link>
+                        {row.source ? <Badge variant="outline">{row.source}</Badge> : null}
+                      </div>
+                      <p className="text-muted-foreground line-clamp-2 min-h-10 text-sm wrap-anywhere">
+                        {row.description}
+                      </p>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="gap-3">
+                    <Button asChild variant="outline" size="sm">
+                      <Link to={path} aria-label={`Details for ${row.name}`}>
+                        Details
+                      </Link>
+                    </Button>
+                    <AdaptiveTooltip>
+                      <AdaptiveTooltipTrigger asChild>
+                        <span className="text-muted-foreground flex min-w-0 items-center gap-1.5 text-xs">
+                          <ServerStatusDot tone={status.tone} />
+                          <span className="truncate">{status.label}</span>
+                        </span>
+                      </AdaptiveTooltipTrigger>
+                      <AdaptiveTooltipContent className="max-w-xs wrap-anywhere">
+                        {status.description}
+                      </AdaptiveTooltipContent>
+                    </AdaptiveTooltip>
+                    <Switch
+                      className="ml-auto"
+                      checked={server.enabled}
+                      aria-label={`Turn ${row.name} on or off`}
+                      onCheckedChange={(enabled) => updateServer(server.id, { enabled })}
+                    />
+                  </CardFooter>
+                </Card>
               </li>
             );
           })}
