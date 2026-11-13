@@ -21,10 +21,10 @@ export function ExtensionIcon({
           alt=""
           referrerPolicy="no-referrer"
           draggable={false}
-          className="bg-white object-contain p-1"
+          className="bg-muted object-contain p-1"
         />
       ) : null}
-      <AvatarFallback className="font-medium">{letter}</AvatarFallback>
+      <AvatarFallback>{letter}</AvatarFallback>
     </Avatar>
   );
 }

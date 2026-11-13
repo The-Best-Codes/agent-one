@@ -109,10 +109,10 @@ function ExtensionDetail({ server }: { server: McpServerConfig }) {
           <Button
             variant="destructive"
             size="sm"
-            className="not-sm:size-7 sm:pl-1.5"
+            className="not-sm:size-7 not-sm:px-0!"
             onClick={() => setShowUninstall(true)}
           >
-            <IconTrash />
+            <IconTrash data-icon="inline-start" />
             <span className="sr-only sm:not-sr-only">Uninstall</span>
           </Button>
         </div>

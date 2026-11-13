@@ -76,7 +76,7 @@ function InstallField({
       </FieldLabel>
       {options?.length ? (
         <Select value={value || options[0].value} onValueChange={onChange}>
-          <SelectTrigger id={field.id} className="w-full">
+          <SelectTrigger id={field.id} className="w-full" aria-invalid={Boolean(error)}>
             <SelectValue placeholder={field.label} />
           </SelectTrigger>
           <SelectContent>
@@ -95,6 +95,7 @@ function InstallField({
           value={value}
           onChange={onChange}
           placeholder={field.placeholder ?? ""}
+          aria-invalid={Boolean(error)}
         />
       ) : (
         <Input
