@@ -1,7 +1,8 @@
-import { IconLogin, IconLogout, IconPencil } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
+import { IconAlertTriangle, IconLogin, IconLogout, IconPencil } from "@tabler/icons-react";
+import { Fragment, useEffect, useState } from "react";
 
 import { SettingsRow } from "@/components/settings-components/setting-controls";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,6 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Field, FieldGroup, FieldLabel, FieldSeparator } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { getToolDisplayName } from "@/lib/ai/tools/mcp";
@@ -104,31 +106,38 @@ function ToolApprovals({
   onChange: (overrides: Record<string, boolean>) => void;
 }) {
   return (
-    <ul className="max-h-96 overflow-x-hidden overflow-y-auto">
-      {tools.map((tool) => {
+    <FieldGroup className="max-h-96 gap-3 overflow-x-hidden overflow-y-auto px-1 py-2">
+      {tools.map((tool, index) => {
         const displayName = getToolDisplayName(tool.name, tool.title);
         const override = server.toolApprovalOverrides?.[tool.name];
         const requiresApproval = override ?? server.requiresApproval;
+        const id = `tool-approval-${server.id}-${tool.name}`;
         return (
-          <li key={tool.name} className="flex items-center gap-2 px-1 py-2 not-last:border-b">
-            <span className="min-w-0 flex-1 truncate text-sm font-medium">{displayName}</span>
-            <span className="text-muted-foreground shrink-0 text-xs">
-              {override === undefined ? "Default" : requiresApproval ? "Always ask" : "Never ask"}
-            </span>
-            <Switch
-              checked={requiresApproval}
-              aria-label={`Ask before running ${displayName}`}
-              onCheckedChange={(checked) => {
-                const next = { ...server.toolApprovalOverrides };
-                if (checked === server.requiresApproval) delete next[tool.name];
-                else next[tool.name] = checked;
-                onChange(next);
-              }}
-            />
-          </li>
+          <Fragment key={tool.name}>
+            {index > 0 ? <FieldSeparator /> : null}
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor={id} className="min-w-0">
+                <span className="truncate">{displayName}</span>
+              </FieldLabel>
+              <span className="text-muted-foreground shrink-0 text-xs">
+                {override === undefined ? "Default" : requiresApproval ? "Always ask" : "Never ask"}
+              </span>
+              <Switch
+                id={id}
+                checked={requiresApproval}
+                aria-label={`Ask before running ${displayName}`}
+                onCheckedChange={(checked) => {
+                  const next = { ...server.toolApprovalOverrides };
+                  if (checked === server.requiresApproval) delete next[tool.name];
+                  else next[tool.name] = checked;
+                  onChange(next);
+                }}
+              />
+            </Field>
+          </Fragment>
         );
       })}
-    </ul>
+    </FieldGroup>
   );
 }
 
@@ -265,9 +274,10 @@ export function ExtensionSettings({ server }: { server: McpServerConfig }) {
         </CardHeader>
         {server.enabled && status.tone === "error" ? (
           <CardContent>
-            <p className="bg-muted rounded-md p-3 font-mono text-xs wrap-anywhere">
-              {status.description}
-            </p>
+            <Alert variant="destructive">
+              <IconAlertTriangle />
+              <AlertDescription className="wrap-anywhere">{status.description}</AlertDescription>
+            </Alert>
           </CardContent>
         ) : tools.length ? (
           <CardContent>
@@ -288,7 +298,7 @@ export function ExtensionSettings({ server }: { server: McpServerConfig }) {
           <CardDescription>
             {server.type === "stdio" ? "Runs on this device" : "Connects online"}
           </CardDescription>
-          <CardAction className="self-center">
+          <CardAction>
             <Button variant="outline" size="sm" onClick={() => setEditingConnection(true)}>
               <IconPencil data-icon="inline-start" />
               Edit

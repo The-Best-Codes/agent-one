@@ -12,7 +12,14 @@ import {
 } from "@/components/ui/adaptive-tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Empty,
   EmptyContent,
@@ -138,24 +145,28 @@ export default function InstalledRoute() {
             return (
               <li key={server.id} className="min-w-0">
                 <Card className="h-full">
-                  <CardContent className="flex flex-1 items-start gap-4">
-                    <ExtensionIcon name={row.name} src={row.iconUrl} className="size-12" />
-                    <div className="flex min-w-0 flex-1 flex-col gap-1">
-                      <div className="flex min-w-0 items-center gap-2">
-                        <Link
-                          to={path}
-                          className="focus-visible:ring-ring/50 truncate rounded-sm text-base font-medium outline-none hover:underline focus-visible:ring-3"
-                        >
+                  <CardHeader>
+                    <CardTitle className="min-w-0">
+                      <Link
+                        to={path}
+                        className="group/link focus-visible:ring-ring/50 flex w-fit max-w-full items-center gap-2 rounded-sm outline-none focus-visible:ring-3"
+                      >
+                        {row.iconUrl ? <ExtensionIcon name={row.name} src={row.iconUrl} /> : null}
+                        <span className="truncate text-lg group-hover/link:underline">
                           {row.name}
-                        </Link>
-                        {row.source ? <Badge variant="outline">{row.source}</Badge> : null}
-                      </div>
-                      <p className="text-muted-foreground line-clamp-2 min-h-10 text-sm wrap-anywhere">
-                        {row.description}
-                      </p>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="gap-3">
+                        </span>
+                      </Link>
+                    </CardTitle>
+                    <CardDescription className="line-clamp-2 wrap-anywhere">
+                      {row.description}
+                    </CardDescription>
+                    {row.source ? (
+                      <CardAction>
+                        <Badge variant="outline">{row.source}</Badge>
+                      </CardAction>
+                    ) : null}
+                  </CardHeader>
+                  <CardFooter className="mt-auto gap-3">
                     <Button asChild variant="outline" size="sm">
                       <Link to={path} aria-label={`Details for ${row.name}`}>
                         Details
