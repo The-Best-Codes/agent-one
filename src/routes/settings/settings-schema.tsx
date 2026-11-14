@@ -36,7 +36,6 @@ import { FileAnalysisModelsControl } from "@/components/settings-components/file
 import {
   AppUpdates,
   DebugTools,
-  ExtensionListUpdates,
   HelpLinks,
   ModelDirectoryUpdates,
 } from "@/components/settings-components/help-and-updates";
@@ -776,13 +775,6 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
         searchDescription: "Download the latest model metadata for built-in providers.",
         keywords: ["updates", "models", "refresh", "download"],
         render: ModelDirectoryUpdates,
-      },
-      {
-        id: "extension-list",
-        title: "Extension List",
-        searchDescription: "Download the latest metadata for the extension browser.",
-        keywords: ["updates", "mcp", "extensions", "refresh", "download"],
-        render: ExtensionListUpdates,
       },
       {
         id: "help",

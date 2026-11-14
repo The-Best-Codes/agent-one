@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import deepLinkSchema from "@/assets/deep-links/schema.json";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { getCronInvocation } from "@/lib/cron";
+import { isValidExtensionLinkId } from "@/lib/extensions/manifest";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -134,6 +135,16 @@ export function DeepLinkHandler() {
           }
 
           void actionsRef.current.navigate(`/extensions?${params.toString()}`);
+        } else if (deepLinkId === "extensions/install") {
+          const id = urlObj.searchParams.get("id");
+          if (!id || !isValidExtensionLinkId(id)) {
+            logger.warn("Deep link extensions/install has a missing or invalid id parameter");
+            return;
+          }
+
+          void actionsRef.current.navigate(
+            `/extensions?${new URLSearchParams({ install: id }).toString()}`,
+          );
         } else if (deepLinkId === "cron") {
           const id = urlObj.searchParams.get("id");
           if (!id) {
