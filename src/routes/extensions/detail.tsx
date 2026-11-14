@@ -204,7 +204,7 @@ export default function ExtensionDetailRoute() {
 
   return (
     <>
-      <Button asChild variant="ghost" size="sm" className="-ml-2 self-start">
+      <Button asChild variant="outline" size="sm" className="self-start">
         <Link to={link("/extensions")}>
           <IconArrowLeft data-icon="inline-start" />
           All extensions
