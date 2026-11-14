@@ -53,7 +53,7 @@ const manifestSchema = z.object({
   categories: z.array(z.string()),
   extensionVersion: z.string().optional(),
   signIn: z.enum(["none", "optional", "required", "unknown"]),
-  setupNote: z.string().optional(),
+  oauthClient: z.object({ helpUrl: z.string().optional() }).optional(),
   templates: z.array(templateSchema),
 });
 

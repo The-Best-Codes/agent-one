@@ -282,6 +282,8 @@ pub fn run() {
                     mcp_auth::mcp_get_token,
                     mcp_auth::mcp_logout,
                     mcp_auth::mcp_check_oauth_support,
+                    mcp_auth::mcp_get_oauth_client,
+                    mcp_auth::mcp_set_oauth_client,
                 ]
             }
             #[cfg(any(target_os = "android", target_os = "ios"))]
@@ -306,6 +308,8 @@ pub fn run() {
                     mcp_auth::mcp_get_token,
                     mcp_auth::mcp_logout,
                     mcp_auth::mcp_check_oauth_support,
+                    mcp_auth::mcp_get_oauth_client,
+                    mcp_auth::mcp_set_oauth_client,
                 ]
             }
         })

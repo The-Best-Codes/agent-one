@@ -1,8 +1,10 @@
 import { IconArrowLeft } from "@tabler/icons-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate, useSearchParams } from "react-router";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { setMcpOAuthClient } from "@/lib/ai/tools/mcp/oauth";
 
 import { AddServerDialog } from "./add-server-dialog";
 import { InstallFromLink } from "./install-from-link";
@@ -85,12 +87,17 @@ export default function ExtensionsLayout() {
             );
           }
         }}
-        onAddServer={(data) => {
+        onAddServer={({ oauthClient, ...data }) => {
           const server = installServer(
             data.type === "stdio"
               ? { ...data, type: "stdio", command: data.command ?? "", env: data.env ?? {} }
               : { ...data, type: "http", url: data.url ?? "", headers: data.headers ?? {} },
           );
+          if (oauthClient) {
+            setMcpOAuthClient(server.id, oauthClient.clientId, oauthClient.clientSecret).catch(
+              (error) => toast.error(`Couldn't save the OAuth app: ${String(error)}`),
+            );
+          }
           void navigate(link(getExtensionPath(server.id)));
         }}
         initialValues={prefill}

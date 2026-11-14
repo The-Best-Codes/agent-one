@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { toast } from "sonner";
 
 import { useTools } from "@/contexts/use-tools/tools-hooks";
+import { setMcpOAuthClient } from "@/lib/ai/tools/mcp/oauth";
 import type { ExtensionInstallResult } from "@/lib/extensions/install";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom, mcpServersAtom } from "@/lib/jotai/mcp-atoms";
 import type { McpRegistryMetadata, McpServerConfig } from "@/lib/settings/types";
@@ -57,6 +58,7 @@ export function useExtensionActions() {
     (serverIds: string[]) => {
       const ids = new Set(serverIds);
       setServers((previous) => previous.filter((server) => !ids.has(server.id)));
+      for (const id of ids) void setMcpOAuthClient(id, "").catch(() => undefined);
     },
     [setServers],
   );

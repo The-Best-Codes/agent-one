@@ -1,6 +1,7 @@
 import { IconAlertTriangle } from "@tabler/icons-react";
 import { useMemo, useState } from "react";
 
+import { SecretInput } from "@/components/a1/input/secret-input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { type McpServerType } from "@/lib/settings/types";
 
 import { McpServerConfigForm, type McpServerConfigFormValues } from "./mcp-server-config-form";
@@ -29,6 +32,7 @@ interface AddServerDialogProps {
     headers?: Record<string, string>;
     timeoutSec: number;
     requiresApproval: boolean;
+    oauthClient?: { clientId: string; clientSecret?: string };
   }) => void;
   initialValues?: {
     name: string;
@@ -55,6 +59,8 @@ export function AddServerDialog({
     requiresApproval: true,
   });
   const [isFromDeepLink, setIsFromDeepLink] = useState(!!initialValues);
+  const [oauthClientId, setOAuthClientId] = useState("");
+  const [oauthClientSecret, setOAuthClientSecret] = useState("");
 
   const isAddFormValid = useMemo(() => {
     if (!formValues.name.trim()) {
@@ -82,6 +88,8 @@ export function AddServerDialog({
       requiresApproval: true,
     });
     setIsFromDeepLink(false);
+    setOAuthClientId("");
+    setOAuthClientSecret("");
   };
 
   const handleAddServer = () => {
@@ -96,6 +104,13 @@ export function AddServerDialog({
       headers: formValues.type === "http" ? formValues.headers : undefined,
       timeoutSec: formValues.timeoutSec,
       requiresApproval: formValues.requiresApproval,
+      oauthClient:
+        formValues.type === "http" && oauthClientId.trim()
+          ? {
+              clientId: oauthClientId.trim(),
+              clientSecret: oauthClientSecret.trim() || undefined,
+            }
+          : undefined,
     });
 
     resetAddForm();
@@ -137,6 +152,41 @@ export function AddServerDialog({
             namePlaceholder="e.g., Everything Server"
             showStdioWarning
             showApprovalControls
+            httpSupplement={
+              <>
+                <Field>
+                  <FieldLabel htmlFor="new-server-dialog-oauth-client-id">
+                    OAuth client ID
+                    <span className="text-muted-foreground">(optional)</span>
+                  </FieldLabel>
+                  <Input
+                    id="new-server-dialog-oauth-client-id"
+                    value={oauthClientId}
+                    onChange={(event) => setOAuthClientId(event.target.value)}
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                  <FieldDescription>
+                    Only needed if the service asks you to create your own OAuth app. Use
+                    http://127.0.0.1/callback as the redirect address.
+                  </FieldDescription>
+                </Field>
+                {oauthClientId.trim() ? (
+                  <Field>
+                    <FieldLabel htmlFor="new-server-dialog-oauth-client-secret">
+                      OAuth client secret
+                      <span className="text-muted-foreground">(optional)</span>
+                    </FieldLabel>
+                    <SecretInput
+                      id="new-server-dialog-oauth-client-secret"
+                      value={oauthClientSecret}
+                      onChange={setOAuthClientSecret}
+                      placeholder=""
+                    />
+                  </Field>
+                ) : null}
+              </>
+            }
           />
         </div>
 

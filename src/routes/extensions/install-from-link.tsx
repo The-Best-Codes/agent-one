@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 
+import { setMcpOAuthClient } from "@/lib/ai/tools/mcp/oauth";
 import {
   createManifestMetadata,
   type ExtensionManifest,
@@ -91,7 +92,6 @@ export function InstallFromLink() {
         manifest.reviewed
           ? undefined
           : "This extension comes from the community and hasn't been reviewed by AgentOne.",
-        manifest.setupNote,
       ].filter((note): note is string => Boolean(note))
     : [];
 
@@ -100,13 +100,26 @@ export function InstallFromLink() {
       name={manifest?.name ?? ""}
       templates={manifest?.templates ?? []}
       notes={notes}
-      signInAfterInstall={manifest?.signIn === "required" && !manifest.setupNote}
+      signInAfterInstall={manifest?.signIn === "required"}
+      oauthClient={manifest?.oauthClient}
       open={Boolean(manifest)}
       onOpenChange={(open) => {
         if (!open) setManifest(undefined);
       }}
-      onInstall={(result, template) => {
+      onInstall={async (result, template, oauthClient) => {
         if (!manifest) return;
+        if (oauthClient) {
+          try {
+            await setMcpOAuthClient(
+              manifest.serverId,
+              oauthClient.clientId,
+              oauthClient.clientSecret,
+            );
+          } catch (error) {
+            logger.error("Failed to save OAuth client", error);
+            toast.error("Couldn't save the client ID. You can add it in the extension's settings.");
+          }
+        }
         const server = installServer(result, {
           id: manifest.serverId,
           metadata: createManifestMetadata(manifest, template),

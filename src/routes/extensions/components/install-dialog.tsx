@@ -122,6 +122,11 @@ function InstallField({
   );
 }
 
+export interface InstallOAuthClient {
+  clientId: string;
+  clientSecret: string;
+}
+
 function getDefaults(
   template: ExtensionInstallTemplate,
   name: string,
@@ -146,6 +151,7 @@ function InstallDialogBody({
   templates,
   notes,
   signInAfterInstall,
+  oauthClient,
   onClose,
   onInstall,
 }: {
@@ -153,8 +159,13 @@ function InstallDialogBody({
   templates: ExtensionInstallTemplate[];
   notes: string[];
   signInAfterInstall: boolean;
+  oauthClient?: { helpUrl?: string };
   onClose: () => void;
-  onInstall: (server: ExtensionInstallResult, template: ExtensionInstallTemplate) => void;
+  onInstall: (
+    server: ExtensionInstallResult,
+    template: ExtensionInstallTemplate,
+    oauthClient?: InstallOAuthClient,
+  ) => void;
 }) {
   const [templateId, setTemplateId] = useState(templates[0].id);
   const template = templates.find((item) => item.id === templateId) ?? templates[0];
@@ -163,6 +174,9 @@ function InstallDialogBody({
     () => getDefaults(templates[0], name).fields,
   );
   const [runtimeCheck, setRuntimeCheck] = useState<{ command: string; available: boolean }>();
+  const [clientId, setClientId] = useState("");
+  const [clientSecret, setClientSecret] = useState("");
+  const needsOAuthClient = Boolean(oauthClient) && template.type === "http";
 
   const selectTemplate = (id: string) => {
     const next = templates.find((item) => item.id === id);
@@ -196,6 +210,7 @@ function InstallDialogBody({
     Number.isFinite(formValues.timeoutSec) &&
     formValues.timeoutSec >= 0.1 &&
     (template.type === "stdio" ? formValues.command.trim() !== "" : formValues.url.trim() !== "") &&
+    (!needsOAuthClient || clientId.trim() !== "") &&
     template.fields.every((field) => {
       const value = fieldValues[field.id] ?? "";
       return (!field.required || value.trim() !== "") && !getFieldError(field, value);
@@ -212,7 +227,13 @@ function InstallDialogBody({
       url: template.type === "http" ? formValues.url : undefined,
     });
     if (!result) return;
-    onInstall(result, template);
+    onInstall(
+      result,
+      template,
+      needsOAuthClient
+        ? { clientId: clientId.trim(), clientSecret: clientSecret.trim() }
+        : undefined,
+    );
     onClose();
   };
 
@@ -291,6 +312,45 @@ function InstallDialogBody({
             />
           ))}
 
+          {needsOAuthClient ? (
+            <>
+              <Field>
+                <FieldLabel htmlFor="install-oauth-client-id">
+                  Client ID
+                  <span className="text-muted-foreground">(required)</span>
+                </FieldLabel>
+                <Input
+                  id="install-oauth-client-id"
+                  value={clientId}
+                  onChange={(event) => setClientId(event.target.value)}
+                  autoComplete="off"
+                  spellCheck={false}
+                />
+                <FieldDescription className="wrap-anywhere">
+                  {`Create an OAuth app in your ${name} account and paste its client ID here.`}
+                  {oauthClient?.helpUrl ? (
+                    <>
+                      {" "}
+                      <ExternalLink href={oauthClient.helpUrl}>Where do I find this?</ExternalLink>
+                    </>
+                  ) : null}
+                </FieldDescription>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="install-oauth-client-secret">Client secret</FieldLabel>
+                <SecretInput
+                  id="install-oauth-client-secret"
+                  value={clientSecret}
+                  onChange={setClientSecret}
+                  placeholder=""
+                />
+                <FieldDescription>
+                  Leave this empty if your OAuth app doesn't have one.
+                </FieldDescription>
+              </Field>
+            </>
+          ) : null}
+
           <Accordion type="single" collapsible className="rounded-md border px-3">
             <AccordionItem value="advanced">
               <AccordionTrigger>Advanced settings</AccordionTrigger>
@@ -328,6 +388,7 @@ export function InstallDialog({
   templates,
   notes = [],
   signInAfterInstall = false,
+  oauthClient,
   open,
   onOpenChange,
   onInstall,
@@ -336,9 +397,14 @@ export function InstallDialog({
   templates: ExtensionInstallTemplate[];
   notes?: string[];
   signInAfterInstall?: boolean;
+  oauthClient?: { helpUrl?: string };
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onInstall: (server: ExtensionInstallResult, template: ExtensionInstallTemplate) => void;
+  onInstall: (
+    server: ExtensionInstallResult,
+    template: ExtensionInstallTemplate,
+    oauthClient?: InstallOAuthClient,
+  ) => void;
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -349,6 +415,7 @@ export function InstallDialog({
             templates={templates}
             notes={notes}
             signInAfterInstall={signInAfterInstall}
+            oauthClient={oauthClient}
             onClose={() => onOpenChange(false)}
             onInstall={onInstall}
           />

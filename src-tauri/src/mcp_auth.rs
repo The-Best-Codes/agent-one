@@ -5,13 +5,13 @@ use axum::{
     routing::get,
 };
 use rmcp::transport::auth::{
-    AuthError, AuthorizationManager, AuthorizationRequest, CredentialStore, OAuthState,
-    StoredCredentials,
+    AuthError, AuthorizationManager, AuthorizationRequest, CredentialStore, OAuthClientConfig,
+    OAuthState, StoredCredentials,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::net::SocketAddr;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
 use tauri_plugin_opener::OpenerExt;
@@ -27,6 +27,32 @@ fn get_client_metadata_url(port: u16) -> String {
         "https://www.agent-one.dev/api/mcp-oauth/client-metadata.json?port={}",
         port
     )
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+struct OAuthClient {
+    client_id: String,
+    client_secret: Option<String>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OAuthClientInfo {
+    client_id: String,
+    has_secret: bool,
+}
+
+fn oauth_client_key(server_id: &str) -> String {
+    format!("mcp_oauth_client_{}", server_id)
+}
+
+async fn load_oauth_client(server_id: &str, db_path: &Path) -> Result<Option<OAuthClient>, String> {
+    match get_password(&oauth_client_key(server_id), db_path).await? {
+        Some(json) => serde_json::from_str(&json)
+            .map(Some)
+            .map_err(|e| format!("JSON parse error: {}", e)),
+        None => Ok(None),
+    }
 }
 
 async fn discover_scopes_with_rmcp(server_url: &str) -> Result<Vec<String>, String> {
@@ -48,6 +74,7 @@ async fn initialize_and_start_auth(
     redirect_uri: &str,
     client_metadata_url: &str,
     scopes: &[String],
+    oauth_client: Option<OAuthClient>,
 ) -> Result<OAuthState, String> {
     let mut state = OAuthState::new(server_url, None)
         .await
@@ -55,8 +82,17 @@ async fn initialize_and_start_auth(
 
     let request = AuthorizationRequest::new(redirect_uri)
         .with_scopes(scopes.iter().cloned())
-        .with_client_name("AgentOne")
-        .with_client_metadata_url(client_metadata_url);
+        .with_client_name("AgentOne");
+    let request = match oauth_client {
+        Some(client) => {
+            let request = request.with_preregistered_client(client.client_id);
+            match client.client_secret {
+                Some(secret) => request.with_client_secret(secret),
+                None => request,
+            }
+        }
+        None => request.with_client_metadata_url(client_metadata_url),
+    };
 
     state
         .start_authorization(request)
@@ -206,6 +242,9 @@ pub async fn mcp_authenticate(
         .await
         .unwrap_or_default();
 
+    let db_path = resolve_agent_db_path(&app)?;
+    let oauth_client = load_oauth_client(&server_id, &db_path).await?;
+
     let redirect_uri_clone = redirect_uri.clone();
     let client_metadata_clone = client_metadata_url.clone();
     let scopes_clone = scopes.clone();
@@ -215,6 +254,7 @@ pub async fn mcp_authenticate(
         &redirect_uri_clone,
         &client_metadata_clone,
         &scopes_clone,
+        oauth_client,
     )
     .await?;
 
@@ -272,7 +312,6 @@ pub async fn mcp_authenticate(
         .await
         .map_err(|e| e.to_string())?;
 
-    let db_path = resolve_agent_db_path(&app)?;
     let cred_store = KeyringCredentialStore::new(server_id, db_path);
     let now = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -307,6 +346,7 @@ async fn try_get_token_with_url(
     url: &str,
     db_path: PathBuf,
 ) -> Result<String, String> {
+    let oauth_client = load_oauth_client(server_id, &db_path).await?;
     let cred_store = KeyringCredentialStore::new(server_id.to_string(), db_path);
 
     let mut auth_manager = AuthorizationManager::new(url)
@@ -321,6 +361,16 @@ async fn try_get_token_with_url(
         .map_err(|e| e.to_string())?;
 
     if initialized {
+        if let Some(OAuthClient {
+            client_id,
+            client_secret: Some(secret),
+        }) = oauth_client
+        {
+            auth_manager
+                .configure_client(OAuthClientConfig::new(client_id, url).with_client_secret(secret))
+                .map_err(|e| e.to_string())?;
+        }
+
         auth_manager
             .get_access_token()
             .await
@@ -347,6 +397,58 @@ pub async fn mcp_logout(app: tauri::AppHandle, server_id: String) -> Result<(), 
     let db_path = resolve_agent_db_path(&app)?;
     let cred_store = KeyringCredentialStore::new(server_id, db_path);
     cred_store.clear().await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn mcp_get_oauth_client(
+    app: tauri::AppHandle,
+    server_id: String,
+) -> Result<Option<OAuthClientInfo>, String> {
+    let db_path = resolve_agent_db_path(&app)?;
+    Ok(load_oauth_client(&server_id, &db_path)
+        .await?
+        .map(|client| OAuthClientInfo {
+            client_id: client.client_id,
+            has_secret: client.client_secret.is_some(),
+        }))
+}
+
+#[tauri::command]
+pub async fn mcp_set_oauth_client(
+    app: tauri::AppHandle,
+    server_id: String,
+    client_id: String,
+    client_secret: Option<String>,
+) -> Result<(), String> {
+    let db_path = resolve_agent_db_path(&app)?;
+    let key = oauth_client_key(&server_id);
+    let client_id = client_id.trim().to_string();
+
+    if client_id.is_empty() {
+        delete_password(&key, &db_path).await?;
+    } else {
+        let client_secret = client_secret
+            .map(|secret| secret.trim().to_string())
+            .filter(|secret| !secret.is_empty());
+        let client_secret = match client_secret {
+            Some(secret) => Some(secret),
+            None => load_oauth_client(&server_id, &db_path)
+                .await?
+                .filter(|existing| existing.client_id == client_id)
+                .and_then(|existing| existing.client_secret),
+        };
+        let client = OAuthClient {
+            client_id,
+            client_secret,
+        };
+        let json = serde_json::to_string(&client).map_err(|e| e.to_string())?;
+        set_password(&key, &json, &db_path).await?;
+    }
+
+    KeyringCredentialStore::new(server_id, db_path)
+        .clear()
+        .await
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
