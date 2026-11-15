@@ -353,7 +353,7 @@ function InstallDialogBody({
 
           <Accordion type="single" collapsible className="rounded-md border px-3">
             <AccordionItem value="advanced">
-              <AccordionTrigger className="items-center">Advanced settings</AccordionTrigger>
+              <AccordionTrigger>Advanced settings</AccordionTrigger>
               <AccordionContent>
                 <McpServerConfigForm
                   idPrefix="install-extension"
