@@ -167,98 +167,6 @@ function getConnectionValues(server: McpServerConfig): McpServerConfigFormValues
   };
 }
 
-function OAuthClientForm({
-  server,
-  onSaved,
-}: {
-  server: McpHttpServerConfig;
-  onSaved: () => void;
-}) {
-  const [saved, setSaved] = useState<McpOAuthClient | null>(null);
-  const [clientId, setClientId] = useState("");
-  const [clientSecret, setClientSecret] = useState("");
-  const [busy, setBusy] = useState(false);
-  const savedClientId = saved?.clientId ?? "";
-  const hasChanges = clientId.trim() !== savedClientId || clientSecret.trim() !== "";
-
-  useEffect(() => {
-    let active = true;
-    void getMcpOAuthClient(server.id)
-      .then((client) => {
-        if (!active) return;
-        setSaved(client);
-        setClientId(client?.clientId ?? "");
-      })
-      .catch(() => undefined);
-    return () => {
-      active = false;
-    };
-  }, [server.id]);
-
-  const save = async () => {
-    if (!hasChanges || busy) return;
-    setBusy(true);
-    try {
-      const nextClientId = clientId.trim();
-      await setMcpOAuthClient(server.id, nextClientId, clientSecret.trim() || undefined);
-      const client = await getMcpOAuthClient(server.id);
-      setSaved(client);
-      setClientId(client?.clientId ?? "");
-      setClientSecret("");
-      onSaved();
-      toast.success(
-        nextClientId ? "OAuth app saved. Connect your account again." : "OAuth app removed",
-      );
-    } catch (error) {
-      toast.error(`Couldn't save the OAuth app: ${String(error)}`);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <form
-      className="border-t px-4 pt-4 pb-4"
-      onSubmit={(event) => {
-        event.preventDefault();
-        void save();
-      }}
-    >
-      <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor={`oauth-client-id-${server.id}`}>OAuth client ID</FieldLabel>
-          <Input
-            id={`oauth-client-id-${server.id}`}
-            value={clientId}
-            onChange={(event) => setClientId(event.target.value)}
-            autoComplete="off"
-            spellCheck={false}
-          />
-          <FieldDescription>
-            Only needed if this extension asks you to create your own OAuth app. Changing it signs
-            you out of this extension.
-          </FieldDescription>
-        </Field>
-        <Field>
-          <FieldLabel htmlFor={`oauth-client-secret-${server.id}`}>OAuth client secret</FieldLabel>
-          <SecretInput
-            id={`oauth-client-secret-${server.id}`}
-            value={clientSecret}
-            onChange={setClientSecret}
-            placeholder={saved?.hasSecret ? "Saved. Enter a new one to replace it." : ""}
-          />
-        </Field>
-        <div className="flex justify-end">
-          <Button type="submit" size="sm" disabled={!hasChanges || busy}>
-            {busy ? <Spinner data-icon="inline-start" /> : null}
-            Save OAuth app
-          </Button>
-        </div>
-      </FieldGroup>
-    </form>
-  );
-}
-
 function ConnectionCard({
   server,
   onSave,
@@ -270,26 +178,68 @@ function ConnectionCard({
 }) {
   const saved = getConnectionValues(server);
   const [draft, setDraft] = useState(saved);
+  const [oauthClient, setOAuthClient] = useState<McpOAuthClient | null>(null);
+  const [clientId, setClientId] = useState("");
+  const [clientSecret, setClientSecret] = useState("");
+  const [busy, setBusy] = useState(false);
   const values = { ...draft, requiresApproval: saved.requiresApproval };
-  const hasChanges = JSON.stringify(values) !== JSON.stringify(saved);
+  const connectionChanged = JSON.stringify(values) !== JSON.stringify(saved);
+  const oauthChanged =
+    clientId.trim() !== (oauthClient?.clientId ?? "") || clientSecret.trim() !== "";
+  const hasChanges = connectionChanged || oauthChanged;
   const isValid =
     values.name.trim() !== "" &&
     Number.isFinite(values.timeoutSec) &&
     values.timeoutSec >= 0.1 &&
     (values.type === "stdio" ? values.command.trim() !== "" : values.url.trim() !== "");
 
-  const save = () => {
-    if (!hasChanges || !isValid) return;
-    const name = values.name.trim();
-    const command = values.command.trim();
-    const url = values.url.trim();
-    const shared = { name, timeoutMs: values.timeoutSec * 1000 };
-    onSave(
-      values.type === "stdio"
-        ? { ...shared, command, env: values.env }
-        : { ...shared, url, headers: values.headers },
-    );
-    setDraft({ ...values, name, command, url });
+  useEffect(() => {
+    if (server.type !== "http") return;
+    let active = true;
+    void getMcpOAuthClient(server.id)
+      .then((client) => {
+        if (!active) return;
+        setOAuthClient(client);
+        setClientId(client?.clientId ?? "");
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [server.id, server.type]);
+
+  const save = async () => {
+    if (!hasChanges || !isValid || busy) return;
+    if (connectionChanged) {
+      const name = values.name.trim();
+      const command = values.command.trim();
+      const url = values.url.trim();
+      const shared = { name, timeoutMs: values.timeoutSec * 1000 };
+      onSave(
+        values.type === "stdio"
+          ? { ...shared, command, env: values.env }
+          : { ...shared, url, headers: values.headers },
+      );
+      setDraft({ ...values, name, command, url });
+    }
+    if (!oauthChanged) return;
+    setBusy(true);
+    try {
+      const nextClientId = clientId.trim();
+      await setMcpOAuthClient(server.id, nextClientId, clientSecret.trim() || undefined);
+      const client = await getMcpOAuthClient(server.id);
+      setOAuthClient(client);
+      setClientId(client?.clientId ?? "");
+      setClientSecret("");
+      onOAuthClientSaved();
+      toast.success(
+        nextClientId ? "OAuth app saved. Connect your account again." : "OAuth app removed",
+      );
+    } catch (error) {
+      toast.error(`Couldn't save the OAuth app: ${String(error)}`);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -310,13 +260,48 @@ function ConnectionCard({
               className="px-4 pt-1 pb-4"
               onSubmit={(event) => {
                 event.preventDefault();
-                save();
+                void save();
               }}
             >
               <McpServerConfigForm
                 idPrefix={`settings-${server.id}`}
                 values={values}
                 onChange={(updates) => setDraft((current) => ({ ...current, ...updates }))}
+                httpSupplement={
+                  <>
+                    <Field>
+                      <FieldLabel htmlFor={`oauth-client-id-${server.id}`}>
+                        OAuth client ID
+                      </FieldLabel>
+                      <Input
+                        id={`oauth-client-id-${server.id}`}
+                        value={clientId}
+                        onChange={(event) => setClientId(event.target.value)}
+                        autoComplete="off"
+                        spellCheck={false}
+                      />
+                      <FieldDescription>
+                        Only needed if this extension asks you to create your own OAuth app.
+                        Changing it signs you out of this extension.
+                      </FieldDescription>
+                    </Field>
+                    {clientId.trim() ? (
+                      <Field>
+                        <FieldLabel htmlFor={`oauth-client-secret-${server.id}`}>
+                          OAuth client secret
+                        </FieldLabel>
+                        <SecretInput
+                          id={`oauth-client-secret-${server.id}`}
+                          value={clientSecret}
+                          onChange={setClientSecret}
+                          placeholder={
+                            oauthClient?.hasSecret ? "Saved. Enter a new one to replace it." : ""
+                          }
+                        />
+                      </Field>
+                    ) : null}
+                  </>
+                }
               />
             </form>
             <CardFooter className="justify-end gap-2">
@@ -324,8 +309,12 @@ function ConnectionCard({
                 type="button"
                 variant="outline"
                 size="sm"
-                disabled={!hasChanges}
-                onClick={() => setDraft(saved)}
+                disabled={!hasChanges || busy}
+                onClick={() => {
+                  setDraft(saved);
+                  setClientId(oauthClient?.clientId ?? "");
+                  setClientSecret("");
+                }}
               >
                 Discard
               </Button>
@@ -333,14 +322,12 @@ function ConnectionCard({
                 type="submit"
                 form={`connection-${server.id}`}
                 size="sm"
-                disabled={!hasChanges || !isValid}
+                disabled={!hasChanges || !isValid || busy}
               >
+                {busy ? <Spinner data-icon="inline-start" /> : null}
                 Save
               </Button>
             </CardFooter>
-            {server.type === "http" ? (
-              <OAuthClientForm server={server} onSaved={onOAuthClientSaved} />
-            ) : null}
           </AccordionContent>
         </AccordionItem>
       </Accordion>
