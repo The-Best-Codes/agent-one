@@ -4,6 +4,7 @@ import { defaultSettingsMiddleware, wrapLanguageModel } from "ai";
 import { providerFetch } from "@/lib/ai/providers/provider-fetch";
 
 const BLOCK_BINDING_MODEL_PREFIXES = [
+  "claude-fable-5-2",
   "claude-fable-5-1",
   "claude-opus-5-5",
   "claude-sonnet-5-5",
