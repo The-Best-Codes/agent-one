@@ -1,4 +1,5 @@
 import { IconAlertTriangle, IconInfoCircle } from "@tabler/icons-react";
+import { platform } from "@tauri-apps/plugin-os";
 import { useEffect, useState } from "react";
 
 import { ExternalLink } from "@/components/a1/external-link";
@@ -30,7 +31,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  type CommandShell,
   createServerFromInstall,
+  getCommandPlaceholderKeys,
+  getCommandValueError,
   getStdioRuntimeCommand,
   type ExtensionInstallResult,
   type ExtensionInstallTemplate,
@@ -40,9 +44,17 @@ import { isCommandAvailable } from "@/lib/run-command";
 
 import { McpServerConfigForm, type McpServerConfigFormValues } from "../mcp-server-config-form";
 
-function getFieldError(field: ExtensionInstallField, value: string): string | undefined {
+const COMMAND_SHELL: CommandShell = platform() === "windows" ? "cmd" : "posix";
+
+function getFieldError(
+  field: ExtensionInstallField,
+  value: string,
+  inCommand: boolean,
+): string | undefined {
   const text = value.trim();
   if (!text) return undefined;
+  const commandError = inCommand ? getCommandValueError(text, COMMAND_SHELL) : undefined;
+  if (commandError) return commandError;
   if (!field.pattern) return undefined;
   try {
     return new RegExp(field.pattern).test(text)
@@ -56,15 +68,17 @@ function getFieldError(field: ExtensionInstallField, value: string): string | un
 function InstallField({
   field,
   value,
+  inCommand,
   onChange,
 }: {
   field: ExtensionInstallField;
   value: string;
+  inCommand: boolean;
   onChange: (value: string) => void;
 }) {
   const options: NonNullable<ExtensionInstallField["options"]> | undefined =
     field.options ?? field.choices?.map((choice) => ({ value: choice, label: choice }));
-  const error = getFieldError(field, value);
+  const error = getFieldError(field, value, inCommand);
   const description =
     options?.find((option) => option.value === value)?.description ?? field.description;
 
@@ -194,6 +208,9 @@ function InstallDialogBody({
 
   const runtimeCommand =
     template.type === "stdio" ? getStdioRuntimeCommand(formValues.command) : undefined;
+  const commandKeys =
+    template.type === "stdio" ? getCommandPlaceholderKeys(formValues.command) : new Set<string>();
+  const isInCommand = (field: ExtensionInstallField) => commandKeys.has(field.key);
   const missingRuntime =
     runtimeCheck && runtimeCheck.command === runtimeCommand && !runtimeCheck.available
       ? runtimeCheck.command
@@ -218,19 +235,25 @@ function InstallDialogBody({
     (!needsOAuthClient || clientId.trim() !== "") &&
     template.fields.every((field) => {
       const value = fieldValues[field.id] ?? "";
-      return (!field.required || value.trim() !== "") && !getFieldError(field, value);
+      return (
+        (!field.required || value.trim() !== "") && !getFieldError(field, value, isInCommand(field))
+      );
     });
 
   const install = () => {
     if (!isValid) return;
-    const result = createServerFromInstall(template, {
-      name: formValues.name.trim(),
-      timeoutSec: formValues.timeoutSec,
-      requiresApproval: formValues.requiresApproval,
-      fieldValues,
-      command: template.type === "stdio" ? formValues.command : undefined,
-      url: template.type === "http" ? formValues.url : undefined,
-    });
+    const result = createServerFromInstall(
+      template,
+      {
+        name: formValues.name.trim(),
+        timeoutSec: formValues.timeoutSec,
+        requiresApproval: formValues.requiresApproval,
+        fieldValues,
+        command: template.type === "stdio" ? formValues.command : undefined,
+        url: template.type === "http" ? formValues.url : undefined,
+      },
+      COMMAND_SHELL,
+    );
     if (!result) return;
     onInstall(
       result,
@@ -311,6 +334,7 @@ function InstallDialogBody({
               key={field.id}
               field={field}
               value={fieldValues[field.id] ?? ""}
+              inCommand={isInCommand(field)}
               onChange={(value) =>
                 setFieldValues((previous) => ({ ...previous, [field.id]: value }))
               }
