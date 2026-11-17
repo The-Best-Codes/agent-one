@@ -1,10 +1,10 @@
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
 import packageJson from "@/../package.json";
 import { releaseNotesLastSeenVersionAtom } from "@/lib/jotai/atoms";
-import { openExternalUrl } from "@/lib/open-external-url";
 import { RELEASE_POST_URLS } from "@/lib/release-posts";
 
 const TOAST_ID = "app-updated";
@@ -22,7 +22,7 @@ export function UpdateToast() {
     toast.success(`Updated to v${currentVersion}`, {
       id: TOAST_ID,
       duration: Infinity,
-      action: url ? { label: "What's new", onClick: () => openExternalUrl(url) } : undefined,
+      action: url ? { label: "What's new", onClick: () => void openUrl(url) } : undefined,
     });
   }, [currentVersion, lastSeenVersion, setLastSeenVersion]);
 

@@ -2,7 +2,6 @@ import { IconAlertTriangle, IconInfoCircle } from "@tabler/icons-react";
 import { platform } from "@tauri-apps/plugin-os";
 import { useEffect, useState } from "react";
 
-import { ExternalLink } from "@/components/a1/external-link";
 import { SecretInput } from "@/components/a1/input/secret-input";
 import {
   Accordion,
@@ -128,7 +127,9 @@ function InstallField({
           {description}
           {description && field.helpUrl ? " " : null}
           {field.helpUrl ? (
-            <ExternalLink href={field.helpUrl}>Where do I find this?</ExternalLink>
+            <a href={field.helpUrl} target="_blank" rel="noopener noreferrer">
+              Where do I find this?
+            </a>
           ) : null}
         </FieldDescription>
       ) : null}
@@ -360,7 +361,9 @@ function InstallDialogBody({
                   {oauthClient?.helpUrl ? (
                     <>
                       {" "}
-                      <ExternalLink href={oauthClient.helpUrl}>Where do I find this?</ExternalLink>
+                      <a href={oauthClient.helpUrl} target="_blank" rel="noopener noreferrer">
+                        Where do I find this?
+                      </a>
                     </>
                   ) : null}
                 </FieldDescription>

@@ -15,7 +15,6 @@ import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import packageJson from "@/../package.json";
-import { ExternalLink } from "@/components/a1/external-link";
 import { SettingsLink } from "@/components/a1/settings-link";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -190,13 +189,15 @@ export function AppUpdates() {
         )}
       </div>
 
-      <ExternalLink
+      <a
         href={AGENT_ONE_BLOG_URL}
         className="flex w-fit items-center gap-1 text-sm underline"
+        target="_blank"
+        rel="noopener noreferrer"
       >
         See what's new on the blog
         <IconExternalLink className="size-4" />
-      </ExternalLink>
+      </a>
     </div>
   );
 }
@@ -276,27 +277,33 @@ export function HelpLinks() {
         Take the tour
         <IconMap className="size-4" />
       </Link>
-      <ExternalLink
+      <a
         href="https://github.com/The-Best-Codes/agent-one/issues/new"
         className="flex w-fit items-center gap-1 underline"
+        target="_blank"
+        rel="noopener noreferrer"
       >
         Report a bug
         <IconExternalLink className="size-4" />
-      </ExternalLink>
-      <ExternalLink
+      </a>
+      <a
         href="https://www.agent-one.dev/discord"
         className="flex w-fit items-center gap-1 underline"
+        target="_blank"
+        rel="noopener noreferrer"
       >
         Get help on Discord
         <IconExternalLink className="size-4" />
-      </ExternalLink>
-      <ExternalLink
+      </a>
+      <a
         href="https://docs.agent-one.dev/docs"
         className="flex w-fit items-center gap-1 underline"
+        target="_blank"
+        rel="noopener noreferrer"
       >
         Read the docs
         <IconExternalLink className="size-4" />
-      </ExternalLink>
+      </a>
     </div>
   );
 }

@@ -10,7 +10,6 @@ import { useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 
-import { ExternalLink } from "@/components/a1/external-link";
 import {
   AdaptiveTooltip,
   AdaptiveTooltipContent,
@@ -49,13 +48,15 @@ function Fact({ label, children }: { label: string; children: React.ReactNode })
 
 function OutLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <ExternalLink
+    <a
       href={href}
       className="hover:text-primary inline-flex max-w-full items-center gap-0.5 underline underline-offset-4"
+      target="_blank"
+      rel="noopener noreferrer"
     >
       <span className="truncate">{children}</span>
       <IconArrowUpRight className="size-3.5 shrink-0" />
-    </ExternalLink>
+    </a>
   );
 }
 

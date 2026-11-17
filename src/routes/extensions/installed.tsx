@@ -3,7 +3,6 @@ import fuzzysort from "fuzzysort";
 import { useMemo, useState } from "react";
 import { Link, useOutletContext } from "react-router";
 
-import { ExternalLink } from "@/components/a1/external-link";
 import { SearchInput } from "@/components/a1/search-input";
 import {
   AdaptiveTooltip,
@@ -101,10 +100,10 @@ export default function InstalledRoute() {
           </EmptyHeader>
           <EmptyContent>
             <Button asChild>
-              <ExternalLink href={AGENT_ONE_EXTENSIONS_URL}>
+              <a href={AGENT_ONE_EXTENSIONS_URL} target="_blank" rel="noopener noreferrer">
                 <IconSearch data-icon="inline-start" />
                 Browse extensions
-              </ExternalLink>
+              </a>
             </Button>
           </EmptyContent>
         </Empty>
@@ -121,12 +120,14 @@ export default function InstalledRoute() {
           </EmptyHeader>
           <EmptyContent>
             <Button asChild>
-              <ExternalLink
+              <a
                 href={`${AGENT_ONE_EXTENSIONS_URL}?${new URLSearchParams({ q: text }).toString()}`}
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <IconSearch data-icon="inline-start" />
                 Search for new extensions
-              </ExternalLink>
+              </a>
             </Button>
           </EmptyContent>
         </Empty>
@@ -134,9 +135,11 @@ export default function InstalledRoute() {
         <ul className="grid gap-4 sm:grid-cols-2">
           {text ? null : (
             <li className="min-w-0">
-              <ExternalLink
+              <a
                 href={AGENT_ONE_EXTENSIONS_URL}
                 className="group focus-visible:ring-ring/50 flex h-full rounded-xl outline-none focus-visible:ring-3"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <Empty className="group-hover:bg-muted/50 border p-4 transition-colors">
                   <EmptyHeader>
@@ -147,7 +150,7 @@ export default function InstalledRoute() {
                     <EmptyDescription>Find more on the AgentOne website.</EmptyDescription>
                   </EmptyHeader>
                 </Empty>
-              </ExternalLink>
+              </a>
             </li>
           )}
           {visible.map((row) => {

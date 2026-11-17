@@ -13,6 +13,7 @@
     },
     "sql:default",
     "sql:allow-execute",
+    "shell:allow-open",
     "shell:allow-stdin-write",
     {
       "identifier": "shell:allow-execute",

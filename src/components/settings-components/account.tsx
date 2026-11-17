@@ -12,7 +12,6 @@ import { useEffect, useMemo, useState } from "react";
 
 import { EnableSyncDialog } from "@/components/a1/enable-sync-dialog";
 import { EncryptedSyncDialog } from "@/components/a1/encrypted-sync-dialog";
-import { ExternalLink } from "@/components/a1/external-link";
 import { PathListEditor } from "@/components/a1/path-list-editor";
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
 import {
@@ -142,11 +141,11 @@ export function AccountStatus() {
             user ? (
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" asChild>
-                  <ExternalLink href={AGENT_ONE_DASHBOARD_URL}>
+                  <a href={AGENT_ONE_DASHBOARD_URL} target="_blank" rel="noopener noreferrer">
                     <IconExternalLink data-icon="inline-start" />
                     <span>Account</span>
                     <span className="sr-only lg:not-sr-only">{" Dashboard"}</span>
-                  </ExternalLink>
+                  </a>
                 </Button>
                 <Button variant="destructive" size="sm" onClick={signOut} disabled={isSigningOut}>
                   {isSigningOut ? (
@@ -191,8 +190,10 @@ export function AccountStatus() {
                   <p className="text-muted-foreground text-sm">{planStatus}</p>
                 </div>
                 <Button size="sm" asChild>
-                  <ExternalLink
+                  <a
                     href={activeSubscription ? AGENT_ONE_BILLING_URL : AGENT_ONE_UPGRADE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
                     {activeSubscription ? (
                       <IconCreditCard data-icon="inline-start" />
@@ -200,7 +201,7 @@ export function AccountStatus() {
                       <IconRocket data-icon="inline-start" />
                     )}
                     <span>{activeSubscription ? "Manage Billing" : "Upgrade"}</span>
-                  </ExternalLink>
+                  </a>
                 </Button>
               </div>
               {isAccountProvisioning ? (

@@ -27,7 +27,6 @@ import { getActivePaidSubscription } from "@/contexts/use-web-auth/web-auth-cont
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { AGENT_ONE_UPGRADE_URL } from "@/lib/constants";
 import { skipPlanChecksAtom } from "@/lib/jotai/unsynced-local-atoms";
-import { openExternalUrl } from "@/lib/open-external-url";
 import {
   encryptedSyncManager,
   errorMessage,
@@ -137,9 +136,11 @@ const UpgradeStep = ({ onCancel }: { onCancel: () => void }) => {
         <Button variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button onClick={() => openExternalUrl(AGENT_ONE_UPGRADE_URL)}>
-          <IconRocket data-icon="inline-start" />
-          Upgrade
+        <Button asChild>
+          <a href={AGENT_ONE_UPGRADE_URL} target="_blank" rel="noopener noreferrer">
+            <IconRocket data-icon="inline-start" />
+            Upgrade
+          </a>
         </Button>
       </DialogFooter>
     </>
