@@ -89,10 +89,6 @@ export function createServerFromInstall(
   submission: ExtensionInstallSubmission,
 ): ExtensionInstallResult | null {
   const install = template;
-  if (!install) {
-    return null;
-  }
-
   const values: Record<string, string> = {};
 
   for (const field of install.fields) {

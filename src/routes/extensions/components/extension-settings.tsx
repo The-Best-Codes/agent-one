@@ -48,9 +48,11 @@ import { useExtensionActions } from "../use-extension-actions";
 function AccountRow({
   server,
   authState,
+  loadFailed,
 }: {
   server: McpHttpServerConfig;
   authState: McpAuthState;
+  loadFailed: boolean;
 }) {
   const [busy, setBusy] = useState(false);
 
@@ -59,6 +61,7 @@ function AccountRow({
   }, [server.id, server.url, server.enabled, authState]);
 
   if (!server.enabled || authState === "no-auth") return null;
+  if (authState === undefined && loadFailed) return null;
 
   const run = async (action: () => Promise<unknown>) => {
     setBusy(true);
@@ -368,7 +371,13 @@ export function ExtensionSettings({
             />
           </SettingsRow>
 
-          {server.type === "http" ? <AccountRow server={server} authState={authState} /> : null}
+          {server.type === "http" ? (
+            <AccountRow
+              server={server}
+              authState={authState}
+              loadFailed={loadState?.status === "error"}
+            />
+          ) : null}
 
           <SettingsRow
             layout="row"

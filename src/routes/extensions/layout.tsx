@@ -16,7 +16,7 @@ export default function ExtensionsLayout() {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const link = useExtensionsLink();
-  const { installServer } = useExtensionActions();
+  const { installServer, restartServer } = useExtensionActions();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const openAddDialog = useCallback(() => setShowAddDialog(true), []);
@@ -94,9 +94,9 @@ export default function ExtensionsLayout() {
               : { ...data, type: "http", url: data.url ?? "", headers: data.headers ?? {} },
           );
           if (oauthClient) {
-            setMcpOAuthClient(server.id, oauthClient.clientId, oauthClient.clientSecret).catch(
-              (error) => toast.error(`Couldn't save the OAuth app: ${String(error)}`),
-            );
+            setMcpOAuthClient(server.id, oauthClient.clientId, oauthClient.clientSecret)
+              .catch((error) => toast.error(`Couldn't save the OAuth app: ${String(error)}`))
+              .finally(() => restartServer(server.id));
           }
           void navigate(link(getExtensionPath(server.id)));
         }}
