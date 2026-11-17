@@ -20,7 +20,7 @@ const CUSTOM_FONT_DIR = "custom-fonts";
 const baseDir = BaseDirectory.AppLocalData;
 
 export const FONT_CLASSES: Record<SettingValue<"FONT">, string> = {
-  default: "font-space-grotesk",
+  default: "font-inter",
   system: "font-sans",
   mono: "font-mono",
 };

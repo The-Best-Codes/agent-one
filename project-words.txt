@@ -10,7 +10,6 @@ deepseek
 DEEPSEEK
 groq
 GROQ
-grotesk
 shiki
 shikijs
 vaul
