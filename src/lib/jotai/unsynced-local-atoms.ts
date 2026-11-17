@@ -22,6 +22,13 @@ export const debugModeEnabledAtom = atomWithStorage<boolean>(
   { getOnInit: true },
 );
 
+export const skipPlanChecksAtom = atomWithStorage<boolean>(
+  "agent-one-skip-plan-checks",
+  false,
+  createJSONStorage(() => sessionStorage),
+  { getOnInit: true },
+);
+
 export const globalAgentsFilesAtom = atomWithStorage<string[]>(
   "agent-one-agents-files",
   ["~/AGENTS.md"],

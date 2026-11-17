@@ -1,7 +1,7 @@
 import { IconAlertTriangle, IconArrowLeft } from "@tabler/icons-react";
 import { appLogDir } from "@tauri-apps/api/path";
 import { openPath } from "@tauri-apps/plugin-opener";
-import { useSetAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
@@ -9,11 +9,14 @@ import { SettingsLink } from "@/components/a1/settings-link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { onboardingCompletedAtom } from "@/lib/jotai/atoms";
+import { skipPlanChecksAtom } from "@/lib/jotai/unsynced-local-atoms";
 
 export default function TestsRoute() {
   const navigate = useNavigate();
   const setOnboardingCompleted = useSetAtom(onboardingCompletedAtom);
+  const [skipPlanChecks, setSkipPlanChecks] = useAtom(skipPlanChecksAtom);
 
   async function openLogs() {
     try {
@@ -111,6 +114,20 @@ export default function TestsRoute() {
                 >
                   Run Test
                 </Button>
+              </div>
+              <div className="flex items-center justify-between gap-4 rounded-md border p-4">
+                <div>
+                  <h3 className="font-medium">Skip Plan Checks</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Hide in-app upgrade prompts for paid features. The server still enforces plan
+                    limits
+                  </p>
+                </div>
+                <Switch
+                  checked={skipPlanChecks}
+                  onCheckedChange={setSkipPlanChecks}
+                  aria-label="Skip plan checks"
+                />
               </div>
               <div className="flex items-center justify-between rounded-md border p-4">
                 <div>
