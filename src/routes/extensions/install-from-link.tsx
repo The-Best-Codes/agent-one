@@ -97,6 +97,7 @@ export function InstallFromLink() {
 
   return (
     <InstallDialog
+      installKey={manifest?.id}
       name={manifest?.name ?? ""}
       templates={manifest?.templates ?? []}
       notes={notes}

@@ -413,6 +413,7 @@ function InstallDialogBody({
 }
 
 export function InstallDialog({
+  installKey,
   name,
   templates,
   notes = [],
@@ -422,6 +423,7 @@ export function InstallDialog({
   onOpenChange,
   onInstall,
 }: {
+  installKey?: string;
   name: string;
   templates: ExtensionInstallTemplate[];
   notes?: string[];
@@ -440,6 +442,7 @@ export function InstallDialog({
       <DialogContent>
         {open && templates.length ? (
           <InstallDialogBody
+            key={installKey}
             name={name}
             templates={templates}
             notes={notes}
