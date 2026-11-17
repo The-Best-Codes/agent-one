@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 
 import packageJson from "@/../package.json";
-import { releaseNotesLastSeenVersionAtom } from "@/lib/jotai/atoms";
+import { releaseNotesLastSeenVersionAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { RELEASE_POST_URLS } from "@/lib/release-posts";
 
 const TOAST_ID = "app-updated";

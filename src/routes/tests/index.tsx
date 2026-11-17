@@ -10,8 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { onboardingCompletedAtom } from "@/lib/jotai/atoms";
-import { skipPlanChecksAtom } from "@/lib/jotai/unsynced-local-atoms";
+import { onboardingCompletedAtom, skipPlanChecksAtom } from "@/lib/jotai/unsynced-local-atoms";
 
 export default function TestsRoute() {
   const navigate = useNavigate();

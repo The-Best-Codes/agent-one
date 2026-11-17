@@ -9,7 +9,7 @@ import {
   modelDirectoryStartupCompleteAtom,
   updateModelDirectory,
 } from "@/lib/ai/models/model-directory";
-import { lastModelDirectorySyncTimestampAtom } from "@/lib/jotai/atoms";
+import { lastModelDirectorySyncTimestampAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
 
 const store = getDefaultStore();

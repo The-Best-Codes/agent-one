@@ -3,7 +3,7 @@ import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { atom, getDefaultStore } from "jotai";
 import { z } from "zod";
 
-import { lastModelDirectorySyncTimestampAtom } from "@/lib/jotai/atoms";
+import { lastModelDirectorySyncTimestampAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);

@@ -2,7 +2,7 @@ import { useAtomValue } from "jotai";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 
-import { onboardingCompletedAtom } from "@/lib/jotai/atoms";
+import { onboardingCompletedAtom } from "@/lib/jotai/unsynced-local-atoms";
 
 import SuspenseFallback from "./suspense-fallback";
 

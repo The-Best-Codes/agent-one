@@ -3,7 +3,10 @@ import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 
-import { onboardingCompletedAtom, onboardingReminderDismissedAtom } from "@/lib/jotai/atoms";
+import {
+  onboardingCompletedAtom,
+  onboardingReminderDismissedAtom,
+} from "@/lib/jotai/unsynced-local-atoms";
 
 const TOAST_ID = "onboarding-reminder";
 

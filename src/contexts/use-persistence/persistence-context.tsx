@@ -4,8 +4,9 @@ import { useAtom, useSetAtom } from "jotai";
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { DEFAULT_MODEL_CONFIG, type ModelConfig } from "@/hooks/ai/use-model-catalog";
-import { chatIdsAtom, chatUpdateTriggerAtom, lastVacuumTimestampAtom } from "@/lib/jotai/atoms";
+import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
+import { lastVacuumTimestampAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
 import { loadProjects } from "@/lib/projects";
 import { type ChatSearchResult, chatStorage } from "@/lib/storage/chat-storage";

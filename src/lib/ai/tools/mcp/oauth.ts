@@ -3,7 +3,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { getDefaultStore } from "jotai";
 import { toast } from "sonner";
 
-import { dismissedOAuthPromptsAtom, mcpAuthStatesAtom } from "@/lib/jotai/mcp-atoms";
+import { mcpAuthStatesAtom } from "@/lib/jotai/mcp-atoms";
+import { dismissedOAuthPromptsAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
 import { type McpHttpServerConfig } from "@/lib/settings/types";
 
