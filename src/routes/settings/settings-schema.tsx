@@ -765,7 +765,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
       {
         id: "app-updates",
         title: "App",
-        searchDescription: "Check for updates, see your current version, and read release notes.",
+        searchDescription: "Check for updates, see your current version, and find what's new.",
         keywords: ["updates", "version", "release notes", "changelog", "download", "install"],
         render: AppUpdates,
       },

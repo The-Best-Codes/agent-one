@@ -26,8 +26,8 @@ const ChatStressTestRoute = lazy(() => import("@/routes/tests/chat-stress"));
 const LocalDatabaseTestRoute = lazy(() => import("@/routes/tests/local-database"));
 const NotificationsTestRoute = lazy(() => import("@/routes/tests/notifications"));
 
-import { ReleaseNotesDialog } from "./components/a1/release-notes-dialog";
 import { UpdateAvailableDialog } from "./components/a1/update-available-dialog";
+import { UpdateToast } from "./components/a1/update-toast";
 import { DeepLinkHandler } from "./deep-link-handler";
 import { KbdRegistry } from "./kbd-shortcuts";
 import { NotificationClickHandler } from "./notification-click-handler";
@@ -51,7 +51,7 @@ function App() {
       <LocalProviderStartupSync />
       <KbdRegistry />
       <FileDropGuard />
-      <ReleaseNotesDialog />
+      <UpdateToast />
       <UpdateAvailableDialog />
       <AttachmentPreviewDialog />
       <OnboardingReminder />
