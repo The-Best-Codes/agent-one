@@ -167,15 +167,6 @@ pub fn run() {
                         },
                     ],
                 )
-                .add_migrations(
-                    "sqlite:mcp-registry.db",
-                    vec![tauri_plugin_sql::Migration {
-                        version: 1,
-                        description: "create_mcp_registry",
-                        sql: include_str!("../migrations/0001_create_mcp_registry.sql"),
-                        kind: tauri_plugin_sql::MigrationKind::Up,
-                    }],
-                )
                 .build(),
         )
         .plugin(tauri_plugin_opener::init())
@@ -291,6 +282,8 @@ pub fn run() {
                     mcp_auth::mcp_get_token,
                     mcp_auth::mcp_logout,
                     mcp_auth::mcp_check_oauth_support,
+                    mcp_auth::mcp_get_oauth_client,
+                    mcp_auth::mcp_set_oauth_client,
                 ]
             }
             #[cfg(any(target_os = "android", target_os = "ios"))]
@@ -315,6 +308,8 @@ pub fn run() {
                     mcp_auth::mcp_get_token,
                     mcp_auth::mcp_logout,
                     mcp_auth::mcp_check_oauth_support,
+                    mcp_auth::mcp_get_oauth_client,
+                    mcp_auth::mcp_set_oauth_client,
                 ]
             }
         })

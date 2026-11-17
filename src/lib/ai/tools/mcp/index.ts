@@ -213,6 +213,7 @@ class TauriHttpMCPTransport implements MCPTransport {
     const requestHeaders: Record<string, string> = {
       "Content-Type": "application/json",
       Accept: "application/json, text/event-stream",
+      Origin: "",
       ...this.headers,
     };
 
@@ -335,6 +336,7 @@ class TauriHttpMCPTransport implements MCPTransport {
           method: "DELETE",
           headers: {
             "mcp-session-id": this.sessionId,
+            Origin: "",
             ...this.headers,
           },
         });

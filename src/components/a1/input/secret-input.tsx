@@ -17,6 +17,7 @@ interface SecretInputProps {
   placeholder?: string;
   className?: string;
   showSaveCancel?: boolean;
+  "aria-invalid"?: boolean;
 }
 
 export function SecretInput({
@@ -26,6 +27,7 @@ export function SecretInput({
   placeholder,
   className,
   showSaveCancel = false,
+  "aria-invalid": ariaInvalid,
 }: SecretInputProps) {
   const resolvedPlaceholder = placeholder ?? "Enter secret value";
   const [showValue, setShowValue] = useState(false);
@@ -64,6 +66,7 @@ export function SecretInput({
           value={inputValue}
           onChange={(e) => handleChange(e.target.value)}
           placeholder={resolvedPlaceholder}
+          aria-invalid={ariaInvalid}
         />
         <InputGroupAddon align="inline-end">
           <InputGroupButton

@@ -40,7 +40,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { useUpdate } from "@/contexts/use-update/update-hooks";
 import { modelDirectoryStatusAtom, updateModelDirectory } from "@/lib/ai/models/model-directory";
 import { tourActiveAtom } from "@/lib/jotai/atoms";
-import { extensionListStatusAtom, updateExtensionList } from "@/lib/mcp-registry/sync";
 
 import { SettingsTarget } from "./settings-target";
 
@@ -309,83 +308,6 @@ export function ModelDirectoryUpdates() {
           </Button>
         </div>
       </div>
-    </>
-  );
-}
-
-export function ExtensionListUpdates() {
-  const extensionListStatus = useAtomValue(extensionListStatusAtom);
-  const extensionListProgress =
-    extensionListStatus.totalCount === null
-      ? undefined
-      : extensionListStatus.totalCount === 0
-        ? 100
-        : Math.min(
-            100,
-            (extensionListStatus.processedCount / extensionListStatus.totalCount) * 100,
-          );
-
-  const handleUpdateExtensionList = async () => {
-    const result = await updateExtensionList();
-    if (!result.ok) {
-      toast.error("Failed to update extension list", { description: result.error });
-      return;
-    }
-    toast.success("Extension list updated", {
-      description: `${(result.entryCount ?? 0).toLocaleString()} extensions loaded.`,
-    });
-  };
-
-  return (
-    <>
-      <p className="text-muted-foreground text-sm">
-        Download the latest extension metadata. This will update the{" "}
-        <Link className="underline" to="/extensions">
-          extension list
-        </Link>{" "}
-        available in the UI.
-      </p>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <p className="text-sm font-medium">
-            {extensionListStatus.hasDownloadedList
-              ? "Extension list loaded"
-              : "Extension list not loaded"}
-          </p>
-          <p className="text-muted-foreground text-sm tabular-nums">
-            Last updated: {formatModelDirectoryTimestamp(extensionListStatus.fetchedAt, "Never")}
-          </p>
-          {extensionListStatus.isUpdating ? (
-            <p className="text-muted-foreground text-sm tabular-nums">
-              {extensionListStatus.totalCount === null
-                ? `${extensionListStatus.processedCount.toLocaleString()} entries processed`
-                : `${extensionListStatus.processedCount.toLocaleString()} of ${extensionListStatus.totalCount.toLocaleString()} entries processed`}
-            </p>
-          ) : null}
-          {extensionListStatus.error ? (
-            <p className="text-destructive text-sm">{extensionListStatus.error}</p>
-          ) : null}
-        </div>
-        <Button
-          onClick={handleUpdateExtensionList}
-          disabled={extensionListStatus.isUpdating}
-          size="sm"
-        >
-          {extensionListStatus.isUpdating ? (
-            <Spinner data-icon="inline-start" />
-          ) : (
-            <IconRefresh data-icon="inline-start" />
-          )}
-          Update now
-        </Button>
-      </div>
-      {extensionListStatus.isUpdating ? (
-        <Progress
-          value={extensionListProgress}
-          indeterminate={extensionListStatus.totalCount === null}
-          aria-label="Extension list update progress"
-        />
-      ) : null}
     </>
   );
 }
