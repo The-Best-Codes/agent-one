@@ -19,6 +19,7 @@ export default function ExtensionsLayout() {
   const { installServer, restartServer } = useExtensionActions();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const installedRef = useRef(false);
   const openAddDialog = useCallback(() => setShowAddDialog(true), []);
   const chatId = searchParams.get("chatId");
   const isList = location.pathname === "/extensions";
@@ -75,7 +76,9 @@ export default function ExtensionsLayout() {
         open={showAddDialog || Boolean(prefill)}
         onOpenChange={(open) => {
           setShowAddDialog(open);
-          if (!open && prefill) {
+          const installed = installedRef.current;
+          installedRef.current = false;
+          if (!open && prefill && !installed) {
             setSearchParams(
               (previous) => {
                 for (const key of ["mcpName", "mcpType", "mcpCommand", "mcpUrl"]) {
@@ -98,7 +101,8 @@ export default function ExtensionsLayout() {
               .catch((error) => toast.error(`Couldn't save the OAuth app: ${String(error)}`))
               .finally(() => restartServer(server.id));
           }
-          void navigate(link(getExtensionPath(server.id)));
+          installedRef.current = true;
+          void navigate(link(getExtensionPath(server.id)), { replace: Boolean(prefill) });
         }}
         initialValues={prefill}
       />
