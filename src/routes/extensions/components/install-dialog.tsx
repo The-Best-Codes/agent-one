@@ -142,7 +142,12 @@ function getDefaults(
       timeoutSec: 30,
       requiresApproval: true,
     },
-    fields: Object.fromEntries(template.fields.map((field) => [field.id, field.defaultValue])),
+    fields: Object.fromEntries(
+      template.fields.map((field) => [
+        field.id,
+        field.defaultValue || (field.options?.[0]?.value ?? field.choices?.[0] ?? ""),
+      ]),
+    ),
   };
 }
 
@@ -327,7 +332,7 @@ function InstallDialogBody({
                   spellCheck={false}
                 />
                 <FieldDescription className="wrap-anywhere">
-                  {`Create an OAuth app in your ${name} account and paste its client ID here.`}
+                  {`Create an OAuth app in your ${name} account and paste its client ID here. Use http://127.0.0.1/callback as the redirect address.`}
                   {oauthClient?.helpUrl ? (
                     <>
                       {" "}

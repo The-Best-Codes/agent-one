@@ -168,7 +168,8 @@ export function AddServerDialog({
                   />
                   <FieldDescription>
                     Only needed if the service asks you to create your own OAuth app. Use
-                    http://127.0.0.1/callback as the redirect address.
+                    http://127.0.0.1/callback as the redirect address. AgentOne uses a different
+                    port each time, so the service needs to accept any port.
                   </FieldDescription>
                 </Field>
                 {oauthClientId.trim() ? (

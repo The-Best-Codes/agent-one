@@ -1,3 +1,4 @@
+import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { z } from "zod";
 
 import { AGENT_ONE_EXTENSIONS_URL, AGENT_ONE_WEBSITE_URL } from "@/lib/constants";
@@ -66,7 +67,7 @@ export function isValidExtensionLinkId(id: string): boolean {
 }
 
 export async function fetchExtensionManifest(id: string): Promise<ExtensionManifest> {
-  const response = await fetch(`${MANIFEST_URL}?id=${encodeURIComponent(id)}`, {
+  const response = await tauriFetch(`${MANIFEST_URL}?id=${encodeURIComponent(id)}`, {
     signal: AbortSignal.timeout(MANIFEST_TIMEOUT_MS),
   });
   if (response.status === 404) throw new ExtensionNotFoundError(id);
