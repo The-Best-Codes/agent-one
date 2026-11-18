@@ -14,7 +14,6 @@ import { type ComponentProps, memo, useMemo, useRef } from "react";
 import { Link } from "react-router";
 import remend from "remend";
 
-import { ExternalLink } from "@/components/a1/external-link";
 import { MentionChip } from "@/components/a1/mention-chip";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import {
@@ -165,7 +164,7 @@ function createMarkdownOptions(
           return <a {...props} href={target ? `#${idPrefix}-${target}` : props.href} />;
         }
 
-        return <ExternalLink {...props} />;
+        return <a {...props} target="_blank" rel="noopener noreferrer" />;
       },
       table(props: ComponentProps<"table">) {
         return (

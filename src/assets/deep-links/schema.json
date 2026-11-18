@@ -10,6 +10,10 @@
       "dangerouslyAllowNoVersion": true
     },
     {
+      "id": "extensions/install",
+      "version": 1
+    },
+    {
       "id": "cron",
       "version": 1
     }

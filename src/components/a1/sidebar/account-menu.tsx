@@ -36,7 +36,6 @@ import {
   AGENT_ONE_DASHBOARD_URL,
   AGENT_ONE_UPGRADE_URL,
 } from "@/lib/constants";
-import { openExternalUrl } from "@/lib/open-external-url";
 
 import { SettingsLink } from "../settings-link";
 import { SignOutModal } from "./modals";
@@ -106,20 +105,22 @@ export function AccountMenu({ activeChatId }: { activeChatId?: string }) {
               <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
               <DropdownMenuGroup>
                 {customerState && (
-                  <DropdownMenuItem
-                    onSelect={() =>
-                      openExternalUrl(
-                        activeSubscription ? AGENT_ONE_BILLING_URL : AGENT_ONE_UPGRADE_URL,
-                      )
-                    }
-                  >
-                    {activeSubscription ? <IconCreditCard /> : <IconRocket />}
-                    {activeSubscription ? "Manage Billing" : "Upgrade Your Plan"}
+                  <DropdownMenuItem asChild>
+                    <a
+                      href={activeSubscription ? AGENT_ONE_BILLING_URL : AGENT_ONE_UPGRADE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {activeSubscription ? <IconCreditCard /> : <IconRocket />}
+                      {activeSubscription ? "Manage Billing" : "Upgrade Your Plan"}
+                    </a>
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onSelect={() => openExternalUrl(AGENT_ONE_DASHBOARD_URL)}>
-                  <IconExternalLink />
-                  Account Dashboard
+                <DropdownMenuItem asChild>
+                  <a href={AGENT_ONE_DASHBOARD_URL} target="_blank" rel="noopener noreferrer">
+                    <IconExternalLink />
+                    Account Dashboard
+                  </a>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </>

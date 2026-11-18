@@ -9,6 +9,7 @@ import {
   HideAgentOneModelsControl,
   MemoryControl,
   SyncControl,
+  EncryptedSyncControl,
 } from "@/components/settings-components/account";
 import {
   ColorThemeControl,
@@ -35,7 +36,6 @@ import { FileAnalysisModelsControl } from "@/components/settings-components/file
 import {
   AppUpdates,
   DebugTools,
-  ExtensionListUpdates,
   HelpLinks,
   ModelDirectoryUpdates,
 } from "@/components/settings-components/help-and-updates";
@@ -195,6 +195,14 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
             keywords: ["sync", "devices", "cloud", "backup"],
             layout: "row",
             control: SyncControl,
+          },
+          {
+            id: "sync-api-keys",
+            label: "Sync keys and providers",
+            description: "Encrypted with a passphrase only you know.",
+            keywords: ["sync", "api key", "provider", "encrypted", "passphrase", "recovery key"],
+            layout: "row",
+            control: EncryptedSyncControl,
           },
           {
             id: "hide-agentone-models",
@@ -757,7 +765,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
       {
         id: "app-updates",
         title: "App",
-        searchDescription: "Check for updates, see your current version, and read release notes.",
+        searchDescription: "Check for updates, see your current version, and find what's new.",
         keywords: ["updates", "version", "release notes", "changelog", "download", "install"],
         render: AppUpdates,
       },
@@ -767,13 +775,6 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
         searchDescription: "Download the latest model metadata for built-in providers.",
         keywords: ["updates", "models", "refresh", "download"],
         render: ModelDirectoryUpdates,
-      },
-      {
-        id: "extension-list",
-        title: "Extension List",
-        searchDescription: "Download the latest metadata for the extension browser.",
-        keywords: ["updates", "mcp", "extensions", "refresh", "download"],
-        render: ExtensionListUpdates,
       },
       {
         id: "help",

@@ -4,8 +4,14 @@ import type { ReactNode } from "react";
 import { EnvVarsEditor } from "@/components/a1/input/env-vars-editor";
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -49,7 +55,7 @@ export function McpServerConfigForm({
   values,
   onChange,
   idPrefix,
-  className = "grid gap-4",
+  className,
   showTypeSelector = false,
   showTransportEditors = true,
   namePlaceholder,
@@ -71,10 +77,10 @@ export function McpServerConfigForm({
     "Ask for confirmation before running tools from this server, unless in Auto mode";
 
   return (
-    <div className={className}>
+    <FieldGroup className={className}>
       {showTypeSelector ? (
-        <div className="grid gap-2">
-          <Label htmlFor={`${idPrefix}-server-type`}>Server Type</Label>
+        <Field>
+          <FieldLabel htmlFor={`${idPrefix}-server-type`}>Server Type</FieldLabel>
           <Select
             value={values.type}
             onValueChange={(value: McpServerType) => onChange({ type: value })}
@@ -89,23 +95,23 @@ export function McpServerConfigForm({
               </SelectGroup>
             </SelectContent>
           </Select>
-          <p className="text-muted-foreground text-xs">
+          <FieldDescription>
             {isStdio
               ? "STDIO servers run locally via command line."
               : "HTTP servers are remote endpoints that support the MCP protocol."}
-          </p>
-        </div>
+          </FieldDescription>
+        </Field>
       ) : null}
 
-      <div className="grid gap-2">
-        <Label htmlFor={`${idPrefix}-name`}>Name</Label>
+      <Field>
+        <FieldLabel htmlFor={`${idPrefix}-name`}>Name</FieldLabel>
         <Input
           id={`${idPrefix}-name`}
           placeholder={resolvedNamePlaceholder}
           value={values.name}
           onChange={(event) => onChange({ name: event.target.value })}
         />
-      </div>
+      </Field>
 
       {isStdio ? (
         <>
@@ -119,15 +125,15 @@ export function McpServerConfigForm({
               </AlertDescription>
             </Alert>
           ) : null}
-          <div className="grid gap-2">
-            <Label htmlFor={`${idPrefix}-command`}>Command</Label>
+          <Field>
+            <FieldLabel htmlFor={`${idPrefix}-command`}>Command</FieldLabel>
             <Input
               id={`${idPrefix}-command`}
               placeholder={resolvedCommandPlaceholder}
               value={values.command}
               onChange={(event) => onChange({ command: event.target.value })}
             />
-          </div>
+          </Field>
           {stdioSupplement}
           {showTransportEditors ? (
             <EnvVarsEditor
@@ -140,15 +146,15 @@ export function McpServerConfigForm({
         </>
       ) : (
         <>
-          <div className="grid gap-2">
-            <Label htmlFor={`${idPrefix}-url`}>URL</Label>
+          <Field>
+            <FieldLabel htmlFor={`${idPrefix}-url`}>URL</FieldLabel>
             <Input
               id={`${idPrefix}-url`}
               placeholder={resolvedUrlPlaceholder}
               value={values.url}
               onChange={(event) => onChange({ url: event.target.value })}
             />
-          </div>
+          </Field>
           {httpSupplement}
           {showTransportEditors ? (
             <HttpHeadersEditor
@@ -161,8 +167,8 @@ export function McpServerConfigForm({
         </>
       )}
 
-      <div className="grid gap-2">
-        <Label htmlFor={`${idPrefix}-timeout`}>Timeout (seconds)</Label>
+      <Field>
+        <FieldLabel htmlFor={`${idPrefix}-timeout`}>Timeout (seconds)</FieldLabel>
         <Input
           id={`${idPrefix}-timeout`}
           type="number"
@@ -175,23 +181,23 @@ export function McpServerConfigForm({
             onChange({ timeoutSec: Number.isFinite(seconds) ? seconds : 0 });
           }}
         />
-      </div>
+      </Field>
 
       {showApprovalControls ? (
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col">
-            <Label htmlFor={`${idPrefix}-requires-approval`} className="text-sm">
+        <Field orientation="horizontal">
+          <FieldContent>
+            <FieldLabel htmlFor={`${idPrefix}-requires-approval`}>
               Require Approval By Default
-            </Label>
-            <span className="text-muted-foreground text-xs">{resolvedApprovalDescription}</span>
-          </div>
+            </FieldLabel>
+            <FieldDescription>{resolvedApprovalDescription}</FieldDescription>
+          </FieldContent>
           <Switch
             id={`${idPrefix}-requires-approval`}
             checked={values.requiresApproval}
             onCheckedChange={(requiresApproval) => onChange({ requiresApproval })}
           />
-        </div>
+        </Field>
       ) : null}
-    </div>
+    </FieldGroup>
   );
 }

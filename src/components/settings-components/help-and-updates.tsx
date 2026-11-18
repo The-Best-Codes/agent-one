@@ -10,37 +10,20 @@ import {
   IconShieldCheck,
 } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import packageJson from "@/../package.json";
-import { getReleaseNotes, getReleaseNotesVersions } from "@/assets/release-notes";
-import { ExternalLink } from "@/components/a1/external-link";
-import { MemoizedMarkdown } from "@/components/a1/markdown/memoized-markdown";
 import { SettingsLink } from "@/components/a1/settings-link";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { useUpdate } from "@/contexts/use-update/update-hooks";
 import { modelDirectoryStatusAtom, updateModelDirectory } from "@/lib/ai/models/model-directory";
+import { AGENT_ONE_BLOG_URL } from "@/lib/constants";
 import { tourActiveAtom } from "@/lib/jotai/atoms";
-import { extensionListStatusAtom, updateExtensionList } from "@/lib/mcp-registry/sync";
 
 import { SettingsTarget } from "./settings-target";
 
@@ -53,13 +36,6 @@ export function AppUpdates() {
     useUpdate();
 
   const currentVersion = packageJson.version;
-  const releaseNoteVersions = useMemo(() => getReleaseNotesVersions(), []);
-  const [selectedReleaseNotesVersion, setSelectedReleaseNotesVersion] = useState(
-    releaseNoteVersions.includes(currentVersion) ? currentVersion : releaseNoteVersions[0],
-  );
-  const selectedReleaseNotes = selectedReleaseNotesVersion
-    ? getReleaseNotes(selectedReleaseNotesVersion)
-    : null;
 
   const getStateDisplay = () => {
     switch (updateStatus) {
@@ -213,40 +189,15 @@ export function AppUpdates() {
         )}
       </div>
 
-      {selectedReleaseNotes && (
-        <Accordion type="single" collapsible className="border-t pt-3">
-          <AccordionItem value="release-notes" className="border-b-0">
-            <AccordionTrigger className="py-1.5">Release notes</AccordionTrigger>
-            <AccordionContent className="h-auto overflow-visible pb-0">
-              <Select
-                value={selectedReleaseNotesVersion}
-                onValueChange={setSelectedReleaseNotesVersion}
-              >
-                <SelectTrigger className="mb-3" size="sm" aria-label="Select release notes version">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {releaseNoteVersions.map((version) => (
-                      <SelectItem key={version} value={version}>
-                        v{version}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <div className="prose prose-sm prose-neutral dark:prose-invert prose-quoteless max-w-none">
-                <MemoizedMarkdown
-                  allowInternalLinks
-                  content={selectedReleaseNotes}
-                  id={`release-notes-${selectedReleaseNotesVersion}`}
-                  messageRole="assistant"
-                />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      )}
+      <a
+        href={AGENT_ONE_BLOG_URL}
+        className="flex w-fit items-center gap-1 text-sm underline"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        See what's new on the blog
+        <IconExternalLink className="size-4" />
+      </a>
     </div>
   );
 }
@@ -313,83 +264,6 @@ export function ModelDirectoryUpdates() {
   );
 }
 
-export function ExtensionListUpdates() {
-  const extensionListStatus = useAtomValue(extensionListStatusAtom);
-  const extensionListProgress =
-    extensionListStatus.totalCount === null
-      ? undefined
-      : extensionListStatus.totalCount === 0
-        ? 100
-        : Math.min(
-            100,
-            (extensionListStatus.processedCount / extensionListStatus.totalCount) * 100,
-          );
-
-  const handleUpdateExtensionList = async () => {
-    const result = await updateExtensionList();
-    if (!result.ok) {
-      toast.error("Failed to update extension list", { description: result.error });
-      return;
-    }
-    toast.success("Extension list updated", {
-      description: `${(result.entryCount ?? 0).toLocaleString()} extensions loaded.`,
-    });
-  };
-
-  return (
-    <>
-      <p className="text-muted-foreground text-sm">
-        Download the latest extension metadata. This will update the{" "}
-        <Link className="underline" to="/extensions">
-          extension list
-        </Link>{" "}
-        available in the UI.
-      </p>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <p className="text-sm font-medium">
-            {extensionListStatus.hasDownloadedList
-              ? "Extension list loaded"
-              : "Extension list not loaded"}
-          </p>
-          <p className="text-muted-foreground text-sm tabular-nums">
-            Last updated: {formatModelDirectoryTimestamp(extensionListStatus.fetchedAt, "Never")}
-          </p>
-          {extensionListStatus.isUpdating ? (
-            <p className="text-muted-foreground text-sm tabular-nums">
-              {extensionListStatus.totalCount === null
-                ? `${extensionListStatus.processedCount.toLocaleString()} entries processed`
-                : `${extensionListStatus.processedCount.toLocaleString()} of ${extensionListStatus.totalCount.toLocaleString()} entries processed`}
-            </p>
-          ) : null}
-          {extensionListStatus.error ? (
-            <p className="text-destructive text-sm">{extensionListStatus.error}</p>
-          ) : null}
-        </div>
-        <Button
-          onClick={handleUpdateExtensionList}
-          disabled={extensionListStatus.isUpdating}
-          size="sm"
-        >
-          {extensionListStatus.isUpdating ? (
-            <Spinner data-icon="inline-start" />
-          ) : (
-            <IconRefresh data-icon="inline-start" />
-          )}
-          Update now
-        </Button>
-      </div>
-      {extensionListStatus.isUpdating ? (
-        <Progress
-          value={extensionListProgress}
-          indeterminate={extensionListStatus.totalCount === null}
-          aria-label="Extension list update progress"
-        />
-      ) : null}
-    </>
-  );
-}
-
 export function HelpLinks() {
   const setTourActive = useSetAtom(tourActiveAtom);
 
@@ -403,27 +277,33 @@ export function HelpLinks() {
         Take the tour
         <IconMap className="size-4" />
       </Link>
-      <ExternalLink
+      <a
         href="https://github.com/The-Best-Codes/agent-one/issues/new"
         className="flex w-fit items-center gap-1 underline"
+        target="_blank"
+        rel="noopener noreferrer"
       >
         Report a bug
         <IconExternalLink className="size-4" />
-      </ExternalLink>
-      <ExternalLink
+      </a>
+      <a
         href="https://www.agent-one.dev/discord"
         className="flex w-fit items-center gap-1 underline"
+        target="_blank"
+        rel="noopener noreferrer"
       >
         Get help on Discord
         <IconExternalLink className="size-4" />
-      </ExternalLink>
-      <ExternalLink
+      </a>
+      <a
         href="https://docs.agent-one.dev/docs"
         className="flex w-fit items-center gap-1 underline"
+        target="_blank"
+        rel="noopener noreferrer"
       >
         Read the docs
         <IconExternalLink className="size-4" />
-      </ExternalLink>
+      </a>
     </div>
   );
 }

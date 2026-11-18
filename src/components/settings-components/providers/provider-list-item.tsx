@@ -41,11 +41,8 @@ import {
   type CustomProvider,
 } from "@/lib/jotai/custom-provider-atoms";
 import { getLocalProviderAtom, updateLocalProviderAtom } from "@/lib/jotai/local-provider-atoms";
-import {
-  getProviderConfigAtom,
-  providerSetupDismissedAtom,
-  type ProviderConfig,
-} from "@/lib/jotai/provider-atoms";
+import { getProviderConfigAtom, type ProviderConfig } from "@/lib/jotai/provider-atoms";
+import { providerSetupDismissedAtom } from "@/lib/jotai/unsynced-local-atoms";
 
 import { ModelList } from "./model-list";
 import { DeleteProviderDialog } from "./provider-dialogs";

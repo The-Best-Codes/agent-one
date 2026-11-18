@@ -97,6 +97,9 @@ export interface McpRegistryMetadata {
   searchText: string;
   transportTypes: McpServerType[];
   registryEntry?: unknown;
+  author?: string;
+  pageUrl?: string;
+  reviewed?: boolean;
 }
 
 export interface McpServerConfigBase {

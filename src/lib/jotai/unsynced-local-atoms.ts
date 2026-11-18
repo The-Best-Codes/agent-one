@@ -1,17 +1,9 @@
-// This file is for atoms that don't sync across app windows, not settings that don't sync across devices when signed in
-
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
-
-function createNoSyncStorage<T>() {
-  const storage = createJSONStorage<T>(() => localStorage);
-  delete storage.subscribe;
-  return storage;
-}
 
 export const sidebarCollapsedAtom = atomWithStorage(
   "agent-one-sidebar-collapsed",
   false,
-  createNoSyncStorage<boolean>(),
+  undefined,
   { getOnInit: true },
 );
 
@@ -22,23 +14,107 @@ export const debugModeEnabledAtom = atomWithStorage<boolean>(
   { getOnInit: true },
 );
 
+export const skipPlanChecksAtom = atomWithStorage<boolean>(
+  "agent-one-skip-plan-checks",
+  false,
+  createJSONStorage(() => sessionStorage),
+  { getOnInit: true },
+);
+
 export const globalAgentsFilesAtom = atomWithStorage<string[]>(
   "agent-one-agents-files",
   ["~/AGENTS.md"],
-  createNoSyncStorage<string[]>(),
+  undefined,
   { getOnInit: true },
 );
 
 export const globalSkillsFoldersAtom = atomWithStorage<string[]>(
   "agent-one-skills-folders",
   ["~/.agents/skills", "~/.claude/skills"],
-  createNoSyncStorage<string[]>(),
+  undefined,
   { getOnInit: true },
 );
 
 export const collapsedProjectIdsAtom = atomWithStorage<string[]>(
   "agent-one-collapsed-project-ids",
   [],
-  createNoSyncStorage<string[]>(),
+  undefined,
+  { getOnInit: true },
+);
+
+export const onboardingCompletedAtom = atomWithStorage(
+  "agent-one-onboarding-completed",
+  false,
+  undefined,
+  { getOnInit: true },
+);
+
+export const onboardingReminderDismissedAtom = atomWithStorage(
+  "agent-one-onboarding-reminder-dismissed",
+  false,
+  undefined,
+  { getOnInit: true },
+);
+
+export const starReminderDismissedAtom = atomWithStorage(
+  "agent-one-star-reminder-dismissed",
+  false,
+  undefined,
+  { getOnInit: true },
+);
+
+export const completedResponseCountAtom = atomWithStorage(
+  "agent-one-completed-response-count",
+  0,
+  undefined,
+  { getOnInit: true },
+);
+
+export const hideAgentOneModelsAtom = atomWithStorage(
+  "agent-one-hide-agentone-models",
+  false,
+  undefined,
+  { getOnInit: true },
+);
+
+export const updateRemindAfterAtom = atomWithStorage<number | null>(
+  "agent-one-update-remind-after",
+  null,
+  undefined,
+  { getOnInit: true },
+);
+
+export const releaseNotesLastSeenVersionAtom = atomWithStorage<string | null>(
+  "agent-one-release-notes-last-seen-version",
+  null,
+  undefined,
+  { getOnInit: true },
+);
+
+export const lastVacuumTimestampAtom = atomWithStorage<number>(
+  "agent-one-last-vacuum-timestamp",
+  0,
+  undefined,
+  { getOnInit: true },
+);
+
+export const lastModelDirectorySyncTimestampAtom = atomWithStorage<number>(
+  "agent-one-last-model-directory-sync-timestamp",
+  0,
+  undefined,
+  { getOnInit: true },
+);
+
+export const dismissedOAuthPromptsAtom = atomWithStorage<string[]>(
+  "agent-one-dismissed-oauth-prompts",
+  [],
+  undefined,
+  { getOnInit: true },
+);
+
+export const providerSetupDismissedAtom = atomWithStorage<Record<string, boolean>>(
+  "agent-one-setting-PROVIDER_SETUP_DISMISSED",
+  {},
+  undefined,
   { getOnInit: true },
 );

@@ -4,7 +4,7 @@ import { check } from "@tauri-apps/plugin-updater";
 import { useAtom } from "jotai";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { updateRemindAfterAtom } from "@/lib/jotai/atoms";
+import { updateRemindAfterAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
 
 import type { UpdateStatus } from "./update-contexts";

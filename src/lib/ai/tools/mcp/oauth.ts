@@ -3,7 +3,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { getDefaultStore } from "jotai";
 import { toast } from "sonner";
 
-import { dismissedOAuthPromptsAtom, mcpAuthStatesAtom } from "@/lib/jotai/mcp-atoms";
+import { mcpAuthStatesAtom } from "@/lib/jotai/mcp-atoms";
+import { dismissedOAuthPromptsAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
 import { type McpHttpServerConfig } from "@/lib/settings/types";
 
@@ -44,6 +45,24 @@ export function dismissMcpLoginToasts(serverId: string): void {
 
 export function clearMcpOAuthCredentials(serverId: string): Promise<void> {
   return invoke("mcp_logout", { serverId });
+}
+
+export interface McpOAuthClient {
+  clientId: string;
+  hasSecret: boolean;
+}
+
+export async function getMcpOAuthClient(serverId: string): Promise<McpOAuthClient | null> {
+  return invoke<McpOAuthClient | null>("mcp_get_oauth_client", { serverId });
+}
+
+export async function setMcpOAuthClient(
+  serverId: string,
+  clientId: string,
+  clientSecret?: string,
+): Promise<void> {
+  await invoke("mcp_set_oauth_client", { serverId, clientId, clientSecret });
+  closeServerCache(serverId);
 }
 
 export async function mcpLogin(

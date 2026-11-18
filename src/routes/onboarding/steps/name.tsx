@@ -58,7 +58,7 @@ export function NameStep({ onSubmit }: NameStepProps) {
             value={nameInput}
             onChange={(e) => setNameInput(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") {
+              if (e.key === "Enter" && !e.nativeEvent.isComposing) {
                 handleSubmit();
               }
             }}

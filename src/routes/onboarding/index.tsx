@@ -3,8 +3,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
-import { onboardingCompletedAtom, tourActiveAtom } from "@/lib/jotai/atoms";
+import { tourActiveAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
+import { onboardingCompletedAtom } from "@/lib/jotai/unsynced-local-atoms";
 
 import { AccountStep } from "./steps/account";
 import { GreetingStep, NameStep } from "./steps/name";

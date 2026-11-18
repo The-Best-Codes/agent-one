@@ -26,7 +26,6 @@ import {
   type ProviderId,
 } from "@/lib/ai/providers/registry";
 import { apiKeyAtomFamily } from "@/lib/jotai/api-key-atoms";
-import { hideAgentOneModelsAtom } from "@/lib/jotai/atoms";
 import { customProviderApiKeysAtom } from "@/lib/jotai/custom-provider-api-key-atoms";
 import {
   type CustomProvider,
@@ -38,6 +37,7 @@ import {
   providerHeadersAtomFamily,
   providerModelsAtomFamily,
 } from "@/lib/jotai/provider-atoms";
+import { hideAgentOneModelsAtom } from "@/lib/jotai/unsynced-local-atoms";
 
 export interface ModelData {
   id: string;

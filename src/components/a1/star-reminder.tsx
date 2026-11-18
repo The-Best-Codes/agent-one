@@ -4,7 +4,10 @@ import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 import { useChatStatus } from "@/contexts/use-chat/chat-hooks";
-import { completedResponseCountAtom, starReminderDismissedAtom } from "@/lib/jotai/atoms";
+import {
+  completedResponseCountAtom,
+  starReminderDismissedAtom,
+} from "@/lib/jotai/unsynced-local-atoms";
 
 const TOAST_ID = "star-reminder";
 const REPO_URL = "https://github.com/The-Best-Codes/agent-one";

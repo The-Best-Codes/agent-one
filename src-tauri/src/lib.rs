@@ -22,6 +22,7 @@ fn log_level() -> LevelFilter {
 
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 mod computer_use;
+mod encrypted_sync;
 mod keyring;
 mod mcp_auth;
 mod tools;
@@ -166,15 +167,6 @@ pub fn run() {
                         },
                     ],
                 )
-                .add_migrations(
-                    "sqlite:mcp-registry.db",
-                    vec![tauri_plugin_sql::Migration {
-                        version: 1,
-                        description: "create_mcp_registry",
-                        sql: include_str!("../migrations/0001_create_mcp_registry.sql"),
-                        kind: tauri_plugin_sql::MigrationKind::Up,
-                    }],
-                )
                 .build(),
         )
         .plugin(tauri_plugin_opener::init())
@@ -219,6 +211,8 @@ pub fn run() {
                     }
                 })?;
             }
+
+            app.manage(encrypted_sync::EncryptedSyncState::default());
 
             app.manage(mcp_auth::AuthCancellationState(std::sync::Arc::new(
                 tokio::sync::Mutex::new(std::collections::HashMap::new()),
@@ -277,11 +271,19 @@ pub fn run() {
                     keyring::storage_set_item,
                     keyring::storage_remove_item,
                     keyring::storage_has_item,
+                    encrypted_sync::encrypted_sync_create_vault,
+                    encrypted_sync::encrypted_sync_unlock,
+                    encrypted_sync::encrypted_sync_lock,
+                    encrypted_sync::encrypted_sync_vault_id,
+                    encrypted_sync::encrypted_sync_seal,
+                    encrypted_sync::encrypted_sync_open,
                     mcp_auth::mcp_authenticate,
                     mcp_auth::mcp_cancel_auth,
                     mcp_auth::mcp_get_token,
                     mcp_auth::mcp_logout,
                     mcp_auth::mcp_check_oauth_support,
+                    mcp_auth::mcp_get_oauth_client,
+                    mcp_auth::mcp_set_oauth_client,
                 ]
             }
             #[cfg(any(target_os = "android", target_os = "ios"))]
@@ -295,11 +297,19 @@ pub fn run() {
                     keyring::storage_set_item,
                     keyring::storage_remove_item,
                     keyring::storage_has_item,
+                    encrypted_sync::encrypted_sync_create_vault,
+                    encrypted_sync::encrypted_sync_unlock,
+                    encrypted_sync::encrypted_sync_lock,
+                    encrypted_sync::encrypted_sync_vault_id,
+                    encrypted_sync::encrypted_sync_seal,
+                    encrypted_sync::encrypted_sync_open,
                     mcp_auth::mcp_authenticate,
                     mcp_auth::mcp_cancel_auth,
                     mcp_auth::mcp_get_token,
                     mcp_auth::mcp_logout,
                     mcp_auth::mcp_check_oauth_support,
+                    mcp_auth::mcp_get_oauth_client,
+                    mcp_auth::mcp_set_oauth_client,
                 ]
             }
         })

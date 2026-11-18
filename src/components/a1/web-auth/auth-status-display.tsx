@@ -2,7 +2,6 @@ import { IconExternalLink, IconLogout, IconUser } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 
 import { CopyButton } from "@/components/a1/copy-button";
-import { ExternalLink } from "@/components/a1/external-link";
 import { UserProfileDisplay } from "@/components/a1/web-auth/user-profile-display";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -60,13 +59,15 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
         icon={<Spinner className="text-foreground" data-icon="inline-start" />}
         title="Link your account"
         description={
-          <ExternalLink
+          <a
             href={deviceFlow.verificationUriComplete || deviceFlow.verificationUri}
             className="flex flex-row items-center justify-center gap-1 hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
           >
             Open Login Form Manually
             <IconExternalLink className="size-4 shrink-0" />
-          </ExternalLink>
+          </a>
         }
         action={
           <>

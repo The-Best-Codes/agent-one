@@ -45,14 +45,14 @@
       let fontFromStorage = localStorage.getItem("agent-one-setting-FONT");
       let parsedFont = jsonParseCatch(fontFromStorage) || "default";
 
-      document.documentElement.classList.remove("font-space-grotesk", "font-sans", "font-mono");
+      document.documentElement.classList.remove("font-inter", "font-sans", "font-mono");
       if (parsedFont === "system") {
         document.documentElement.classList.add("font-sans");
       } else if (parsedFont === "mono") {
         document.documentElement.classList.add("font-mono");
       } else {
         parsedFont = "default";
-        document.documentElement.classList.add("font-space-grotesk");
+        document.documentElement.classList.add("font-inter");
       }
       document.documentElement.setAttribute("data-font", parsedFont);
     </script>

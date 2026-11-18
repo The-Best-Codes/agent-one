@@ -11,7 +11,6 @@ import {
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
 
-import { ExternalLink } from "@/components/a1/external-link";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -217,12 +216,14 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
                     {result.results?.map((r) => (
                       <div key={r.pageid} className="rounded-md border p-2">
                         <div className="flex flex-col gap-1">
-                          <ExternalLink
+                          <a
                             href={`https://en.wikipedia.org/wiki/${encodeURIComponent(r.title.replace(/ /g, "_"))}`}
                             className="text-foreground inline-block text-sm font-medium hover:underline"
+                            target="_blank"
+                            rel="noopener noreferrer"
                           >
                             {r.title}
-                          </ExternalLink>
+                          </a>
                           <p
                             className="text-muted-foreground text-xs"
                             dangerouslySetInnerHTML={{ __html: r.snippet }}
@@ -286,13 +287,15 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
                       <p className="text-muted-foreground text-xs italic">{result.description}</p>
                     )}
                     {result.url && (
-                      <ExternalLink
+                      <a
                         href={result.url}
                         className="text-muted-foreground hover:text-foreground text-xs"
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
                         View on Wikipedia
                         <IconExternalLink className="ml-1 inline size-3" />
-                      </ExternalLink>
+                      </a>
                     )}
                     {result.summary && (
                       <div className="rounded-md border p-2">
@@ -409,14 +412,16 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
                 <ScrollArea type="always" viewportClassName="max-h-96">
                   <div className="flex flex-wrap gap-1">
                     {result.links?.map((link) => (
-                      <ExternalLink
+                      <a
                         key={link}
                         href={`https://en.wikipedia.org/wiki/${encodeURIComponent(link.replace(/ /g, "_"))}`}
                         className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs hover:underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
                         <IconLink className="size-3 shrink-0" />
                         {link}
-                      </ExternalLink>
+                      </a>
                     ))}
                   </div>
                 </ScrollArea>

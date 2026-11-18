@@ -1,7 +1,6 @@
 import { platform } from "@tauri-apps/plugin-os";
 import dedent from "dedent";
 import { atom } from "jotai";
-import { atomWithStorage } from "jotai/utils";
 
 import { sanitizeMemoryEntries } from "@/lib/memory";
 import { getProjectPromptSection, type Project } from "@/lib/projects";
@@ -16,79 +15,9 @@ export const chatIdsAtom = atom<string[]>([]);
 
 export const chatUpdateTriggerAtom = atom(0);
 
-export const onboardingCompletedAtom = atomWithStorage(
-  "agent-one-onboarding-completed",
-  false,
-  undefined,
-  { getOnInit: true },
-);
-
-export const onboardingReminderDismissedAtom = atomWithStorage(
-  "agent-one-onboarding-reminder-dismissed",
-  false,
-  undefined,
-  { getOnInit: true },
-);
-
-export const starReminderDismissedAtom = atomWithStorage(
-  "agent-one-star-reminder-dismissed",
-  false,
-  undefined,
-  { getOnInit: true },
-);
-
-export const completedResponseCountAtom = atomWithStorage(
-  "agent-one-completed-response-count",
-  0,
-  undefined,
-  { getOnInit: true },
-);
-
 export const tourActiveAtom = atom(false);
 
 export const recordingShortcutAtom = atom(false);
-
-export const hideAgentOneModelsAtom = atomWithStorage(
-  "agent-one-hide-agentone-models",
-  false,
-  undefined,
-  { getOnInit: true },
-);
-
-export const updateRemindAfterAtom = atomWithStorage<number | null>(
-  "agent-one-update-remind-after",
-  null,
-  undefined,
-  { getOnInit: true },
-);
-
-export const releaseNotesLastSeenVersionAtom = atomWithStorage<string | null>(
-  "agent-one-release-notes-last-seen-version",
-  null,
-  undefined,
-  { getOnInit: true },
-);
-
-export const lastVacuumTimestampAtom = atomWithStorage<number>(
-  "agent-one-last-vacuum-timestamp",
-  0,
-  undefined,
-  { getOnInit: true },
-);
-
-export const lastExtensionListSyncTimestampAtom = atomWithStorage<number>(
-  "agent-one-last-extension-list-sync-timestamp",
-  0,
-  undefined,
-  { getOnInit: true },
-);
-
-export const lastModelDirectorySyncTimestampAtom = atomWithStorage<number>(
-  "agent-one-last-model-directory-sync-timestamp",
-  0,
-  undefined,
-  { getOnInit: true },
-);
 
 const COMMAND_SHELLS: Partial<Record<ReturnType<typeof platform>, string>> = {
   windows: "powershell",

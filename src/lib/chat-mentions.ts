@@ -8,7 +8,7 @@ export type ChatMention =
 const MENTION_SCHEME = "mention://";
 
 export const MENTION_CHIP_CLASS =
-  "bg-primary/15 text-foreground inline-flex max-w-64 items-baseline gap-1 rounded-sm px-1 align-baseline font-medium";
+  "bg-primary/15 text-foreground inline-flex max-w-64 items-baseline gap-1 rounded-sm px-1 align-baseline leading-tight font-medium";
 export const MENTION_ICON_CLASS = "text-primary flex shrink-0 self-center [&>svg]:size-[1em]";
 
 export function getMentionDisplay(mention: ChatMention) {

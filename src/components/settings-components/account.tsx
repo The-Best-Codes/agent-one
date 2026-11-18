@@ -7,10 +7,11 @@ import {
   IconRocket,
   IconX,
 } from "@tabler/icons-react";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 
-import { ExternalLink } from "@/components/a1/external-link";
+import { EnableSyncDialog } from "@/components/a1/enable-sync-dialog";
+import { EncryptedSyncDialog } from "@/components/a1/encrypted-sync-dialog";
 import { PathListEditor } from "@/components/a1/path-list-editor";
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
 import {
@@ -47,11 +48,16 @@ import {
   AGENT_ONE_DASHBOARD_URL,
   AGENT_ONE_UPGRADE_URL,
 } from "@/lib/constants";
-import { hideAgentOneModelsAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
-import { syncEnabledAtom } from "@/lib/jotai/sync-atoms";
-import { globalAgentsFilesAtom, globalSkillsFoldersAtom } from "@/lib/jotai/unsynced-local-atoms";
+import { encryptedSyncStatusAtom, syncEnabledAtom } from "@/lib/jotai/sync-atoms";
+import {
+  globalAgentsFilesAtom,
+  globalSkillsFoldersAtom,
+  hideAgentOneModelsAtom,
+} from "@/lib/jotai/unsynced-local-atoms";
 import { MAX_MEMORY_ENTRIES, MAX_MEMORY_ENTRY_CHARS } from "@/lib/memory";
+import { encryptedSyncManager } from "@/lib/sync/encrypted-sync-manager";
+import { settingsSyncManager } from "@/lib/sync/settings-sync-manager";
 
 import { SettingsTarget } from "./settings-target";
 
@@ -138,11 +144,11 @@ export function AccountStatus() {
             user ? (
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" asChild>
-                  <ExternalLink href={AGENT_ONE_DASHBOARD_URL}>
+                  <a href={AGENT_ONE_DASHBOARD_URL} target="_blank" rel="noopener noreferrer">
                     <IconExternalLink data-icon="inline-start" />
                     <span>Account</span>
                     <span className="sr-only lg:not-sr-only">{" Dashboard"}</span>
-                  </ExternalLink>
+                  </a>
                 </Button>
                 <Button variant="destructive" size="sm" onClick={signOut} disabled={isSigningOut}>
                   {isSigningOut ? (
@@ -187,8 +193,10 @@ export function AccountStatus() {
                   <p className="text-muted-foreground text-sm">{planStatus}</p>
                 </div>
                 <Button size="sm" asChild>
-                  <ExternalLink
+                  <a
                     href={activeSubscription ? AGENT_ONE_BILLING_URL : AGENT_ONE_UPGRADE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
                     {activeSubscription ? (
                       <IconCreditCard data-icon="inline-start" />
@@ -196,7 +204,7 @@ export function AccountStatus() {
                       <IconRocket data-icon="inline-start" />
                     )}
                     <span>{activeSubscription ? "Manage Billing" : "Upgrade"}</span>
-                  </ExternalLink>
+                  </a>
                 </Button>
               </div>
               {isAccountProvisioning ? (
@@ -276,14 +284,51 @@ function AccountSwitch({
 
 export function SyncControl() {
   const [syncEnabled, setSyncEnabled] = useAtom(syncEnabledAtom);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
-    <AccountSwitch
-      label="Synchronize my settings"
-      checked={syncEnabled}
-      onCheckedChange={setSyncEnabled}
-      signedOutHint="Sign in to enable sync"
-    />
+    <>
+      <AccountSwitch
+        label="Synchronize my settings"
+        checked={syncEnabled}
+        onCheckedChange={(checked) => {
+          if (checked) setDialogOpen(true);
+          else setSyncEnabled(false);
+        }}
+        signedOutHint="Sign in to enable sync"
+      />
+      <EnableSyncDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onConfirm={(overwriteRemote) => settingsSyncManager.enable({ overwriteRemote })}
+      />
+    </>
+  );
+}
+
+export function EncryptedSyncControl() {
+  const status = useAtomValue(encryptedSyncStatusAtom);
+  const { user } = useWebAuth();
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  return (
+    <div className="flex items-center gap-2">
+      {status === "locked" && user && (
+        <Button variant="outline" size="xs" onClick={() => setDialogOpen(true)}>
+          Unlock
+        </Button>
+      )}
+      <AccountSwitch
+        label="Sync keys and providers"
+        checked={status !== "off"}
+        onCheckedChange={(checked) => {
+          if (checked) setDialogOpen(true);
+          else void encryptedSyncManager.disable();
+        }}
+        signedOutHint="Sign in to use encrypted sync"
+      />
+      <EncryptedSyncDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+    </div>
   );
 }
 

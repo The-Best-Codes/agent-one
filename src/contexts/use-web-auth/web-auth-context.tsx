@@ -7,6 +7,7 @@ import { getApiKeyBaseAtom } from "@/lib/jotai/api-key-atoms";
 import { getProviderConfigAtom } from "@/lib/jotai/provider-atoms";
 import { getLogger } from "@/lib/logger";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
+import { encryptedSyncManager } from "@/lib/sync/encrypted-sync-manager";
 import { settingsSyncManager } from "@/lib/sync/settings-sync-manager";
 
 import {
@@ -51,6 +52,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
           void setAgentOneApiKey(accessToken);
           setAgentOneConfig({ enabled: true, headers: {}, models: [] });
           settingsSyncManager.syncNow();
+          encryptedSyncManager.syncNow();
           return "valid";
         }
         if (error?.status === 401 || error?.status === 403) {
@@ -272,6 +274,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
     try {
       stopPolling();
       settingsSyncManager.onSignedOut();
+      encryptedSyncManager.onSignedOut();
       setAuthToken(null);
       await keyringStorage.removeItem(TOKEN_KEY);
       void setAgentOneApiKey("");
@@ -294,6 +297,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
     const id = setInterval(
       () => {
         settingsSyncManager.syncNow();
+        encryptedSyncManager.syncNow();
       },
       60 * 60 * 1000,
     );

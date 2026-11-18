@@ -45,10 +45,3 @@ export interface McpServerLoadState {
 export const mcpAuthStatesAtom = atom<Record<string, McpAuthState>>({});
 
 export const mcpServerLoadStatesAtom = atom<Record<string, McpServerLoadState>>({});
-
-export const dismissedOAuthPromptsAtom = atomWithStorage<string[]>(
-  "agent-one-dismissed-oauth-prompts",
-  [],
-  undefined,
-  { getOnInit: true },
-);

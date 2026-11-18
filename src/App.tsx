@@ -3,7 +3,6 @@ import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import { Toaster } from "sonner";
 
 import { AttachmentPreviewDialog } from "@/components/a1/attachment-preview-dialog";
-import { ExtensionListStartupSync } from "@/components/a1/extension-list-startup-sync";
 import { FileDropGuard } from "@/components/a1/file-drop-guard";
 import { LocalProviderStartupSync } from "@/components/a1/local-provider-startup-sync";
 import { ModelDirectoryStartupSync } from "@/components/a1/model-directory-startup-sync";
@@ -12,7 +11,9 @@ import { StarReminder } from "@/components/a1/star-reminder";
 import { Spinner } from "@/components/ui/spinner";
 import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
 import ChatRoute from "@/routes/chat";
-import ExtensionsRoute from "@/routes/extensions";
+import ExtensionDetailRoute from "@/routes/extensions/detail";
+import InstalledExtensionsRoute from "@/routes/extensions/installed";
+import ExtensionsLayout from "@/routes/extensions/layout";
 import IndexRoute from "@/routes/index";
 import NotFoundRoute from "@/routes/not-found";
 import OnboardingRoute from "@/routes/onboarding";
@@ -25,8 +26,8 @@ const ChatStressTestRoute = lazy(() => import("@/routes/tests/chat-stress"));
 const LocalDatabaseTestRoute = lazy(() => import("@/routes/tests/local-database"));
 const NotificationsTestRoute = lazy(() => import("@/routes/tests/notifications"));
 
-import { ReleaseNotesDialog } from "./components/a1/release-notes-dialog";
 import { UpdateAvailableDialog } from "./components/a1/update-available-dialog";
+import { UpdateToast } from "./components/a1/update-toast";
 import { DeepLinkHandler } from "./deep-link-handler";
 import { KbdRegistry } from "./kbd-shortcuts";
 import { NotificationClickHandler } from "./notification-click-handler";
@@ -47,11 +48,10 @@ function App() {
   return (
     <BrowserRouter>
       <ModelDirectoryStartupSync />
-      <ExtensionListStartupSync />
       <LocalProviderStartupSync />
       <KbdRegistry />
       <FileDropGuard />
-      <ReleaseNotesDialog />
+      <UpdateToast />
       <UpdateAvailableDialog />
       <AttachmentPreviewDialog />
       <OnboardingReminder />
@@ -62,7 +62,10 @@ function App() {
           <Route path="/chat" element={<ChatRoute />} />
           <Route path="/chat/:id" element={<ChatRoute />} />
           <Route path="/onboarding" element={<OnboardingRoute />} />
-          <Route path="/extensions" element={<ExtensionsRoute />} />
+          <Route path="/extensions" element={<ExtensionsLayout />}>
+            <Route index element={<InstalledExtensionsRoute />} />
+            <Route path="view/*" element={<ExtensionDetailRoute />} />
+          </Route>
           <Route path="/settings" element={<SettingsRoute />} />
           <Route path="/scheduled-agents" element={<ScheduledAgentsRoute />} />
           <Route
