@@ -65,7 +65,23 @@ export async function setMcpOAuthClient(
   closeServerCache(serverId);
 }
 
-export async function mcpLogin(
+const pendingLogins = new Map<string, Promise<boolean>>();
+
+export function mcpLogin(
+  serverId: string,
+  serverUrl: string,
+  serverName: string,
+): Promise<boolean> {
+  const pending = pendingLogins.get(serverId);
+  if (pending) return pending;
+  const login = runMcpLogin(serverId, serverUrl, serverName).finally(() => {
+    pendingLogins.delete(serverId);
+  });
+  pendingLogins.set(serverId, login);
+  return login;
+}
+
+async function runMcpLogin(
   serverId: string,
   serverUrl: string,
   serverName: string,
