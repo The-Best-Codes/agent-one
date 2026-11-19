@@ -887,6 +887,12 @@
   }
 }
 
+@keyframes spinner-wave {
+  to {
+    transform: translateX(16px);
+  }
+}
+
 @utility scrollbar-size-xs {
   &::-webkit-scrollbar {
     @apply size-0.5;
