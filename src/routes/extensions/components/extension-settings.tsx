@@ -107,12 +107,16 @@ function StatusNotice({
             <IconRefresh data-icon="inline-start" />
             Try again
           </Button>
-          <details className="text-muted-foreground max-w-full text-xs">
-            <summary className="hover:text-foreground cursor-pointer select-none">
-              Technical details
-            </summary>
-            <p className="mt-1 font-mono wrap-anywhere">{status.description}</p>
-          </details>
+          <Accordion type="single" collapsible className="max-w-full">
+            <AccordionItem value="details">
+              <AccordionTrigger className="text-muted-foreground hover:text-foreground flex-none items-center gap-1 py-0 text-xs font-normal hover:no-underline">
+                Technical details
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground pt-1 pb-0 font-mono text-xs wrap-anywhere">
+                {status.description}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       </AlertDescription>
     </Alert>
