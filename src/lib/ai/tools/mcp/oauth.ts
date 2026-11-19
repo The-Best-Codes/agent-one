@@ -147,14 +147,13 @@ export async function mcpLogout(serverId: string, serverName: string): Promise<b
   try {
     await clearMcpOAuthCredentials(serverId);
     toast.success(`Signed out of your ${serverName} account`);
-    store.set(mcpAuthStatesAtom, (prev) => {
-      if (prev[serverId] === "logged-out") return prev;
-      return {
-        ...prev,
-        [serverId]: "logged-out",
-      };
-    });
     closeServerCache(serverId);
+    store.set(mcpAuthStatesAtom, (prev) => {
+      if (!(serverId in prev)) return prev;
+      const next = { ...prev };
+      delete next[serverId];
+      return next;
+    });
     return true;
   } catch (e) {
     toast.error(`Couldn't sign out of ${serverName}: ${String(e)}`);
