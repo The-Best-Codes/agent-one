@@ -1,7 +1,9 @@
 import {
-  IconAlertTriangle,
   IconArrowLeft,
   IconArrowUpRight,
+  IconDotsVertical,
+  IconLogin,
+  IconLogout,
   IconPuzzleOff,
   IconRefresh,
   IconTrash,
@@ -10,15 +12,16 @@ import { useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 
-import {
-  AdaptiveTooltip,
-  AdaptiveTooltipContent,
-  AdaptiveTooltipTrigger,
-} from "@/components/ui/adaptive-tooltip";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Empty,
   EmptyDescription,
@@ -26,6 +29,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { Switch } from "@/components/ui/switch";
+import { mcpLogin, mcpLogout } from "@/lib/ai/tools/mcp/oauth";
 import { getExtensionPageUrl } from "@/lib/extensions/manifest";
 import { getExtensionSourceLabel, getInstalledExtensionMetadata } from "@/lib/extensions/metadata";
 import type { McpServerConfig } from "@/lib/settings/types";
@@ -63,7 +68,8 @@ function OutLink({ href, children }: { href: string; children: React.ReactNode }
 function ExtensionDetail({ server }: { server: McpServerConfig }) {
   const navigate = useNavigate();
   const link = useExtensionsLink();
-  const { loadStates, authStates, removeServers, restartServer } = useExtensionActions();
+  const { loadStates, authStates, updateServer, removeServers, restartServer } =
+    useExtensionActions();
   const [showUninstall, setShowUninstall] = useState(false);
 
   const metadata = getInstalledExtensionMetadata(server);
@@ -72,7 +78,8 @@ function ExtensionDetail({ server }: { server: McpServerConfig }) {
   const pageUrl = getExtensionPageUrl(server);
   const isWebsite = /^https?:\/\//i.test(metadata?.websiteUrl ?? "");
   const source = getExtensionSourceLabel(metadata);
-  const status = getServerStatus(loadStates[server.id], authStates[server.id], server.enabled);
+  const authState = authStates[server.id];
+  const status = getServerStatus(loadStates[server.id], authState, server.enabled);
 
   return (
     <>
@@ -83,51 +90,70 @@ function ExtensionDetail({ server }: { server: McpServerConfig }) {
             <h2 className="min-w-0 text-xl leading-6 font-semibold wrap-anywhere">{name}</h2>
             {source ? <Badge variant="outline">{source}</Badge> : null}
           </div>
-          <div
-            className="text-muted-foreground flex min-w-0 items-center gap-1.5 text-sm leading-4"
-            title={status.description}
-          >
+          <div className="text-muted-foreground flex min-w-0 items-center gap-1 text-sm leading-4">
             <ServerStatusDot tone={status.tone} />
             <span className="truncate">
-              {status.tone === "error" ? status.label : `${status.label} · ${status.description}`}
+              {status.tone === "ok" ? `${status.label} · ${status.description}` : status.label}
             </span>
+            {status.tone === "ok" && server.type === "http" && authState === "supports-oauth" ? (
+              <>
+                <span aria-hidden>·</span>
+                <button
+                  type="button"
+                  className="hover:text-foreground focus-visible:ring-ring/50 shrink-0 rounded-sm underline underline-offset-4 outline-none focus-visible:ring-3"
+                  onClick={() => void mcpLogin(server.id, server.url, server.name)}
+                >
+                  Sign in for full access
+                </button>
+              </>
+            ) : null}
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-2 self-center">
-          {server.enabled && status.tone !== "loading" ? (
-            <AdaptiveTooltip>
-              <AdaptiveTooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon-sm"
-                  aria-label="Restart extension"
-                  onClick={() => restartServer(server.id)}
-                >
-                  <IconRefresh />
-                </Button>
-              </AdaptiveTooltipTrigger>
-              <AdaptiveTooltipContent>Restart</AdaptiveTooltipContent>
-            </AdaptiveTooltip>
-          ) : null}
-          <Button
-            variant="destructive"
-            size="sm"
-            className="not-sm:size-7 not-sm:px-0!"
-            onClick={() => setShowUninstall(true)}
-          >
-            <IconTrash data-icon="inline-start" />
-            <span className="sr-only sm:not-sr-only">Uninstall</span>
-          </Button>
+        <div className="flex shrink-0 items-center gap-3 self-center">
+          <Switch
+            checked={server.enabled}
+            aria-label={`Turn ${name} on or off`}
+            onCheckedChange={(enabled) => updateServer(server.id, { enabled })}
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon-sm" aria-label="More options">
+                <IconDotsVertical />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-auto min-w-max">
+              <DropdownMenuGroup>
+                {server.enabled ? (
+                  <DropdownMenuItem onSelect={() => restartServer(server.id)}>
+                    <IconRefresh />
+                    Restart
+                  </DropdownMenuItem>
+                ) : null}
+                {server.type === "http" && server.enabled && authState === "logged-in" ? (
+                  <DropdownMenuItem onSelect={() => void mcpLogout(server.id, server.name)}>
+                    <IconLogout />
+                    Sign out
+                  </DropdownMenuItem>
+                ) : null}
+                {server.type === "http" &&
+                server.enabled &&
+                (authState === "logged-out" || authState === "supports-oauth") ? (
+                  <DropdownMenuItem
+                    onSelect={() => void mcpLogin(server.id, server.url, server.name)}
+                  >
+                    <IconLogin />
+                    Sign in
+                  </DropdownMenuItem>
+                ) : null}
+                <DropdownMenuItem variant="destructive" onSelect={() => setShowUninstall(true)}>
+                  <IconTrash />
+                  Uninstall
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
-
-      {status.tone === "error" ? (
-        <Alert variant="destructive">
-          <IconAlertTriangle />
-          <AlertTitle>This extension couldn't load</AlertTitle>
-          <AlertDescription className="wrap-anywhere">Error: {status.description}</AlertDescription>
-        </Alert>
-      ) : null}
 
       <ExtensionSettings
         server={server}

@@ -1,4 +1,4 @@
-import { IconLogin, IconLogout } from "@tabler/icons-react";
+import { IconAlertTriangle, IconLogin, IconRefresh } from "@tabler/icons-react";
 import { Fragment, type ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -10,6 +10,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -35,34 +36,17 @@ import {
   type McpOAuthClient,
   mcpCheckAuth,
   mcpLogin,
-  mcpLogout,
   setMcpOAuthClient,
 } from "@/lib/ai/tools/mcp/oauth";
-import type { McpAuthState, McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
+import type { McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
 import type { McpHttpServerConfig, McpServerConfig } from "@/lib/settings/types";
 
 import { McpServerConfigForm, type McpServerConfigFormValues } from "../mcp-server-config-form";
-import { getServerStatus } from "../model";
+import { getServerStatus, type ServerStatus } from "../model";
 import { useExtensionActions } from "../use-extension-actions";
 
-function AccountRow({
-  server,
-  authState,
-  loadFailed,
-}: {
-  server: McpHttpServerConfig;
-  authState: McpAuthState;
-  loadFailed: boolean;
-}) {
+function useBusy() {
   const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    if (authState === undefined && server.enabled) void mcpCheckAuth(server.id, server.url);
-  }, [server.id, server.url, server.enabled, authState]);
-
-  if (!server.enabled || authState === "no-auth") return null;
-  if (authState === undefined && loadFailed) return null;
-
   const run = async (action: () => Promise<unknown>) => {
     setBusy(true);
     try {
@@ -71,44 +55,67 @@ function AccountRow({
       setBusy(false);
     }
   };
+  return [busy, run] as const;
+}
 
+function SignInButton({ server }: { server: McpHttpServerConfig }) {
+  const [busy, run] = useBusy();
   return (
-    <SettingsRow
-      layout="row"
-      label="Account"
-      description={
-        authState === undefined
-          ? "Checking sign-in status..."
-          : authState === "logged-in"
-            ? "Connected"
-            : authState === "supports-oauth"
-              ? "Connect your account for full access."
-              : "Not connected"
-      }
+    <Button
+      size="sm"
+      disabled={busy}
+      onClick={() => run(() => mcpLogin(server.id, server.url, server.name))}
     >
-      {authState === undefined ? (
-        <Spinner />
-      ) : authState === "logged-in" ? (
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={busy}
-          onClick={() => run(() => mcpLogout(server.id, server.name))}
-        >
-          {busy ? <Spinner data-icon="inline-start" /> : <IconLogout data-icon="inline-start" />}
-          Disconnect
-        </Button>
-      ) : (
-        <Button
-          size="sm"
-          disabled={busy}
-          onClick={() => run(() => mcpLogin(server.id, server.url, server.name))}
-        >
-          {busy ? <Spinner data-icon="inline-start" /> : <IconLogin data-icon="inline-start" />}
-          Connect
-        </Button>
-      )}
-    </SettingsRow>
+      {busy ? <Spinner data-icon="inline-start" /> : <IconLogin data-icon="inline-start" />}
+      Sign in
+    </Button>
+  );
+}
+
+function StatusNotice({
+  server,
+  status,
+  onRetry,
+}: {
+  server: McpServerConfig;
+  status: ServerStatus;
+  onRetry: () => void;
+}) {
+  if (status.tone === "warn" && server.type === "http") {
+    return (
+      <Alert>
+        <IconLogin />
+        <AlertTitle>Sign in to finish setting up</AlertTitle>
+        <AlertDescription>
+          <p>This extension needs you to sign in to your account before AgentOne can use it.</p>
+          <SignInButton server={server} />
+        </AlertDescription>
+      </Alert>
+    );
+  }
+  if (status.tone !== "error") return null;
+  return (
+    <Alert variant="destructive">
+      <IconAlertTriangle />
+      <AlertTitle>This extension couldn't connect</AlertTitle>
+      <AlertDescription className="min-w-0">
+        <p>
+          Try again in a moment. If it keeps happening, the extension may need to be set up again.
+        </p>
+        <div className="flex flex-col items-start gap-3">
+          <Button variant="outline" size="sm" className="text-foreground" onClick={onRetry}>
+            <IconRefresh data-icon="inline-start" />
+            Try again
+          </Button>
+          <details className="text-muted-foreground max-w-full text-xs">
+            <summary className="hover:text-foreground cursor-pointer select-none">
+              Technical details
+            </summary>
+            <p className="mt-1 font-mono wrap-anywhere">{status.description}</p>
+          </details>
+        </div>
+      </AlertDescription>
+    </Alert>
   );
 }
 
@@ -122,7 +129,7 @@ function ToolApprovals({
   onChange: (overrides: Record<string, boolean>) => void;
 }) {
   return (
-    <FieldGroup className="max-h-96 gap-3 overflow-x-hidden overflow-y-auto px-1 py-2">
+    <FieldGroup className="max-h-96 gap-1.5 overflow-x-hidden overflow-y-auto px-1 py-2">
       {tools.map((tool, index) => {
         const displayName = getToolDisplayName(tool.name, tool.title);
         const override = server.toolApprovalOverrides?.[tool.name];
@@ -130,9 +137,9 @@ function ToolApprovals({
         const id = `tool-approval-${server.id}-${tool.name}`;
         return (
           <Fragment key={tool.name}>
-            {index > 0 ? <FieldSeparator /> : null}
+            {index > 0 ? <FieldSeparator className="shrink-0" /> : null}
             <Field orientation="horizontal">
-              <FieldLabel htmlFor={id} className="min-w-0">
+              <FieldLabel htmlFor={id} className="min-w-0 font-normal">
                 <span className="truncate">{displayName}</span>
               </FieldLabel>
               <span className="text-muted-foreground shrink-0 text-xs">
@@ -141,7 +148,7 @@ function ToolApprovals({
               <Switch
                 id={id}
                 checked={requiresApproval}
-                aria-label={`Ask before running ${displayName}`}
+                aria-label={`Ask before using ${displayName}`}
                 onCheckedChange={(checked) => {
                   const next = { ...server.toolApprovalOverrides };
                   if (checked === server.requiresApproval) delete next[tool.name];
@@ -235,9 +242,7 @@ function ConnectionCard({
       setClientId(client?.clientId ?? "");
       setClientSecret("");
       onOAuthClientSaved();
-      toast.success(
-        nextClientId ? "OAuth app saved. Connect your account again." : "OAuth app removed",
-      );
+      toast.success(nextClientId ? "OAuth app saved. Sign in again." : "OAuth app removed");
     } catch (error) {
       toast.error(`Couldn't save the OAuth app: ${String(error)}`);
     } finally {
@@ -253,7 +258,7 @@ function ConnectionCard({
             <span className="flex min-w-0 flex-col gap-1">
               <span className="text-base leading-snug font-medium">Advanced</span>
               <span className="text-muted-foreground text-sm font-normal">
-                Only change these settings if you know what you're doing.
+                Connection details. Most people never need to change these.
               </span>
             </span>
           </AccordionTrigger>
@@ -349,82 +354,65 @@ export function ExtensionSettings({
   const loadState = loadStates[server.id];
   const authState = authStates[server.id];
   const status = getServerStatus(loadState, authState, server.enabled);
-  const tools = server.enabled && loadState?.status === "loaded" ? (loadState.tools ?? []) : [];
+  const tools = loadState?.tools ?? [];
+  const url = server.type === "http" ? server.url : undefined;
+
+  useEffect(() => {
+    if (url && server.enabled && authState === undefined) void mcpCheckAuth(server.id, url);
+  }, [server.id, url, server.enabled, authState]);
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle>General</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-6">
-          <SettingsRow
-            layout="row"
-            htmlFor={`enabled-${server.id}`}
-            label="Turn on"
-            description="Lets AgentOne use this extension's tools."
-          >
-            <Switch
-              id={`enabled-${server.id}`}
-              checked={server.enabled}
-              onCheckedChange={(enabled) => updateServer(server.id, { enabled })}
-            />
-          </SettingsRow>
+      {server.enabled ? (
+        <>
+          <StatusNotice server={server} status={status} onRetry={() => restartServer(server.id)} />
 
-          {server.type === "http" ? (
-            <AccountRow
-              server={server}
-              authState={authState}
-              loadFailed={loadState?.status === "error"}
-            />
+          {status.tone === "ok" ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Tools</CardTitle>
+                <CardDescription>
+                  Tools are the actions this extension lets AgentOne take for you.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-4">
+                <SettingsRow
+                  layout="row"
+                  htmlFor={`approval-${server.id}`}
+                  label="Ask before using tools"
+                  description="AgentOne checks with you first each time, except in Auto mode."
+                >
+                  <Switch
+                    id={`approval-${server.id}`}
+                    checked={server.requiresApproval}
+                    onCheckedChange={(requiresApproval) =>
+                      updateServer(server.id, { requiresApproval })
+                    }
+                  />
+                </SettingsRow>
+                {tools.length ? (
+                  <div className="flex flex-col gap-1 border-t pt-4">
+                    <p className="text-muted-foreground text-sm">Or choose for each tool:</p>
+                    <ToolApprovals
+                      server={server}
+                      tools={tools}
+                      onChange={(toolApprovalOverrides) =>
+                        updateServer(server.id, { toolApprovalOverrides })
+                      }
+                    />
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground border-t pt-4 text-sm">
+                    This extension doesn't have any tools right now.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
           ) : null}
-
-          <SettingsRow
-            layout="row"
-            htmlFor={`approval-${server.id}`}
-            label="Ask before running tools"
-            description="Asks for confirmation before each tool runs, unless in Auto mode."
-          >
-            <Switch
-              id={`approval-${server.id}`}
-              checked={server.requiresApproval}
-              onCheckedChange={(requiresApproval) => updateServer(server.id, { requiresApproval })}
-            />
-          </SettingsRow>
-        </CardContent>
-      </Card>
+        </>
+      ) : null}
 
       {about}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Tools</CardTitle>
-          <CardDescription>
-            {!server.enabled
-              ? "Turn this extension on to set approvals per tool."
-              : status.tone === "warn"
-                ? status.description
-                : status.tone === "error"
-                  ? "Tools couldn't be loaded."
-                  : loadState?.status !== "loaded"
-                    ? "Tools will appear once the extension finishes loading."
-                    : tools.length
-                      ? "Choose which tools ask before running. Tools you haven't changed follow the setting above."
-                      : "This extension has no tools right now."}
-          </CardDescription>
-        </CardHeader>
-        {tools.length ? (
-          <CardContent>
-            <ToolApprovals
-              server={server}
-              tools={tools}
-              onChange={(toolApprovalOverrides) =>
-                updateServer(server.id, { toolApprovalOverrides })
-              }
-            />
-          </CardContent>
-        ) : null}
-      </Card>
 
       <ConnectionCard
         server={server}
