@@ -1,6 +1,6 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigationType, useParams, useSearchParams } from "react-router";
+import { useLocation, useParams, useSearchParams } from "react-router";
 
 import { AutoScrollContainer, type AutoScrollHandle } from "@/components/a1/auto-scroll-container";
 import { ChatMessageLoading } from "@/components/a1/chat-message-loading";
@@ -43,12 +43,6 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
   const hasProjects = useAtomValue(projectsAtom).length > 0;
   const { loadChatMetadata } = usePersistence();
   const requestedProjectId = searchParams.get("project") ?? undefined;
-  const navigationType = useNavigationType();
-  const [draftProjectId, setDraftProjectId] = useState(requestedProjectId);
-  if (navigationType !== "REPLACE" && draftProjectId !== requestedProjectId) {
-    setDraftProjectId(requestedProjectId);
-  }
-  const draftKey = chatId || (draftProjectId ? `new-chat:${draftProjectId}` : "new-chat");
   const getChatProject = useCallback(
     () => getProject(chatId ? loadChatMetadata(chatId).projectId : requestedProjectId),
     [chatId, loadChatMetadata, requestedProjectId],
@@ -212,8 +206,8 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
         )}
         <div className="w-full max-w-3xl">
           <MainChatInput
-            key={draftKey}
-            draftKey={draftKey}
+            key={chatId || "new-chat"}
+            draftKey={chatId || "new-chat"}
             initialValue={initialInputValue}
             initialValueKey={chatId ? undefined : location.key}
             disabled={isChatLoading}
