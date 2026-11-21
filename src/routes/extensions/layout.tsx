@@ -1,6 +1,6 @@
 import { IconArrowLeft } from "@tabler/icons-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, Outlet, useLocation, useNavigate, useSearchParams } from "react-router";
+import { Outlet, useLocation, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,6 @@ export default function ExtensionsLayout() {
   const installedRef = useRef(false);
   const openAddDialog = useCallback(() => setShowAddDialog(true), []);
   const chatId = searchParams.get("chatId");
-  const isList = location.pathname === "/extensions";
 
   const prefill = useMemo(() => {
     const name = searchParams.get("mcpName");
@@ -51,18 +50,7 @@ export default function ExtensionsLayout() {
           <IconArrowLeft data-icon="inline-start" />
           Back
         </Button>
-        <h1 className="text-base font-semibold">
-          {isList ? (
-            "Extensions"
-          ) : (
-            <Link
-              to={link("/extensions")}
-              className="focus-visible:ring-ring/50 rounded-sm outline-none hover:underline focus-visible:ring-3"
-            >
-              Extensions
-            </Link>
-          )}
-        </h1>
+        <h1 className="text-base font-semibold">Extensions</h1>
       </header>
 
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
