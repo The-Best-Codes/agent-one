@@ -73,6 +73,7 @@ export function UpdateAvailableDialog() {
               dismissDialog();
               void navigate("/settings#setting-download-and-install-update");
             }}
+            autoFocus
           >
             <IconDownload data-icon="inline-start" />
             Update
