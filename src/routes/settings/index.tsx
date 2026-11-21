@@ -1,6 +1,6 @@
 import { IconArrowLeft, IconList } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +11,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { useBack } from "@/hooks/use-back";
 
 import SettingsNav from "./settings-nav";
 import { SettingsSections } from "./settings-renderer";
@@ -77,7 +78,7 @@ function useActiveItems() {
 export default function SettingsRoute() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchParams] = useSearchParams();
+  const back = useBack();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const activeIds = useActiveItems();
@@ -95,11 +96,6 @@ export default function SettingsRoute() {
 
     return () => window.cancelAnimationFrame(frameId);
   }, [location.hash, location.key]);
-
-  const handleNavigateBack = () => {
-    const chatId = searchParams.get("chatId");
-    void navigate(chatId ? `/chat/${chatId}` : "/chat");
-  };
 
   const handleNavigate = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -119,7 +115,7 @@ export default function SettingsRoute() {
       />
       <div className="bg-background sticky top-0 z-10 border-b p-4 md:hidden">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleNavigateBack}>
+          <Button variant="outline" size="sm" onClick={() => back()}>
             <IconArrowLeft data-icon="inline-start" />
             Back
           </Button>
@@ -154,13 +150,9 @@ export default function SettingsRoute() {
         <div className="flex flex-col gap-6 md:flex-row">
           <div className="hidden w-48 shrink-0 md:sticky md:top-6 md:flex md:max-h-[calc(100svh-3rem)] md:flex-col md:gap-3 md:self-start lg:w-64">
             <div className="flex flex-col gap-2">
-              <Button
-                variant="outline"
-                onClick={handleNavigateBack}
-                className="w-full justify-start"
-              >
+              <Button variant="outline" onClick={() => back()} className="w-full justify-start">
                 <IconArrowLeft data-icon="inline-start" />
-                Back to Chat
+                Back
               </Button>
               <SettingsSearchTrigger onClick={() => setIsSearchOpen(true)} />
             </div>

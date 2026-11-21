@@ -44,7 +44,7 @@ export const DeleteProjectModal = ({ isOpen, onClose, project }: DeleteProjectMo
     if (deleteChats) {
       bulkDeleteChats(projectChatIds);
       if (activeChatId && projectChatIds.includes(activeChatId)) {
-        void navigate("/chat");
+        void navigate("/chat", { replace: true });
       }
     } else {
       setChatsProject(projectChatIds, undefined);

@@ -26,7 +26,7 @@ export const BulkDeleteModal = ({ isOpen, onClose, chatIds, chatCount }: BulkDel
   const handleDelete = () => {
     bulkDeleteChats(chatIds);
     if (activeChatId && chatIds.includes(activeChatId)) {
-      void navigate("/chat");
+      void navigate("/chat", { replace: true });
     }
     onClose();
   };

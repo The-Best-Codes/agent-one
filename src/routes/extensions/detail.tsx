@@ -9,7 +9,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { useState } from "react";
-import { Link, Navigate, useNavigate, useParams } from "react-router";
+import { Link, Navigate, useParams } from "react-router";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +30,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Switch } from "@/components/ui/switch";
+import { useUp } from "@/hooks/use-back";
 import { mcpLogin, mcpLogout } from "@/lib/ai/tools/mcp/oauth";
 import { getExtensionPageUrl } from "@/lib/extensions/manifest";
 import { getExtensionSourceLabel, getInstalledExtensionMetadata } from "@/lib/extensions/metadata";
@@ -38,7 +39,7 @@ import type { McpServerConfig } from "@/lib/settings/types";
 import { ExtensionIcon } from "./components/extension-icon";
 import { ExtensionSettings } from "./components/extension-settings";
 import { ServerStatusDot } from "./components/server-status";
-import { getServerStatus, useExtensionsLink } from "./model";
+import { getServerStatus } from "./model";
 import { UninstallExtensionDialog } from "./uninstall-extension-dialog";
 import { useExtensionActions } from "./use-extension-actions";
 
@@ -66,8 +67,7 @@ function OutLink({ href, children }: { href: string; children: React.ReactNode }
 }
 
 function ExtensionDetail({ server }: { server: McpServerConfig }) {
-  const navigate = useNavigate();
-  const link = useExtensionsLink();
+  const up = useUp();
   const { loadStates, authStates, updateServer, removeServers, restartServer } =
     useExtensionActions();
   const [showUninstall, setShowUninstall] = useState(false);
@@ -215,7 +215,7 @@ function ExtensionDetail({ server }: { server: McpServerConfig }) {
           removeServers([server.id]);
           toast.success(`${name} removed`);
           setShowUninstall(false);
-          void navigate(link("/extensions"), { replace: true });
+          up("/extensions");
         }}
       />
     </>
@@ -224,15 +224,21 @@ function ExtensionDetail({ server }: { server: McpServerConfig }) {
 
 export default function ExtensionDetailRoute() {
   const serverId = useParams()["*"];
-  const link = useExtensionsLink();
+  const up = useUp();
   const { servers } = useExtensionActions();
-  if (!serverId) return <Navigate replace to={link("/extensions")} />;
+  if (!serverId) return <Navigate replace to="/extensions" />;
   const server = servers.find((item) => item.id === serverId);
 
   return (
     <>
       <Button asChild variant="outline" size="sm" className="self-start">
-        <Link to={link("/extensions")}>
+        <Link
+          to="/extensions"
+          onClick={(event) => {
+            event.preventDefault();
+            up("/extensions");
+          }}
+        >
           <IconArrowLeft data-icon="inline-start" />
           All extensions
         </Link>

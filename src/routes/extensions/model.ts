@@ -1,19 +1,7 @@
-import { useCallback } from "react";
-import { useSearchParams } from "react-router";
-
 import type { McpAuthState, McpServerLoadState } from "@/lib/jotai/mcp-atoms";
 
 export function getExtensionPath(serverId: string): string {
   return `/extensions/view/${serverId.split("/").map(encodeURIComponent).join("/")}`;
-}
-
-export function useExtensionsLink() {
-  const [searchParams] = useSearchParams();
-  const chatId = searchParams.get("chatId");
-  return useCallback(
-    (path: string) => (chatId ? `${path}?${new URLSearchParams({ chatId }).toString()}` : path),
-    [chatId],
-  );
 }
 
 export type ServerStatusTone = "ok" | "warn" | "error" | "off" | "loading";

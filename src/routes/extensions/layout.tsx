@@ -4,24 +4,24 @@ import { Outlet, useLocation, useNavigate, useSearchParams } from "react-router"
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { useBack } from "@/hooks/use-back";
 import { setMcpOAuthClient } from "@/lib/ai/tools/mcp/oauth";
 
 import { AddServerDialog } from "./add-server-dialog";
 import { InstallFromLink } from "./install-from-link";
-import { getExtensionPath, useExtensionsLink } from "./model";
+import { getExtensionPath } from "./model";
 import { useExtensionActions } from "./use-extension-actions";
 
 export default function ExtensionsLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const link = useExtensionsLink();
   const { installServer, restartServer } = useExtensionActions();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const installedRef = useRef(false);
   const openAddDialog = useCallback(() => setShowAddDialog(true), []);
-  const chatId = searchParams.get("chatId");
+  const back = useBack();
 
   const prefill = useMemo(() => {
     const name = searchParams.get("mcpName");
@@ -42,11 +42,7 @@ export default function ExtensionsLayout() {
   return (
     <main className="flex h-svh min-h-0 flex-col" role="main">
       <header className="bg-background z-10 flex items-center gap-3 border-b p-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => void navigate(chatId ? `/chat/${chatId}` : "/chat")}
-        >
+        <Button variant="outline" size="sm" onClick={() => back()}>
           <IconArrowLeft data-icon="inline-start" />
           Back
         </Button>
@@ -90,7 +86,7 @@ export default function ExtensionsLayout() {
               .finally(() => restartServer(server.id));
           }
           installedRef.current = true;
-          void navigate(link(getExtensionPath(server.id)), { replace: Boolean(prefill) });
+          void navigate(getExtensionPath(server.id), { replace: Boolean(prefill) });
         }}
         initialValues={prefill}
       />

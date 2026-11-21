@@ -34,11 +34,10 @@ import { getExtensionSourceLabel, getInstalledExtensionMetadata } from "@/lib/ex
 
 import { ExtensionIcon } from "./components/extension-icon";
 import { ServerStatusDot } from "./components/server-status";
-import { getExtensionPath, getServerStatus, useExtensionsLink } from "./model";
+import { getExtensionPath, getServerStatus } from "./model";
 import { useExtensionActions } from "./use-extension-actions";
 
 export default function InstalledRoute() {
-  const link = useExtensionsLink();
   const { servers, loadStates, authStates, updateServer } = useExtensionActions();
   const openAddDialog = useOutletContext<() => void>();
   const [query, setQuery] = useState("");
@@ -161,7 +160,7 @@ export default function InstalledRoute() {
               authStates[server.id],
               server.enabled,
             );
-            const path = link(getExtensionPath(server.id));
+            const path = getExtensionPath(server.id);
             return (
               <li key={server.id} className="min-w-0">
                 <Card className="h-full">

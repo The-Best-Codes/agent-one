@@ -1,13 +1,13 @@
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
-import { useSettingsPath } from "@/hooks/use-settings-path";
 
 export function KbdRegistry() {
   const navigate = useNavigate();
-  const settingsPath = useSettingsPath();
+  const location = useLocation();
   useKeyboardShortcut("openSettings", () => {
-    void navigate(settingsPath);
+    if (location.pathname === "/settings") return;
+    void navigate("/settings");
   });
   useKeyboardShortcut("newChat", () => {
     void navigate("/chat");

@@ -24,7 +24,7 @@ export default function OnboardingRoute() {
 
   useEffect(() => {
     if (onboardingCompleted) {
-      void navigate("/chat");
+      void navigate("/chat", { replace: true });
     }
   }, [onboardingCompleted, navigate]);
 

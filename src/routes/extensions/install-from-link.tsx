@@ -12,23 +12,22 @@ import {
 import { getLogger } from "@/lib/logger";
 
 import { InstallDialog } from "./components/install-dialog";
-import { getExtensionPath, useExtensionsLink } from "./model";
+import { getExtensionPath } from "./model";
 import { useExtensionActions } from "./use-extension-actions";
 
 const logger = getLogger(import.meta.url);
 
 export function InstallFromLink() {
   const navigate = useNavigate();
-  const link = useExtensionsLink();
   const [searchParams, setSearchParams] = useSearchParams();
   const { servers, installServer } = useExtensionActions();
   const [manifest, setManifest] = useState<ExtensionManifest>();
   const id = searchParams.get("install");
-  const latest = useRef({ servers, navigate, link, setSearchParams });
+  const latest = useRef({ servers, navigate, setSearchParams });
 
   useEffect(() => {
-    latest.current = { servers, navigate, link, setSearchParams };
-  }, [servers, navigate, link, setSearchParams]);
+    latest.current = { servers, navigate, setSearchParams };
+  }, [servers, navigate, setSearchParams]);
 
   useEffect(() => {
     if (!id) return;
@@ -53,7 +52,7 @@ export function InstallFromLink() {
         if (existing) {
           loading = false;
           toast.info(`${existing.name || result.name} is already installed`, { id: toastId });
-          void latest.current.navigate(latest.current.link(getExtensionPath(existing.id)), {
+          void latest.current.navigate(getExtensionPath(existing.id), {
             replace: true,
           });
           return;
@@ -125,7 +124,7 @@ export function InstallFromLink() {
           id: manifest.serverId,
           metadata: createManifestMetadata(manifest, template),
         });
-        void navigate(link(getExtensionPath(server.id)));
+        void navigate(getExtensionPath(server.id));
       }}
     />
   );

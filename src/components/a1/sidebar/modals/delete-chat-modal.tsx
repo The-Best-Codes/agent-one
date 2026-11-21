@@ -26,7 +26,7 @@ export const DeleteChatModal = ({ isOpen, onClose, chatId, chatTitle }: DeleteCh
   const handleDelete = () => {
     deleteChat(chatId);
     if (activeChatId === chatId) {
-      void navigate("/chat");
+      void navigate("/chat", { replace: true });
     }
     onClose();
   };
