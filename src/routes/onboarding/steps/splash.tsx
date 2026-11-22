@@ -76,10 +76,15 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
 
   useEffect(() => {
     const timeouts: number[] = [];
+    let cancelled = false;
 
-    const measureWidth = () => {
-      if (textRef.current) {
-        const width = textRef.current.getBoundingClientRect().width;
+    const measureWidth = async () => {
+      const text = textRef.current;
+      if (text) {
+        await document.fonts.load(getComputedStyle(text).font, CONFIG.appName).catch(() => {});
+        if (cancelled) return;
+
+        const width = Math.ceil(text.getBoundingClientRect().width);
 
         const revealTimeout = window.setTimeout(() => {
           animateWidth(0, width, CONFIG.revealDuration, () => {
@@ -114,10 +119,11 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
       }
     };
 
-    const initialTimeout = window.setTimeout(measureWidth, 100);
+    const initialTimeout = window.setTimeout(() => void measureWidth(), 100);
     timeouts.push(initialTimeout);
 
     return () => {
+      cancelled = true;
       timeouts.forEach((id) => window.clearTimeout(id));
     };
   }, [animateWidth]);
