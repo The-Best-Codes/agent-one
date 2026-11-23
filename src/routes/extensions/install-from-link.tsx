@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 
 import { setMcpOAuthClient } from "@/lib/ai/tools/mcp/oauth";
@@ -23,11 +23,12 @@ export function InstallFromLink() {
   const { servers, installServer } = useExtensionActions();
   const [manifest, setManifest] = useState<ExtensionManifest>();
   const id = searchParams.get("install");
-  const latest = useRef({ servers, navigate, setSearchParams });
+  const inPlace = Boolean(useLocation().state?.inPlace);
+  const latest = useRef({ servers, navigate, setSearchParams, inPlace });
 
   useEffect(() => {
-    latest.current = { servers, navigate, setSearchParams };
-  }, [servers, navigate, setSearchParams]);
+    latest.current = { servers, navigate, setSearchParams, inPlace };
+  }, [servers, navigate, setSearchParams, inPlace]);
 
   useEffect(() => {
     if (!id) return;
@@ -50,11 +51,11 @@ export function InstallFromLink() {
         if (!active) return;
         const existing = latest.current.servers.find((server) => server.id === result.serverId);
         if (existing) {
+          const { inPlace, navigate } = latest.current;
           loading = false;
           toast.info(`${existing.name || result.name} is already installed`, { id: toastId });
-          void latest.current.navigate(getExtensionPath(existing.id), {
-            replace: true,
-          });
+          if (inPlace) finish();
+          void navigate(getExtensionPath(existing.id), { replace: !inPlace });
           return;
         }
         if (!result.templates.length) {

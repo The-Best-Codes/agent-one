@@ -35,6 +35,17 @@ export default function ExtensionsLayout() {
     } as const;
   }, [searchParams]);
 
+  const clearPrefill = () =>
+    setSearchParams(
+      (previous) => {
+        for (const key of ["mcpName", "mcpType", "mcpCommand", "mcpUrl"]) {
+          previous.delete(key);
+        }
+        return previous;
+      },
+      { replace: true },
+    );
+
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 });
   }, [location.pathname]);
@@ -62,17 +73,7 @@ export default function ExtensionsLayout() {
           setShowAddDialog(open);
           const installed = installedRef.current;
           installedRef.current = false;
-          if (!open && prefill && !installed) {
-            setSearchParams(
-              (previous) => {
-                for (const key of ["mcpName", "mcpType", "mcpCommand", "mcpUrl"]) {
-                  previous.delete(key);
-                }
-                return previous;
-              },
-              { replace: true },
-            );
-          }
+          if (!open && prefill && !installed) clearPrefill();
         }}
         onAddServer={({ oauthClient, ...data }) => {
           const server = installServer(
@@ -86,7 +87,9 @@ export default function ExtensionsLayout() {
               .finally(() => restartServer(server.id));
           }
           installedRef.current = true;
-          void navigate(getExtensionPath(server.id), { replace: Boolean(prefill) });
+          const inPlace = Boolean(prefill && location.state?.inPlace);
+          if (inPlace) clearPrefill();
+          void navigate(getExtensionPath(server.id), { replace: Boolean(prefill) && !inPlace });
         }}
         initialValues={prefill}
       />

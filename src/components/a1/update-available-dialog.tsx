@@ -71,7 +71,9 @@ export function UpdateAvailableDialog() {
             size="sm"
             onClick={() => {
               dismissDialog();
-              void navigate("/settings#setting-download-and-install-update");
+              void navigate("/settings#setting-download-and-install-update", {
+                replace: window.location.pathname === "/settings",
+              });
             }}
             autoFocus
           >
