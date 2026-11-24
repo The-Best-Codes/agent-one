@@ -86,7 +86,7 @@ const DEFAULT_MODEL_DIRECTORY: ModelDirectoryData = {
         name: "Default",
         features: { tool_call: true, attachment: true, reasoning: true },
         modalities: { input: ["text", "image", "file"], output: ["text"] },
-        limit: { context: 256000, output: 32000 },
+        limit: { context: 100000, output: 32000 },
       },
     },
   },
