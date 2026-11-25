@@ -505,7 +505,11 @@ class ChatSyncManager {
       typeof document !== "undefined" && document.visibilityState === "visible"
         ? PULL_INTERVAL_VISIBLE_MS
         : PULL_INTERVAL_HIDDEN_MS;
-    const delay = Math.max(0, this.lastFullAt + interval - Date.now());
+    const now = Date.now();
+    let delay = Math.max(0, this.lastFullAt + interval - now);
+    for (const { until } of this.chatBackoff.values()) {
+      if (until > now) delay = Math.min(delay, until - now);
+    }
     this.pollTimeout = setTimeout(() => {
       this.pollTimeout = null;
       this.schedule("full");
