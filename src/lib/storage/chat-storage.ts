@@ -74,7 +74,7 @@ export function onLocalChatChange(listener: (chatIds: string[]) => void): () => 
   return () => localChangeListeners.delete(listener);
 }
 
-function emitLocalChange(ids: string[]): void {
+export function emitLocalChange(ids: string[]): void {
   for (const listener of localChangeListeners) listener(ids);
 }
 

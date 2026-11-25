@@ -54,6 +54,7 @@ const DOWNLOAD_CONCURRENCY = 2;
 const UPLOAD_BATCH_MAX_CHATS = 25;
 const UPLOAD_BATCH_MAX_BYTES = 8 * 1024 * 1024;
 const MAX_FUTURE_SKEW_MS = 60_000;
+const REQUEST_TIMEOUT_MS = 10 * 60_000;
 
 type PassKind = "push" | "full";
 
@@ -263,13 +264,23 @@ function summaryMetadata(metadata: ChatMetadata): Record<string, unknown> {
 
 async function runPool<T>(items: T[], limit: number, worker: (item: T) => Promise<void>) {
   let index = 0;
+  let failed = false;
   const next = async (): Promise<void> => {
-    while (index < items.length) {
+    while (index < items.length && !failed) {
       const item = items[index++];
-      await worker(item);
+      try {
+        await worker(item);
+      } catch (error) {
+        failed = true;
+        throw error;
+      }
     }
   };
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, next));
+  const results = await Promise.allSettled(
+    Array.from({ length: Math.min(limit, items.length) }, next),
+  );
+  const rejected = results.find((result) => result.status === "rejected");
+  if (rejected) throw rejected.reason;
 }
 
 class ChatSyncManager {
@@ -649,6 +660,7 @@ class ChatSyncManager {
         Origin: SERVER_URL,
         "User-Agent": USER_AGENT,
       },
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     }).catch((error: unknown) => {
       throw new NetworkError(error instanceof Error ? error.message : String(error));
     });
@@ -757,6 +769,7 @@ class ChatSyncManager {
         method: "GET",
       });
       const page = (await response.json()) as PullResponse;
+      if (this.userId !== userId) throw new SyncStoppedError();
       if (page.limits?.maxChatBytes) this.maxChatBytes = page.limits.maxChatBytes;
 
       const chats = page.chats.filter((chat) => CHAT_ID_PATTERN.test(chat.id));
@@ -984,20 +997,22 @@ class ChatSyncManager {
     }
 
     const batch = downloads.slice(0, BATCH_SIZE);
-    await runPool(batch, DOWNLOAD_CONCURRENCY, async (row) => {
-      const result = await this.download(row);
-      if (result === "applied") changes.updated.push(row.chat_id);
-      if (result !== "skipped" && row.excluded) excludedChanged = true;
-    });
-
-    if (excludedChanged) await this.loadExcluded();
-    if (changes.updated.length > 0 || changes.deleted.length > 0) {
-      logger.verbose(
-        `Applied ${changes.updated.length} updated and ${changes.deleted.length} deleted chats from sync`,
-      );
-      for (const listener of this.listeners) listener(changes);
+    try {
+      await runPool(batch, DOWNLOAD_CONCURRENCY, async (row) => {
+        const result = await this.download(row);
+        if (result === "applied") changes.updated.push(row.chat_id);
+        if (result !== "skipped" && row.excluded) excludedChanged = true;
+      });
+    } finally {
+      if (excludedChanged) await this.loadExcluded();
+      if (changes.updated.length > 0 || changes.deleted.length > 0) {
+        logger.verbose(
+          `Applied ${changes.updated.length} updated and ${changes.deleted.length} deleted chats from sync`,
+        );
+        for (const listener of this.listeners) listener(changes);
+      }
+      this.refreshStatus();
     }
-    this.refreshStatus();
     return downloads.length > batch.length;
   }
 
@@ -1044,7 +1059,7 @@ class ChatSyncManager {
     const dirty = current.local_version !== current.synced_version || Boolean(current.excluded);
 
     if (dirty) {
-      const localWins = await this.resolveConflict(id, current, body, remoteRev);
+      const localWins = await this.localWins(id, current, body);
       if (localWins) {
         await this.updateRow(
           id,
@@ -1083,44 +1098,12 @@ class ChatSyncManager {
     return applied ? "applied" : "skipped";
   }
 
-  private async resolveConflict(
-    id: string,
-    row: SyncRow,
-    remote: ChatBody,
-    remoteRev: number,
-  ): Promise<boolean> {
-    const [localMetadata, localMessages] = await Promise.all([
-      chatStorage.getChatMetadata(id),
-      chatStorage.getChatMessages(id),
-    ]);
-    if (!localMetadata) return false;
-    const local: ChatBody = {
-      v: BODY_VERSION,
-      metadata: localMetadata,
-      messages: localMessages ?? [],
-    };
-    const localTime = local.metadata.updatedAt ?? row.updated_at;
+  private async localWins(id: string, row: SyncRow, remote: ChatBody): Promise<boolean> {
+    const local = await chatStorage.getChatMetadata(id);
+    if (!local) return false;
+    const localTime = local.updatedAt ?? row.updated_at;
     const remoteTime = remote.metadata.updatedAt ?? row.remote_updated_at;
-    const localWins = localTime >= remoteTime;
-    const [winner, loser] = localWins ? [local, remote] : [remote, local];
-
-    const winnerIds = new Set(winner.messages.map((message) => message.id));
-    const loserHasUnique = loser.messages.some((message) => !winnerIds.has(message.id));
-    if (loserHasUnique) {
-      const copyId = `${id.slice(0, 40)}-c${remoteRev}`;
-      const metadata: ChatMetadata = {
-        ...loser.metadata,
-        title: `${loser.metadata.title} (conflict copy)`,
-        titleState: "generated",
-        branchOf: id,
-      };
-      logger.info(`Chat ${id} changed on two devices, saving the older version as ${copyId}`);
-      await chatStorage.setChatMetadata(copyId, metadata);
-      await chatStorage.setChatMessages(copyId, loser.messages);
-      await chatStorage.updateFtsIndex(copyId, metadata.title, loser.messages);
-      for (const listener of this.listeners) listener({ updated: [copyId], deleted: [] });
-    }
-    return localWins;
+    return localTime >= remoteTime;
   }
 
   private async push(): Promise<{ conflicted: boolean; more: boolean }> {
@@ -1162,14 +1145,14 @@ class ChatSyncManager {
     for (; index < rows.length && uploaded < BATCH_SIZE; index++) {
       const row = rows[index];
       if (this.isBusy(row.chat_id) || this.isBackedOff(row.chat_id)) continue;
-      if (!row.local_deleted && quotaPaused()) {
+      if (!row.local_deleted && !row.excluded && !row.project_id && quotaPaused()) {
         skippedForQuota = true;
         continue;
       }
       const prepared = await this.preparePush(row);
       if (!prepared) continue;
       uploaded++;
-      if (prepared.blob.size > UPLOAD_BATCH_MAX_BYTES) {
+      if ((prepared.disabled && quotaPaused()) || prepared.blob.size > UPLOAD_BATCH_MAX_BYTES) {
         record(await this.uploadOne(prepared));
         continue;
       }
@@ -1366,6 +1349,7 @@ class ChatSyncManager {
           return update.rowsAffected > 0;
         });
         if (!saved) await this.request(`/api/sync/chats/${id}`, { method: "DELETE" });
+        if (item.disabled) this.quotaFullUntil = 0;
         return "ok";
       }
       case "conflict":

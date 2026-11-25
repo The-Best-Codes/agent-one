@@ -351,9 +351,8 @@ export function ChatSyncControl() {
         label="Sync chats"
         checked={enabled && canSyncChats}
         onCheckedChange={(checked) => {
-          if (!checked) setEnabled(false);
-          else if (canSyncChats) setEnabled(true);
-          else setDialogOpen(true);
+          if (checked) setDialogOpen(true);
+          else setEnabled(false);
         }}
         signedOutHint="Sign in to sync chats"
       />

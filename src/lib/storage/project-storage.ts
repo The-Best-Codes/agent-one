@@ -1,4 +1,4 @@
-import { enqueueWrite, getDb } from "@/lib/storage/chat-storage";
+import { emitLocalChange, enqueueWrite, getDb } from "@/lib/storage/chat-storage";
 
 export interface Project {
   id: string;
@@ -89,7 +89,11 @@ export const projectStorage = {
   },
 
   async deleteProject(id: string): Promise<void> {
-    await enqueueWrite(async (d) => {
+    const chatIds = await enqueueWrite(async (d) => {
+      const chats = await d.select<{ id: string }[]>(
+        "SELECT id FROM chat_metadata WHERE project_id = $1",
+        [id],
+      );
       await d.execute(
         `UPDATE chat_sync SET local_version = local_version + 1, updated_at = $2
          WHERE chat_id IN (SELECT id FROM chat_metadata WHERE project_id = $1)`,
@@ -97,6 +101,8 @@ export const projectStorage = {
       );
       await d.execute("UPDATE chat_metadata SET project_id = NULL WHERE project_id = $1", [id]);
       await d.execute("DELETE FROM projects WHERE id = $1", [id]);
+      return chats.map((chat) => chat.id);
     });
+    if (chatIds.length > 0) emitLocalChange(chatIds);
   },
 };
