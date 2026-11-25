@@ -10,7 +10,12 @@ import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { lastVacuumTimestampAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
 import { loadProjects } from "@/lib/projects";
-import { type ChatSearchResult, chatStorage, enqueueWrite } from "@/lib/storage/chat-storage";
+import {
+  type ChatSearchResult,
+  chatStorage,
+  enqueueWrite,
+  type StoredChat,
+} from "@/lib/storage/chat-storage";
 import { chatSyncManager } from "@/lib/sync/chat-sync-manager";
 
 import { PersistenceContext } from "./persistence-contexts";
@@ -114,6 +119,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [chatSort] = useAtom(settingAtoms.CHAT_SORT);
 
   const metadataCacheRef = useRef<Map<string, ChatMetadata>>(new Map());
+  const cacheVersionRef = useRef(0);
   const [isMetadataLoaded, setIsMetadataLoaded] = useState(false);
 
   useEffect(() => {
@@ -145,9 +151,14 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     let cancelled = false;
     const reload = debounce(async () => {
       try {
-        await enqueueWrite(async () => undefined);
-        const storedChats = await chatStorage.listChats(chatSort);
-        if (cancelled) return;
+        let version: number;
+        let storedChats: StoredChat[];
+        do {
+          version = cacheVersionRef.current;
+          await enqueueWrite(async () => undefined);
+          storedChats = await chatStorage.listChats(chatSort);
+          if (cancelled) return;
+        } while (version !== cacheVersionRef.current);
         const cache = new Map<string, ChatMetadata>();
         for (const { id, metadata } of storedChats) {
           cache.set(id, metadata);
@@ -196,10 +207,12 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
   }, []);
 
   const setMetadata = useCallback((id: string, metadata: ChatMetadata) => {
+    cacheVersionRef.current++;
     metadataCacheRef.current.set(id, metadata);
   }, []);
 
   const removeMetadata = useCallback((id: string) => {
+    cacheVersionRef.current++;
     metadataCacheRef.current.delete(id);
   }, []);
 
