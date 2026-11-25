@@ -388,7 +388,10 @@ class ChatSyncManager {
         await this.pull(userId);
       }
       const row = await this.getRow(chatId);
-      if (row && row.remote_rev > row.rev) await this.applyRows([row]);
+      if (row && row.remote_rev > row.rev) {
+        this.chatBackoff.delete(chatId);
+        await this.applyRows([row]);
+      }
     } catch (error) {
       if (error instanceof SyncStoppedError) return;
       logger.warn(`Failed to sync chat ${chatId} on open: ${describeError(error)}`);
@@ -846,7 +849,7 @@ class ChatSyncManager {
               deleted ? 0 : syncedAt,
             ],
           );
-        } else if (chat.rev > known) {
+        } else if (chat.rev >= known) {
           await d.execute(
             `UPDATE chat_sync SET
                remote_rev = $2,
@@ -998,13 +1001,18 @@ class ChatSyncManager {
 
     const ready = downloads.filter((row) => !this.isBackedOff(row.chat_id));
     const batch = ready.slice(0, BATCH_SIZE);
+    let unreachable = false;
     try {
       await runPool(batch, DOWNLOAD_CONCURRENCY, async (row) => {
+        if (unreachable) return;
         let result: "applied" | "kept" | "skipped";
         try {
           result = await this.download(row);
         } catch (error) {
-          if (!(error instanceof HttpError) || [401, 402, 403].includes(error.status)) throw error;
+          if (error instanceof NetworkError) unreachable = true;
+          else if (!(error instanceof HttpError) || [401, 402, 403].includes(error.status)) {
+            throw error;
+          }
           this.backOffChat(row.chat_id, userMessage(error));
           return;
         }
@@ -1022,7 +1030,7 @@ class ChatSyncManager {
       }
       this.refreshStatus();
     }
-    return ready.length > batch.length;
+    return unreachable || ready.length > batch.length;
   }
 
   private download(row: SyncRow): Promise<"applied" | "kept" | "skipped"> {
