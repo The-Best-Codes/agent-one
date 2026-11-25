@@ -1,10 +1,9 @@
 #[tauri::command]
 pub fn device_display_name() -> String {
-    let name = whoami::devicename();
-    let name = name.trim();
-    if name.is_empty() || name.eq_ignore_ascii_case("localhost") {
-        "My device".to_string()
-    } else {
-        name.to_string()
-    }
+    whoami::devicename()
+        .or_else(|_| whoami::hostname())
+        .map(|name| name.trim().to_string())
+        .ok()
+        .filter(|name| !name.is_empty() && !name.eq_ignore_ascii_case("localhost"))
+        .unwrap_or_else(|| "My device".to_string())
 }

@@ -170,6 +170,17 @@ class HttpError extends Error {
 
 class SyncStoppedError extends Error {}
 
+function count(n: number, noun: string): string {
+  return `${n} ${noun}${n === 1 ? "" : "s"}`;
+}
+
+function userMessage(error: unknown): string {
+  if (!(error instanceof HttpError)) return "Couldn't reach the sync server.";
+  if (error.status === 402) return "Chat sync requires a Pro plan or higher.";
+  if (error.status >= 500) return "The sync server ran into a problem.";
+  return "The sync server rejected the request.";
+}
+
 function describeError(error: unknown): string {
   if (error instanceof HttpError) return `HTTP ${error.status}: ${error.message}`;
   if (error instanceof Error) return error.message;
@@ -274,7 +285,7 @@ class ChatSyncManager {
   private stoppedForUser: string | null = null;
   private maxChatBytes = 16 * 1024 * 1024;
   private pullPromise: Promise<void> | null = null;
-  private chatBackoff = new Map<string, { delay: number; until: number }>();
+  private chatBackoff = new Map<string, { delay: number; until: number; reason: string }>();
   private downloads = new Map<string, Promise<"applied" | "kept" | "skipped">>();
   private listeners = new Set<(changes: RemoteChatChanges) => void>();
 
@@ -542,22 +553,14 @@ class ChatSyncManager {
       if (more) this.scheduleBacklog();
     } catch (error) {
       if (error instanceof SyncStoppedError) return;
-      if (error instanceof HttpError) {
-        if (error.status === 402) {
-          logger.info("Chat sync is not available on this plan");
-          this.stoppedForUser = this.userId;
-          this.refresh();
-          return;
-        }
-        if (error.status === 401 || error.status === 403) {
-          logger.warn("Chat sync was rejected by the server, pausing until the account changes");
-          this.stoppedForUser = this.userId;
-          this.refresh();
-          return;
-        }
+      if (error instanceof HttpError && (error.status === 401 || error.status === 403)) {
+        logger.warn("Chat sync was rejected by the server, pausing until the account changes");
+        this.stoppedForUser = this.userId;
+        this.refresh();
+        return;
       }
-      this.lastError = describeError(error);
-      logger.warn(`Chat sync failed: ${this.lastError}`);
+      this.lastError = userMessage(error);
+      logger.warn(`Chat sync failed: ${describeError(error)}`);
       this.scheduleRetry();
     }
   }
@@ -588,7 +591,8 @@ class ChatSyncManager {
       >(
         `SELECT
            SUM(CASE WHEN local_version != synced_version AND local_version != skipped_version
-                     AND m.project_id IS NULL THEN 1 ELSE 0 END) AS uploads,
+                     AND local_deleted = 0 AND excluded = 0 AND m.project_id IS NULL
+                    THEN 1 ELSE 0 END) AS uploads,
            SUM(CASE WHEN remote_rev > rev AND local_deleted = 0 AND m.project_id IS NULL
                     THEN 1 ELSE 0 END) AS downloads,
            SUM(CASE WHEN local_version = skipped_version AND local_version != synced_version
@@ -604,9 +608,15 @@ class ChatSyncManager {
       const state = readJson<StoredState>(STATE_LS_KEY);
       const pendingUploads = counts?.uploads ?? 0;
       const pendingDownloads = counts?.downloads ?? 0;
+      const failures = [...this.chatBackoff.values()];
+      const error =
+        this.lastError ??
+        (failures.length > 0
+          ? `${count(failures.length, "chat")} couldn't sync: ${failures.at(-1)?.reason}`
+          : null);
       let phase: ChatSyncPhase = "idle";
       if (this.running) phase = "syncing";
-      else if (this.lastError) phase = "error";
+      else if (error) phase = "error";
       else if (Date.now() < this.quotaFullUntil) phase = "quota";
       else if (pendingUploads + pendingDownloads > 0) phase = "waiting";
       store.set(chatSyncStatusAtom, {
@@ -617,7 +627,7 @@ class ChatSyncManager {
         totalChats: counts?.total ?? 0,
         syncedChats: counts?.synced ?? 0,
         lastSyncedAt: state?.userId === this.userId ? (state?.lastSyncedAt ?? null) : null,
-        error: this.lastError,
+        error,
       });
     } catch (error) {
       logger.warn("Failed to read chat sync status:", error);
@@ -925,7 +935,7 @@ class ChatSyncManager {
       }
 
       if (row.remote_deleted) {
-        if (dirty && !row.excluded) {
+        if (dirty || row.excluded) {
           await this.updateRow(id, row.local_version, "rev = remote_rev", []);
         } else {
           const removed = await enqueueWrite(async (db) => {
@@ -937,10 +947,7 @@ class ChatSyncManager {
             await deleteChatRows(db, [id]);
             return true;
           });
-          if (removed) {
-            changes.deleted.push(id);
-            if (row.excluded) excludedChanged = true;
-          }
+          if (removed) changes.deleted.push(id);
         }
         continue;
       }
@@ -1027,10 +1034,10 @@ class ChatSyncManager {
     if (!current || current.local_version !== row.local_version || this.isBusy(id)) {
       return "skipped";
     }
-    const dirty = current.local_version !== current.synced_version;
+    const dirty = current.local_version !== current.synced_version || Boolean(current.excluded);
 
     if (dirty) {
-      const localWins = await this.resolveConflict(id, current, body);
+      const localWins = await this.resolveConflict(id, current, body, remoteRev);
       if (localWins) {
         await this.updateRow(id, current.local_version, "rev = MAX(rev, $3)", [remoteRev]);
         return "kept";
@@ -1062,7 +1069,12 @@ class ChatSyncManager {
     return applied ? "applied" : "skipped";
   }
 
-  private async resolveConflict(id: string, row: SyncRow, remote: ChatBody): Promise<boolean> {
+  private async resolveConflict(
+    id: string,
+    row: SyncRow,
+    remote: ChatBody,
+    remoteRev: number,
+  ): Promise<boolean> {
     const [localMetadata, localMessages] = await Promise.all([
       chatStorage.getChatMetadata(id),
       chatStorage.getChatMessages(id),
@@ -1081,7 +1093,7 @@ class ChatSyncManager {
     const winnerIds = new Set(winner.messages.map((message) => message.id));
     const loserHasUnique = loser.messages.some((message) => !winnerIds.has(message.id));
     if (loserHasUnique) {
-      const copyId = generateId();
+      const copyId = `${id.slice(0, 40)}-c${remoteRev}`;
       const metadata: ChatMetadata = {
         ...loser.metadata,
         title: `${loser.metadata.title} (conflict copy)`,
@@ -1098,7 +1110,6 @@ class ChatSyncManager {
   }
 
   private async push(): Promise<{ conflicted: boolean; more: boolean }> {
-    if (Date.now() < this.quotaFullUntil) return { conflicted: false, more: false };
     const d = await getDb();
     const rows = await d.select<(SyncRow & { present: number })[]>(
       `SELECT s.*, m.project_id, (m.id IS NOT NULL) AS present
@@ -1111,14 +1122,13 @@ class ChatSyncManager {
     );
 
     let conflicted = false;
-    let quotaFull = false;
+    const quotaPaused = () => Date.now() < this.quotaFullUntil;
     let uploaded = 0;
     let index = 0;
     let batch: PreparedUpload[] = [];
     let batchBytes = 0;
     const record = (outcome: UploadOutcome) => {
       if (outcome === "conflict") conflicted = true;
-      if (outcome === "quota") quotaFull = true;
     };
     const flush = async () => {
       if (batch.length === 0) return;
@@ -1129,9 +1139,10 @@ class ChatSyncManager {
       this.refreshStatus();
     };
 
-    for (; index < rows.length && uploaded < BATCH_SIZE && !quotaFull; index++) {
+    for (; index < rows.length && uploaded < BATCH_SIZE; index++) {
       const row = rows[index];
       if (this.isBusy(row.chat_id) || this.isBackedOff(row.chat_id)) continue;
+      if (!row.local_deleted && quotaPaused()) continue;
       const prepared = await this.preparePush(row);
       if (!prepared) continue;
       uploaded++;
@@ -1144,14 +1155,14 @@ class ChatSyncManager {
         batchBytes + prepared.blob.size > UPLOAD_BATCH_MAX_BYTES
       ) {
         await flush();
-        if (quotaFull) break;
+        if (quotaPaused()) continue;
       }
       batch.push(prepared);
       batchBytes += prepared.blob.size;
     }
-    if (!quotaFull) await flush();
+    if (!quotaPaused()) await flush();
     this.refreshStatus();
-    return { conflicted, more: !quotaFull && index < rows.length };
+    return { conflicted, more: !quotaPaused() && index < rows.length };
   }
 
   private isBackedOff(chatId: string): boolean {
@@ -1161,7 +1172,7 @@ class ChatSyncManager {
 
   private backOffChat(chatId: string, reason: string): void {
     const delay = Math.min((this.chatBackoff.get(chatId)?.delay ?? 15_000) * 2, MAX_RETRY_MS);
-    this.chatBackoff.set(chatId, { delay, until: Date.now() + delay });
+    this.chatBackoff.set(chatId, { delay, until: Date.now() + delay, reason });
     logger.warn(`Chat ${chatId} failed to sync (${reason}), retrying it in ${delay}ms`);
   }
 
@@ -1169,6 +1180,7 @@ class ChatSyncManager {
     const id = row.chat_id;
     const version = row.local_version;
     const markSynced = async () => {
+      this.chatBackoff.delete(id);
       await this.updateRow(id, version, "synced_version = $2", []);
       return null;
     };
@@ -1176,8 +1188,9 @@ class ChatSyncManager {
     if (!CHAT_ID_PATTERN.test(id)) return markSynced();
 
     if (row.local_deleted) {
-      if (!row.excluded && row.rev > 0) {
+      if (row.rev > 0) {
         await this.request(`/api/sync/chats/${id}`, { method: "DELETE" });
+        this.quotaFullUntil = 0;
       }
       await enqueueWrite((db) =>
         db.execute(
@@ -1185,6 +1198,7 @@ class ChatSyncManager {
           [id, version],
         ),
       );
+      this.chatBackoff.delete(id);
       return null;
     }
 
@@ -1263,10 +1277,9 @@ class ChatSyncManager {
           status: error.body.code === "quota_exceeded" ? "quota_exceeded" : "chat_too_large",
         });
       }
-      if (error.status >= 500) {
-        return this.applyUploadResult(item, { status: "error", error: describeError(error) });
-      }
-      throw error;
+      if (error.status === 401 || error.status === 402 || error.status === 403) throw error;
+      logger.warn(`Chat ${id} upload failed: ${describeError(error)}`);
+      return this.applyUploadResult(item, { status: "error", error: userMessage(error) });
     }
   }
 
@@ -1296,9 +1309,9 @@ class ChatSyncManager {
     result: UploadResult,
   ): Promise<UploadOutcome> {
     const id = item.row.chat_id;
+    if (result.status !== "invalid" && result.status !== "error") this.chatBackoff.delete(id);
     switch (result.status) {
       case "ok": {
-        this.chatBackoff.delete(id);
         const saved = await enqueueWrite(async (db) => {
           const update = await db.execute(
             `UPDATE chat_sync SET
@@ -1352,7 +1365,15 @@ class ChatSyncManager {
         await this.updateRow(id, item.row.local_version, "skipped_version = $2", []);
         return "skipped";
       default:
-        this.backOffChat(id, "error" in result && result.error ? result.error : result.status);
+        if (result.status === "invalid") {
+          logger.warn(`Chat ${id} was rejected by the sync server: ${result.error ?? "invalid"}`);
+        }
+        this.backOffChat(
+          id,
+          result.status === "invalid"
+            ? "The sync server rejected the request."
+            : (result.error ?? "The sync server ran into a problem."),
+        );
         return "failed";
     }
   }

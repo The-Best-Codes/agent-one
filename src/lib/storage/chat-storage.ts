@@ -94,7 +94,7 @@ async function markChatSyncDeleted(d: Database, ids: string[]): Promise<void> {
   const placeholders = ids.map((_, i) => `$${i + 1}`).join(", ");
   await d.execute(
     `DELETE FROM chat_sync
-     WHERE chat_id IN (${placeholders}) AND ((rev = 0 AND remote_rev = 0) OR excluded = 1)`,
+     WHERE chat_id IN (${placeholders}) AND rev = 0 AND remote_rev = 0`,
     ids,
   );
   const shifted = ids.map((_, i) => `$${i + 2}`).join(", ");

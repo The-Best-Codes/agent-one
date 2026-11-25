@@ -32,7 +32,7 @@ export function ChatSyncStatus() {
   }
   if (status.tooLarge > 0) {
     details.push(
-      `${count.format(status.tooLarge)} ${status.tooLarge === 1 ? "chat is" : "chats are"} over 16 MB and can't be synced.`,
+      `${count.format(status.tooLarge)} ${status.tooLarge === 1 ? "chat is" : "chats are"} too large to sync.`,
     );
   }
   if (status.lastSyncedAt) details.push(`Last synced ${formatSyncTime(status.lastSyncedAt)}.`);
@@ -43,7 +43,7 @@ export function ChatSyncStatus() {
         <Alert variant="destructive">
           <IconAlertCircle />
           <AlertTitle>Chat sync failed</AlertTitle>
-          <AlertDescription>
+          <AlertDescription className="wrap-break-word">
             {status.error ?? "Couldn't reach the sync server."} AgentOne will keep retrying.
           </AlertDescription>
         </Alert>

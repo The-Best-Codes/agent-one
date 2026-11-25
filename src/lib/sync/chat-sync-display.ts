@@ -6,16 +6,8 @@ import {
   IconCloudX,
   type Icon,
 } from "@tabler/icons-react";
-import { useAtomValue } from "jotai";
-import { useEffect, useState } from "react";
 
-import { chatSyncStatusAtom } from "@/lib/jotai/sync-atoms";
-import {
-  type ChatSyncDevice,
-  type ChatSyncInfo,
-  type ChatSyncState,
-  chatSyncManager,
-} from "@/lib/sync/chat-sync-manager";
+import type { ChatSyncDevice, ChatSyncInfo, ChatSyncState } from "@/lib/sync/chat-sync-manager";
 
 const relativeTime = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
 
@@ -50,25 +42,7 @@ export function getChatSyncDetails(info: ChatSyncInfo): string[] {
     lines.push(`Last synced from ${deviceLabel(info.lastDevice)}${when}`);
   }
   if (info.state === "project") return ["Chats in projects aren't synced"];
-  if (info.state === "too-large") lines.push("Chats over 16 MB can't be synced");
+  if (info.state === "too-large") lines.push("This chat is too large to sync");
   if (lines.length === 0 && info.state === "pending") lines.push("Not uploaded yet");
   return lines;
-}
-
-export function useChatSyncInfo(chatId: string, enabled: boolean): ChatSyncInfo | null {
-  const [info, setInfo] = useState<ChatSyncInfo | null>(null);
-  const status = useAtomValue(chatSyncStatusAtom);
-
-  useEffect(() => {
-    if (!enabled) return;
-    let cancelled = false;
-    void chatSyncManager.getChatSyncInfo(chatId).then((next) => {
-      if (!cancelled) setInfo(next);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [chatId, enabled, status]);
-
-  return info;
 }

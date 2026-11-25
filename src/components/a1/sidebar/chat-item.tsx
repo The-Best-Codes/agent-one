@@ -50,14 +50,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
+import { useChatSyncInfo } from "@/hooks/use-chat-sync-info";
 import { chatSyncAvailableAtom, chatSyncExcludedIdsAtom } from "@/lib/jotai/sync-atoms";
 import { getLogger } from "@/lib/logger";
 import { projectsAtom } from "@/lib/projects";
-import {
-  CHAT_SYNC_STATE_LABELS,
-  getChatSyncDetails,
-  useChatSyncInfo,
-} from "@/lib/sync/chat-sync-display";
+import { CHAT_SYNC_STATE_LABELS, getChatSyncDetails } from "@/lib/sync/chat-sync-display";
 import { chatSyncManager } from "@/lib/sync/chat-sync-manager";
 import { cn } from "@/lib/utils";
 
@@ -422,7 +419,9 @@ export const ChatItem = memo(
                                 <>
                                   <DropdownMenuGroup>
                                     {syncDetails.map((line) => (
-                                      <DropdownMenuLabel key={line}>{line}</DropdownMenuLabel>
+                                      <DropdownMenuLabel key={line} className="wrap-break-word">
+                                        {line}
+                                      </DropdownMenuLabel>
                                     ))}
                                   </DropdownMenuGroup>
                                   {!projectId && <DropdownMenuSeparator />}
@@ -545,7 +544,9 @@ export const ChatItem = memo(
                       <>
                         <ContextMenuGroup>
                           {syncDetails.map((line) => (
-                            <ContextMenuLabel key={line}>{line}</ContextMenuLabel>
+                            <ContextMenuLabel key={line} className="wrap-break-word">
+                              {line}
+                            </ContextMenuLabel>
                           ))}
                         </ContextMenuGroup>
                         {!projectId && <ContextMenuSeparator />}
