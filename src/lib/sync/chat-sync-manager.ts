@@ -955,7 +955,7 @@ class ChatSyncManager {
       }
 
       if (row.remote_deleted) {
-        if (dirty || row.excluded) {
+        if (row.excluded || (dirty && row.updated_at > row.remote_updated_at)) {
           await this.updateRow(id, row.local_version, "rev = remote_rev", []);
         } else {
           const removed = await enqueueWrite(async (db) => {
@@ -996,10 +996,19 @@ class ChatSyncManager {
       downloads.push(row);
     }
 
-    const batch = downloads.slice(0, BATCH_SIZE);
+    const ready = downloads.filter((row) => !this.isBackedOff(row.chat_id));
+    const batch = ready.slice(0, BATCH_SIZE);
     try {
       await runPool(batch, DOWNLOAD_CONCURRENCY, async (row) => {
-        const result = await this.download(row);
+        let result: "applied" | "kept" | "skipped";
+        try {
+          result = await this.download(row);
+        } catch (error) {
+          if (!(error instanceof HttpError) || [401, 402, 403].includes(error.status)) throw error;
+          this.backOffChat(row.chat_id, userMessage(error));
+          return;
+        }
+        this.chatBackoff.delete(row.chat_id);
         if (result === "applied") changes.updated.push(row.chat_id);
         if (result !== "skipped" && row.excluded) excludedChanged = true;
       });
@@ -1013,7 +1022,7 @@ class ChatSyncManager {
       }
       this.refreshStatus();
     }
-    return downloads.length > batch.length;
+    return ready.length > batch.length;
   }
 
   private download(row: SyncRow): Promise<"applied" | "kept" | "skipped"> {
@@ -1118,7 +1127,11 @@ class ChatSyncManager {
       [],
     );
 
-    const pendingIds = new Set(rows.map((row) => row.chat_id));
+    const waiting = await d.select<{ chat_id: string }[]>(
+      "SELECT chat_id FROM chat_sync WHERE remote_rev > rev",
+      [],
+    );
+    const pendingIds = new Set([...rows, ...waiting].map((row) => row.chat_id));
     for (const id of this.chatBackoff.keys()) {
       if (!pendingIds.has(id)) this.chatBackoff.delete(id);
     }
