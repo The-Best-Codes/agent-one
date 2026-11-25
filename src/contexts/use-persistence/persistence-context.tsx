@@ -1,6 +1,7 @@
 import type { UIMessage } from "ai";
 import { generateId } from "ai";
 import { useAtom, useSetAtom } from "jotai";
+import debounce from "lodash.debounce";
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { DEFAULT_MODEL_CONFIG, type ModelConfig } from "@/hooks/ai/use-model-catalog";
@@ -9,7 +10,8 @@ import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { lastVacuumTimestampAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
 import { loadProjects } from "@/lib/projects";
-import { type ChatSearchResult, chatStorage } from "@/lib/storage/chat-storage";
+import { type ChatSearchResult, chatStorage, enqueueWrite } from "@/lib/storage/chat-storage";
+import { chatSyncManager } from "@/lib/sync/chat-sync-manager";
 
 import { PersistenceContext } from "./persistence-contexts";
 
@@ -138,6 +140,32 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
       cancelled = true;
     };
   }, [chatSort, setChatIds]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const reload = debounce(async () => {
+      try {
+        await enqueueWrite(async () => undefined);
+        const storedChats = await chatStorage.listChats(chatSort);
+        if (cancelled) return;
+        const cache = new Map<string, ChatMetadata>();
+        for (const { id, metadata } of storedChats) {
+          cache.set(id, metadata);
+        }
+        metadataCacheRef.current = cache;
+        setChatIds(storedChats.map(({ id }) => id));
+        setChatUpdateTrigger((prev) => prev + 1);
+      } catch (error) {
+        logger.error("Failed to reload chats after sync", error);
+      }
+    }, 300);
+    const unsubscribe = chatSyncManager.onRemoteChange(() => void reload());
+    return () => {
+      cancelled = true;
+      reload.cancel();
+      unsubscribe();
+    };
+  }, [chatSort, setChatIds, setChatUpdateTrigger]);
 
   useEffect(() => {
     void chatStorage.removeItem("chat-ids").catch((error) => {

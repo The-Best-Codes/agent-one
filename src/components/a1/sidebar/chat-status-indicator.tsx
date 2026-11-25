@@ -9,6 +9,7 @@ import {
   chatStatusIndicatorsAtom,
 } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
+import { chatSyncDownloadingIdsAtom } from "@/lib/jotai/sync-atoms";
 import { cn } from "@/lib/utils";
 
 const DEBOUNCE_MS = 150;
@@ -50,7 +51,12 @@ export const ChatStatusIndicator = ({ chatId }: { chatId: string }) => {
     [chatId],
   );
   const chatStatus = useAtomValue(chatStatusAtom);
-  const rawStatus = showStatusIndicator ? chatStatus : null;
+  const syncingAtom = useMemo(
+    () => selectAtom(chatSyncDownloadingIdsAtom, (ids) => ids.has(chatId)),
+    [chatId],
+  );
+  const isSyncing = useAtomValue(syncingAtom);
+  const rawStatus = showStatusIndicator ? (chatStatus ?? (isSyncing ? "loading" : null)) : null;
 
   const [displayedStatus, setDisplayedStatus] = useState<ChatStatusIndicatorType>(
     rawStatus ?? null,

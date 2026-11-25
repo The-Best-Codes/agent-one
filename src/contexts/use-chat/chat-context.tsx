@@ -16,6 +16,7 @@ import { TOOL_CANCELLED_BY_USER_SYMBOL, TOOL_INTERRUPTED_BY_ERROR_TEXT } from "@
 import { chatIdsAtom, chatStatusIndicatorsAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
 import { projectsAtom, projectsLoadedAtom } from "@/lib/projects";
+import { chatSyncManager } from "@/lib/sync/chat-sync-manager";
 
 import {
   ChatApprovalHandlerContext,
@@ -93,6 +94,26 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const loadedMessagesRef = useRef<Map<string, UIMessage[]>>(new Map());
   const [chatMessagesLoaded, setChatMessagesLoaded] = useState<Set<string>>(new Set());
   const loadVersionRef = useRef(0);
+  const reloadVersionsRef = useRef<Map<string, number>>(new Map());
+
+  useEffect(() => {
+    return chatSyncManager.onRemoteChange(({ updated, deleted }) => {
+      if (currentChatId && deleted.includes(currentChatId)) {
+        void navigate("/", { replace: true });
+      }
+      const changed = [...updated, ...deleted].filter((id) => loadedMessagesRef.current.has(id));
+      if (changed.length === 0) return;
+      for (const id of changed) {
+        loadedMessagesRef.current.delete(id);
+        reloadVersionsRef.current.set(id, (reloadVersionsRef.current.get(id) ?? 0) + 1);
+      }
+      setChatMessagesLoaded((prev) => {
+        const next = new Set(prev);
+        for (const id of changed) next.delete(id);
+        return next;
+      });
+    });
+  }, [currentChatId, navigate]);
 
   const isChatLoading = useMemo(() => {
     if (!currentChatId) return false;
@@ -673,7 +694,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
         const initialMessages = loadedMessagesRef.current.get(id) ?? [];
         return (
           <ChatInstance
-            key={id}
+            key={`${id}:${reloadVersionsRef.current.get(id) ?? 0}`}
             chatId={id}
             model={chatModel.getLanguageModel()}
             modelId={chatModel.id}

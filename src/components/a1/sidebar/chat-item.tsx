@@ -25,9 +25,11 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   ContextMenu,
+  ContextMenuCheckboxItem,
   ContextMenuContent,
   ContextMenuGroup,
   ContextMenuItem,
+  ContextMenuLabel,
   ContextMenuSeparator,
   ContextMenuSub,
   ContextMenuSubContent,
@@ -36,9 +38,11 @@ import {
 } from "@/components/ui/context-menu";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
@@ -46,8 +50,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
+import { chatSyncAvailableAtom, chatSyncExcludedIdsAtom } from "@/lib/jotai/sync-atoms";
 import { getLogger } from "@/lib/logger";
 import { projectsAtom } from "@/lib/projects";
+import {
+  CHAT_SYNC_STATE_LABELS,
+  getChatSyncDetails,
+  useChatSyncInfo,
+} from "@/lib/sync/chat-sync-display";
+import { chatSyncManager } from "@/lib/sync/chat-sync-manager";
 import { cn } from "@/lib/utils";
 
 import { ChatStatusIndicator } from "./chat-status-indicator";
@@ -189,8 +200,31 @@ export const ChatItem = memo(
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
     const projects = useAtomValue(projectsAtom);
     const { setChatsProject } = usePersistence();
+    const chatSyncAvailable = useAtomValue(chatSyncAvailableAtom);
+    const syncExcluded = useAtomValue(chatSyncExcludedIdsAtom).has(id);
+    const syncInfo = useChatSyncInfo(
+      id,
+      chatSyncAvailable && (isDropdownOpen || isContextMenuOpen),
+    );
+    const syncState = projectId
+      ? "project"
+      : syncExcluded
+        ? "excluded"
+        : (syncInfo?.state ?? "pending");
+    const SyncStateIcon = CHAT_SYNC_STATE_LABELS[syncState].icon;
+    const syncDetails =
+      syncInfo || projectId
+        ? getChatSyncDetails({
+            firstDevice: null,
+            lastDevice: null,
+            lastSyncedAt: null,
+            ...syncInfo,
+            state: syncState,
+          })
+        : [];
 
     const isSelectedChat = activeChatId === id;
     const projectName = showProject
@@ -200,6 +234,12 @@ export const ChatItem = memo(
     const moveToProject = (targetProjectId: string | undefined) => {
       logger.verbose("Moving chat to project", { chatId: id, projectId: targetProjectId });
       setChatsProject([id], targetProjectId);
+    };
+    const setSyncEnabled = (enabled: boolean) => {
+      logger.verbose("Changing chat sync preference", { chatId: id, sync: enabled });
+      void chatSyncManager.setChatExcluded(id, !enabled).catch((error) => {
+        logger.error("Failed to change chat sync preference", error);
+      });
     };
 
     if (selectionMode) {
@@ -225,7 +265,7 @@ export const ChatItem = memo(
 
     return (
       <>
-        <ContextMenu>
+        <ContextMenu onOpenChange={setIsContextMenuOpen}>
           <ContextMenuTrigger asChild>
             <Button
               variant={isSelectedChat ? "secondary" : "ghost"}
@@ -371,6 +411,37 @@ export const ChatItem = memo(
                             </DropdownMenuSubContent>
                           </DropdownMenuSub>
                         )}
+                        {chatSyncAvailable && (
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger onClick={(e) => e.stopPropagation()}>
+                              <SyncStateIcon />
+                              {CHAT_SYNC_STATE_LABELS[syncState].label}
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="max-w-80">
+                              {syncDetails.length > 0 && (
+                                <>
+                                  <DropdownMenuGroup>
+                                    {syncDetails.map((line) => (
+                                      <DropdownMenuLabel key={line}>{line}</DropdownMenuLabel>
+                                    ))}
+                                  </DropdownMenuGroup>
+                                  {!projectId && <DropdownMenuSeparator />}
+                                </>
+                              )}
+                              {!projectId && (
+                                <DropdownMenuGroup>
+                                  <DropdownMenuCheckboxItem
+                                    checked={!syncExcluded}
+                                    onCheckedChange={setSyncEnabled}
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    Sync This Chat
+                                  </DropdownMenuCheckboxItem>
+                                </DropdownMenuGroup>
+                              )}
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+                        )}
                         <DropdownMenuItem
                           onClick={(e) => {
                             e.stopPropagation();
@@ -459,6 +530,36 @@ export const ChatItem = memo(
                           Remove from Project
                         </ContextMenuItem>
                       </>
+                    )}
+                  </ContextMenuSubContent>
+                </ContextMenuSub>
+              )}
+              {chatSyncAvailable && (
+                <ContextMenuSub>
+                  <ContextMenuSubTrigger>
+                    <SyncStateIcon />
+                    {CHAT_SYNC_STATE_LABELS[syncState].label}
+                  </ContextMenuSubTrigger>
+                  <ContextMenuSubContent className="max-w-80">
+                    {syncDetails.length > 0 && (
+                      <>
+                        <ContextMenuGroup>
+                          {syncDetails.map((line) => (
+                            <ContextMenuLabel key={line}>{line}</ContextMenuLabel>
+                          ))}
+                        </ContextMenuGroup>
+                        {!projectId && <ContextMenuSeparator />}
+                      </>
+                    )}
+                    {!projectId && (
+                      <ContextMenuGroup>
+                        <ContextMenuCheckboxItem
+                          checked={!syncExcluded}
+                          onCheckedChange={setSyncEnabled}
+                        >
+                          Sync This Chat
+                        </ContextMenuCheckboxItem>
+                      </ContextMenuGroup>
                     )}
                   </ContextMenuSubContent>
                 </ContextMenuSub>

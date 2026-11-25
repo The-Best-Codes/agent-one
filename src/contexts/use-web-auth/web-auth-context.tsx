@@ -7,12 +7,14 @@ import { getApiKeyBaseAtom } from "@/lib/jotai/api-key-atoms";
 import { getProviderConfigAtom } from "@/lib/jotai/provider-atoms";
 import { getLogger } from "@/lib/logger";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
+import { chatSyncManager } from "@/lib/sync/chat-sync-manager";
 import { encryptedSyncManager } from "@/lib/sync/encrypted-sync-manager";
 import { settingsSyncManager } from "@/lib/sync/settings-sync-manager";
 
 import {
   type CustomerState,
   type DeviceFlowState,
+  getActivePaidSubscription,
   WebAuthContext,
   type WebAuthUser,
 } from "./web-auth-contexts";
@@ -304,6 +306,19 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
 
     return () => clearInterval(id);
   }, [user]);
+
+  useEffect(() => {
+    if (!user) {
+      chatSyncManager.setAccount(null);
+      return;
+    }
+    const paid = customerState
+      ? getActivePaidSubscription(customerState) !== null
+      : billingError
+        ? false
+        : null;
+    chatSyncManager.setAccount({ userId: user.id, paid });
+  }, [user, customerState, billingError]);
 
   const refreshBilling = useCallback(() => {
     void loadBillingRef.current?.(true);

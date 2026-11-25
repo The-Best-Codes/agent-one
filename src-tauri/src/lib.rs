@@ -165,6 +165,12 @@ pub fn run() {
                             sql: include_str!("../migrations/0010_add_project_skills_folders.sql"),
                             kind: tauri_plugin_sql::MigrationKind::Up,
                         },
+                        tauri_plugin_sql::Migration {
+                            version: 11,
+                            description: "add_chat_sync",
+                            sql: include_str!("../migrations/0011_add_chat_sync.sql"),
+                            kind: tauri_plugin_sql::MigrationKind::Up,
+                        },
                     ],
                 )
                 .build(),
@@ -173,6 +179,12 @@ pub fn run() {
         .plugin(
             tauri_plugin_log::Builder::new()
                 .level(log_level())
+                .level_for("h2", LevelFilter::Info)
+                .level_for("hyper", LevelFilter::Info)
+                .level_for("hyper_util", LevelFilter::Info)
+                .level_for("reqwest", LevelFilter::Info)
+                .level_for("rustls", LevelFilter::Info)
+                .level_for("tracing", LevelFilter::Info)
                 .clear_targets()
                 .target(Target::new(TargetKind::LogDir {
                     file_name: Some(LOG_FILE_NAME.to_string()),
@@ -247,6 +259,7 @@ pub fn run() {
                     tools::get_url_content,
                     tools::web_search,
                     utils::is_update_managed_externally,
+                    utils::device_display_name,
                     utils::list_project_files,
                     utils::list_crons,
                     utils::create_cron,
@@ -292,6 +305,7 @@ pub fn run() {
                     tools::get_url_content,
                     tools::web_search,
                     utils::is_update_managed_externally,
+                    utils::device_display_name,
                     utils::list_project_files,
                     keyring::storage_get_item,
                     keyring::storage_set_item,

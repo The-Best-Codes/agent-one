@@ -90,6 +90,11 @@ export const projectStorage = {
 
   async deleteProject(id: string): Promise<void> {
     await enqueueWrite(async (d) => {
+      await d.execute(
+        `UPDATE chat_sync SET local_version = local_version + 1, updated_at = $2
+         WHERE chat_id IN (SELECT id FROM chat_metadata WHERE project_id = $1)`,
+        [id, Date.now()],
+      );
       await d.execute("UPDATE chat_metadata SET project_id = NULL WHERE project_id = $1", [id]);
       await d.execute("DELETE FROM projects WHERE id = $1", [id]);
     });

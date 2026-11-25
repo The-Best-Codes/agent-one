@@ -1,8 +1,8 @@
-import { IconRocket } from "@tabler/icons-react";
 import { useAtomValue } from "jotai";
 import { type SubmitEvent, useEffect, useState } from "react";
 
 import { CopyButton } from "@/components/a1/copy-button";
+import { PlanCheckingStep, UpgradeRequiredStep } from "@/components/a1/plan-required-steps";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -25,7 +25,6 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { getActivePaidSubscription } from "@/contexts/use-web-auth/web-auth-contexts";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
-import { AGENT_ONE_UPGRADE_URL } from "@/lib/constants";
 import { skipPlanChecksAtom } from "@/lib/jotai/unsynced-local-atoms";
 import {
   encryptedSyncManager,
@@ -95,56 +94,20 @@ const EncryptedSyncDialogBody = ({
   }
 
   if (!customerState && billingLoading) {
-    return (
-      <>
-        <DialogHeader>
-          <DialogTitle>Sync keys and providers</DialogTitle>
-          <DialogDescription>Checking your account…</DialogDescription>
-        </DialogHeader>
-        <div className="flex justify-center py-6">
-          <Spinner />
-        </div>
-      </>
-    );
+    return <PlanCheckingStep title="Sync keys and providers" />;
   }
 
   if (customerState && !getActivePaidSubscription(customerState)) {
-    return <UpgradeStep onCancel={onDone} />;
+    return (
+      <UpgradeRequiredStep
+        title="Sync keys and providers"
+        description="Syncing API keys and providers across devices requires a Pro plan or higher. You're on the Free plan right now."
+        onCancel={onDone}
+      />
+    );
   }
 
   return <VaultSteps onDone={onDone} onLockedChange={onLockedChange} />;
-};
-
-const UpgradeStep = ({ onCancel }: { onCancel: () => void }) => {
-  const { refreshBilling } = useWebAuth();
-
-  useEffect(() => {
-    window.addEventListener("focus", refreshBilling);
-    return () => window.removeEventListener("focus", refreshBilling);
-  }, [refreshBilling]);
-
-  return (
-    <>
-      <DialogHeader>
-        <DialogTitle>Sync keys and providers</DialogTitle>
-        <DialogDescription>
-          Syncing API keys and providers across devices requires a Pro plan or higher. You're on the
-          Free plan right now.
-        </DialogDescription>
-      </DialogHeader>
-      <DialogFooter>
-        <Button variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button asChild>
-          <a href={AGENT_ONE_UPGRADE_URL} target="_blank" rel="noopener noreferrer">
-            <IconRocket data-icon="inline-start" />
-            Upgrade
-          </a>
-        </Button>
-      </DialogFooter>
-    </>
-  );
 };
 
 const VaultSteps = ({

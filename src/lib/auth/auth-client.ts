@@ -19,7 +19,7 @@ function buildUserAgent(): string {
   return `AgentOne/${packageJson.version} (${label})`;
 }
 
-const USER_AGENT = buildUserAgent();
+export const USER_AGENT = buildUserAgent();
 
 let cachedToken: string | null = null;
 

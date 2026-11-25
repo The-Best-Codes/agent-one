@@ -65,6 +65,7 @@ argon2 = "0.6.0"
 hkdf = "0.13.0"
 hmac = "0.13.0"
 sha2 = "0.11.1"
+whoami = "1.6"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs", version = "0.0.0" }
