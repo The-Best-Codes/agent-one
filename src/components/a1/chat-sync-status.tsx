@@ -43,7 +43,7 @@ export function ChatSyncStatus() {
         <Alert variant="destructive">
           <IconAlertCircle />
           <AlertTitle>Chat sync failed</AlertTitle>
-          <AlertDescription className="wrap-break-word">
+          <AlertDescription>
             {status.error ?? "Couldn't reach the sync server."} AgentOne will keep retrying.
           </AlertDescription>
         </Alert>

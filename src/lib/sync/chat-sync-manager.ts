@@ -333,6 +333,7 @@ class ChatSyncManager {
     const userId = account?.userId ?? null;
     const paid = account?.paid ?? null;
     if (userId === this.userId && paid === this.paid) return;
+    if (userId !== this.userId) this.chatBackoff.clear();
     this.userId = userId;
     this.paid = paid;
     this.stoppedForUser = null;
@@ -980,7 +981,7 @@ class ChatSyncManager {
     await runPool(batch, DOWNLOAD_CONCURRENCY, async (row) => {
       const result = await this.download(row);
       if (result === "applied") changes.updated.push(row.chat_id);
-      if (result === "applied" && row.excluded) excludedChanged = true;
+      if (result !== "skipped" && row.excluded) excludedChanged = true;
     });
 
     if (excludedChanged) await this.loadExcluded();
@@ -1039,7 +1040,14 @@ class ChatSyncManager {
     if (dirty) {
       const localWins = await this.resolveConflict(id, current, body, remoteRev);
       if (localWins) {
-        await this.updateRow(id, current.local_version, "rev = MAX(rev, $3)", [remoteRev]);
+        await this.updateRow(
+          id,
+          current.local_version,
+          current.excluded
+            ? "rev = MAX(rev, $3), excluded = 0, local_version = local_version + 1"
+            : "rev = MAX(rev, $3)",
+          [remoteRev],
+        );
         return "kept";
       }
     }
@@ -1121,7 +1129,13 @@ class ChatSyncManager {
       [],
     );
 
+    const pendingIds = new Set(rows.map((row) => row.chat_id));
+    for (const id of this.chatBackoff.keys()) {
+      if (!pendingIds.has(id)) this.chatBackoff.delete(id);
+    }
+
     let conflicted = false;
+    let skippedForQuota = false;
     const quotaPaused = () => Date.now() < this.quotaFullUntil;
     let uploaded = 0;
     let index = 0;
@@ -1142,7 +1156,10 @@ class ChatSyncManager {
     for (; index < rows.length && uploaded < BATCH_SIZE; index++) {
       const row = rows[index];
       if (this.isBusy(row.chat_id) || this.isBackedOff(row.chat_id)) continue;
-      if (!row.local_deleted && quotaPaused()) continue;
+      if (!row.local_deleted && quotaPaused()) {
+        skippedForQuota = true;
+        continue;
+      }
       const prepared = await this.preparePush(row);
       if (!prepared) continue;
       uploaded++;
@@ -1162,7 +1179,7 @@ class ChatSyncManager {
     }
     if (!quotaPaused()) await flush();
     this.refreshStatus();
-    return { conflicted, more: !quotaPaused() && index < rows.length };
+    return { conflicted, more: !quotaPaused() && (skippedForQuota || index < rows.length) };
   }
 
   private isBackedOff(chatId: string): boolean {
