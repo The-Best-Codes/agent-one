@@ -170,12 +170,15 @@ class HttpError extends Error {
 
 class SyncStoppedError extends Error {}
 
+class NetworkError extends Error {}
+
 function count(n: number, noun: string): string {
   return `${n} ${noun}${n === 1 ? "" : "s"}`;
 }
 
 function userMessage(error: unknown): string {
-  if (!(error instanceof HttpError)) return "Couldn't reach the sync server.";
+  if (error instanceof NetworkError) return "Couldn't reach the sync server.";
+  if (!(error instanceof HttpError)) return "Something went wrong while syncing chats.";
   if (error.status === 402) return "Chat sync requires a Pro plan or higher.";
   if (error.status >= 500) return "The sync server ran into a problem.";
   return "The sync server rejected the request.";
@@ -360,6 +363,7 @@ class ChatSyncManager {
         [chatId, excluded ? 1 : 0, Date.now()],
       ),
     );
+    this.chatBackoff.delete(chatId);
     await this.loadExcluded();
     this.refreshStatus();
     this.schedule("push");
@@ -645,6 +649,8 @@ class ChatSyncManager {
         Origin: SERVER_URL,
         "User-Agent": USER_AGENT,
       },
+    }).catch((error: unknown) => {
+      throw new NetworkError(error instanceof Error ? error.message : String(error));
     });
     if (!response.ok) {
       const body = await response
