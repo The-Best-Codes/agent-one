@@ -587,6 +587,7 @@ export const MainChatInput = ({
       EditorView.contentAttributes.of({
         spellcheck: "true",
         "aria-label": "Chat message input",
+        dir: "auto",
         "data-testid": "chat-editor",
       }),
       // eslint-disable-next-line react-hooks/refs

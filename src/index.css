@@ -831,6 +831,12 @@
     content: none !important;
   }
 
+  .prose :is(ul, ol):has(> li:first-child:dir(rtl), > li:first-child > p:first-child:dir(rtl)),
+  .prose blockquote:has(> :first-child:dir(rtl)),
+  .prose li:has(> p:first-child:dir(rtl)) {
+    direction: rtl;
+  }
+
   input::-ms-reveal {
     display: none;
     width: 0;
