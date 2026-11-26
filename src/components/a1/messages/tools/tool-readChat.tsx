@@ -110,7 +110,7 @@ export const MessagePartToolReadChat = ({ part }: { part: ToolUIPart }) => {
         );
       return (
         <div key={callId} className="flex items-center gap-1 text-sm font-bold">
-          <Spinner className="size-4 shrink-0" />
+          <Spinner />
           <span>Reading chat</span>
         </div>
       );

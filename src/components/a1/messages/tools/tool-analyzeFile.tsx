@@ -43,7 +43,7 @@ export const MessagePartToolAnalyzeFile = ({ part }: { part: ToolUIPart }) => {
     case "approval-responded":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <Spinner className="text-foreground size-4 shrink-0" />
+          <Spinner />
           <span className="text-foreground truncate text-sm font-bold">
             {name ? `Analyzing ${name}...` : "Analyzing a file..."}
           </span>

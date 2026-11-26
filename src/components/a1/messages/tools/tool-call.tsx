@@ -97,7 +97,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
           <AccordionItem value={callId}>
             <AccordionTrigger className="p-2 hover:no-underline">
               <p className="text-destructive flex min-w-0 flex-row items-center gap-1 text-sm font-bold">
-                <Spinner className="text-destructive" />
+                <Spinner />
                 <span className="max-w-2xl truncate">{`Running unknown tool "${toolName}"`}</span>
               </p>
             </AccordionTrigger>

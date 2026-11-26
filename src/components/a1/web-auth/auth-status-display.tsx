@@ -29,7 +29,7 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
     return (
       <StatusRow
         className={className}
-        icon={<Spinner className="text-muted-foreground" data-icon="inline-start" />}
+        icon={<Spinner data-icon="inline-start" />}
         title="Checking status..."
         description="Please wait while we check your account"
       />
@@ -40,7 +40,7 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
     return (
       <StatusRow
         className={className}
-        icon={<Spinner className="text-foreground" data-icon="inline-start" />}
+        icon={<Spinner data-icon="inline-start" />}
         title="Signing in..."
         description="Getting you signed in..."
         action={
@@ -56,7 +56,7 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
     return (
       <StatusRow
         className={className}
-        icon={<Spinner className="text-foreground" data-icon="inline-start" />}
+        icon={<Spinner data-icon="inline-start" />}
         title="Link your account"
         description={
           <a

@@ -76,7 +76,7 @@ const formatUrl = (url: string) => {
 const UrlPendingDisplay = memo(({ url }: { url: string }) => {
   return (
     <div className="flex items-center gap-1">
-      <Spinner className="text-foreground size-4 shrink-0" />
+      <Spinner />
       <span className="text-foreground max-w-2xl truncate text-sm font-bold">
         {"Browsing"}{" "}
         <a
@@ -286,7 +286,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
       return (
         <div key={callId} className="flex items-center gap-1">
           <div>
-            <Spinner className="text-foreground size-4 shrink-0" />
+            <Spinner />
           </div>
           <span className="text-foreground text-sm font-bold">Browsing URLs...</span>
         </div>
@@ -328,7 +328,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           key={callId}
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <Spinner className="text-foreground size-4 shrink-0" />
+          <Spinner />
           <span className="max-w-2xl truncate">
             {urlCount === 1 ? (
               <>
@@ -365,7 +365,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
         if (isStreaming && results[0]?.pending) {
           return (
             <div key={callId} className="flex items-center gap-1">
-              <Spinner className="text-foreground size-4 shrink-0" />
+              <Spinner />
               <span className="text-foreground text-sm font-bold">
                 {"Browsing"}{" "}
                 {results[0] ? (
@@ -413,7 +413,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                   {isStreaming ? (
                     <Spinner
                       className={cn(
-                        "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-0 group-hover/url-content-accordion:opacity-0",
+                        "text-foreground absolute inset-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-0 group-hover/url-content-accordion:opacity-0",
                         isMainAccordionOpen && "scale-0 opacity-0",
                       )}
                     />

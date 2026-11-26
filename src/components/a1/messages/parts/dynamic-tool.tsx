@@ -164,7 +164,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
       const loadingText = labels?.loadingTitle ?? `Running "${toolName}" tool...`;
       return (
         <div key={callId} className="flex items-center gap-1">
-          <Spinner className="text-foreground" />
+          <Spinner />
           <span className="text-foreground text-sm font-bold">{loadingText}</span>
         </div>
       );
@@ -176,7 +176,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
           key={callId}
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <Spinner className="text-foreground" />
+          <Spinner />
           <span className="max-w-2xl truncate">{loadingText}</span>
         </div>
       );

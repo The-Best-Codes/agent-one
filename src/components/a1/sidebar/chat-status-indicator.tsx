@@ -35,7 +35,7 @@ const StatusIcon = ({ status }: { status: ChatStatusIndicatorType }) => {
         isVisible ? "w-4 opacity-100" : "-ml-1.5 w-0 opacity-0",
       )}
     >
-      {activeStatus === "loading" && <Spinner className="text-foreground size-4 shrink-0" />}
+      {activeStatus === "loading" && <Spinner />}
       {activeStatus === "error" && (
         <IconExclamationCircle className="text-destructive size-4 shrink-0" />
       )}

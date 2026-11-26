@@ -686,7 +686,7 @@ export const VirtualizedChatList = ({
           </div>
         ) : showSearchLoading ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
-            <Spinner className="text-muted-foreground size-16" />
+            <Spinner className="size-16" />
             <p className="max-w-full min-w-0 truncate">Searching...</p>
           </div>
         ) : showNoSearchResults ? (

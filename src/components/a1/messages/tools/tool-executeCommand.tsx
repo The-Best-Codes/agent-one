@@ -258,7 +258,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
     case "input-streaming":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <Spinner className="text-foreground size-4 shrink-0" />
+          <Spinner />
           <span className="text-foreground text-sm font-bold">Preparing command...</span>
         </div>
       );
@@ -278,7 +278,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
           key={callId}
           className="text-foreground flex max-w-2xl flex-row items-center gap-1 text-sm font-bold"
         >
-          <Spinner className="text-foreground size-4 shrink-0" />
+          <Spinner />
           <span className="truncate">
             Running <code className="text-xs">{truncatedCommand}</code>...
           </span>
@@ -328,7 +328,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
                   {showSpinnerIcon ? (
                     <Spinner
                       className={cn(
-                        "text-foreground absolute inset-0 size-4 shrink-0 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-0 group-hover/exec-accordion:opacity-0",
+                        "text-foreground absolute inset-0 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-0 group-hover/exec-accordion:opacity-0",
                         isMainAccordionOpen && "scale-0 opacity-0",
                       )}
                     />

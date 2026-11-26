@@ -147,7 +147,7 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
       <div className="relative flex h-full w-full flex-1 flex-col items-center">
         {isChatLoading && showSpinner ? (
           <div className="flex flex-1 items-center justify-center">
-            <Spinner className="text-muted-foreground size-8" />
+            <Spinner className="size-8" />
           </div>
         ) : (
           <div className="relative min-h-0 w-full flex-1">

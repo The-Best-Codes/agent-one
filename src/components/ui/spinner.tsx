@@ -11,10 +11,7 @@ function Spinner({ className, ...props }: React.ComponentProps<"svg">) {
       stroke="currentColor"
       strokeWidth={2}
       strokeLinecap="round"
-      className={cn(
-        "text-muted-foreground inline-block size-4 shrink-0 mask-x-from-75% align-middle",
-        className,
-      )}
+      className={cn("inline-block size-4 shrink-0 mask-x-from-75% align-middle", className)}
       {...props}
     >
       <path

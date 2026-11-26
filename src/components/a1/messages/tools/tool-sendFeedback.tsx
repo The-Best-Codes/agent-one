@@ -96,7 +96,7 @@ export const MessagePartToolSendFeedback = ({ part }: { part: ToolUIPart }) => {
           key={callId}
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <Spinner className="text-foreground size-4 shrink-0" />
+          <Spinner />
           <span className="max-w-2xl truncate">Reporting a problem...</span>
         </div>
       );

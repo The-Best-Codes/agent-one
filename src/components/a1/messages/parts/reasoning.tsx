@@ -64,7 +64,7 @@ export const MessagePartReasoning = ({
               {isLoading ? (
                 <Spinner
                   className={cn(
-                    "text-foreground absolute inset-0 size-4 shrink-0 opacity-100 transition-[opacity,scale] duration-200 group-hover/reasoning-accordion:scale-0 group-hover/reasoning-accordion:opacity-0",
+                    "text-foreground absolute inset-0 opacity-100 transition-[opacity,scale] duration-200 group-hover/reasoning-accordion:scale-0 group-hover/reasoning-accordion:opacity-0",
                     isMainAccordionOpen && "scale-0 opacity-0",
                   )}
                 />
