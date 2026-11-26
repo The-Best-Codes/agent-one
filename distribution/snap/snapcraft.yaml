@@ -33,13 +33,13 @@ slots:
   single-instance:
     interface: dbus
     bus: session
-    name: org.dev_agent_one.SingleInstance
+    name: dev.agent-one.SingleInstance
 
 plugs:
   single-instance-plug:
     interface: dbus
     bus: session
-    name: org.dev_agent_one.SingleInstance
+    name: dev.agent-one.SingleInstance
 
 parts:
   agent-one:
