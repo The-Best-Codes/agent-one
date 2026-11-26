@@ -67,7 +67,116 @@ function trimSnippetLeft(snippet: string, maxLeftTokens: number): string {
   return "…" + words.slice(-maxLeftTokens).join(" ") + " " + snippet.slice(markIdx);
 }
 
-function extractTextFromMessages(messages: UIMessage[]): string {
+const localChangeListeners = new Set<(chatIds: string[]) => void>();
+
+export function onLocalChatChange(listener: (chatIds: string[]) => void): () => void {
+  localChangeListeners.add(listener);
+  return () => localChangeListeners.delete(listener);
+}
+
+export function emitLocalChange(ids: string[]): void {
+  for (const listener of localChangeListeners) listener(ids);
+}
+
+async function markChatSyncChanged(d: Database, id: string): Promise<void> {
+  await d.execute(
+    `INSERT INTO chat_sync (chat_id, local_version, updated_at) VALUES ($1, 1, $2)
+     ON CONFLICT(chat_id) DO UPDATE SET
+       local_version = chat_sync.local_version + 1,
+       local_deleted = 0,
+       updated_at = $2`,
+    [id, Date.now()],
+  );
+}
+
+async function markChatSyncDeleted(d: Database, ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  const placeholders = ids.map((_, i) => `$${i + 1}`).join(", ");
+  await d.execute(
+    `DELETE FROM chat_sync
+     WHERE chat_id IN (${placeholders}) AND rev = 0 AND remote_rev = 0`,
+    ids,
+  );
+  const shifted = ids.map((_, i) => `$${i + 2}`).join(", ");
+  await d.execute(
+    `UPDATE chat_sync
+     SET local_deleted = 1, local_version = local_version + 1, updated_at = $1
+     WHERE chat_id IN (${shifted})`,
+    [Date.now(), ...ids],
+  );
+}
+
+export async function upsertChatMetadata(
+  d: Database,
+  id: string,
+  metadata: ChatMetadata,
+): Promise<void> {
+  await d.execute(
+    `INSERT INTO chat_metadata (
+       id,
+       title,
+       title_state,
+       model_id,
+       model_config,
+       branch_of,
+       scheduled_agent_id,
+       scheduled_agent_title,
+       project_id,
+       created_at,
+       updated_at,
+       last_message_at
+     )
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+     ON CONFLICT(id) DO UPDATE SET
+        title = $2,
+        title_state = $3,
+        model_id = $4,
+        model_config = $5,
+        branch_of = $6,
+        scheduled_agent_id = $7,
+        scheduled_agent_title = $8,
+        project_id = $9,
+        created_at = COALESCE(chat_metadata.created_at, excluded.created_at),
+        updated_at = COALESCE(excluded.updated_at, chat_metadata.updated_at),
+        last_message_at = COALESCE(excluded.last_message_at, chat_metadata.last_message_at)`,
+    [
+      id,
+      metadata.title,
+      metadata.titleState ?? null,
+      metadata.modelId ?? null,
+      metadata.modelConfig ? JSON.stringify(metadata.modelConfig) : null,
+      metadata.branchOf ?? null,
+      metadata.scheduledAgentId ?? null,
+      metadata.scheduledAgentTitle ?? null,
+      metadata.projectId ?? null,
+      metadata.createdAt ?? null,
+      metadata.updatedAt ?? null,
+      metadata.lastMessageAt ?? null,
+    ],
+  );
+}
+
+export async function upsertChatMessages(
+  d: Database,
+  id: string,
+  messages: UIMessage[],
+): Promise<void> {
+  await d.execute(
+    `INSERT INTO chat_messages (id, messages) VALUES ($1, $2)
+     ON CONFLICT(id) DO UPDATE SET messages = $2`,
+    [id, JSON.stringify(messages)],
+  );
+}
+
+export async function deleteChatRows(d: Database, ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  const placeholders = ids.map((_, i) => `$${i + 1}`).join(", ");
+  await d.execute(`DELETE FROM chat_metadata WHERE id IN (${placeholders})`, ids);
+  await d.execute(`DELETE FROM chat_messages WHERE id IN (${placeholders})`, ids);
+  await d.execute(`DELETE FROM chat_fts WHERE chat_id IN (${placeholders})`, ids);
+}
+
+export function extractTextFromMessages(messages: UIMessage[]): string {
   const parts: string[] = [];
   for (const msg of messages) {
     for (const part of msg.parts ?? []) {
@@ -79,7 +188,7 @@ function extractTextFromMessages(messages: UIMessage[]): string {
   return parts.join(" ");
 }
 
-async function replaceFtsEntry(
+export async function replaceFtsEntry(
   d: Database,
   id: string,
   title: string,
@@ -153,51 +262,11 @@ export const chatStorage = {
   },
 
   async setChatMetadata(id: string, metadata: ChatMetadata): Promise<void> {
-    await enqueueWrite((d) =>
-      d.execute(
-        `INSERT INTO chat_metadata (
-           id,
-           title,
-           title_state,
-           model_id,
-           model_config,
-           branch_of,
-           scheduled_agent_id,
-           scheduled_agent_title,
-           project_id,
-           created_at,
-           updated_at,
-           last_message_at
-         )
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-         ON CONFLICT(id) DO UPDATE SET
-            title = $2,
-            title_state = $3,
-            model_id = $4,
-            model_config = $5,
-            branch_of = $6,
-            scheduled_agent_id = $7,
-            scheduled_agent_title = $8,
-            project_id = $9,
-            created_at = COALESCE(chat_metadata.created_at, excluded.created_at),
-            updated_at = COALESCE(excluded.updated_at, chat_metadata.updated_at),
-            last_message_at = COALESCE(excluded.last_message_at, chat_metadata.last_message_at)`,
-        [
-          id,
-          metadata.title,
-          metadata.titleState ?? null,
-          metadata.modelId ?? null,
-          metadata.modelConfig ? JSON.stringify(metadata.modelConfig) : null,
-          metadata.branchOf ?? null,
-          metadata.scheduledAgentId ?? null,
-          metadata.scheduledAgentTitle ?? null,
-          metadata.projectId ?? null,
-          metadata.createdAt ?? null,
-          metadata.updatedAt ?? null,
-          metadata.lastMessageAt ?? null,
-        ],
-      ),
-    );
+    await enqueueWrite(async (d) => {
+      await upsertChatMetadata(d, id, metadata);
+      await markChatSyncChanged(d, id);
+    });
+    emitLocalChange([id]);
   },
 
   async listChats(sortBy: SettingValue<"CHAT_SORT">): Promise<StoredChat[]> {
@@ -273,13 +342,10 @@ export const chatStorage = {
   },
 
   async setChatMessages(id: string, messages: UIMessage[]): Promise<void> {
-    const write = enqueueWrite((d) =>
-      d.execute(
-        `INSERT INTO chat_messages (id, messages) VALUES ($1, $2)
-         ON CONFLICT(id) DO UPDATE SET messages = $2`,
-        [id, JSON.stringify(messages)],
-      ),
-    ).then(() => undefined);
+    const write = enqueueWrite(async (d) => {
+      await upsertChatMessages(d, id, messages);
+      await markChatSyncChanged(d, id);
+    }).then(() => emitLocalChange([id]));
     const settled = write.catch(() => undefined);
     pendingMessageWrites.set(id, settled);
     void settled.then(() => {
@@ -292,20 +358,19 @@ export const chatStorage = {
 
   async deleteChat(id: string): Promise<void> {
     await enqueueWrite(async (d) => {
-      await d.execute("DELETE FROM chat_metadata WHERE id = $1", [id]);
-      await d.execute("DELETE FROM chat_messages WHERE id = $1", [id]);
-      await d.execute("DELETE FROM chat_fts WHERE chat_id = $1", [id]);
+      await deleteChatRows(d, [id]);
+      await markChatSyncDeleted(d, [id]);
     });
+    emitLocalChange([id]);
   },
 
   async bulkDeleteChats(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
-    const placeholders = ids.map((_, i) => `$${i + 1}`).join(", ");
     await enqueueWrite(async (d) => {
-      await d.execute(`DELETE FROM chat_metadata WHERE id IN (${placeholders})`, ids);
-      await d.execute(`DELETE FROM chat_messages WHERE id IN (${placeholders})`, ids);
-      await d.execute(`DELETE FROM chat_fts WHERE chat_id IN (${placeholders})`, ids);
+      await deleteChatRows(d, ids);
+      await markChatSyncDeleted(d, ids);
     });
+    emitLocalChange(ids);
   },
 
   async updateFtsIndex(id: string, title: string, messages: UIMessage[]): Promise<void> {

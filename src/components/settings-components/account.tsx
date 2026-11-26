@@ -10,6 +10,7 @@ import {
 import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 
+import { ChatSyncDialog } from "@/components/a1/chat-sync-dialog";
 import { EnableSyncDialog } from "@/components/a1/enable-sync-dialog";
 import { EncryptedSyncDialog } from "@/components/a1/encrypted-sync-dialog";
 import { PathListEditor } from "@/components/a1/path-list-editor";
@@ -43,13 +44,20 @@ import {
   isAgentOneAccountProvisioning,
 } from "@/contexts/use-web-auth/web-auth-contexts";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
+import { useCanSyncChats } from "@/hooks/use-can-sync-chats";
 import {
   AGENT_ONE_BILLING_URL,
   AGENT_ONE_DASHBOARD_URL,
   AGENT_ONE_UPGRADE_URL,
 } from "@/lib/constants";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
-import { encryptedSyncStatusAtom, syncEnabledAtom } from "@/lib/jotai/sync-atoms";
+import {
+  chatSyncEnabledAtom,
+  defaultDeviceNameAtom,
+  deviceNameAtom,
+  encryptedSyncStatusAtom,
+  syncEnabledAtom,
+} from "@/lib/jotai/sync-atoms";
 import {
   globalAgentsFilesAtom,
   globalSkillsFoldersAtom,
@@ -329,6 +337,43 @@ export function EncryptedSyncControl() {
       />
       <EncryptedSyncDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>
+  );
+}
+
+export function ChatSyncControl() {
+  const [enabled, setEnabled] = useAtom(chatSyncEnabledAtom);
+  const canSyncChats = useCanSyncChats();
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  return (
+    <>
+      <AccountSwitch
+        label="Sync chats"
+        checked={enabled && canSyncChats}
+        onCheckedChange={(checked) => {
+          if (checked) setDialogOpen(true);
+          else setEnabled(false);
+        }}
+        signedOutHint="Sign in to sync chats"
+      />
+      <ChatSyncDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+    </>
+  );
+}
+
+export function DeviceNameControl() {
+  const [deviceName, setDeviceName] = useAtom(deviceNameAtom);
+  const defaultDeviceName = useAtomValue(defaultDeviceNameAtom);
+
+  return (
+    <Input
+      value={deviceName}
+      onChange={(e) => setDeviceName(e.target.value)}
+      placeholder={defaultDeviceName}
+      maxLength={64}
+      aria-label="Device name"
+      className="w-full md:w-64"
+    />
   );
 }
 
