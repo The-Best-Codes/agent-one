@@ -998,3 +998,32 @@
   --pele-critical: var(--destructive);
   --pele-error: var(--destructive);
 }
+
+@supports (anchor-name: --a) {
+  [data-a1-focus-ring-anchor]:has(:focus-visible) {
+    anchor-name: --a1-focus-ring-anchor;
+  }
+
+  [data-a1-focus-ring-anchor] :focus-visible {
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .a1-anchored-focus-ring {
+    position: fixed;
+    position-anchor: --a1-focus-ring-anchor;
+    top: anchor(top);
+    right: anchor(right);
+    bottom: anchor(bottom);
+    left: anchor(left);
+    display: none;
+    z-index: 60;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
+    pointer-events: none;
+  }
+
+  :root:has([data-a1-focus-ring-anchor] :focus-visible) .a1-anchored-focus-ring {
+    display: block;
+  }
+}

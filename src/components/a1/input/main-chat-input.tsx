@@ -746,6 +746,7 @@ export const MainChatInput = ({
               />
             </div>
             <div
+              data-a1-focus-ring-anchor
               className={cn(
                 "flex-none overflow-hidden rounded-lg transition-[width] duration-200 ease-in-out motion-reduce:transition-none",
                 showInterruptButton ? "w-16" : "w-8",
