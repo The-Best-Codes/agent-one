@@ -204,6 +204,7 @@ pub fn run() {
             use tauri_plugin_deep_link::DeepLinkExt;
 
             keyring::initialize_keyring_store(app.handle())?;
+            utils::cron::configure_native_cron();
 
             #[cfg(any(target_os = "linux", windows))]
             {

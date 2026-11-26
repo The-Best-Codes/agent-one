@@ -58,7 +58,7 @@ base64 = "0.23.1"
 croner = { version = "5", features = ["chrono"] }
 chrono = "0.4"
 uuid = { version = "1", features = ["v4"] }
-native-cron = "0.2.2"
+native-cron = "0.2.3"
 tempfile = "3.27.0"
 ignore = "0.4.35"
 argon2 = "0.6.0"

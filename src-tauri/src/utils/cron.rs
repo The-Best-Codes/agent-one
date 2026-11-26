@@ -520,18 +520,39 @@ fn gui_env() -> Vec<(String, String)> {
     .collect()
 }
 
+#[cfg(target_os = "windows")]
+pub fn configure_native_cron() {
+    use std::ptr::null_mut;
+    use windows_sys::Win32::Foundation::ERROR_INSUFFICIENT_BUFFER;
+    use windows_sys::Win32::Storage::Packaging::Appx::GetCurrentPackageFullName;
+
+    let mut length: u32 = 0;
+    let is_packaged =
+        unsafe { GetCurrentPackageFullName(&mut length, null_mut()) } == ERROR_INSUFFICIENT_BUFFER;
+    if !is_packaged {
+        return;
+    }
+    let Some(profile) = std::env::var_os("USERPROFILE") else {
+        return;
+    };
+    let root = PathBuf::from(profile)
+        .join(".agent-one")
+        .join("native-cron");
+    if let Err(error) = native_cron::set_windows_root(root) {
+        eprintln!("Failed to set native-cron folder: {error}");
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn configure_native_cron() {}
+
 fn build_options(cron: &Cron) -> Result<native_cron::CronOptions, String> {
-    // `open_url` picks a per-platform opener that doesn't flash a console
-    // window on Windows and doesn't get AgentOne killed on Linux when the
-    // job's systemd service exits.
     let options = native_cron::CronOptions::open_url(
         cron.id.clone(),
         cron.schedule.clone(),
         cron_url(&cron.id),
     )
     .overwrite(true);
-    // Env vars would bring back the PowerShell wrapper on Windows, and
-    // nothing outside Linux needs them.
     #[cfg(target_os = "linux")]
     let options = gui_env()
         .into_iter()
@@ -548,7 +569,6 @@ fn install_cron(cron: &Cron) -> Result<(), String> {
 }
 
 fn disable_cron(id: &str) -> Result<(), String> {
-    // Disabling a job that isn't registered is a no-op in native-cron.
     native_cron::job(id)
         .and_then(|job| job.disable())
         .map_err(|error| error.to_string())
