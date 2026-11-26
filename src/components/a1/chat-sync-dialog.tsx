@@ -12,33 +12,35 @@ import {
 } from "@/components/ui/dialog";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { useCanSyncChats } from "@/hooks/use-can-sync-chats";
-import { chatSyncEnabledAtom } from "@/lib/jotai/sync-atoms";
+import { type ChatSyncMode, chatSyncModeAtom } from "@/lib/jotai/sync-atoms";
 
 interface ChatSyncDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  mode: ChatSyncMode | null;
+  onClose: () => void;
 }
 
-export const ChatSyncDialog = ({ open, onOpenChange }: ChatSyncDialogProps) => (
-  <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent>
-      {open && <ChatSyncDialogBody onDone={() => onOpenChange(false)} />}
-    </DialogContent>
+export const ChatSyncDialog = ({ mode, onClose }: ChatSyncDialogProps) => (
+  <Dialog open={mode !== null} onOpenChange={(open) => !open && onClose()}>
+    <DialogContent>{mode && <ChatSyncDialogBody mode={mode} onDone={onClose} />}</DialogContent>
   </Dialog>
 );
 
-const ChatSyncDialogBody = ({ onDone }: { onDone: () => void }) => {
+const ChatSyncDialogBody = ({ mode, onDone }: { mode: ChatSyncMode; onDone: () => void }) => {
   const { customerState, billingLoading } = useWebAuth();
   const canSyncChats = useCanSyncChats();
-  const setChatSyncEnabled = useSetAtom(chatSyncEnabledAtom);
+  const setChatSyncMode = useSetAtom(chatSyncModeAtom);
 
   if (canSyncChats) {
     return (
       <>
         <DialogHeader>
-          <DialogTitle>Turn on chat sync?</DialogTitle>
+          <DialogTitle>
+            {mode === "selected" ? "Sync the chats you choose?" : "Sync all your chats?"}
+          </DialogTitle>
           <DialogDescription>
-            Keep your chats the same on every device you're signed in to.
+            {mode === "selected"
+              ? "Chats stay on this device until you turn on Sync This Chat in their menu. Then they stay the same on every device you're signed in to."
+              : "Keep all your chats the same on every device you're signed in to. You can stop syncing any chat from its menu."}
           </DialogDescription>
         </DialogHeader>
         <ul className="text-muted-foreground list-disc space-y-1.5 pl-5 text-sm">
@@ -55,7 +57,7 @@ const ChatSyncDialogBody = ({ onDone }: { onDone: () => void }) => {
           </Button>
           <Button
             onClick={() => {
-              setChatSyncEnabled(true);
+              setChatSyncMode(mode);
               onDone();
             }}
           >

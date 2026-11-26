@@ -171,6 +171,12 @@ pub fn run() {
                             sql: include_str!("../migrations/0011_add_chat_sync.sql"),
                             kind: tauri_plugin_sql::MigrationKind::Up,
                         },
+                        tauri_plugin_sql::Migration {
+                            version: 12,
+                            description: "add_chat_sync_opted_out",
+                            sql: include_str!("../migrations/0012_add_chat_sync_opted_out.sql"),
+                            kind: tauri_plugin_sql::MigrationKind::Up,
+                        },
                     ],
                 )
                 .build(),

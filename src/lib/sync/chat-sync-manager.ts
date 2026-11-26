@@ -13,6 +13,7 @@ import {
   chatSyncDownloadingIdsAtom,
   chatSyncEnabledAtom,
   chatSyncExcludedIdsAtom,
+  chatSyncModeAtom,
   chatSyncStatusAtom,
   defaultDeviceNameAtom,
   deviceNameAtom,
@@ -309,8 +310,11 @@ class ChatSyncManager {
 
   private refreshStatus = debounce(() => void this.computeStatus(), 250, { maxWait: 1_000 });
 
+  private refreshExcluded = debounce(() => void this.loadExcluded(), 250, { maxWait: 1_000 });
+
   constructor() {
     onLocalChatChange(() => {
+      this.refreshExcluded();
       if (!this.isActive()) return;
       this.debouncedPush();
       this.refreshStatus();
@@ -318,6 +322,7 @@ class ChatSyncManager {
 
     const store = getDefaultStore();
     store.sub(chatSyncEnabledAtom, () => this.refresh());
+    store.sub(chatSyncModeAtom, () => void this.applyMode());
     store.sub(skipPlanChecksAtom, () => {
       this.stoppedForUser = null;
       this.refresh();
@@ -366,9 +371,10 @@ class ChatSyncManager {
   async setChatExcluded(chatId: string, excluded: boolean): Promise<void> {
     await enqueueWrite((d) =>
       d.execute(
-        `INSERT INTO chat_sync (chat_id, excluded, updated_at) VALUES ($1, $2, $3)
+        `INSERT INTO chat_sync (chat_id, excluded, opted_out, updated_at) VALUES ($1, $2, $2, $3)
          ON CONFLICT(chat_id) DO UPDATE SET
            excluded = $2,
+           opted_out = $2,
            local_version = chat_sync.local_version + 1,
            updated_at = $3`,
         [chatId, excluded ? 1 : 0, Date.now()],
@@ -724,12 +730,30 @@ class ChatSyncManager {
   private async trackUntrackedChats(): Promise<void> {
     await enqueueWrite((d) =>
       d.execute(
-        `INSERT INTO chat_sync (chat_id, updated_at)
-         SELECT id, COALESCE(updated_at, created_at, 0) FROM chat_metadata
+        `INSERT INTO chat_sync (chat_id, excluded, updated_at)
+         SELECT id, $1, COALESCE(updated_at, created_at, 0) FROM chat_metadata
          WHERE id NOT IN (SELECT chat_id FROM chat_sync)`,
-        [],
+        [getDefaultStore().get(chatSyncModeAtom) === "all" ? 0 : 1],
       ),
     );
+  }
+
+  private async applyMode(): Promise<void> {
+    if (getDefaultStore().get(chatSyncModeAtom) !== "all") return;
+    try {
+      await enqueueWrite((d) =>
+        d.execute(
+          `UPDATE chat_sync SET excluded = 0, local_version = local_version + 1
+           WHERE excluded = 1 AND opted_out = 0 AND remote_disabled = 0 AND local_deleted = 0`,
+          [],
+        ),
+      );
+    } catch (error) {
+      logger.warn("Failed to apply the chat sync mode:", error);
+    }
+    await this.loadExcluded();
+    this.refreshStatus();
+    this.schedule("push");
   }
 
   private async loadExcluded(): Promise<void> {
@@ -739,7 +763,10 @@ class ChatSyncManager {
         "SELECT chat_id FROM chat_sync WHERE excluded = 1",
         [],
       );
-      getDefaultStore().set(chatSyncExcludedIdsAtom, new Set(rows.map((row) => row.chat_id)));
+      const store = getDefaultStore();
+      const current = store.get(chatSyncExcludedIdsAtom);
+      if (rows.length === current.size && rows.every((row) => current.has(row.chat_id))) return;
+      store.set(chatSyncExcludedIdsAtom, new Set(rows.map((row) => row.chat_id)));
     } catch (error) {
       logger.warn("Failed to load chat sync preferences:", error);
     }

@@ -16,14 +16,16 @@ export type EncryptedSyncStatus = "off" | "locked" | "unlocked";
 
 export const encryptedSyncStatusAtom = atom<EncryptedSyncStatus>("off");
 
-export const chatSyncEnabledAtom = atomWithStorage(
-  "agent-one-chat-sync-enabled",
-  false,
+export type ChatSyncMode = "off" | "all" | "selected";
+
+export const chatSyncModeAtom = atomWithStorage<ChatSyncMode>(
+  "agent-one-chat-sync-mode",
+  "off",
   undefined,
-  {
-    getOnInit: true,
-  },
+  { getOnInit: true },
 );
+
+export const chatSyncEnabledAtom = atom((get) => get(chatSyncModeAtom) !== "off");
 
 export const chatSyncAvailableAtom = atom(false);
 

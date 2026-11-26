@@ -1,7 +1,9 @@
 import Database from "@tauri-apps/plugin-sql";
 import type { UIMessage } from "ai";
+import { getDefaultStore } from "jotai";
 
 import type { ChatMetadata } from "@/contexts/use-persistence/persistence-context";
+import { chatSyncModeAtom } from "@/lib/jotai/sync-atoms";
 import { getLogger } from "@/lib/logger";
 import type { ChatAccessScope } from "@/lib/projects";
 import type { SettingValue } from "@/lib/settings/definitions";
@@ -80,12 +82,12 @@ export function emitLocalChange(ids: string[]): void {
 
 async function markChatSyncChanged(d: Database, id: string): Promise<void> {
   await d.execute(
-    `INSERT INTO chat_sync (chat_id, local_version, updated_at) VALUES ($1, 1, $2)
+    `INSERT INTO chat_sync (chat_id, local_version, excluded, updated_at) VALUES ($1, 1, $3, $2)
      ON CONFLICT(chat_id) DO UPDATE SET
        local_version = chat_sync.local_version + 1,
        local_deleted = 0,
        updated_at = $2`,
-    [id, Date.now()],
+    [id, Date.now(), getDefaultStore().get(chatSyncModeAtom) === "all" ? 0 : 1],
   );
 }
 

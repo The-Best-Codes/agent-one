@@ -33,6 +33,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
@@ -52,7 +60,8 @@ import {
 } from "@/lib/constants";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import {
-  chatSyncEnabledAtom,
+  type ChatSyncMode,
+  chatSyncModeAtom,
   defaultDeviceNameAtom,
   deviceNameAtom,
   encryptedSyncStatusAtom,
@@ -340,23 +349,51 @@ export function EncryptedSyncControl() {
   );
 }
 
+const CHAT_SYNC_MODES: [ChatSyncMode, string][] = [
+  ["off", "Off"],
+  ["all", "All chats"],
+  ["selected", "Only chats I choose"],
+];
+
 export function ChatSyncControl() {
-  const [enabled, setEnabled] = useAtom(chatSyncEnabledAtom);
+  const { user } = useWebAuth();
+  const [mode, setMode] = useAtom(chatSyncModeAtom);
   const canSyncChats = useCanSyncChats();
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [pendingMode, setPendingMode] = useState<ChatSyncMode | null>(null);
+  const value = canSyncChats ? mode : "off";
 
   return (
     <>
-      <AccountSwitch
-        label="Sync chats"
-        checked={enabled && canSyncChats}
-        onCheckedChange={(checked) => {
-          if (checked) setDialogOpen(true);
-          else setEnabled(false);
-        }}
-        signedOutHint="Sign in to sync chats"
-      />
-      <ChatSyncDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      <AdaptiveTooltip>
+        <AdaptiveTooltipTrigger asChild>
+          <span>
+            <Select
+              value={value}
+              onValueChange={(next) => {
+                const nextMode = next as ChatSyncMode;
+                if (nextMode === "off" || value !== "off") setMode(nextMode);
+                else setPendingMode(nextMode);
+              }}
+              disabled={!user}
+            >
+              <SelectTrigger className="w-full md:w-fit" aria-label="Sync chats">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {CHAT_SYNC_MODES.map(([option, label]) => (
+                    <SelectItem key={option} value={option}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </span>
+        </AdaptiveTooltipTrigger>
+        {!user && <AdaptiveTooltipContent>Sign in to sync chats</AdaptiveTooltipContent>}
+      </AdaptiveTooltip>
+      <ChatSyncDialog mode={pendingMode} onClose={() => setPendingMode(null)} />
     </>
   );
 }
