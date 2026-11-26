@@ -7,6 +7,7 @@ import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import {
   MAX_MEMORY_ENTRIES,
+  MAX_MEMORY_ENTRY_CHARS,
   hasMemoryEntry,
   removeMemoryEntries,
   sanitizeMemoryEntries,
@@ -24,8 +25,24 @@ const memoryOperationSchema = z.object({
     .optional()
     .describe("Entries to add or remove. Used by the add and remove operations."),
   oldEntry: z.string().optional().describe("The existing entry to replace. Used by replace."),
-  newEntry: z.string().optional().describe("The new entry text. Used by replace."),
+  newEntry: z
+    .string()
+    .optional()
+    .describe("The new entry text. Used only by replace; add takes its entries in `entries`."),
 });
+
+function assertEntriesFit(values: (string | undefined)[]) {
+  const tooLong = values.filter(
+    (value): value is string =>
+      !!value && value.replace(/\s+/g, " ").trim().length > MAX_MEMORY_ENTRY_CHARS,
+  );
+  if (tooLong.length === 0) return;
+  throw new Error(
+    `Memory entries can be at most ${MAX_MEMORY_ENTRY_CHARS} characters. Nothing was saved. Shorten or split these entries:\n${tooLong
+      .map((value) => `- ${value.slice(0, 80)}… (${value.length} characters)`)
+      .join("\n")}`,
+  );
+}
 
 function collectEntries(entries: string[] | undefined, single: string | undefined) {
   return [...(entries ?? []), ...(single ? [single] : [])]
@@ -66,7 +83,13 @@ export const createMemoryTool = (context: ChatToolsContext) =>
       let entries = sanitizeMemoryEntries(memoryStore.get());
 
       if (input.operation === "add") {
-        const toAdd = collectEntries(input.entries, input.newEntry);
+        if (input.newEntry) {
+          throw new Error(
+            "add doesn't take `newEntry`. Nothing was saved. Pass each new entry as a separate string in the `entries` array.",
+          );
+        }
+        assertEntriesFit(input.entries ?? []);
+        const toAdd = collectEntries(input.entries, undefined);
         if (toAdd.length === 0) {
           throw new Error("No entries to add. Pass the new entries in the `entries` array.");
         }
@@ -117,8 +140,19 @@ export const createMemoryTool = (context: ChatToolsContext) =>
 
       const oldEntry = sanitizeMemoryEntry(input.oldEntry ?? "");
       const newEntry = sanitizeMemoryEntry(input.newEntry ?? "");
+      if (!oldEntry || !newEntry) {
+        throw new Error(
+          "replace needs both `oldEntry` (the exact existing entry) and `newEntry` (its new text). Nothing was changed.",
+        );
+      }
+      assertEntriesFit([input.newEntry]);
       const withoutOld = removeMemoryEntries(entries, [oldEntry]);
       const replaced = withoutOld.length !== entries.length;
+      if (!replaced) {
+        throw new Error(
+          "`oldEntry` doesn't match any memory entry, so nothing was changed. Use the exact text of the entry you want to replace.",
+        );
+      }
       const nextEntries = sanitizeMemoryEntries(
         newEntry && !hasMemoryEntry(withoutOld, newEntry) ? [...withoutOld, newEntry] : withoutOld,
       );
