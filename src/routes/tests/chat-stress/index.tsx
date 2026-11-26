@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
-import { useUp } from "@/hooks/use-back";
+import { useBack } from "@/hooks/use-back";
 
 const USER_BASE_SENTENCE =
   "Please help me think through this request carefully, keep track of the constraints, and respond with enough detail to stress the chat message renderer.";
@@ -100,7 +100,7 @@ function createStressMessages({
 
 export default function ChatStressTestRoute() {
   const navigate = useNavigate();
-  const up = useUp();
+  const back = useBack();
   const {
     createChat,
     getNewChatModelConfig,
@@ -171,9 +171,9 @@ export default function ChatStressTestRoute() {
     <div className="bg-background min-h-screen">
       <div className="container mx-auto max-w-4xl p-6">
         <div className="mb-6 flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={() => up("/tests")} className="gap-2">
+          <Button variant="outline" size="sm" onClick={() => back("/tests")} className="gap-2">
             <IconArrowLeft data-icon="inline-start" />
-            Back to Tests
+            Back
           </Button>
           <h1 className="text-2xl font-bold">Chat Stress Test</h1>
         </div>

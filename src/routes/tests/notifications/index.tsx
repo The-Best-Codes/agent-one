@@ -4,11 +4,11 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useUp } from "@/hooks/use-back";
+import { useBack } from "@/hooks/use-back";
 import { sendNotificationIfAllowed } from "@/lib/notifications";
 
 export default function NotificationsTestRoute() {
-  const up = useUp();
+  const back = useBack();
   const [logs, setLogs] = useState<string[]>([]);
 
   const addLog = (message: string) => {
@@ -69,9 +69,9 @@ export default function NotificationsTestRoute() {
     <div className="bg-background min-h-screen">
       <div className="container mx-auto max-w-4xl p-6">
         <div className="mb-6 flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={() => up("/tests")} className="gap-2">
+          <Button variant="outline" size="sm" onClick={() => back("/tests")} className="gap-2">
             <IconArrowLeft data-icon="inline-start" />
-            Back to Tests
+            Back
           </Button>
           <h1 className="text-2xl font-bold">Notifications Test</h1>
         </div>

@@ -9,12 +9,12 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { useUp } from "@/hooks/use-back";
+import { useBack } from "@/hooks/use-back";
 import { onboardingCompletedAtom, skipPlanChecksAtom } from "@/lib/jotai/unsynced-local-atoms";
 
 export default function TestsRoute() {
   const navigate = useNavigate();
-  const up = useUp();
+  const back = useBack();
   const setOnboardingCompleted = useSetAtom(onboardingCompletedAtom);
   const [skipPlanChecks, setSkipPlanChecks] = useAtom(skipPlanChecksAtom);
 
@@ -30,9 +30,9 @@ export default function TestsRoute() {
     <div className="bg-background min-h-screen">
       <div className="container mx-auto max-w-4xl p-6">
         <div className="mb-6 flex items-center gap-4">
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => up("/settings")}>
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => back("/settings")}>
             <IconArrowLeft data-icon="inline-start" />
-            Back to Settings
+            Back
           </Button>
           <h1 className="text-2xl font-bold">Tests</h1>
         </div>
