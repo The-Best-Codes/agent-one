@@ -18,6 +18,7 @@ import { MessagePartToolDeleteFile } from "./tools/tool-deleteFile";
 import { MessagePartToolDeleteScheduledAgent } from "./tools/tool-deleteScheduledAgent";
 import { MessagePartToolEditFile } from "./tools/tool-editFile";
 import { MessagePartToolExecuteCommand } from "./tools/tool-executeCommand";
+import { MessagePartToolGetAccountDetails } from "./tools/tool-getAccountDetails";
 import { MessagePartToolGetSetting } from "./tools/tool-getSetting";
 import { MessagePartToolGetUrlContent } from "./tools/tool-getUrlContent";
 import { MessagePartToolListScheduledAgents } from "./tools/tool-listScheduledAgents";
@@ -95,6 +96,8 @@ function ToolPart({ part }: MessageToolHandlerProps) {
       return <MessagePartToolComputerUseObserve part={part} />;
     case "tool-computerUseAct":
       return <MessagePartToolComputerUseAct part={part} />;
+    case "tool-getAccountDetails":
+      return <MessagePartToolGetAccountDetails part={part} />;
     case "tool-listSkills":
       return <MessagePartToolListSkills part={part} />;
     default:

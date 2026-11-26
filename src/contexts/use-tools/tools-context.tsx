@@ -15,6 +15,7 @@ import {
   createSubAgentTool,
   createListSkillsTool,
   createAnalyzeFileTool,
+  createGetAccountDetailsTool,
   createViewFileTool,
   createWaitTool,
   createWebSearchTool,
@@ -599,6 +600,8 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
           mergedToolConfigs.viewFile.requiresApproval,
         );
       }
+
+      filteredStaticTools.getAccountDetails = withApproval(createGetAccountDetailsTool(), false);
 
       if (options?.analyzeFile) {
         filteredStaticTools.analyzeFile = withApproval(
