@@ -57,5 +57,8 @@ parts:
       # Fix desktop file icon path for snap
       sed -i -e "s|Icon=agent-one|Icon=/usr/share/icons/hicolor/32x32/apps/agent-one.png|g" \
         $CRAFT_PART_INSTALL/usr/share/applications/AgentOne.desktop 2>/dev/null || true
+      # Pass the deep link URL to the app
+      sed -i -e "s|^Exec=agent-one$|Exec=agent-one %u|" \
+        $CRAFT_PART_INSTALL/usr/share/applications/AgentOne.desktop
     stage-packages:
       - libwebkit2gtk-4.1-0
