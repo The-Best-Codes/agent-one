@@ -80,7 +80,7 @@ export function AccountStep({ onSignedIn, onContinueWithoutAccount }: AccountSte
           </div>
 
           <ScrollArea className="min-h-0 flex-1">
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 p-px">
               {PROVIDER_CARDS.map(({ title, description, Content }) => (
                 <Card key={title} size="sm">
                   <CardHeader>
