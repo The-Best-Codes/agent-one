@@ -20,6 +20,7 @@
 - [CLI client](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/cli.md): Scripting the MCP Inspector: methods, output formats, exit codes, and CI recipes
 - [TUI client](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/tui.md): The terminal MCP Inspector: navigation, tabs, and keyboard reference
 - [mcpdo connection client](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/mcpdo.md): Connect to an MCP server once, then run many commands against that named connection
+- [Load testing](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/load-testing.md): Call a tool, or a weighted mix of tools, resources and prompts, repeatedly and concurrently from the web client, the CLI or mcpdo, and read the latency and error-rate summary
 - [Configuration and flags](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/configuration.md): Catalog vs. config files, which client owns which flag, and every environment variable
 - [Authorization](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/authorization.md): How the MCP Inspector performs OAuth, re-authorizes mid-session, and shares tokens between its clients
 - [Protocol eras](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/protocol-eras.md): How the Inspector negotiates legacy vs. modern MCP, and how every feature is handled between protocol eras
@@ -43,7 +44,6 @@
 - [Security Best Practices](https://modelcontextprotocol.io/docs/2025-11-25/tutorials/security/security_best_practices.md): Security considerations, attack vectors, and best practices for MCP implementations
 - [MCP Inspector](https://modelcontextprotocol.io/docs/2025-11-25/tools/inspector.md): In-depth guide to using the MCP Inspector for testing and debugging Model Context Protocol servers
 - [Debugging](https://modelcontextprotocol.io/docs/2025-11-25/tools/debugging.md): A comprehensive guide to debugging Model Context Protocol (MCP) integrations
-- [Example Servers](https://modelcontextprotocol.io/examples.md): A list of example servers and implementations
 - [What is the Model Context Protocol (MCP)?](https://modelcontextprotocol.io/docs/2025-06-18/getting-started/intro.md)
 - [Architecture overview](https://modelcontextprotocol.io/docs/2025-06-18/learn/architecture.md)
 - [Understanding MCP servers](https://modelcontextprotocol.io/docs/2025-06-18/learn/server-concepts.md)
@@ -60,7 +60,6 @@
 - [Security Best Practices](https://modelcontextprotocol.io/docs/2025-06-18/tutorials/security/security_best_practices.md): Security considerations, attack vectors, and best practices for MCP implementations
 - [MCP Inspector](https://modelcontextprotocol.io/docs/2025-06-18/tools/inspector.md): In-depth guide to using the MCP Inspector for testing and debugging Model Context Protocol servers
 - [Debugging](https://modelcontextprotocol.io/docs/2025-06-18/tools/debugging.md): A comprehensive guide to debugging Model Context Protocol (MCP) integrations
-- [Example Servers](https://modelcontextprotocol.io/examples.md): A list of example servers and implementations
 - [What is the Model Context Protocol (MCP)?](https://modelcontextprotocol.io/docs/2025-03-26/getting-started/intro.md)
 - [Architecture overview](https://modelcontextprotocol.io/docs/2025-03-26/learn/architecture.md)
 - [Understanding MCP servers](https://modelcontextprotocol.io/docs/2025-03-26/learn/server-concepts.md)
@@ -77,7 +76,6 @@
 - [Security Best Practices](https://modelcontextprotocol.io/docs/2025-03-26/tutorials/security/security_best_practices.md): Security considerations, attack vectors, and best practices for MCP implementations
 - [MCP Inspector](https://modelcontextprotocol.io/docs/2025-03-26/tools/inspector.md): In-depth guide to using the MCP Inspector for testing and debugging Model Context Protocol servers
 - [Debugging](https://modelcontextprotocol.io/docs/2025-03-26/tools/debugging.md): A comprehensive guide to debugging Model Context Protocol (MCP) integrations
-- [Example Servers](https://modelcontextprotocol.io/examples.md): A list of example servers and implementations
 - [What is the Model Context Protocol (MCP)?](https://modelcontextprotocol.io/docs/2024-11-05/getting-started/intro.md)
 - [Architecture overview](https://modelcontextprotocol.io/docs/2024-11-05/learn/architecture.md)
 - [Understanding MCP servers](https://modelcontextprotocol.io/docs/2024-11-05/learn/server-concepts.md)
@@ -94,7 +92,6 @@
 - [Security Best Practices](https://modelcontextprotocol.io/docs/2024-11-05/tutorials/security/security_best_practices.md): Security considerations, attack vectors, and best practices for MCP implementations
 - [MCP Inspector](https://modelcontextprotocol.io/docs/2024-11-05/tools/inspector.md): In-depth guide to using the MCP Inspector for testing and debugging Model Context Protocol servers
 - [Debugging](https://modelcontextprotocol.io/docs/2024-11-05/tools/debugging.md): A comprehensive guide to debugging Model Context Protocol (MCP) integrations
-- [Example Servers](https://modelcontextprotocol.io/examples.md): A list of example servers and implementations
 - [What is the Model Context Protocol (MCP)?](https://modelcontextprotocol.io/docs/draft/getting-started/intro.md)
 - [Architecture overview](https://modelcontextprotocol.io/docs/draft/learn/architecture.md)
 - [Understanding MCP servers](https://modelcontextprotocol.io/docs/draft/learn/server-concepts.md)
@@ -115,13 +112,13 @@
 - [CLI client](https://modelcontextprotocol.io/docs/draft/tools/inspector/cli.md): Scripting the MCP Inspector: methods, output formats, exit codes, and CI recipes
 - [TUI client](https://modelcontextprotocol.io/docs/draft/tools/inspector/tui.md): The terminal MCP Inspector: navigation, tabs, and keyboard reference
 - [mcpdo connection client](https://modelcontextprotocol.io/docs/draft/tools/inspector/mcpdo.md): Connect to an MCP server once, then run many commands against that named connection
+- [Load testing](https://modelcontextprotocol.io/docs/draft/tools/inspector/load-testing.md): Call a tool, or a weighted mix of tools, resources and prompts, repeatedly and concurrently from the web client, the CLI or mcpdo, and read the latency and error-rate summary
 - [Configuration and flags](https://modelcontextprotocol.io/docs/draft/tools/inspector/configuration.md): Catalog vs. config files, which client owns which flag, and every environment variable
 - [Authorization](https://modelcontextprotocol.io/docs/draft/tools/inspector/authorization.md): How the MCP Inspector performs OAuth, re-authorizes mid-session, and shares tokens between its clients
 - [Protocol eras](https://modelcontextprotocol.io/docs/draft/tools/inspector/protocol-eras.md): How the Inspector negotiates legacy vs. modern MCP, and how every feature is handled between protocol eras
 - [Recipes](https://modelcontextprotocol.io/docs/draft/tools/inspector/recipes.md): Practical guides for transports, importing configs, reviewing MCP Apps, Docker, network hosting, and persistent connections with mcpdo
 - [Security](https://modelcontextprotocol.io/docs/draft/tools/inspector/security.md): The Inspector's threat model in one place, covering the web backend, Docker, secret storage, stdio servers, and the mcpdo daemon
 - [Debugging](https://modelcontextprotocol.io/docs/draft/tools/debugging.md): A comprehensive guide to debugging Model Context Protocol (MCP) integrations
-- [Example Servers](https://modelcontextprotocol.io/examples.md): A list of example servers and implementations
 - [Specification](https://modelcontextprotocol.io/specification/2026-07-28/index.md)
 - [Key Changes](https://modelcontextprotocol.io/specification/2026-07-28/changelog.md)
 - [Deprecated Features](https://modelcontextprotocol.io/specification/2026-07-28/deprecated.md)
@@ -273,6 +270,7 @@
 - [Enterprise-Managed Authorization](https://modelcontextprotocol.io/extensions/auth/enterprise-managed-authorization.md): Centralized access control for MCP in enterprise environments via identity providers
 - [Tasks](https://modelcontextprotocol.io/extensions/tasks/overview.md): Asynchronous task execution for long-running MCP operations
 - [Skills](https://modelcontextprotocol.io/extensions/skills/overview.md): Discover and read Agent Skills from MCP servers
+- [Events](https://modelcontextprotocol.io/extensions/events/overview.md): Subscribe to events in upstream systems and react when they happen
 - [The MCP Registry](https://modelcontextprotocol.io/registry/about.md)
 - [Quickstart: Publish an MCP Server to the MCP Registry](https://modelcontextprotocol.io/registry/quickstart.md)
 - [Frequently Asked Questions](https://modelcontextprotocol.io/registry/faq.md)
@@ -329,20 +327,19 @@
 - [SEP-2640: Skills Extension](https://modelcontextprotocol.io/seps/2640-skills-extension.md): Skills Extension
 - [SEP-2663: Tasks Extension](https://modelcontextprotocol.io/seps/2663-tasks-extension.md): Tasks Extension
 - [SEP-3392: Extension Lifecycle](https://modelcontextprotocol.io/seps/3392-extension-lifecycle.md): Extension Lifecycle
+- [SEP-3415: Events Extension](https://modelcontextprotocol.io/seps/3415-events-extension.md): Events Extension
 - [SEP-3398: Release Cycle Updates](https://modelcontextprotocol.io/seps/3398-release-cycle-updates.md): Release Cycle Updates
-- [Contributing to MCP](https://modelcontextprotocol.io/community/contributing.md): How to contribute to the Model Context Protocol project
-- [Contributor Communication](https://modelcontextprotocol.io/community/communication.md): Communication strategy and framework for the Model Context Protocol community
-- [Working and Interest Groups](https://modelcontextprotocol.io/community/working-interest-groups.md): Governance rules for the two forms of collaborative groups within the Model Context Protocol community — Working Groups and Interest Groups.
-- [Group Charter Template](https://modelcontextprotocol.io/community/charter-template.md): Template for MCP Working Group and Interest Group charters.
-- [Roadmap](https://modelcontextprotocol.io/development/roadmap.md): The Model Context Protocol roadmap, covering the priority areas Core Maintainers and Working Groups are driving for the next specification release and how they shape SEP review.
+- [Contributing to MCP](https://modelcontextprotocol.io/community/contributing.md): How to contribute to the Model Context Protocol specification, docs and SDKs.
+- [SEP Guidelines](https://modelcontextprotocol.io/community/sep-guidelines.md): When a Specification Enhancement Proposal is required and the procedure a proposal follows from pull request to Final.
 - [Design Principles](https://modelcontextprotocol.io/community/design-principles.md): The core design principles that guide the development of the Model Context Protocol.
-- [SEP Guidelines](https://modelcontextprotocol.io/community/sep-guidelines.md): Specification Enhancement Proposal (SEP) guidelines for proposing changes to the Model Context Protocol
+- [Roadmap](https://modelcontextprotocol.io/development/roadmap.md): The Model Context Protocol roadmap, covering the priority areas Core Maintainers and Working Groups are driving for the next specification release and how they shape SEP review.
 - [Governance and Stewardship](https://modelcontextprotocol.io/community/governance.md): Learn about the Model Context Protocol's governance structure and how to participate in the community
-- [Contributor Ladder](https://modelcontextprotocol.io/community/contributor-ladder.md): Roles, responsibilities, and advancement criteria for MCP contributors, from first contribution to Core Maintainer
-- [Feature Lifecycle and Deprecation Policy](https://modelcontextprotocol.io/community/feature-lifecycle.md): How individual MCP specification features move through Active, Deprecated, and Removed states, and the timeline implementers can plan against.
-- [SDK Tiering System](https://modelcontextprotocol.io/community/sdk-tiers.md): Feature completeness, protocol support, and maintenance commitment levels for Model Context Protocol SDKs
-- [Security Policy](https://modelcontextprotocol.io/community/security.md): How to report security vulnerabilities in the Model Context Protocol specification and SDKs, what is in and out of scope, and how SDK maintainers coordinate disclosure.
-- [Antitrust Policy](https://modelcontextprotocol.io/community/antitrust.md): MCP Project Antitrust Policy for participants and contributors
+- [Contributor Ladder](https://modelcontextprotocol.io/community/contributor-ladder.md): The contributor roles in the MCP project, what each requires and grants, and how people move between them.
+- [Working Groups and Interest Groups](https://modelcontextprotocol.io/community/working-interest-groups.md): The MCP project's working groups and interest groups, how to join or start one, and the operating rules every group follows.
+- [Group Charter Template](https://modelcontextprotocol.io/community/charter-template.md): The charter template for MCP working groups and interest groups, and how to submit a charter.
+- [Working Groups Overview](https://modelcontextprotocol.io/community/working-groups/overview.md): Current MCP working groups, their leads, channels, and focus.
+- [MCP Apps Working Group Charter](https://modelcontextprotocol.io/community/working-groups/apps.md): Charter for the MCP Apps Working Group.
+- [Core Primitives Charter](https://modelcontextprotocol.io/community/working-groups/core-primitives.md): Charter for the MCP Core Primitives Working Group.
 - [File Uploads Charter](https://modelcontextprotocol.io/community/working-groups/file-uploads.md): Charter for the MCP File Uploads Working Group.
 - [Filesystems Charter](https://modelcontextprotocol.io/community/working-groups/filesystems.md): Charter for the MCP Filesystems Working Group.
 - [Governance Working Group Charter](https://modelcontextprotocol.io/community/working-groups/governance.md): Charter for the MCP Governance Working Group.
@@ -359,8 +356,15 @@
 - [Agents Charter](https://modelcontextprotocol.io/community/interest-groups/agents.md): Charter for the MCP Agents Interest Group.
 - [Authorization Charter](https://modelcontextprotocol.io/community/interest-groups/auth.md): Charter for the MCP Authorization Interest Group.
 - [Enterprise Interest Group Charter](https://modelcontextprotocol.io/community/interest-groups/enterprise.md): Charter for the MCP Enterprise Interest Group.
-- [Enterprise-Managed Authorization Charter](https://modelcontextprotocol.io/community/interest-groups/enterprise-managed-authorization.md): Charter for the MCP Enterprise-Managed Authorization Interest Group.
 - [Financial Services Charter](https://modelcontextprotocol.io/community/interest-groups/financial-services.md): Charter for the MCP Financial Services Interest Group.
 - [Scientific Computing Charter](https://modelcontextprotocol.io/community/interest-groups/scientific-computing.md): Charter for the MCP Scientific Computing Interest Group.
 - [Security Charter](https://modelcontextprotocol.io/community/interest-groups/security.md): Charter for the MCP Security Interest Group.
 - [Tool Annotations Charter](https://modelcontextprotocol.io/community/interest-groups/tool-annotations.md): Charter for the MCP Tool Annotations Interest Group.
+- [Project Policies](https://modelcontextprotocol.io/community/policies.md): The standing policies that apply to everyone who takes part in the MCP project, and where each one is defined.
+- [Communication](https://modelcontextprotocol.io/community/communication.md): The MCP project's communication channels, when a channel may be private, and where decisions are recorded.
+- [Feature Lifecycle and Deprecation](https://modelcontextprotocol.io/community/feature-lifecycle.md): How individual MCP specification features move through Active, Deprecated, and Removed states, and the timeline implementers can plan against.
+- [SDK Tiers](https://modelcontextprotocol.io/community/sdk-tiers.md): What each SDK tier requires, how conformance is measured, how an SDK moves between tiers, and the issue labels SDK repositories must use.
+- [Antitrust Policy](https://modelcontextprotocol.io/community/antitrust.md): MCP Project Antitrust Policy for participants and contributors
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

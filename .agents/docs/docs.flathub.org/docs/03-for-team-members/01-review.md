@@ -66,16 +66,58 @@ separately.
   are allowed to use `org.kde` IDs. flathub/kde team should be cc-ed
   for `org.kde.` submissions.
 
-Once the PR ready to be merged you can use the merge command to merge
-the submission. The syntax is
+## Merge pull requests
 
+Only members of `@flathub/reviewers` can use `/merge`. The `head` value
+must be the full 40-character SHA of the current pull request head. The bot
+rejects the command if the head changes before the merge.
+
+### New app submissions
+
+Use this command on submission pull requests in `flathub/flathub`:
+
+```text
+/merge [branch=<target>] head=<sha> [@collaborator ...]
 ```
-/merge:<optional target repo default branch, default:master> head=<pr head commit sha, 40 chars> <additional colloborators @foo @baz, default: PR author>
 
-# Examples
+- Apps default to `master`.
+- `branch=beta` targets `beta`; `branch=24.08` targets `branch/24.08`.
+- For runtime extensions `branch` can be omitted to use the branch declared in
+  their manifest: `stable` targets `master`, `beta` targets `beta`, and other
+  values target `branch/<branch>`.
+- The pull request author is added as a collaborator automatically. Add
+  `@user` names to grant access to additional collaborators.
 
-/merge head=SHA -> creates 'master'
-/merge:beta head=SHA -> creates 'beta'
-/merge:24.08 head=SHA -> creates 'branch/24.08'
-/merge:24.08 head=SHA @foo @baz -> creates 'branch/24.08', adds PR author, GitHub user 'foo' and 'baz' to colloborators
+```text
+/merge head=<sha>
+/merge branch=beta head=<sha>
+/merge branch=24.08 head=<sha> @foo @baz
+```
+
+### Existing app pull requests
+
+Use this command on pull requests in existing app repositories:
+
+```text
+/merge [method=merge|squash|rebase] [force=true|false] head=<sha>
+```
+
+The method defaults to `merge` and must be enabled in the repository settings.
+Reviewers cannot merge their own app pull requests.
+
+`force` defaults to `false`. Set it to `true` to skip build, permission, and
+GitHub branch-protection checks.
+
+```text
+/merge force=true head=<sha>
+```
+
+### Shared-modules pull requests
+
+Shared-modules uses the same command and options but defaults to `rebase`.
+Reviewers can merge their own shared-modules pull requests.
+
+```text
+/merge head=<sha>
+/merge method=squash head=<sha>
 ```
