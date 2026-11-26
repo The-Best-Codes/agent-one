@@ -476,6 +476,43 @@ async function getMcpClientAndTools(
   }
 }
 
+function reconnectAfterExit(server: McpServerConfig, entry: ManagedMCPServer): void {
+  const transport = entry.transport;
+  if (server.type !== "stdio" || !transport) return;
+
+  let exited = false;
+  const onClientClose = transport.onclose;
+  transport.onclose = () => {
+    onClientClose?.();
+    if (serverCache.get(server.id) === entry) exited = true;
+  };
+
+  entry.tools = Object.fromEntries(
+    Object.entries(entry.tools).map(([name, tool]) => {
+      if (!tool.execute) return [name, tool];
+      const reconnectingTool: Tool<unknown, unknown> = {
+        ...tool,
+        execute: async (input, options) => {
+          const cached = serverCache.get(server.id);
+          const canReconnect =
+            cached?.configHash === entry.configHash ||
+            loadingOperations.get(server.id)?.configHash === entry.configHash;
+          if (!exited || !canReconnect) {
+            return tool.execute!(input, options);
+          }
+          if (cached === entry) serverCache.delete(server.id);
+          const freshTool = (await getMcpToolsForServer(server))[name];
+          if (!freshTool?.execute) {
+            throw new Error(`${server.name} restarted and no longer has the ${name} tool.`);
+          }
+          return freshTool.execute(input, options);
+        },
+      };
+      return [name, reconnectingTool];
+    }),
+  );
+}
+
 export async function getMcpToolsForServer(server: McpServerConfig): Promise<ToolSet> {
   const configHash = getConfigHash(server);
   const cached = serverCache.get(server.id);
@@ -503,7 +540,9 @@ export async function getMcpToolsForServer(server: McpServerConfig): Promise<Too
   const promise = (async () => {
     try {
       const result = await getMcpClientAndTools(server, controller.signal);
-      serverCache.set(server.id, { ...result, configHash });
+      const entry = { ...result, configHash };
+      reconnectAfterExit(server, entry);
+      serverCache.set(server.id, entry);
 
       if (server.type === "http") {
         if (result.hasToken) {
