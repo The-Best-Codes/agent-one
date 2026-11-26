@@ -11,10 +11,10 @@ const SVG_PLACEHOLDER: &str = "[SVG Image]";
 pub fn convert_html_to_markdown(html: &str) -> Result<String, String> {
     let converter = HtmlToMarkdown::builder()
         .skip_tags(vec!["script", "style", "link", "meta"])
-        .add_handler(vec!["svg"], |_: &dyn Handlers, _: Element| {
+        .add_handler(vec!["svg"], |_: &dyn Handlers, _: &Element| {
             Some(SVG_PLACEHOLDER.into())
         })
-        .add_handler(vec!["img"], |_: &dyn Handlers, element: Element| {
+        .add_handler(vec!["img"], |_: &dyn Handlers, element: &Element| {
             image_to_markdown(element).map(Into::into)
         })
         .build();
@@ -58,16 +58,16 @@ fn normalize_markdown(markdown: String) -> String {
     BLANK_LINE_REGEX.replace_all(&markdown, "\n\n").to_string()
 }
 
-fn image_to_markdown(element: Element) -> Option<String> {
+fn image_to_markdown(element: &Element) -> Option<String> {
     let mut src = None;
     let mut alt = None;
     let mut title = None;
 
-    for attr in element.attrs {
-        match attr.name.local.as_ref() {
-            "src" | "href" => src = Some(attr.value.to_string()),
-            "alt" => alt = Some(normalize_image_text(attr.value.as_ref())),
-            "title" => title = Some(normalize_image_text(attr.value.as_ref())),
+    for (name, value) in element.node.attrs().iter() {
+        match name {
+            "src" | "href" => src = Some(value.to_string()),
+            "alt" => alt = Some(normalize_image_text(value)),
+            "title" => title = Some(normalize_image_text(value)),
             _ => {}
         }
     }
