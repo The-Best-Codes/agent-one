@@ -1,7 +1,7 @@
 import { getDefaultStore } from "jotai";
 import { useEffect } from "react";
 
-import { fetchProviderModels } from "@/lib/ai/providers/custom-provider-factory";
+import { fetchProviderModelMetadata } from "@/lib/ai/providers/custom-provider-factory";
 import {
   normalizedLocalProvidersAtom,
   updateLocalProviderAtom,
@@ -21,24 +21,18 @@ export function LocalProviderStartupSync() {
 
       for (const provider of providers) {
         try {
-          const response = await fetchProviderModels(provider.baseUrl, undefined, provider.headers);
+          const response = await fetchProviderModelMetadata(
+            provider.baseUrl,
+            undefined,
+            provider.headers,
+            provider.id,
+          );
           if (cancelled) {
             return;
           }
 
           const existingModels = new Map(provider.models.map((model) => [model.id, model]));
-          const fetchedModels = response.data.map((model) => {
-            const existingModel = existingModels.get(model.id);
-
-            return (
-              existingModel ?? {
-                id: model.id,
-                supportsText: true,
-                supportsTools: true,
-                supportsImages: false,
-              }
-            );
-          });
+          const fetchedModels = response.map((model) => existingModels.get(model.id) ?? model);
 
           const extraModels = provider.models.filter(
             (model) => !fetchedModels.some((item) => item.id === model.id),
