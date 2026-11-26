@@ -72,7 +72,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
     case "input-streaming":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <Spinner className="text-foreground size-4 shrink-0" />
+          <Spinner />
           <span className="text-foreground text-sm font-bold">Preparing to delete file...</span>
         </div>
       );
@@ -94,7 +94,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
           key={callId}
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <Spinner className="text-foreground size-4 shrink-0" />
+          <Spinner />
           <span className="max-w-2xl truncate">{`Deleting ${filePath}...`}</span>
         </div>
       );

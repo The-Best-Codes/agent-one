@@ -175,7 +175,7 @@ export const MessagePartToolComputerUseObserve = ({ part }: { part: ToolUIPart }
       if (part.approval?.approved === false) return <Denied callId={callId} />;
       return (
         <div key={callId} className="flex items-center gap-1 text-sm font-bold">
-          <Spinner className="size-4 shrink-0" />
+          <Spinner />
           <span className="truncate">{`Looking at ${target}`}</span>
         </div>
       );

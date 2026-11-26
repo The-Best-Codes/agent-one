@@ -40,7 +40,7 @@ import {
 import { SettingsLink } from "../settings-link";
 import { SignOutModal } from "./modals";
 
-export function AccountMenu({ activeChatId }: { activeChatId?: string }) {
+export function AccountMenu() {
   const { user, isLoading, customerState, billingError } = useWebAuth();
   const [showSignOutModal, setShowSignOutModal] = useState(false);
 
@@ -48,8 +48,6 @@ export function AccountMenu({ activeChatId }: { activeChatId?: string }) {
     () => getActivePaidSubscription(customerState),
     [customerState],
   );
-
-  const chatQuery = activeChatId ? `?chatId=${activeChatId}` : "";
 
   let triggerContent: ReactNode;
   if (user) {
@@ -137,13 +135,13 @@ export function AccountMenu({ activeChatId }: { activeChatId?: string }) {
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem asChild>
-              <Link to={`/extensions${chatQuery}`}>
+              <Link to="/extensions">
                 <IconPuzzle />
                 Extensions
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to={`/scheduled-agents${chatQuery}`}>
+              <Link to="/scheduled-agents">
                 <IconClock />
                 Scheduled Agents
               </Link>

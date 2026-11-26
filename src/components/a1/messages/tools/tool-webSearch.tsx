@@ -104,7 +104,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
     case "input-streaming":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <Spinner className="text-foreground size-4 shrink-0" />{" "}
+          <Spinner />{" "}
           <span className="text-foreground text-sm font-bold">Preparing web search...</span>
         </div>
       );
@@ -123,7 +123,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
       }
       return (
         <div key={callId} className="flex flex-row items-center gap-1">
-          <Spinner className="text-foreground size-4 shrink-0" />
+          <Spinner />
           <span className="max-w-2xl truncate text-sm font-bold">
             {`Searching online for "${query}"...`}
           </span>

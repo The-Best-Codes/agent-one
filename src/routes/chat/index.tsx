@@ -12,6 +12,7 @@ import { MessagePreviewRail } from "@/components/a1/message-preview-rail";
 import { MessageParts } from "@/components/a1/messages";
 import { ProjectPicker } from "@/components/a1/project-picker";
 import { Sidebar } from "@/components/a1/sidebar";
+import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import { useChatLoading, useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
@@ -22,7 +23,9 @@ import {
   editingMessageIdsAtom,
 } from "@/lib/jotai/chat-message-editing-atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
+import { chatSyncDownloadingIdsAtom } from "@/lib/jotai/sync-atoms";
 import { getProject, projectsAtom } from "@/lib/projects";
+import { chatSyncManager } from "@/lib/sync/chat-sync-manager";
 import { cn } from "@/lib/utils";
 
 const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
@@ -42,11 +45,16 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
   const clearEditingMessages = useSetAtom(clearEditingMessagesAtom);
   const hasProjects = useAtomValue(projectsAtom).length > 0;
   const { loadChatMetadata } = usePersistence();
+  const isSyncingChat = useAtomValue(chatSyncDownloadingIdsAtom).has(chatId ?? "");
   const requestedProjectId = searchParams.get("project") ?? undefined;
   const getChatProject = useCallback(
     () => getProject(chatId ? loadChatMetadata(chatId).projectId : requestedProjectId),
     [chatId, loadChatMetadata, requestedProjectId],
   );
+
+  useEffect(() => {
+    if (chatId) void chatSyncManager.syncChatOnOpen(chatId);
+  }, [chatId]);
 
   useEffect(() => {
     clearEditingMessages();
@@ -139,7 +147,7 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
       <div className="relative flex h-full w-full flex-1 flex-col items-center">
         {isChatLoading && showSpinner ? (
           <div className="flex flex-1 items-center justify-center">
-            <Spinner className="text-muted-foreground size-8" />
+            <Spinner className="size-8" />
           </div>
         ) : (
           <div className="relative min-h-0 w-full flex-1">
@@ -205,12 +213,18 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
           </div>
         )}
         <div className="w-full max-w-3xl">
+          {isSyncingChat && (
+            <Badge variant="secondary" className="mb-2">
+              <Spinner data-icon="inline-start" />
+              Syncing latest version
+            </Badge>
+          )}
           <MainChatInput
             key={chatId || "new-chat"}
             draftKey={chatId || "new-chat"}
             initialValue={initialInputValue}
             initialValueKey={chatId ? undefined : location.key}
-            disabled={isChatLoading}
+            disabled={isChatLoading || isSyncingChat}
             toolbarStart={!chatId && hasProjects ? <ProjectPicker /> : undefined}
             getProject={getChatProject}
             onScrollNeededAction={() => {

@@ -47,7 +47,7 @@ export function AppUpdates() {
         };
       case "checking":
         return {
-          icon: <Spinner className="text-foreground" data-icon="inline-start" />,
+          icon: <Spinner data-icon="inline-start" />,
           title: "Checking for updates...",
           description: "Please wait while we check for the latest version",
         };
@@ -80,7 +80,7 @@ export function AppUpdates() {
         };
       case "installing":
         return {
-          icon: <Spinner className="text-foreground" data-icon="inline-start" />,
+          icon: <Spinner data-icon="inline-start" />,
           title: "Installing update...",
           description: "Please wait while we install the update",
         };

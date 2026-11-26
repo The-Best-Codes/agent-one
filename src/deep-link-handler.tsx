@@ -134,7 +134,11 @@ export function DeepLinkHandler() {
             params.set("mcpUrl", config.url);
           }
 
-          void actionsRef.current.navigate(`/extensions?${params.toString()}`);
+          const inPlace = window.location.pathname === "/extensions";
+          void actionsRef.current.navigate(`/extensions?${params.toString()}`, {
+            replace: inPlace,
+            state: { inPlace },
+          });
         } else if (deepLinkId === "extensions/install") {
           const id = urlObj.searchParams.get("id");
           if (!id || !isValidExtensionLinkId(id)) {
@@ -142,8 +146,10 @@ export function DeepLinkHandler() {
             return;
           }
 
+          const inPlace = window.location.pathname === "/extensions";
           void actionsRef.current.navigate(
             `/extensions?${new URLSearchParams({ install: id }).toString()}`,
+            { replace: inPlace, state: { inPlace } },
           );
         } else if (deepLinkId === "cron") {
           const id = urlObj.searchParams.get("id");

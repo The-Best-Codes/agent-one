@@ -1,6 +1,6 @@
 use axum::{
     Router,
-    extract::{Query, State},
+    extract::{Query, RawQuery, State},
     response::Html,
     routing::get,
 };
@@ -55,34 +55,22 @@ async fn load_oauth_client(server_id: &str, db_path: &Path) -> Result<Option<OAu
     }
 }
 
-async fn discover_scopes_with_rmcp(server_url: &str) -> Result<Vec<String>, String> {
-    let mut auth_manager = AuthorizationManager::new(server_url)
-        .await
-        .map_err(|e| e.to_string())?;
-
-    let resolution = auth_manager
-        .resolve_metadata()
-        .await
-        .map_err(|e| e.to_string())?;
-    auth_manager.set_metadata(resolution.metadata);
-
-    Ok(auth_manager.select_scopes(None, &[]))
-}
-
 async fn initialize_and_start_auth(
     server_url: &str,
     redirect_uri: &str,
     client_metadata_url: &str,
-    scopes: &[String],
+    cred_store: KeyringCredentialStore,
     oauth_client: Option<OAuthClient>,
 ) -> Result<OAuthState, String> {
     let mut state = OAuthState::new(server_url, None)
         .await
         .map_err(|e| format!("Failed to initialize OAuth: {}", e))?;
 
-    let request = AuthorizationRequest::new(redirect_uri)
-        .with_scopes(scopes.iter().cloned())
-        .with_client_name("AgentOne");
+    if let OAuthState::Unauthorized(manager) = &mut state {
+        manager.set_credential_store(cred_store);
+    }
+
+    let request = AuthorizationRequest::new(redirect_uri).with_client_name("AgentOne");
     let request = match oauth_client {
         Some(client) => {
             let request = request.with_preregistered_client(client.client_id);
@@ -117,27 +105,12 @@ struct AppState {
 }
 
 #[derive(Debug, Deserialize)]
-struct CallbackParams {
-    code: String,
-    state: String,
-}
-
-#[derive(Debug, Deserialize)]
-struct CallbackQuery {
-    code: Option<String>,
-    state: Option<String>,
+struct CallbackError {
     error: Option<String>,
     error_description: Option<String>,
 }
 
-#[derive(Debug)]
-enum CallbackResult {
-    Success(CallbackParams),
-    Error {
-        error: String,
-        description: Option<String>,
-    },
-}
+type CallbackResult = Result<String, String>;
 
 #[derive(Clone)]
 pub struct KeyringCredentialStore {
@@ -187,24 +160,14 @@ impl CredentialStore for KeyringCredentialStore {
 }
 
 async fn callback_handler(
-    Query(query): Query<CallbackQuery>,
+    RawQuery(query): RawQuery,
+    Query(failure): Query<CallbackError>,
     State(state): State<AppState>,
 ) -> Html<&'static str> {
     if let Some(sender) = state.code_receiver.lock().await.take() {
-        let result = match (
-            query.code,
-            query.state,
-            query.error,
-            query.error_description,
-        ) {
-            (Some(code), Some(state), _, _) => {
-                CallbackResult::Success(CallbackParams { code, state })
-            }
-            (_, _, Some(error), description) => CallbackResult::Error { error, description },
-            _ => CallbackResult::Error {
-                error: "invalid_callback".to_string(),
-                description: Some("Missing OAuth callback parameters".to_string()),
-            },
+        let result = match failure.error {
+            Some(error) => Err(failure.error_description.unwrap_or(error)),
+            None => Ok(query.unwrap_or_default()),
         };
         let _ = sender.send(result);
     }
@@ -238,22 +201,15 @@ pub async fn mcp_authenticate(
 
     let server_handle = tokio::spawn(async move { axum::serve(listener, router).await });
 
-    let scopes = discover_scopes_with_rmcp(&server_url)
-        .await
-        .unwrap_or_default();
-
     let db_path = resolve_agent_db_path(&app)?;
     let oauth_client = load_oauth_client(&server_id, &db_path).await?;
-
-    let redirect_uri_clone = redirect_uri.clone();
-    let client_metadata_clone = client_metadata_url.clone();
-    let scopes_clone = scopes.clone();
+    let cred_store = KeyringCredentialStore::new(server_id.clone(), db_path);
 
     let mut oauth_state = initialize_and_start_auth(
         &server_url,
-        &redirect_uri_clone,
-        &client_metadata_clone,
-        &scopes_clone,
+        &redirect_uri,
+        &client_metadata_url,
+        cred_store,
         oauth_client,
     )
     .await?;
@@ -294,37 +250,12 @@ pub async fn mcp_authenticate(
 
     server_handle.abort();
 
-    let params = match params_result? {
-        CallbackResult::Success(params) => params,
-        CallbackResult::Error { error, description } => {
-            let message = description.unwrap_or(error);
-            return Err(format!("Authorization failed: {}", message));
-        }
-    };
+    let query = params_result?.map_err(|e| format!("Authorization failed: {}", e))?;
 
     oauth_state
-        .handle_callback(&params.code, &params.state)
+        .handle_callback_url(&format!("{}?{}", redirect_uri, query))
         .await
         .map_err(|e| format!("Token exchange failed: {}", e))?;
-
-    let (client_id, token_response) = oauth_state
-        .get_credentials()
-        .await
-        .map_err(|e| e.to_string())?;
-
-    let cred_store = KeyringCredentialStore::new(server_id, db_path);
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|d| d.as_secs())
-        .unwrap_or(0);
-    let creds: StoredCredentials = serde_json::from_value(serde_json::json!({
-        "client_id": client_id,
-        "token_response": token_response,
-        "granted_scopes": [],
-        "token_received_at": now,
-    }))
-    .map_err(|e| e.to_string())?;
-    cred_store.save(creds).await.map_err(|e| e.to_string())?;
 
     Ok("Authentication successful".to_string())
 }

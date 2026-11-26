@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/drawer";
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { useSettingsPath } from "@/hooks/use-settings-path";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { debugModeEnabledAtom, sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
@@ -46,7 +45,6 @@ const SidebarContent = ({
   onChatClick?: (id: string) => void;
 }) => {
   const navigate = useNavigate();
-  const debugSettingsPath = useSettingsPath({ id: "setting-debug" });
   const [debugMode, setDebugMode] = useAtom(debugModeEnabledAtom);
   const clickTimestamps = useRef<number[]>([]);
 
@@ -68,7 +66,10 @@ const SidebarContent = ({
               description: "Check Settings > Help & Updates to access internal tests.",
               action: {
                 label: "Open Settings",
-                onClick: () => navigate(debugSettingsPath),
+                onClick: () =>
+                  navigate("/settings#setting-debug", {
+                    replace: window.location.pathname === "/settings",
+                  }),
               },
             });
           },
@@ -76,7 +77,7 @@ const SidebarContent = ({
         duration: Infinity,
       });
     }
-  }, [navigate, debugMode, setDebugMode, debugSettingsPath]);
+  }, [navigate, debugMode, setDebugMode]);
 
   return (
     <div className="flex h-full flex-col">
@@ -94,7 +95,7 @@ const SidebarContent = ({
       </div>
 
       <div className="pt-2" data-tour="account-menu">
-        <AccountMenu activeChatId={activeChatId} />
+        <AccountMenu />
       </div>
     </div>
   );

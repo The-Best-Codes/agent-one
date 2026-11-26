@@ -2,6 +2,7 @@ import { platform } from "@tauri-apps/plugin-os";
 import { atom, type Atom } from "jotai";
 import type { ComponentType } from "react";
 
+import { ChatSyncStatus } from "@/components/a1/chat-sync-status";
 import {
   AccountStatus,
   GlobalAgentsFilesControl,
@@ -10,6 +11,8 @@ import {
   MemoryControl,
   SyncControl,
   EncryptedSyncControl,
+  ChatSyncControl,
+  DeviceNameControl,
 } from "@/components/settings-components/account";
 import {
   ColorThemeControl,
@@ -81,6 +84,7 @@ import { PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
 import { TTS_PROVIDER_OPTIONS } from "@/lib/ai/tts";
 import { isComputerUseSupported } from "@/lib/computer-use";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
+import { chatSyncAvailableAtom } from "@/lib/jotai/sync-atoms";
 import { debugModeEnabledAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { keyboardShortcutDefinitions } from "@/lib/kbd-registry";
 import type { SettingKey } from "@/lib/settings/definitions";
@@ -163,7 +167,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     label: "Account",
     cards: [
       {
-        title: "Sync & Access",
+        title: "Account & Access",
         items: [
           {
             id: "account",
@@ -189,20 +193,13 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
             ],
           },
           {
-            id: "synchronize-my-settings",
-            label: "Synchronize my settings",
-            description: "Keep your settings in sync across devices using your AgentOne account.",
-            keywords: ["sync", "devices", "cloud", "backup"],
-            layout: "row",
-            control: SyncControl,
-          },
-          {
-            id: "sync-api-keys",
-            label: "Sync keys and providers",
-            description: "Encrypted with a passphrase only you know.",
-            keywords: ["sync", "api key", "provider", "encrypted", "passphrase", "recovery key"],
-            layout: "row",
-            control: EncryptedSyncControl,
+            id: "device-name",
+            label: "Device name",
+            description: "Shown on chats synced from this device.",
+            keywords: ["device", "computer", "name", "sync"],
+            layout: "responsive",
+            control: DeviceNameControl,
+            visible: chatSyncAvailableAtom,
           },
           {
             id: "hide-agentone-models",
@@ -273,6 +270,64 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
             keywords: ["chat history", "recall", "search chats", "read chat", "tool", "past"],
             layout: "row",
             control: ChatHistoryToolToggle,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "sync",
+    label: "Sync",
+    cards: [
+      {
+        title: "Settings & Keys",
+        items: [
+          {
+            id: "synchronize-my-settings",
+            label: "Synchronize my settings",
+            description: "Keep your settings in sync across devices using your AgentOne account.",
+            keywords: ["sync", "devices", "cloud", "backup"],
+            layout: "row",
+            control: SyncControl,
+          },
+          {
+            id: "sync-api-keys",
+            label: "Sync keys and providers",
+            description: "Encrypted with a passphrase only you know.",
+            keywords: ["sync", "api key", "provider", "encrypted", "passphrase", "recovery key"],
+            layout: "row",
+            control: EncryptedSyncControl,
+          },
+        ],
+      },
+      {
+        title: "Chats",
+        items: [
+          {
+            id: "sync-chats",
+            label: "Sync chats",
+            description:
+              "Back up your chats and keep them in sync across devices. Sync all chats, or only the ones you turn on from a chat's menu. Requires a Pro plan or higher. Chats in projects aren't synced.",
+            keywords: [
+              "sync",
+              "chats",
+              "history",
+              "backup",
+              "devices",
+              "cloud",
+              "pro",
+              "choose",
+              "all",
+            ],
+            layout: "row",
+            control: ChatSyncControl,
+          },
+          {
+            id: "chat-sync-status",
+            label: "Chats synced",
+            keywords: ["sync", "chats", "upload", "download", "pending", "status"],
+            render: ChatSyncStatus,
+            visible: chatSyncAvailableAtom,
           },
         ],
       },

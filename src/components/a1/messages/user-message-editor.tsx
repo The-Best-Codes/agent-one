@@ -98,7 +98,11 @@ export function UserMessageEditor({
           editorTheme,
           EditorView.lineWrapping,
           chatMentionChips,
-          EditorView.contentAttributes.of({ spellcheck: "true", "aria-label": "Edit message" }),
+          EditorView.contentAttributes.of({
+            spellcheck: "true",
+            "aria-label": "Edit message",
+            dir: "auto",
+          }),
           Prec.highest(
             keymap.of([
               {

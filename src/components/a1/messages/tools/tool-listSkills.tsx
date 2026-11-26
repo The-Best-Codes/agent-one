@@ -68,7 +68,7 @@ export const MessagePartToolListSkills = ({ part }: { part: ToolUIPart }) => {
       if (part.approval?.approved === false) return denied;
       return (
         <div key={callId} className="flex items-center gap-1">
-          <Spinner className="text-foreground size-4 shrink-0" />
+          <Spinner />
           <span className="text-foreground text-sm font-bold">Looking for skills...</span>
         </div>
       );

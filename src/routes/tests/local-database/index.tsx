@@ -1,10 +1,10 @@
 import { IconArrowLeft } from "@tabler/icons-react";
 import { generateId, type UIMessage } from "ai";
 import { useState } from "react";
-import { useNavigate } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useBack } from "@/hooks/use-back";
 import { chatStorage } from "@/lib/storage/chat-storage";
 
 const BENCHMARK_CHAT_COUNT = 1_000;
@@ -86,7 +86,7 @@ async function yieldToUi(): Promise<void> {
 }
 
 export default function LocalDatabaseTestRoute() {
-  const navigate = useNavigate();
+  const back = useBack();
   const [isRunning, setIsRunning] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
   const [metrics, setMetrics] = useState<BenchmarkMetric[]>([]);
@@ -240,9 +240,7 @@ export default function LocalDatabaseTestRoute() {
           `Writes: ${formatOpsPerSecond(writeOps, writeMetric?.durationMs ?? 0)}`,
           `Reads: ${formatOpsPerSecond(readOps, readMetric?.durationMs ?? 0)}`,
           `Search average: ${formatDuration((searchMetric?.durationMs ?? 0) / SEARCH_ITERATIONS)}`,
-        ]
-
-          .join(" | "),
+        ].join(" | "),
       );
       setMetrics(nextMetrics);
       addLog("Benchmark completed successfully.");
@@ -305,9 +303,9 @@ export default function LocalDatabaseTestRoute() {
     <div className="bg-background min-h-screen">
       <div className="container mx-auto max-w-4xl p-6">
         <div className="mb-6 flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={() => navigate("/tests")} className="gap-2">
+          <Button variant="outline" size="sm" onClick={() => back("/tests")} className="gap-2">
             <IconArrowLeft data-icon="inline-start" />
-            Back to Tests
+            Back
           </Button>
           <h1 className="text-2xl font-bold">Local Database Test</h1>
         </div>

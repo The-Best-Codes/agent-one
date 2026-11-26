@@ -10,6 +10,7 @@ export { createSubAgentTool } from "./subAgent";
 export { createListSkillsTool } from "./listSkills";
 export { createViewFileTool } from "./viewFile";
 export { createAnalyzeFileTool } from "./analyzeFile";
+export { createGetAccountDetailsTool } from "./getAccountDetails";
 export { createWaitTool } from "./waitNumberMilliseconds";
 export { createWebSearchTool } from "./webSearch";
 export { createWikipediaTool } from "./wikipedia";

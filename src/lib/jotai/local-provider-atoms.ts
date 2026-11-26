@@ -16,7 +16,7 @@ export interface LocalProvider {
 }
 
 const OLLAMA_PROVIDER_ID = "ollama";
-const LM_STUDIO_PROVIDER_ID = "lm-studio";
+export const LM_STUDIO_PROVIDER_ID = "lm-studio";
 const STORAGE_KEY = "agent-one-local-providers";
 
 const DEFAULT_LOCAL_PROVIDERS: LocalProvider[] = [

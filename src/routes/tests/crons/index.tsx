@@ -1,6 +1,5 @@
 import { IconAlarm, IconArrowLeft, IconEdit, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -34,6 +33,7 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { useBack } from "@/hooks/use-back";
 import {
   createCron,
   type CronTest,
@@ -46,7 +46,7 @@ import {
 const DEFAULT_SCHEDULE = "0 19 * * *";
 
 export default function CronsTestRoute() {
-  const navigate = useNavigate();
+  const back = useBack();
   const [crons, setCrons] = useState<CronTest[]>([]);
   const [editingCron, setEditingCron] = useState<CronTest | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -138,9 +138,9 @@ export default function CronsTestRoute() {
     <div className="bg-background min-h-screen">
       <div className="container mx-auto flex max-w-4xl flex-col gap-6 p-6">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={() => navigate("/tests")}>
+          <Button variant="outline" size="sm" onClick={() => back("/tests")}>
             <IconArrowLeft data-icon="inline-start" />
-            Back to Tests
+            Back
           </Button>
           <h1 className="text-2xl font-bold">Cron Test</h1>
         </div>

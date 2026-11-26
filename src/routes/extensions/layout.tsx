@@ -1,28 +1,27 @@
 import { IconArrowLeft } from "@tabler/icons-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, Outlet, useLocation, useNavigate, useSearchParams } from "react-router";
+import { Outlet, useLocation, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { useBack } from "@/hooks/use-back";
 import { setMcpOAuthClient } from "@/lib/ai/tools/mcp/oauth";
 
 import { AddServerDialog } from "./add-server-dialog";
 import { InstallFromLink } from "./install-from-link";
-import { getExtensionPath, useExtensionsLink } from "./model";
+import { getExtensionPath } from "./model";
 import { useExtensionActions } from "./use-extension-actions";
 
 export default function ExtensionsLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const link = useExtensionsLink();
   const { installServer, restartServer } = useExtensionActions();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const installedRef = useRef(false);
   const openAddDialog = useCallback(() => setShowAddDialog(true), []);
-  const chatId = searchParams.get("chatId");
-  const isList = location.pathname === "/extensions";
+  const back = useBack();
 
   const prefill = useMemo(() => {
     const name = searchParams.get("mcpName");
@@ -36,6 +35,17 @@ export default function ExtensionsLayout() {
     } as const;
   }, [searchParams]);
 
+  const clearPrefill = () =>
+    setSearchParams(
+      (previous) => {
+        for (const key of ["mcpName", "mcpType", "mcpCommand", "mcpUrl"]) {
+          previous.delete(key);
+        }
+        return previous;
+      },
+      { replace: true },
+    );
+
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 });
   }, [location.pathname]);
@@ -43,26 +53,11 @@ export default function ExtensionsLayout() {
   return (
     <main className="flex h-svh min-h-0 flex-col" role="main">
       <header className="bg-background z-10 flex items-center gap-3 border-b p-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => void navigate(chatId ? `/chat/${chatId}` : "/chat")}
-        >
+        <Button variant="outline" size="sm" onClick={() => back()}>
           <IconArrowLeft data-icon="inline-start" />
           Back
         </Button>
-        <h1 className="text-base font-semibold">
-          {isList ? (
-            "Extensions"
-          ) : (
-            <Link
-              to={link("/extensions")}
-              className="focus-visible:ring-ring/50 rounded-sm outline-none hover:underline focus-visible:ring-3"
-            >
-              Extensions
-            </Link>
-          )}
-        </h1>
+        <h1 className="text-base font-semibold">Extensions</h1>
       </header>
 
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
@@ -78,17 +73,7 @@ export default function ExtensionsLayout() {
           setShowAddDialog(open);
           const installed = installedRef.current;
           installedRef.current = false;
-          if (!open && prefill && !installed) {
-            setSearchParams(
-              (previous) => {
-                for (const key of ["mcpName", "mcpType", "mcpCommand", "mcpUrl"]) {
-                  previous.delete(key);
-                }
-                return previous;
-              },
-              { replace: true },
-            );
-          }
+          if (!open && prefill && !installed) clearPrefill();
         }}
         onAddServer={({ oauthClient, ...data }) => {
           const server = installServer(
@@ -102,7 +87,9 @@ export default function ExtensionsLayout() {
               .finally(() => restartServer(server.id));
           }
           installedRef.current = true;
-          void navigate(link(getExtensionPath(server.id)), { replace: Boolean(prefill) });
+          const inPlace = Boolean(prefill && location.state?.inPlace);
+          if (inPlace) clearPrefill();
+          void navigate(getExtensionPath(server.id), { replace: Boolean(prefill) && !inPlace });
         }}
         initialValues={prefill}
       />

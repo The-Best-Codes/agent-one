@@ -10,6 +10,7 @@ import { OnboardingReminder } from "@/components/a1/onboarding-reminder";
 import { StarReminder } from "@/components/a1/star-reminder";
 import { Spinner } from "@/components/ui/spinner";
 import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
+import { useTrackHistory } from "@/hooks/use-back";
 import ChatRoute from "@/routes/chat";
 import ExtensionDetailRoute from "@/routes/extensions/detail";
 import InstalledExtensionsRoute from "@/routes/extensions/installed";
@@ -33,6 +34,7 @@ import { KbdRegistry } from "./kbd-shortcuts";
 import { NotificationClickHandler } from "./notification-click-handler";
 
 function AppLayout() {
+  useTrackHistory();
   return (
     <MultiChatProvider>
       <DeepLinkHandler />
@@ -73,7 +75,7 @@ function App() {
               <Suspense
                 fallback={
                   <div className="flex h-svh items-center justify-center">
-                    <Spinner className="text-muted-foreground size-8" />
+                    <Spinner className="size-8" />
                   </div>
                 }
               >

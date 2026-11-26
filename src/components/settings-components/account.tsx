@@ -10,6 +10,7 @@ import {
 import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 
+import { ChatSyncDialog } from "@/components/a1/chat-sync-dialog";
 import { EnableSyncDialog } from "@/components/a1/enable-sync-dialog";
 import { EncryptedSyncDialog } from "@/components/a1/encrypted-sync-dialog";
 import { PathListEditor } from "@/components/a1/path-list-editor";
@@ -32,6 +33,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
@@ -43,13 +52,21 @@ import {
   isAgentOneAccountProvisioning,
 } from "@/contexts/use-web-auth/web-auth-contexts";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
+import { useCanSyncChats } from "@/hooks/use-can-sync-chats";
 import {
   AGENT_ONE_BILLING_URL,
   AGENT_ONE_DASHBOARD_URL,
   AGENT_ONE_UPGRADE_URL,
 } from "@/lib/constants";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
-import { encryptedSyncStatusAtom, syncEnabledAtom } from "@/lib/jotai/sync-atoms";
+import {
+  type ChatSyncMode,
+  chatSyncModeAtom,
+  defaultDeviceNameAtom,
+  deviceNameAtom,
+  encryptedSyncStatusAtom,
+  syncEnabledAtom,
+} from "@/lib/jotai/sync-atoms";
 import {
   globalAgentsFilesAtom,
   globalSkillsFoldersAtom,
@@ -329,6 +346,71 @@ export function EncryptedSyncControl() {
       />
       <EncryptedSyncDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>
+  );
+}
+
+const CHAT_SYNC_MODES: [ChatSyncMode, string][] = [
+  ["off", "Off"],
+  ["all", "All chats"],
+  ["selected", "Only chats I choose"],
+];
+
+export function ChatSyncControl() {
+  const { user } = useWebAuth();
+  const [mode, setMode] = useAtom(chatSyncModeAtom);
+  const canSyncChats = useCanSyncChats();
+  const [pendingMode, setPendingMode] = useState<ChatSyncMode | null>(null);
+  const value = canSyncChats ? mode : "off";
+
+  return (
+    <>
+      <AdaptiveTooltip>
+        <AdaptiveTooltipTrigger asChild>
+          <span>
+            <Select
+              value={value}
+              onValueChange={(next) => {
+                const nextMode = next as ChatSyncMode;
+                if (nextMode === "off" || value !== "off") setMode(nextMode);
+                else setPendingMode(nextMode);
+              }}
+              disabled={!user}
+            >
+              <SelectTrigger className="w-full md:w-fit" aria-label="Sync chats">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {CHAT_SYNC_MODES.map(([option, label]) => (
+                    <SelectItem key={option} value={option}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </span>
+        </AdaptiveTooltipTrigger>
+        {!user && <AdaptiveTooltipContent>Sign in to sync chats</AdaptiveTooltipContent>}
+      </AdaptiveTooltip>
+      <ChatSyncDialog mode={pendingMode} onClose={() => setPendingMode(null)} />
+    </>
+  );
+}
+
+export function DeviceNameControl() {
+  const [deviceName, setDeviceName] = useAtom(deviceNameAtom);
+  const defaultDeviceName = useAtomValue(defaultDeviceNameAtom);
+
+  return (
+    <Input
+      value={deviceName}
+      onChange={(e) => setDeviceName(e.target.value)}
+      placeholder={defaultDeviceName}
+      maxLength={64}
+      aria-label="Device name"
+      className="w-full md:w-64"
+    />
   );
 }
 

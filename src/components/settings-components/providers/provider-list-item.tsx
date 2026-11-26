@@ -197,6 +197,7 @@ const ProviderEditorItem = memo(function ProviderEditorItem({
             <ModelList
               models={models}
               builtInModels={builtInModels}
+              providerId={id}
               baseUrl={modelListBaseUrl}
               apiKey={modelListApiKey}
               headers={modelListHeaders}
@@ -409,7 +410,7 @@ export const LocalProviderListItem = memo(function LocalProviderListItem({
       modelListHeaders={provider.headers}
       autoFetchOnMount
       emptyTitle="No models configured"
-      emptyDescription="Fetch models from Ollama or add one manually."
+      emptyDescription={`Fetch models from ${provider.name} or add one manually.`}
       details={
         <FieldGroup>
           <Field>

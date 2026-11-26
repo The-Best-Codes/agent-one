@@ -28,16 +28,16 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Switch } from "@/components/ui/switch";
+import { mcpLogin } from "@/lib/ai/tools/mcp/oauth";
 import { AGENT_ONE_EXTENSIONS_URL } from "@/lib/constants";
 import { getExtensionSourceLabel, getInstalledExtensionMetadata } from "@/lib/extensions/metadata";
 
 import { ExtensionIcon } from "./components/extension-icon";
 import { ServerStatusDot } from "./components/server-status";
-import { getExtensionPath, getServerStatus, useExtensionsLink } from "./model";
+import { getExtensionPath, getServerStatus } from "./model";
 import { useExtensionActions } from "./use-extension-actions";
 
 export default function InstalledRoute() {
-  const link = useExtensionsLink();
   const { servers, loadStates, authStates, updateServer } = useExtensionActions();
   const openAddDialog = useOutletContext<() => void>();
   const [query, setQuery] = useState("");
@@ -160,7 +160,7 @@ export default function InstalledRoute() {
               authStates[server.id],
               server.enabled,
             );
-            const path = link(getExtensionPath(server.id));
+            const path = getExtensionPath(server.id);
             return (
               <li key={server.id} className="min-w-0">
                 <Card className="h-full">
@@ -193,7 +193,7 @@ export default function InstalledRoute() {
                     </Button>
                     <AdaptiveTooltip>
                       <AdaptiveTooltipTrigger asChild>
-                        <span className="text-muted-foreground flex min-w-0 items-center gap-1.5 text-xs">
+                        <span className="text-muted-foreground flex min-w-0 items-center gap-1 text-xs">
                           <ServerStatusDot tone={status.tone} />
                           <span className="truncate">{status.label}</span>
                         </span>
@@ -202,6 +202,20 @@ export default function InstalledRoute() {
                         {status.description}
                       </AdaptiveTooltipContent>
                     </AdaptiveTooltip>
+                    {status.tone === "ok" &&
+                    server.type === "http" &&
+                    authStates[server.id] === "supports-oauth" ? (
+                      <span className="text-muted-foreground -ml-2 flex shrink-0 items-center gap-1 text-xs">
+                        <span aria-hidden>·</span>
+                        <button
+                          type="button"
+                          className="hover:text-foreground focus-visible:ring-ring/50 rounded-sm underline underline-offset-4 outline-none focus-visible:ring-3"
+                          onClick={() => void mcpLogin(server.id, server.url, server.name)}
+                        >
+                          Sign in
+                        </button>
+                      </span>
+                    ) : null}
                     <Switch
                       className="ml-auto"
                       checked={server.enabled}

@@ -1,4 +1,4 @@
-import { readFile, stat } from "@tauri-apps/plugin-fs";
+import { readDir, readFile, stat } from "@tauri-apps/plugin-fs";
 import { generateText, type LanguageModel, tool } from "ai";
 import { z } from "zod";
 
@@ -9,6 +9,61 @@ import formatBytes from "@/lib/format-bytes";
 
 const VIEW_TIMEOUT_MS = 120_000;
 const MAX_FILE_BYTES = 500 * 1024 * 1024;
+const MISSING_FILE_RETRIES = 3;
+const MISSING_FILE_RETRY_MS = 1000;
+
+const tryStat = (path: string) =>
+  stat(path).then(
+    (info) => info.size,
+    () => undefined,
+  );
+
+const normalizeFileName = (name: string) => name.replace(/\s+/g, " ").normalize("NFC");
+
+function getPathCandidates(path: string): string[] {
+  if (!path.includes("%")) return [path];
+  try {
+    const decoded = decodeURIComponent(path);
+    return decoded === path ? [path] : [path, decoded];
+  } catch {
+    return [path];
+  }
+}
+
+async function findSimilarPath(path: string): Promise<string | undefined> {
+  const name = getFileName(path);
+  const dir = path.slice(0, path.length - name.length);
+  if (!name || !dir) return undefined;
+  const target = normalizeFileName(name);
+  const entries = await readDir(dir).catch(() => []);
+  const match = entries.find((entry) => normalizeFileName(entry.name) === target);
+  return match ? dir + match.name : undefined;
+}
+
+async function resolveFile(
+  path: string,
+  abortSignal?: AbortSignal,
+): Promise<{ path: string; size: number }> {
+  const candidates = getPathCandidates(path);
+  for (let attempt = 0; attempt <= MISSING_FILE_RETRIES; attempt++) {
+    if (attempt > 0) {
+      await new Promise((resolve) => setTimeout(resolve, MISSING_FILE_RETRY_MS));
+      abortSignal?.throwIfAborted();
+    }
+    for (const candidate of candidates) {
+      const size = await tryStat(candidate);
+      if (size !== undefined) return { path: candidate, size };
+    }
+    for (const candidate of candidates) {
+      const similar = await findSimilarPath(candidate);
+      if (!similar) continue;
+      const size = await tryStat(similar);
+      if (size !== undefined) return { path: similar, size };
+    }
+  }
+  const { size } = await stat(path);
+  return { path, size };
+}
 
 export interface AnalyzeFileContext {
   models: Record<FileKind, LanguageModel>;
@@ -19,7 +74,7 @@ export interface AnalyzeFileContext {
 export const createAnalyzeFileTool = (context: AnalyzeFileContext) =>
   tool({
     description:
-      "Analyze any file, like an image, video, audio, or PDF, by sending it to another AI model and asking about it. Use this when you need to know what's in a file that you can't read yourself, whether the user attached it or not. The other model costs the user money each time, so don't use this for files you can read with your other tools. Describe exactly what you need in the prompt, because the other model only sees the file and your prompt.",
+      "Analyze any file, like an image, video, audio, or PDF, by sending it to another AI model and asking about it. Use this when you need to know what's in a file that you can't read yourself, whether the user attached it or not. The other model costs the user money each time, so don't use this for files you can read with your other tools. Describe exactly what you need in the prompt, because the other model only sees the file and your prompt. Only call this after whatever creates or changes the file has finished, never in the same step as it, because tool calls in one step run at the same time and the file may not exist yet.",
     inputSchema: z.object({
       path: z
         .string()
@@ -33,11 +88,11 @@ export const createAnalyzeFileTool = (context: AnalyzeFileContext) =>
         ),
     }),
     execute: async ({ path: rawPath, prompt }, { abortSignal }) => {
-      const path = rawPath.trim();
-      const name = getFileName(path);
+      let name = getFileName(rawPath.trim());
       let model: LanguageModel | undefined;
       try {
-        const { size } = await stat(path);
+        const { path, size } = await resolveFile(rawPath.trim(), abortSignal);
+        name = getFileName(path);
         if (size > MAX_FILE_BYTES) {
           throw new Error(
             `The file is ${formatBytes(size)}, which is over the ${formatBytes(MAX_FILE_BYTES)} limit.`,

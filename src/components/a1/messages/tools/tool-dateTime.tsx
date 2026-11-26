@@ -72,7 +72,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <div>
-            <Spinner className="text-foreground size-4 shrink-0" />
+            <Spinner />
           </div>
           <span className="text-foreground text-sm font-bold">Checking time and date...</span>
         </div>
@@ -95,7 +95,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
           key={callId}
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <Spinner className="text-foreground size-4 shrink-0" />
+          <Spinner />
           <span className="max-w-2xl truncate">Checking time and date...</span>
         </div>
       );

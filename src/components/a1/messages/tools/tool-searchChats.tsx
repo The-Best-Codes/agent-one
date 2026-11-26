@@ -110,7 +110,7 @@ export const MessagePartToolSearchChats = ({ part }: { part: ToolUIPart }) => {
         );
       return (
         <div key={callId} className="flex items-center gap-1 text-sm font-bold">
-          <Spinner className="size-4 shrink-0" />
+          <Spinner />
           <span className="max-w-2xl truncate">
             {query ? `Searching chats for "${query}"` : "Listing recent chats"}
           </span>

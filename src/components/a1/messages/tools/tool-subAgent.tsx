@@ -150,7 +150,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
     case "input-streaming":
       return (
         <div className="flex items-center gap-1">
-          <Spinner className="text-foreground size-4 shrink-0" />
+          <Spinner />
           <span className="text-foreground text-sm font-bold">Preparing subagent...</span>
         </div>
       );
@@ -186,7 +186,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
                   {showSpinnerIcon ? (
                     <Spinner
                       className={cn(
-                        "text-foreground absolute inset-0 size-4 shrink-0 transition-[opacity,scale] duration-200 group-hover/subagent-accordion:scale-0 group-hover/subagent-accordion:opacity-0",
+                        "text-foreground absolute inset-0 transition-[opacity,scale] duration-200 group-hover/subagent-accordion:scale-0 group-hover/subagent-accordion:opacity-0",
                         isExpanded && "scale-0 opacity-0",
                       )}
                     />

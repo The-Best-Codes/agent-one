@@ -35,10 +35,7 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
-import {
-  fetchProviderModels,
-  type OpenAIModelsResponse,
-} from "@/lib/ai/providers/custom-provider-factory";
+import { fetchProviderModelMetadata } from "@/lib/ai/providers/custom-provider-factory";
 import {
   getProviderModelName,
   type ProviderModelMetadata,
@@ -50,6 +47,7 @@ const logger = getLogger(import.meta.url);
 interface ModelListProps {
   models: ProviderModelMetadata[];
   builtInModels?: ProviderModelMetadata[];
+  providerId?: string;
   baseUrl?: string;
   apiKey?: string;
   headers?: Record<string, string>;
@@ -546,6 +544,7 @@ const ModelRow = memo(function ModelRow({
 export function ModelList({
   models,
   builtInModels = [],
+  providerId,
   baseUrl,
   apiKey = "",
   headers = {},
@@ -666,17 +665,9 @@ export function ModelList({
     setFetchState("fetching");
 
     try {
-      const response: OpenAIModelsResponse = await fetchProviderModels(baseUrl, apiKey, headers);
+      const response = await fetchProviderModelMetadata(baseUrl, apiKey, headers, providerId);
       const existingIds = new Set(models.map((model) => model.id));
-      const fetchedModels = response.data
-        .filter((model) => !existingIds.has(model.id))
-        .map((model): ProviderModelMetadata => ({
-          id: model.id,
-          supportsText: true,
-          supportsTools: true,
-          supportsImages: false,
-          supportsAttachments: false,
-        }));
+      const fetchedModels = response.filter((model) => !existingIds.has(model.id));
 
       if (fetchedModels.length > 0) {
         onChange([...fetchedModels, ...models]);

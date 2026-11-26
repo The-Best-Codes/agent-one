@@ -9,6 +9,7 @@ import {
   chatStatusIndicatorsAtom,
 } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
+import { chatSyncDownloadingIdsAtom } from "@/lib/jotai/sync-atoms";
 import { cn } from "@/lib/utils";
 
 const DEBOUNCE_MS = 150;
@@ -34,7 +35,7 @@ const StatusIcon = ({ status }: { status: ChatStatusIndicatorType }) => {
         isVisible ? "w-4 opacity-100" : "-ml-1.5 w-0 opacity-0",
       )}
     >
-      {activeStatus === "loading" && <Spinner className="text-foreground size-4 shrink-0" />}
+      {activeStatus === "loading" && <Spinner />}
       {activeStatus === "error" && (
         <IconExclamationCircle className="text-destructive size-4 shrink-0" />
       )}
@@ -50,7 +51,12 @@ export const ChatStatusIndicator = ({ chatId }: { chatId: string }) => {
     [chatId],
   );
   const chatStatus = useAtomValue(chatStatusAtom);
-  const rawStatus = showStatusIndicator ? chatStatus : null;
+  const syncingAtom = useMemo(
+    () => selectAtom(chatSyncDownloadingIdsAtom, (ids) => ids.has(chatId)),
+    [chatId],
+  );
+  const isSyncing = useAtomValue(syncingAtom);
+  const rawStatus = showStatusIndicator ? (chatStatus ?? (isSyncing ? "loading" : null)) : null;
 
   const [displayedStatus, setDisplayedStatus] = useState<ChatStatusIndicatorType>(
     rawStatus ?? null,

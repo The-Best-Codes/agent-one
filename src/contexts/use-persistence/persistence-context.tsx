@@ -1,6 +1,7 @@
 import type { UIMessage } from "ai";
 import { generateId } from "ai";
 import { useAtom, useSetAtom } from "jotai";
+import debounce from "lodash.debounce";
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { DEFAULT_MODEL_CONFIG, type ModelConfig } from "@/hooks/ai/use-model-catalog";
@@ -9,7 +10,13 @@ import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { lastVacuumTimestampAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
 import { loadProjects } from "@/lib/projects";
-import { type ChatSearchResult, chatStorage } from "@/lib/storage/chat-storage";
+import {
+  type ChatSearchResult,
+  chatStorage,
+  enqueueWrite,
+  type StoredChat,
+} from "@/lib/storage/chat-storage";
+import { chatSyncManager } from "@/lib/sync/chat-sync-manager";
 
 import { PersistenceContext } from "./persistence-contexts";
 
@@ -112,6 +119,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [chatSort] = useAtom(settingAtoms.CHAT_SORT);
 
   const metadataCacheRef = useRef<Map<string, ChatMetadata>>(new Map());
+  const cacheVersionRef = useRef(0);
   const [isMetadataLoaded, setIsMetadataLoaded] = useState(false);
 
   useEffect(() => {
@@ -138,6 +146,37 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
       cancelled = true;
     };
   }, [chatSort, setChatIds]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const reload = debounce(async () => {
+      try {
+        let version: number;
+        let storedChats: StoredChat[];
+        do {
+          version = cacheVersionRef.current;
+          await enqueueWrite(async () => undefined);
+          storedChats = await chatStorage.listChats(chatSort);
+          if (cancelled) return;
+        } while (version !== cacheVersionRef.current);
+        const cache = new Map<string, ChatMetadata>();
+        for (const { id, metadata } of storedChats) {
+          cache.set(id, metadata);
+        }
+        metadataCacheRef.current = cache;
+        setChatIds(storedChats.map(({ id }) => id));
+        setChatUpdateTrigger((prev) => prev + 1);
+      } catch (error) {
+        logger.error("Failed to reload chats after sync", error);
+      }
+    }, 300);
+    const unsubscribe = chatSyncManager.onRemoteChange(() => void reload());
+    return () => {
+      cancelled = true;
+      reload.cancel();
+      unsubscribe();
+    };
+  }, [chatSort, setChatIds, setChatUpdateTrigger]);
 
   useEffect(() => {
     void chatStorage.removeItem("chat-ids").catch((error) => {
@@ -168,10 +207,12 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
   }, []);
 
   const setMetadata = useCallback((id: string, metadata: ChatMetadata) => {
+    cacheVersionRef.current++;
     metadataCacheRef.current.set(id, metadata);
   }, []);
 
   const removeMetadata = useCallback((id: string) => {
+    cacheVersionRef.current++;
     metadataCacheRef.current.delete(id);
   }, []);
 

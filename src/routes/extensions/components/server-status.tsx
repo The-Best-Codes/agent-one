@@ -11,7 +11,11 @@ export function ServerStatusDot({
   className?: string;
 }) {
   if (tone === "loading") {
-    return <Spinner className={cn("text-muted-foreground size-3", className)} />;
+    return (
+      <span className={cn("flex size-2 shrink-0 items-center justify-center", className)}>
+        <Spinner className="size-3" />
+      </span>
+    );
   }
   return (
     <span

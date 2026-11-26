@@ -57,6 +57,7 @@ export const MessagePartText = ({
         />
       ) : (
         <pre
+          dir="auto"
           className="text-base wrap-break-word whitespace-pre-wrap"
           style={{
             fontFamily: "inherit",

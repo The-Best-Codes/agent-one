@@ -7,7 +7,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useNavigate } from "react-router";
 
 import { ScheduledAgentSchedule } from "@/components/a1/scheduled-agent-schedule";
 import { SearchInput } from "@/components/a1/search-input";
@@ -40,6 +40,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { useBack } from "@/hooks/use-back";
 import {
   createScheduledAgent,
   DEFAULT_DELAY_CUTOFF_SECONDS,
@@ -264,7 +265,7 @@ function AgentEditor({
 
 export default function ScheduledAgentsRoute() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const back = useBack();
   const [agents, setAgents] = useState<ScheduledAgent[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -292,10 +293,6 @@ export default function ScheduledAgentsRoute() {
   const filtered = agents.filter((agent) =>
     `${agent.title} ${agent.schedule} ${agent.prompt}`.toLowerCase().includes(query.toLowerCase()),
   );
-  const handleNavigateBack = () => {
-    const chatId = searchParams.get("chatId");
-    void navigate(chatId ? `/chat/${chatId}` : "/chat");
-  };
 
   const openCreateDialog = () => {
     setManualCreate(false);
@@ -363,7 +360,7 @@ export default function ScheduledAgentsRoute() {
   return (
     <main className="flex h-svh min-h-0 flex-col" role="main">
       <header className="bg-background sticky top-0 z-10 flex items-center gap-3 border-b p-4">
-        <Button variant="outline" size="sm" onClick={handleNavigateBack}>
+        <Button variant="outline" size="sm" onClick={() => back()}>
           <IconArrowLeft data-icon="inline-start" />
           Back
         </Button>

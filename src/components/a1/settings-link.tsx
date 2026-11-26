@@ -1,9 +1,10 @@
-import { Link, type LinkProps } from "react-router";
+import { Link, type LinkProps, useLocation } from "react-router";
 
-import { type SettingsDestination, useSettingsPath } from "@/hooks/use-settings-path";
-
-type SettingsLinkProps = Omit<LinkProps, "to"> & SettingsDestination;
+type SettingsLinkProps = Omit<LinkProps, "to"> & { id?: string };
 
 export function SettingsLink({ id, ...props }: SettingsLinkProps) {
-  return <Link {...props} to={useSettingsPath({ id })} />;
+  const { pathname } = useLocation();
+  return (
+    <Link {...props} to={`/settings${id ? `#${id}` : ""}`} replace={pathname === "/settings"} />
+  );
 }

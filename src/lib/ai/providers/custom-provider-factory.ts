@@ -1,7 +1,13 @@
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
+import { fetchLmStudioModels } from "@/lib/ai/providers/lm-studio-models";
 import { providerFetch } from "@/lib/ai/providers/provider-fetch";
+import type { ProviderModelMetadata } from "@/lib/ai/providers/provider-models";
 import type { CustomProvider } from "@/lib/jotai/custom-provider-atoms";
+import { LM_STUDIO_PROVIDER_ID } from "@/lib/jotai/local-provider-atoms";
+import { getLogger } from "@/lib/logger";
+
+const logger = getLogger(import.meta.url);
 
 export interface OpenAIModelsResponse {
   data: Array<{
@@ -63,4 +69,28 @@ export async function fetchProviderModels(
   }
 
   return json as OpenAIModelsResponse;
+}
+
+export async function fetchProviderModelMetadata(
+  baseUrl: string,
+  apiKey?: string,
+  headers?: Record<string, string>,
+  providerId?: string,
+): Promise<ProviderModelMetadata[]> {
+  if (providerId === LM_STUDIO_PROVIDER_ID) {
+    try {
+      return await fetchLmStudioModels(baseUrl, headers);
+    } catch (error) {
+      logger.warn("LM Studio v1 models API unavailable, falling back to /v1/models", error);
+    }
+  }
+
+  const response = await fetchProviderModels(baseUrl, apiKey, headers);
+  return response.data.map((model) => ({
+    id: model.id,
+    supportsText: true,
+    supportsTools: true,
+    supportsImages: false,
+    supportsAttachments: false,
+  }));
 }

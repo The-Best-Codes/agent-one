@@ -15,6 +15,7 @@ import {
   createSubAgentTool,
   createListSkillsTool,
   createAnalyzeFileTool,
+  createGetAccountDetailsTool,
   createViewFileTool,
   createWaitTool,
   createWebSearchTool,
@@ -125,6 +126,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const serverRestartVersionsRef = useRef<Record<string, number>>({});
   const authStatesRef = useRef<Record<string, (typeof mcpAuthStates)[string]>>({});
   const authResetPromisesRef = useRef<Map<string, Promise<unknown>>>(new Map());
+  const failedServerIdsRef = useRef<Set<string>>(new Set());
   const loadIdRef = useRef(0);
 
   const clearMcpServerRuntimeState = useCallback(
@@ -247,7 +249,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         return false;
       }
 
-      if (forceReloadUncachedServers) {
+      if (forceReloadUncachedServers && !failedServerIdsRef.current.has(server.id)) {
         return true;
       }
 
@@ -277,6 +279,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         mcpAuthStates[server.id] === "logged-in"
       );
     });
+
+    for (const server of serversToLoad) {
+      failedServerIdsRef.current.delete(server.id);
+    }
 
     const loadId = ++loadIdRef.current;
 
@@ -400,6 +406,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                   error,
                 );
                 if (loadId !== loadIdRef.current) return;
+                failedServerIdsRef.current.add(server.id);
                 abortMcpServerLoad(server.id);
                 closeServerCache(server.id);
                 setMcpServerLoadStates((prev) => {
@@ -593,6 +600,8 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
           mergedToolConfigs.viewFile.requiresApproval,
         );
       }
+
+      filteredStaticTools.getAccountDetails = withApproval(createGetAccountDetailsTool(), false);
 
       if (options?.analyzeFile) {
         filteredStaticTools.analyzeFile = withApproval(

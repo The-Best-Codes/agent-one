@@ -107,6 +107,8 @@ const ALERTS: Record<string, { title: string; icon: Icon; variant?: "destructive
   CAUTION: { title: "Caution", icon: IconAlertOctagon, variant: "destructive" },
 };
 
+const AUTO_DIRECTION = { props: { dir: "auto" } };
+
 function createMarkdownOptions(
   allowInternalLinks: boolean,
   idPrefix: string,
@@ -143,6 +145,14 @@ function createMarkdownOptions(
       return next();
     },
     overrides: {
+      p: AUTO_DIRECTION,
+      li: AUTO_DIRECTION,
+      h1: AUTO_DIRECTION,
+      h2: AUTO_DIRECTION,
+      h3: AUTO_DIRECTION,
+      h4: AUTO_DIRECTION,
+      h5: AUTO_DIRECTION,
+      h6: AUTO_DIRECTION,
       a(props: ComponentProps<"a">) {
         const mention = parseChatMentionHref(
           props.href,
