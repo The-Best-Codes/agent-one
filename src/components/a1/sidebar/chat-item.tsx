@@ -244,7 +244,7 @@ export const ChatItem = memo(
         <Button
           variant={isSelected ? "secondary" : "ghost"}
           className={cn(
-            "w-full justify-start py-2 pr-1 pl-2 mb-0.5 transition-none",
+            "w-full justify-start py-2 pr-1 pl-2 mb-0.5 transition-none focus-visible:ring-inset",
             isSelected && "border border-border",
           )}
           data-marquee-trigger
@@ -267,7 +267,7 @@ export const ChatItem = memo(
             <Button
               variant={isSelectedChat ? "secondary" : "ghost"}
               className={cn(
-                "group/chat-item w-full justify-between pr-1 pl-2 transition-none",
+                "group/chat-item w-full justify-between pr-1 pl-2 transition-none focus-visible:ring-inset",
                 hasSubtitle ? "h-auto items-start py-1" : "py-2",
                 isSelectedChat && "border border-border",
               )}
