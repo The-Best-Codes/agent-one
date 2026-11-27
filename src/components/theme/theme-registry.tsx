@@ -1,13 +1,14 @@
 import { useAtom, useAtomValue } from "jotai";
 import { useEffect } from "react";
 
+import { useMediaQuery } from "@/hooks/use-media-query";
 import {
   activeCustomFontAtom,
   FONT_CLASSES,
   loadCustomFontFace,
   resolveFontSetting,
 } from "@/lib/custom-fonts";
-import { getResolvedTheme } from "@/lib/get-resolved-theme";
+import { getResolvedTheme, SYSTEM_DARK_QUERY } from "@/lib/get-resolved-theme";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { jsonParseCatch } from "@/lib/json-parse-catch";
 import { getLogger } from "@/lib/logger";
@@ -42,6 +43,7 @@ export function ThemeRegistry() {
   const [rawFont] = useAtom(settingAtoms.FONT);
   const [rawTextScale] = useAtom(settingAtoms.TEXT_SCALE);
   const activeCustomFont = useAtomValue(activeCustomFontAtom);
+  const systemDark = useMediaQuery(SYSTEM_DARK_QUERY);
 
   const theme = jsonParseCatch(rawTheme);
   const colorTheme = jsonParseCatch(rawColorTheme);
@@ -54,7 +56,7 @@ export function ThemeRegistry() {
   useEffect(() => {
     // Handle theme
     const root = document.documentElement;
-    const resolvedTheme = getResolvedTheme(theme);
+    const resolvedTheme = getResolvedTheme(theme, systemDark);
 
     root.classList.remove("light", "dark");
     root.classList.add(resolvedTheme);
@@ -101,7 +103,17 @@ export function ThemeRegistry() {
     root.classList.remove("text-xs", "text-sm", "text-md", "text-lg", "text-xl", "text-2xl");
     root.classList.add(`text-${textScale || "md"}`);
     root.setAttribute("data-text-scale", textScale || "md");
-  }, [theme, colorTheme, uiTint, uiTintStrength, roundness, font, activeCustomFont, textScale]);
+  }, [
+    theme,
+    systemDark,
+    colorTheme,
+    uiTint,
+    uiTintStrength,
+    roundness,
+    font,
+    activeCustomFont,
+    textScale,
+  ]);
 
   useEffect(() => {
     if (!activeCustomFont) return;
