@@ -59,7 +59,7 @@ export const CodeBlock = ({ content, lang, complete = true, messageRole }: CodeB
   return (
     <div
       className="not-prose mb-2 min-w-0 rounded-md text-sm last:mb-0.5"
-      style={{ clipPath: "inset(0 round 0.375rem)" }}
+      style={{ clipPath: "inset(0 round 0.25rem)" }}
     >
       <div
         className={cn(
@@ -94,7 +94,7 @@ export const CodeBlock = ({ content, lang, complete = true, messageRole }: CodeB
           </div>
         </div>
       </div>
-      <div className="shiki-container overflow-auto rounded-b-md border border-t-0">
+      <div className="bg-background overflow-auto rounded-b-md border border-t-0">
         {isPreviewMode && PreviewComponent ? (
           <PreviewComponent content={content} complete={complete} />
         ) : (
