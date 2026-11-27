@@ -8,17 +8,18 @@ export type UpdateStatus =
   | "available"
   | "downloading"
   | "installing"
+  | "ready"
   | "error";
 
 export interface UpdateContextType {
   updateStatus: UpdateStatus;
   updateProgress: number | null;
   updateVersion: string;
+  updateError: string | null;
+  installsOnRestart: boolean;
   checkForUpdates: () => Promise<void>;
   downloadAndInstallUpdate: () => Promise<void>;
-  dialogOpen: boolean;
-  handleRemind: (days: number) => void;
-  dismissDialog: () => void;
+  finishUpdate: () => Promise<void>;
 }
 
 export const UpdateContext = createContext<UpdateContextType | undefined>(undefined);

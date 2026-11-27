@@ -83,6 +83,7 @@ import { TOOL_SETS, toolsEnabledAtom } from "@/components/settings-components/to
 import { PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
 import { TTS_PROVIDER_OPTIONS } from "@/lib/ai/tts";
 import { isComputerUseSupported } from "@/lib/computer-use";
+import { updatesManagedExternallyAtom } from "@/lib/jotai/atoms";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { chatSyncAvailableAtom } from "@/lib/jotai/sync-atoms";
 import { debugModeEnabledAtom } from "@/lib/jotai/unsynced-local-atoms";
@@ -92,6 +93,8 @@ import type { SettingKey } from "@/lib/settings/definitions";
 const computerUseSupportedAtom = atom(() => isComputerUseSupported());
 
 const computerUsePermissionsVisibleAtom = atom(() => platform() === "macos");
+
+const updatesAutoInstallableAtom = atom((get) => !get(updatesManagedExternallyAtom));
 
 const computerUseEnabledAtom = toolsEnabledAtom(TOOL_SETS.computerUse);
 
@@ -822,7 +825,15 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
         title: "App",
         searchDescription: "Check for updates, see your current version, and find what's new.",
         keywords: ["updates", "version", "release notes", "changelog", "download", "install"],
-        render: AppUpdates,
+        items: [
+          { id: "app-version", render: AppUpdates },
+          {
+            id: "auto-update",
+            key: "AUTO_UPDATE",
+            layout: "row",
+            visible: updatesAutoInstallableAtom,
+          },
+        ],
       },
       {
         id: "model-directory",

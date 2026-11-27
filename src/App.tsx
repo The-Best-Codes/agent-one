@@ -27,7 +27,6 @@ const ChatStressTestRoute = lazy(() => import("@/routes/tests/chat-stress"));
 const LocalDatabaseTestRoute = lazy(() => import("@/routes/tests/local-database"));
 const NotificationsTestRoute = lazy(() => import("@/routes/tests/notifications"));
 
-import { UpdateAvailableDialog } from "./components/a1/update-available-dialog";
 import { UpdateToast } from "./components/a1/update-toast";
 import { DeepLinkHandler } from "./deep-link-handler";
 import { KbdRegistry } from "./kbd-shortcuts";
@@ -54,7 +53,6 @@ function App() {
       <KbdRegistry />
       <FileDropGuard />
       <UpdateToast />
-      <UpdateAvailableDialog />
       <AttachmentPreviewDialog />
       <OnboardingReminder />
       <Toaster className="pointer-events-auto!" position="top-right" richColors closeButton />

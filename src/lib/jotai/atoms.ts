@@ -19,6 +19,8 @@ export const tourActiveAtom = atom(false);
 
 export const recordingShortcutAtom = atom(false);
 
+export const updatesManagedExternallyAtom = atom(false);
+
 const COMMAND_SHELLS: Partial<Record<ReturnType<typeof platform>, string>> = {
   windows: "powershell",
   macos: "zsh",

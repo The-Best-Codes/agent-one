@@ -8,6 +8,7 @@ import {
   IconRefresh,
   IconRocket,
   IconShieldCheck,
+  IconSparkles,
 } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useState } from "react";
@@ -24,16 +25,23 @@ import { useUpdate } from "@/contexts/use-update/update-hooks";
 import { modelDirectoryStatusAtom, updateModelDirectory } from "@/lib/ai/models/model-directory";
 import { AGENT_ONE_BLOG_URL } from "@/lib/constants";
 import { tourActiveAtom } from "@/lib/jotai/atoms";
-
-import { SettingsTarget } from "./settings-target";
+import { RELEASE_POST_URLS } from "@/lib/release-posts";
 
 function formatModelDirectoryTimestamp(value: number, neverLabel: string): string {
   return value ? new Date(value).toLocaleString() : neverLabel;
 }
 
 export function AppUpdates() {
-  const { updateStatus, updateProgress, updateVersion, checkForUpdates, downloadAndInstallUpdate } =
-    useUpdate();
+  const {
+    updateStatus,
+    updateProgress,
+    updateVersion,
+    updateError,
+    installsOnRestart,
+    checkForUpdates,
+    downloadAndInstallUpdate,
+    finishUpdate,
+  } = useUpdate();
 
   const currentVersion = packageJson.version;
 
@@ -67,28 +75,42 @@ export function AppUpdates() {
         return {
           icon: <IconRocket className="text-foreground size-5" />,
           title: `Update available: v${updateVersion}`,
-          description: "A new version is ready to install",
+          description: "A new version is ready to download",
         };
       case "downloading":
         return {
           icon: <IconDownload className="text-foreground size-5" />,
-          title: "Downloading update...",
+          title: `Downloading v${updateVersion}...`,
           description:
             updateProgress === null
-              ? "Please wait while the update downloads"
+              ? "The update is downloading in the background"
               : `${Math.round(updateProgress)}% complete`,
         };
       case "installing":
         return {
           icon: <Spinner data-icon="inline-start" />,
-          title: "Installing update...",
-          description: "Please wait while we install the update",
+          title: `Installing v${updateVersion}...`,
+          description: installsOnRestart
+            ? "The update is installing in the background"
+            : "AgentOne will close while the update installs",
         };
+      case "ready":
+        return installsOnRestart
+          ? {
+              icon: <IconRocket className="text-foreground size-5" />,
+              title: `v${updateVersion} is ready`,
+              description: "It'll be used next time you open AgentOne",
+            }
+          : {
+              icon: <IconRocket className="text-foreground size-5" />,
+              title: `v${updateVersion} is ready to install`,
+              description: "AgentOne will close while the update installs",
+            };
       case "error":
         return {
           icon: <IconAlertCircle className="text-destructive size-5" />,
           title: "Update failed",
-          description: "Something went wrong while checking for updates",
+          description: updateError ?? "Something went wrong while updating",
         };
     }
   };
@@ -118,28 +140,41 @@ export function AppUpdates() {
           </Button>
         );
 
-      case "managed-externally":
-        return null;
       case "available":
         return (
-          <SettingsTarget id="setting-download-and-install-update">
-            <Button
-              onClick={() => {
-                void downloadAndInstallUpdate();
-              }}
-              size="sm"
-            >
+          <Button
+            onClick={() => {
+              void downloadAndInstallUpdate();
+            }}
+            size="sm"
+          >
+            <IconDownload data-icon="inline-start" />
+            Download & Install
+          </Button>
+        );
+
+      case "ready":
+        return (
+          <Button
+            onClick={() => {
+              void finishUpdate();
+            }}
+            size="sm"
+          >
+            {installsOnRestart ? (
+              <IconRefresh data-icon="inline-start" />
+            ) : (
               <IconDownload data-icon="inline-start" />
-              Download & Install
-            </Button>
-          </SettingsTarget>
+            )}
+            {installsOnRestart ? "Restart Now" : "Install"}
+          </Button>
         );
 
       case "error":
         return (
           <Button
             onClick={() => {
-              void checkForUpdates();
+              void downloadAndInstallUpdate();
             }}
             variant="outline"
             size="sm"
@@ -158,25 +193,39 @@ export function AppUpdates() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <p className="text-muted-foreground text-sm">Current Version</p>
-        <p className="text-3xl font-bold tracking-tight">{currentVersion}</p>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-muted-foreground text-sm">Current Version</p>
+          <p className="text-3xl font-bold tracking-tight">{currentVersion}</p>
+        </div>
+        <Button asChild variant="outline" size="sm">
+          <a
+            href={RELEASE_POST_URLS[currentVersion] ?? AGENT_ONE_BLOG_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <IconSparkles data-icon="inline-start" />
+            What's New
+          </a>
+        </Button>
       </div>
 
       <Separator />
 
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-lg">
               {stateDisplay.icon}
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="leading-none font-medium">{stateDisplay.title}</p>
-              <p className="text-muted-foreground text-sm">{stateDisplay.description}</p>
+              <p className="text-muted-foreground text-sm wrap-break-word">
+                {stateDisplay.description}
+              </p>
             </div>
           </div>
-          {getActionButton()}
+          <div className="shrink-0">{getActionButton()}</div>
         </div>
 
         {(updateStatus === "downloading" || updateStatus === "installing") && (
@@ -188,16 +237,6 @@ export function AppUpdates() {
           />
         )}
       </div>
-
-      <a
-        href={AGENT_ONE_BLOG_URL}
-        className="flex w-fit items-center gap-1 text-sm underline"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        See what's new on the blog
-        <IconExternalLink className="size-4" />
-      </a>
     </div>
   );
 }

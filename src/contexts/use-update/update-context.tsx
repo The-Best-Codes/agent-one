@@ -1,10 +1,13 @@
 import { invoke } from "@tauri-apps/api/core";
+import { platform } from "@tauri-apps/plugin-os";
 import { relaunch } from "@tauri-apps/plugin-process";
-import { check } from "@tauri-apps/plugin-updater";
-import { useAtom } from "jotai";
+import { check, type Update } from "@tauri-apps/plugin-updater";
+import { getDefaultStore, useAtomValue, useSetAtom } from "jotai";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 
-import { updateRemindAfterAtom } from "@/lib/jotai/unsynced-local-atoms";
+import { updatesManagedExternallyAtom } from "@/lib/jotai/atoms";
+import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 
 import type { UpdateStatus } from "./update-contexts";
@@ -12,21 +15,144 @@ import { UpdateContext } from "./update-contexts";
 
 const logger = getLogger(import.meta.url);
 
+const TOAST_ID = "app-update";
+const CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000;
+const INSTALLS_ON_RESTART = platform() !== "windows";
+
+function errorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string" && error) return error;
+  return fallback;
+}
+
 export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [updateStatus, setUpdateStatus] = useState<UpdateStatus>("idle");
   const [updateProgress, setUpdateProgress] = useState<number | null>(null);
   const [updateVersion, setUpdateVersion] = useState("");
-  const [remindAfter, setRemindAfter] = useAtom(updateRemindAfterAtom);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+  const autoUpdate = useAtomValue(settingAtoms.AUTO_UPDATE);
+  const setManagedExternally = useSetAtom(updatesManagedExternallyAtom);
+
+  const pendingUpdateRef = useRef<Update | null>(null);
+  const readyVersionRef = useRef<string | null>(null);
+  const busyRef = useRef(false);
+  const notifiedRef = useRef(new Set<string>());
   const hasCheckedRef = useRef(false);
-  const [dialogDismissed, setDialogDismissed] = useState(() => {
-    return remindAfter != null && Date.now() < remindAfter;
-  });
+
+  const replacePendingUpdate = useCallback((update: Update | null) => {
+    const previous = pendingUpdateRef.current;
+    pendingUpdateRef.current = update;
+    if (previous && previous !== update) {
+      void previous.close().catch(() => undefined);
+    }
+  }, []);
+
+  const finishUpdate = useCallback(async () => {
+    if (INSTALLS_ON_RESTART) {
+      logger.verbose("Relaunching to apply installed update.");
+      await relaunch();
+      return;
+    }
+
+    const update = pendingUpdateRef.current;
+    if (!update) return;
+    try {
+      busyRef.current = true;
+      setUpdateStatus("installing");
+      setUpdateError(null);
+      logger.verbose(`Installing downloaded update ${update.version}.`);
+      await update.install();
+    } catch (error) {
+      setUpdateStatus("error");
+      setUpdateError(errorMessage(error, "Failed to install update"));
+      logger.error("Error installing update.", error);
+    } finally {
+      busyRef.current = false;
+    }
+  }, []);
+
+  const notifyReady = useCallback(
+    (version: string) => {
+      const key = `ready:${version}`;
+      if (notifiedRef.current.has(key)) return;
+      notifiedRef.current.add(key);
+      if (INSTALLS_ON_RESTART) {
+        toast.info(`AgentOne v${version} is ready`, {
+          id: TOAST_ID,
+          description: "It'll be used next time you open AgentOne.",
+          duration: Infinity,
+          action: { label: "Restart now", onClick: () => void finishUpdate() },
+        });
+      } else {
+        toast.info(`AgentOne v${version} is ready to install`, {
+          id: TOAST_ID,
+          description: "AgentOne will close while the update installs.",
+          duration: Infinity,
+          action: { label: "Install", onClick: () => void finishUpdate() },
+        });
+      }
+    },
+    [finishUpdate],
+  );
+
+  const downloadUpdate = useCallback(
+    async (update: Update) => {
+      try {
+        busyRef.current = true;
+        setUpdateVersion(update.version);
+        setUpdateStatus("downloading");
+        setUpdateProgress(null);
+        setUpdateError(null);
+        logger.verbose(`Downloading update ${update.version}.`);
+
+        let contentLength: number | undefined;
+        let downloaded = 0;
+        await update.download((event) => {
+          switch (event.event) {
+            case "Started":
+              contentLength = event.data.contentLength;
+              downloaded = 0;
+              setUpdateProgress(contentLength ? 0 : null);
+              break;
+            case "Progress":
+              downloaded += event.data.chunkLength;
+              if (contentLength) {
+                setUpdateProgress(Math.min((downloaded / contentLength) * 100, 100));
+              }
+              break;
+            case "Finished":
+              setUpdateProgress(100);
+              break;
+          }
+        });
+
+        if (INSTALLS_ON_RESTART) {
+          setUpdateStatus("installing");
+          logger.verbose(`Installing update ${update.version} for next launch.`);
+          await update.install();
+        }
+
+        readyVersionRef.current = update.version;
+        setUpdateStatus("ready");
+        logger.verbose(`Update ${update.version} is ready.`);
+        notifyReady(update.version);
+      } catch (error) {
+        setUpdateStatus("error");
+        setUpdateError(errorMessage(error, "Failed to download update"));
+        logger.error("Error downloading update.", error);
+      } finally {
+        busyRef.current = false;
+      }
+    },
+    [notifyReady],
+  );
 
   const checkForUpdates = useCallback(async () => {
+    if (busyRef.current) return;
+    busyRef.current = true;
+    const wasReady = readyVersionRef.current !== null;
     logger.verbose("Initiating update check.");
     try {
-      setUpdateStatus("checking");
-
       let managedExternally = false;
       try {
         managedExternally = await invoke<boolean>("is_update_managed_externally");
@@ -35,134 +161,116 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       }
 
       if (managedExternally) {
+        setManagedExternally(true);
         setUpdateStatus("managed-externally");
         logger.verbose("Updates are managed externally. Skipping built-in updater.");
         return;
       }
 
-      const update = await check();
-      logger.verbose(`Update check completed. Update found: ${!!update}.`);
+      if (!wasReady) {
+        setUpdateStatus("checking");
+        setUpdateError(null);
+      }
 
-      if (update) {
-        setUpdateVersion(update.version);
-        setUpdateStatus("available");
-        logger.verbose(
-          `Update version ${update.version} available. Setting status to 'available'.`,
-        );
-      } else {
-        setUpdateStatus("up-to-date");
-        logger.verbose("No update available. Setting status to 'up-to-date'.");
+      const update = await check();
+      logger.verbose(`Update check completed. Update found: ${update?.version ?? "none"}.`);
+
+      if (!update) {
+        if (!wasReady) setUpdateStatus("up-to-date");
+        return;
+      }
+
+      if (update.version === readyVersionRef.current) {
+        void update.close().catch(() => undefined);
+        setUpdateStatus("ready");
+        setUpdateError(null);
+        return;
+      }
+
+      replacePendingUpdate(update);
+
+      if (getDefaultStore().get(settingAtoms.AUTO_UPDATE)) {
+        await downloadUpdate(update);
+        return;
+      }
+
+      readyVersionRef.current = null;
+      setUpdateVersion(update.version);
+      setUpdateStatus("available");
+      const key = `available:${update.version}`;
+      if (!notifiedRef.current.has(key)) {
+        notifiedRef.current.add(key);
+        toast.info(`AgentOne v${update.version} is available`, {
+          id: TOAST_ID,
+          duration: Infinity,
+          action: {
+            label: "Update",
+            onClick: () => {
+              const pending = pendingUpdateRef.current;
+              if (pending) void downloadUpdate(pending);
+            },
+          },
+        });
       }
     } catch (error) {
-      setUpdateStatus("error");
-      const message = error instanceof Error ? error.message : "Failed to check for updates";
-      logger.error(`Error during update check: ${message}`, error);
+      if (!wasReady) {
+        setUpdateStatus("error");
+        setUpdateError(errorMessage(error, "Failed to check for updates"));
+      }
+      logger.error("Error during update check.", error);
+    } finally {
+      busyRef.current = false;
     }
-  }, []);
+  }, [downloadUpdate, replacePendingUpdate, setManagedExternally]);
 
   const downloadAndInstallUpdate = useCallback(async () => {
-    logger.verbose("Initiating download and install of update.");
-    try {
-      setUpdateStatus("downloading");
-      setUpdateProgress(null);
-
-      let managedExternally = false;
-      try {
-        managedExternally = await invoke<boolean>("is_update_managed_externally");
-      } catch (error) {
-        logger.error("Failed to determine whether updates are externally managed.", error);
-      }
-
-      if (managedExternally) {
-        setUpdateStatus("managed-externally");
-        logger.verbose("Updates are managed externally. Skipping built-in install.");
-        return;
-      }
-
-      const update = await check();
-      if (!update) {
-        setUpdateStatus("error");
-        logger.error("Update not found during download attempt.");
-        return;
-      }
-      logger.verbose(`Confirmed update version ${update.version} for download.`);
-
-      let contentLength: number | undefined;
-      let downloaded = 0;
-      await update.downloadAndInstall((event) => {
-        switch (event.event) {
-          case "Started":
-            contentLength = event.data.contentLength;
-            downloaded = 0;
-            setUpdateProgress(contentLength ? 0 : null);
-            break;
-          case "Progress":
-            downloaded += event.data.chunkLength;
-            if (contentLength) {
-              setUpdateProgress(Math.min((downloaded / contentLength) * 100, 100));
-            }
-            break;
-          case "Finished":
-            setUpdateProgress(100);
-            setUpdateStatus("installing");
-            break;
-        }
-      });
-
-      setUpdateStatus("idle");
-      logger.verbose("Update installation complete. Relaunching application.");
-      await relaunch();
-    } catch (error) {
-      setUpdateStatus("error");
-      const message = error instanceof Error ? error.message : "Failed to install update";
-      logger.error(`Error during update: ${message}`, error);
+    const pending = pendingUpdateRef.current;
+    if (pending && readyVersionRef.current === null) {
+      await downloadUpdate(pending);
+      return;
     }
-  }, []);
+    await checkForUpdates();
+  }, [checkForUpdates, downloadUpdate]);
 
   useEffect(() => {
     if (hasCheckedRef.current) return;
     hasCheckedRef.current = true;
-    const startCheck = async () => {
-      await checkForUpdates();
-    };
-    void startCheck();
+    void checkForUpdates();
   }, [checkForUpdates]);
 
-  const dialogOpen = updateStatus === "available" && !dialogDismissed;
+  const managedExternally = updateStatus === "managed-externally";
 
-  const handleRemind = useCallback(
-    (days: number) => {
-      const until = Date.now() + days * 24 * 60 * 60 * 1000;
-      setRemindAfter(until);
-      setDialogDismissed(true);
-    },
-    [setRemindAfter],
-  );
+  useEffect(() => {
+    if (managedExternally) return;
+    const interval = setInterval(() => void checkForUpdates(), CHECK_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [checkForUpdates, managedExternally]);
 
-  const dismissDialog = useCallback(() => {
-    setDialogDismissed(true);
-  }, []);
+  useEffect(() => {
+    if (!autoUpdate || updateStatus !== "available") return;
+    const pending = pendingUpdateRef.current;
+    if (pending && !busyRef.current) void downloadUpdate(pending);
+  }, [autoUpdate, updateStatus, downloadUpdate]);
 
   const value = useMemo(
     () => ({
       updateStatus,
       updateProgress,
       updateVersion,
+      updateError,
+      installsOnRestart: INSTALLS_ON_RESTART,
       checkForUpdates,
       downloadAndInstallUpdate,
-      dialogOpen,
-      handleRemind,
-      dismissDialog,
+      finishUpdate,
     }),
     [
       updateStatus,
       updateProgress,
       updateVersion,
+      updateError,
       checkForUpdates,
       downloadAndInstallUpdate,
-      dialogOpen,
-      handleRemind,
-      dismissDialog,
+      finishUpdate,
     ],
   );
 

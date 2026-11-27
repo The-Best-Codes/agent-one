@@ -77,13 +77,6 @@ export const hideAgentOneModelsAtom = atomWithStorage(
   { getOnInit: true },
 );
 
-export const updateRemindAfterAtom = atomWithStorage<number | null>(
-  "agent-one-update-remind-after",
-  null,
-  undefined,
-  { getOnInit: true },
-);
-
 export const releaseNotesLastSeenVersionAtom = atomWithStorage<string | null>(
   "agent-one-release-notes-last-seen-version",
   null,

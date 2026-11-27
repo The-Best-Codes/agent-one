@@ -525,6 +525,13 @@ export const SETTINGS = {
       "Show a warning before switching tool behavior to YOLO, which runs tools without asking for your approval.",
     default: true,
   }),
+  AUTO_UPDATE: toggle({
+    keywords: ["updates", "auto update", "download", "install", "version"],
+    label: "Automatically download and install updates",
+    description:
+      "Download new versions in the background so they're ready the next time you open AgentOne.",
+    default: true,
+  }),
   AUTO_MODE_MODEL: data<string>({
     keywords: ["auto mode", "classifier", "approval", "model", "tool behavior"],
     label: "Auto mode model",
