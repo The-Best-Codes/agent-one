@@ -70,7 +70,7 @@ Here's some screenshots of various AgentOne setups and themes.
 
 - **Subagents:** Obviously. Everyone supports these. Async subagents are coming soon, though!
 - **Extensions & MCP:** AgentOne ships with **20,000+ built-in extensions** and supports the [Model Context Protocol (MCP)](https://modelcontextprotocol.io) for custom servers, both local (STDIO) and remote (HTTP). Extensions can also render interactive apps directly inside your chats (MCP Apps, beta).
-- **Bring your own key:** Use your own API keys from OpenRouter, Groq, Google, Cerebras, and dozens more directly from your device, with no price markup. Or let AgentOne handle the models for you. Local models via Ollama and LM Studio are supported too.
+- **Bring your own key:** Use your own API keys from OpenRouter, Groq, Google, Cerebras, and dozens more directly from your device, with no price markup. Or let AgentOne handle the models for you. Local models via Ollama, LM Studio, and Llama are supported too.
 - **Private by default:** Everything runs locally on your device.
 - **Cross-device sync:** Sign in to sync your settings across devices.
 - **Per-chat model configuration:** Adjust the model configuration used for each chat, including temperature, top-p, and other parameters. Turn YOLO mode on for one chat, leave it off for another.

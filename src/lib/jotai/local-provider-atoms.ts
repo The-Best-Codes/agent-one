@@ -17,6 +17,7 @@ export interface LocalProvider {
 
 const OLLAMA_PROVIDER_ID = "ollama";
 export const LM_STUDIO_PROVIDER_ID = "lm-studio";
+export const LLAMA_APP_PROVIDER_ID = "llama-app";
 const STORAGE_KEY = "agent-one-local-providers";
 
 const DEFAULT_LOCAL_PROVIDERS: LocalProvider[] = [
@@ -34,6 +35,14 @@ const DEFAULT_LOCAL_PROVIDERS: LocalProvider[] = [
     id: LM_STUDIO_PROVIDER_ID,
     name: "LM Studio",
     baseUrl: "http://127.0.0.1:1234/v1",
+    headers: {},
+    enabled: true,
+    models: [],
+  },
+  {
+    id: LLAMA_APP_PROVIDER_ID,
+    name: "Llama",
+    baseUrl: "http://127.0.0.1:9931/v1",
     headers: {},
     enabled: true,
     models: [],

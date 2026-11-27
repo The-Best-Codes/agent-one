@@ -23,7 +23,7 @@ const PROVIDER_CARDS = [
   },
   {
     title: "Local",
-    description: "Use models running on your device, like Ollama or LM Studio.",
+    description: "Use models running on your device, like Ollama, LM Studio, or Llama.",
     Content: LocalProviders,
   },
   {

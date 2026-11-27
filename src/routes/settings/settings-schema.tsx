@@ -620,7 +620,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
         title: "Local",
         description:
           "Configure built-in local providers that can automatically discover models on startup.",
-        keywords: ["providers", "ollama", "lm studio", "offline"],
+        keywords: ["providers", "ollama", "lm studio", "llama", "llama.app", "offline"],
         size: "sm",
         render: LocalProviders,
       },
