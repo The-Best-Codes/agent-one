@@ -37,7 +37,8 @@ export function AppUpdates() {
     updateProgress,
     updateVersion,
     updateError,
-    installsOnRestart,
+    updateInstalled,
+    isWindows,
     checkForUpdates,
     downloadAndInstallUpdate,
     finishUpdate,
@@ -90,12 +91,10 @@ export function AppUpdates() {
         return {
           icon: <Spinner data-icon="inline-start" />,
           title: `Installing v${updateVersion}...`,
-          description: installsOnRestart
-            ? "The update is installing in the background"
-            : "AgentOne will close while the update installs",
+          description: "Please wait while the update installs",
         };
       case "ready":
-        return installsOnRestart
+        return updateInstalled
           ? {
               icon: <IconRocket className="text-foreground size-5" />,
               title: `v${updateVersion} is ready`,
@@ -104,7 +103,9 @@ export function AppUpdates() {
           : {
               icon: <IconRocket className="text-foreground size-5" />,
               title: `v${updateVersion} is ready to install`,
-              description: "AgentOne will close while the update installs",
+              description: isWindows
+                ? "AgentOne will close while the update installs"
+                : "AgentOne will restart after the update installs",
             };
       case "error":
         return {
@@ -161,12 +162,12 @@ export function AppUpdates() {
             }}
             size="sm"
           >
-            {installsOnRestart ? (
+            {updateInstalled ? (
               <IconRefresh data-icon="inline-start" />
             ) : (
               <IconDownload data-icon="inline-start" />
             )}
-            {installsOnRestart ? "Restart Now" : "Install"}
+            {updateInstalled ? "Restart Now" : "Install"}
           </Button>
         );
 

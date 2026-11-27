@@ -44,3 +44,47 @@ pub fn is_update_managed_externally() -> bool {
         || Path::new(EXTERNAL_UPDATE_MARKER_PATH).exists()
         || is_microsoft_store_install()
 }
+
+#[cfg(target_os = "macos")]
+fn can_install_update_without_prompt() -> bool {
+    use std::os::unix::fs::{MetadataExt, PermissionsExt};
+
+    let Ok(exe) = env::current_exe() else {
+        return false;
+    };
+    let Some(app) = exe
+        .ancestors()
+        .find(|p| p.extension().is_some_and(|e| e == "app"))
+    else {
+        return false;
+    };
+    let Some(parent) = app.parent() else {
+        return false;
+    };
+    let Ok(probe) = tempfile::NamedTempFile::new_in(parent) else {
+        return false;
+    };
+    let (Ok(probe_meta), Ok(app_meta)) =
+        (probe.as_file().metadata(), std::fs::symlink_metadata(app))
+    else {
+        return false;
+    };
+    app_meta.uid() == probe_meta.uid() && app_meta.permissions().mode() & 0o200 != 0
+}
+
+#[cfg(target_os = "linux")]
+fn can_install_update_without_prompt() -> bool {
+    use tauri::utils::{config::BundleType, platform::bundle_type};
+
+    !matches!(bundle_type(), Some(BundleType::Deb | BundleType::Rpm))
+}
+
+#[cfg(not(any(target_os = "macos", target_os = "linux")))]
+fn can_install_update_without_prompt() -> bool {
+    false
+}
+
+#[tauri::command]
+pub fn can_install_update_in_background() -> bool {
+    can_install_update_without_prompt()
+}

@@ -17,7 +17,7 @@ const logger = getLogger(import.meta.url);
 
 const TOAST_ID = "app-update";
 const CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000;
-const INSTALLS_ON_RESTART = platform() !== "windows";
+const IS_WINDOWS = platform() === "windows";
 
 function errorMessage(error: unknown, fallback: string): string {
   if (error instanceof Error) return error.message;
@@ -30,11 +30,13 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [updateProgress, setUpdateProgress] = useState<number | null>(null);
   const [updateVersion, setUpdateVersion] = useState("");
   const [updateError, setUpdateError] = useState<string | null>(null);
+  const [updateInstalled, setUpdateInstalled] = useState(false);
   const autoUpdate = useAtomValue(settingAtoms.AUTO_UPDATE);
   const setManagedExternally = useSetAtom(updatesManagedExternallyAtom);
 
   const pendingUpdateRef = useRef<Update | null>(null);
   const readyVersionRef = useRef<string | null>(null);
+  const installedRef = useRef(false);
   const busyRef = useRef(false);
   const notifiedRef = useRef(new Set<string>());
   const hasCheckedRef = useRef(false);
@@ -48,20 +50,24 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   }, []);
 
   const finishUpdate = useCallback(async () => {
-    if (INSTALLS_ON_RESTART) {
+    if (installedRef.current) {
       logger.verbose("Relaunching to apply installed update.");
       await relaunch();
       return;
     }
 
     const update = pendingUpdateRef.current;
-    if (!update) return;
+    if (!update || busyRef.current) return;
     try {
       busyRef.current = true;
+      toast.dismiss(TOAST_ID);
       setUpdateStatus("installing");
       setUpdateError(null);
       logger.verbose(`Installing downloaded update ${update.version}.`);
       await update.install();
+      installedRef.current = true;
+      setUpdateInstalled(true);
+      await relaunch();
     } catch (error) {
       setUpdateStatus("error");
       setUpdateError(errorMessage(error, "Failed to install update"));
@@ -76,7 +82,7 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       const key = `ready:${version}`;
       if (notifiedRef.current.has(key)) return;
       notifiedRef.current.add(key);
-      if (INSTALLS_ON_RESTART) {
+      if (installedRef.current) {
         toast.info(`AgentOne v${version} is ready`, {
           id: TOAST_ID,
           description: "It'll be used next time you open AgentOne.",
@@ -86,7 +92,9 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       } else {
         toast.info(`AgentOne v${version} is ready to install`, {
           id: TOAST_ID,
-          description: "AgentOne will close while the update installs.",
+          description: IS_WINDOWS
+            ? "AgentOne will close while the update installs."
+            : "AgentOne will restart after the update installs.",
           duration: Infinity,
           action: { label: "Install", onClick: () => void finishUpdate() },
         });
@@ -97,8 +105,13 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
   const downloadUpdate = useCallback(
     async (update: Update) => {
+      if (busyRef.current) return;
       try {
         busyRef.current = true;
+        toast.dismiss(TOAST_ID);
+        readyVersionRef.current = null;
+        installedRef.current = false;
+        setUpdateInstalled(false);
         setUpdateVersion(update.version);
         setUpdateStatus("downloading");
         setUpdateProgress(null);
@@ -126,10 +139,19 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
           }
         });
 
-        if (INSTALLS_ON_RESTART) {
+        let installInBackground = false;
+        try {
+          installInBackground = await invoke<boolean>("can_install_update_in_background");
+        } catch (error) {
+          logger.error("Failed to determine whether updates can install in the background.", error);
+        }
+
+        if (installInBackground) {
           setUpdateStatus("installing");
           logger.verbose(`Installing update ${update.version} for next launch.`);
           await update.install();
+          installedRef.current = true;
+          setUpdateInstalled(true);
         }
 
         readyVersionRef.current = update.version;
@@ -150,7 +172,7 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const checkForUpdates = useCallback(async () => {
     if (busyRef.current) return;
     busyRef.current = true;
-    const wasReady = readyVersionRef.current !== null;
+    const hasKnownUpdate = readyVersionRef.current !== null || pendingUpdateRef.current !== null;
     logger.verbose("Initiating update check.");
     try {
       let managedExternally = false;
@@ -167,7 +189,7 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         return;
       }
 
-      if (!wasReady) {
+      if (!hasKnownUpdate) {
         setUpdateStatus("checking");
         setUpdateError(null);
       }
@@ -176,7 +198,7 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       logger.verbose(`Update check completed. Update found: ${update?.version ?? "none"}.`);
 
       if (!update) {
-        if (!wasReady) setUpdateStatus("up-to-date");
+        if (!hasKnownUpdate) setUpdateStatus("up-to-date");
         return;
       }
 
@@ -190,6 +212,7 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       replacePendingUpdate(update);
 
       if (getDefaultStore().get(settingAtoms.AUTO_UPDATE)) {
+        busyRef.current = false;
         await downloadUpdate(update);
         return;
       }
@@ -213,7 +236,7 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         });
       }
     } catch (error) {
-      if (!wasReady) {
+      if (!hasKnownUpdate) {
         setUpdateStatus("error");
         setUpdateError(errorMessage(error, "Failed to check for updates"));
       }
@@ -258,7 +281,8 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       updateProgress,
       updateVersion,
       updateError,
-      installsOnRestart: INSTALLS_ON_RESTART,
+      updateInstalled,
+      isWindows: IS_WINDOWS,
       checkForUpdates,
       downloadAndInstallUpdate,
       finishUpdate,
@@ -268,6 +292,7 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       updateProgress,
       updateVersion,
       updateError,
+      updateInstalled,
       checkForUpdates,
       downloadAndInstallUpdate,
       finishUpdate,

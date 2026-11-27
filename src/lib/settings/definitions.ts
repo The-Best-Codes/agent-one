@@ -528,8 +528,7 @@ export const SETTINGS = {
   AUTO_UPDATE: toggle({
     keywords: ["updates", "auto update", "download", "install", "version"],
     label: "Automatically download and install updates",
-    description:
-      "Download new versions in the background so they're ready the next time you open AgentOne.",
+    description: "Download new versions in the background and let you know when one is ready.",
     default: true,
   }),
   AUTO_MODE_MODEL: data<string>({

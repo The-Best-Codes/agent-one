@@ -16,7 +16,8 @@ export interface UpdateContextType {
   updateProgress: number | null;
   updateVersion: string;
   updateError: string | null;
-  installsOnRestart: boolean;
+  updateInstalled: boolean;
+  isWindows: boolean;
   checkForUpdates: () => Promise<void>;
   downloadAndInstallUpdate: () => Promise<void>;
   finishUpdate: () => Promise<void>;
