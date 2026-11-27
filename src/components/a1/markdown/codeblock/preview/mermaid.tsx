@@ -35,7 +35,7 @@ export const MermaidPreview = ({ content, complete = true }: MermaidPreviewProps
 
   if (!complete || !state) {
     return (
-      <div className="flex h-32 items-center justify-center border-2 border-solid border-[rgb(30,30,30)]">
+      <div className="flex h-32 items-center justify-center">
         <span className="shimmer shimmer-with-pause shimmer-spread-2 shimmer-duration-1000 dark:text-muted-foreground text-foreground text-sm font-bold [--shimmer-pause:1000ms]">
           Generating diagram
         </span>
@@ -44,16 +44,12 @@ export const MermaidPreview = ({ content, complete = true }: MermaidPreviewProps
   }
 
   if (state.svg === undefined) {
-    return (
-      <div className="text-destructive border-2 border-solid border-[rgb(30,30,30)] p-4 font-mono text-xs">
-        {state.error}
-      </div>
-    );
+    return <div className="text-destructive p-4 font-mono text-xs">{state.error}</div>;
   }
 
   return (
     <div
-      className="mermaid-preview bg-background flex justify-center border-2 border-solid border-[rgb(30,30,30)] p-4"
+      className="mermaid-preview flex justify-center p-4"
       dangerouslySetInnerHTML={{ __html: state.svg }}
     />
   );

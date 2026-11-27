@@ -64,10 +64,7 @@ export const SyntaxHighlighter: FC<HighlighterProps> = ({
 
   return (
     <pre
-      className={cn(
-        "max-w-full overflow-auto bg-[rgb(30,30,30)] p-2 text-sm text-white",
-        className,
-      )}
+      className={cn("max-w-full overflow-auto p-2 text-sm", className)}
       style={highlighted?.fg ? { color: highlighted.fg } : undefined}
     >
       <code>
