@@ -1,5 +1,6 @@
 import { useAtom } from "jotai";
 
+import { ModelSelector } from "@/components/a1/chat-model-selector";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -10,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { settingAtoms } from "@/lib/jotai/settings-atoms";
 import type { TitleGenerationMethodOption, TitleGenerationSettings } from "@/lib/settings/types";
 
@@ -91,6 +93,23 @@ export function TitleFallbackMethodControl() {
           fallbackMethod: fallbackMethod as TitleGenerationSettings["fallbackMethod"],
         })
       }
+    />
+  );
+}
+
+export function TitleModelControl() {
+  const [modelId, setModelId] = useAtom(settingAtoms.TITLE_MODEL);
+  const { getChatModelById } = useModelCatalog();
+  const model = modelId ? (getChatModelById(modelId) ?? null) : null;
+
+  return (
+    <ModelSelector
+      id="title-model-control"
+      value={model}
+      onValueChange={setModelId}
+      placeholder={modelId ? "Unavailable, using chat model" : "Same as chat model"}
+      className="w-60 max-w-full"
+      popoverClassName="w-60"
     />
   );
 }

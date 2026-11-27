@@ -5,11 +5,11 @@ import {
   type UIMessage,
 } from "ai";
 import { useAtomValue, useAtomValueRawSync } from "jotai";
-import { memo, useCallback, useEffect, useRef } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
-import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
+import { type ModelConfig, useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { getLastTextPart, truncateMessagePreview } from "@/lib/ai/message-preview";
 import {
   generateChatTitle,
@@ -54,6 +54,13 @@ export const ChatInstance = memo(
     const throttleValue = useAtomValue(settingAtoms.THROTTLE_VALUE);
     const titleGenerationSettings = useAtomValue(settingAtoms.TITLE_GENERATION);
     const extractReasoningEnabled = useAtomValue(settingAtoms.EXTRACT_REASONING_ENABLED);
+    const titleModelId = useAtomValue(settingAtoms.TITLE_MODEL);
+    const { getChatModelById } = useModelCatalog();
+    const titleModelData = titleModelId ? getChatModelById(titleModelId) : undefined;
+    const titleModel = useMemo(
+      () => titleModelData?.getLanguageModel() ?? model,
+      [titleModelData, model],
+    );
     const notificationSetting = useAtomValue(settingAtoms.NOTIFICATION_SETTING);
     const { loadChatMetadata, saveChat, markChatMessageSent, saveChatTitleState, saveChatTitle } =
       usePersistence();
@@ -192,7 +199,7 @@ export const ChatInstance = memo(
                 : undefined,
           });
           generateChatTitle(
-            model,
+            titleModel,
             titleMessages,
             titleGenerationSettings,
             undefined,
@@ -216,7 +223,7 @@ export const ChatInstance = memo(
       chat.messages,
       chat.status,
       chatId,
-      model,
+      titleModel,
       chatIds,
       extractReasoningEnabled,
       loadChatMetadata,

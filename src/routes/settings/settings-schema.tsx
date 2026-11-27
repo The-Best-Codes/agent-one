@@ -33,6 +33,7 @@ import {
   TitleFallbackPhraseControl,
   TitleMaxOutputTokens,
   TitleMethodControl,
+  TitleModelControl,
 } from "@/components/settings-components/chat-titles";
 import { VirtualizationControl } from "@/components/settings-components/chat-virtualization";
 import { FileAnalysisModelsControl } from "@/components/settings-components/file-analysis";
@@ -493,6 +494,12 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
             label: "Generation Method",
             description: "How chat titles should be generated.",
             control: TitleMethodControl,
+          },
+          {
+            id: "title-model",
+            key: "TITLE_MODEL",
+            control: TitleModelControl,
+            visible: isAiTitleAtom,
           },
           {
             id: "title-max-output-tokens",

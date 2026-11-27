@@ -45,8 +45,9 @@ const ChangeTitleForm = ({
   const [title, setTitle] = useState(currentTitle);
   const [isGenerating, setIsGenerating] = useState(false);
   const { saveChatTitle, loadChatMetadata, loadChatMessages } = usePersistence();
-  const { getModelById } = useModelCatalog();
+  const { getModelById, getChatModelById } = useModelCatalog();
   const titleGenerationSettings = useAtomValue(settingAtoms.TITLE_GENERATION);
+  const titleModelId = useAtomValue(settingAtoms.TITLE_MODEL);
   const extractReasoningEnabled = useAtomValue(settingAtoms.EXTRACT_REASONING_ENABLED);
 
   const handleSave = () => {
@@ -67,7 +68,9 @@ const ChangeTitleForm = ({
     try {
       const chatMetadata = loadChatMetadata(chatId);
       const messages = await loadChatMessages(chatId);
-      const modelConfig = getModelById(chatMetadata.modelId || "");
+      const modelConfig =
+        (titleModelId && getChatModelById(titleModelId)) ||
+        getModelById(chatMetadata.modelId || "");
       if (modelConfig) {
         const generatedTitle = await generateChatTitleAI(
           modelConfig.getLanguageModel(),

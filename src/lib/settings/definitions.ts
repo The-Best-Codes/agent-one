@@ -393,6 +393,12 @@ export const SETTINGS = {
       fallbackPhrase: "New chat",
     },
   }),
+  TITLE_MODEL: data<string>({
+    keywords: ["titles", "chat titles", "title generation", "model", "rename"],
+    label: "Title model",
+    description: "The model used to generate chat titles. Reset to use the chat's own model.",
+    default: "",
+  }),
   TTS: data<TtsSettings>({
     default: {
       provider: "",
