@@ -123,7 +123,7 @@ export function spawnCommand(command: string, options: RunCommandOptions = {}): 
   let decodeStderr = createOutputDecoder("utf-8");
 
   let child: Child | null = null;
-  let killed = false;
+  let killing: Promise<void> | undefined;
   let resolveResult!: (result: RunCommandResult) => void;
   let rejectResult!: (err: unknown) => void;
 
@@ -176,14 +176,15 @@ export function spawnCommand(command: string, options: RunCommandOptions = {}): 
     });
   };
 
-  const kill = async () => {
-    if (killed || !child) return;
-    killed = true;
-    await killTree(child.pid);
-    await child.kill().catch((err) => {
-      logger.verbose("Failed to kill child process:", err);
-    });
-  };
+  const kill = () =>
+    (killing ??= (async () => {
+      await spawnPromise.catch(() => undefined);
+      if (!child) return;
+      await killTree(child.pid);
+      await child.kill().catch((err) => {
+        logger.verbose("Failed to kill child process:", err);
+      });
+    })());
 
   const onAbort = () => {
     void kill();

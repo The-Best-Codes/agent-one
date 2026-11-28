@@ -22,7 +22,7 @@
       "csp": null,
       "assetProtocol": {
         "enable": true,
-        "scope": ["$APPLOCALDATA/chat-backgrounds/**/*"]
+        "scope": ["$APPLOCALDATA/chat-backgrounds/**/*", "$APPLOCALDATA/extensions/**/*"]
       }
     }
   },
@@ -38,6 +38,19 @@
       "icons/icon.ico"
     ],
     "publisher": "AgentOne Developers",
+    "fileAssociations": [
+      {
+        "ext": ["mcpb"],
+        "name": "MCP Bundle",
+        "description": "AgentOne extension bundle",
+        "role": "Viewer",
+        "mimeType": "application/x-mcpb",
+        "exportedType": {
+          "identifier": "dev.agent-one.mcpb",
+          "conformsTo": ["public.zip-archive"]
+        }
+      }
+    ],
     "macOS": {
       "dmg": {
         "background": "dmg/background.png",

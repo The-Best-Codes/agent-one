@@ -36,6 +36,8 @@ export interface ExtensionInstallField {
   options?: { value: string; label: string; description?: string }[];
   pattern?: string;
   helpUrl?: string;
+  picker?: "directory" | "file";
+  multiple?: boolean;
 }
 
 export interface ExtensionInstallTemplate {
@@ -191,13 +193,47 @@ export function resolveCommandTemplate(
   return result;
 }
 
+function expandMultipleValues(
+  template: string,
+  fields: ExtensionInstallField[],
+  values: Record<string, string>,
+): string {
+  let result = template;
+  for (const field of fields) {
+    if (!field.multiple) continue;
+    const items = (values[field.key] ?? "")
+      .split("\n")
+      .map((item) => item.trim())
+      .filter(Boolean);
+    let prefix = `${field.key}__`;
+    while (
+      Object.keys(values).some((key) => key.startsWith(prefix)) ||
+      result.includes(`{${prefix}`)
+    ) {
+      prefix += "_";
+    }
+    items.forEach((item, index) => {
+      values[`${prefix}${index}`] = item;
+    });
+    values[field.key] = items.join(",");
+    result = result.replace(
+      new RegExp(`(^|\\s)(['"])\\{${field.key}\\}\\2(?=\\s|$)`, "g"),
+      (_match, lead: string, quote: string) =>
+        items.length
+          ? lead + items.map((_, index) => `${quote}{${prefix}${index}}${quote}`).join(" ")
+          : "",
+    );
+  }
+  return result;
+}
+
 export function createServerFromInstall(
   template: ExtensionInstallTemplate,
   submission: ExtensionInstallSubmission,
   shell: CommandShell,
 ): ExtensionInstallResult | null {
   const install = template;
-  const values: Record<string, string> = {};
+  const values: Record<string, string> = Object.create(null);
 
   for (const field of install.fields) {
     const submitted = submission.fieldValues[field.id];
@@ -209,7 +245,11 @@ export function createServerFromInstall(
   };
 
   if (install.type === "stdio") {
-    const commandTemplate = submission.command ?? install.commandTemplate ?? "";
+    const commandTemplate = expandMultipleValues(
+      submission.command ?? install.commandTemplate ?? "",
+      install.fields,
+      values,
+    );
     const command = resolveCommandTemplate(commandTemplate, values, shell).trim();
     if (!command) {
       return null;

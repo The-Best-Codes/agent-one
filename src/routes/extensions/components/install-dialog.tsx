@@ -1,4 +1,5 @@
-import { IconAlertTriangle, IconInfoCircle } from "@tabler/icons-react";
+import { IconAlertTriangle, IconFolderOpen, IconInfoCircle } from "@tabler/icons-react";
+import { open } from "@tauri-apps/plugin-dialog";
 import { platform } from "@tauri-apps/plugin-os";
 import { useEffect, useState } from "react";
 
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +23,13 @@ import {
 } from "@/components/ui/dialog";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+  InputGroupTextarea,
+} from "@/components/ui/input-group";
 import {
   Select,
   SelectContent,
@@ -52,7 +61,10 @@ function getFieldError(
 ): string | undefined {
   const text = value.trim();
   if (!text) return undefined;
-  const commandError = inCommand ? getCommandValueError(text, COMMAND_SHELL) : undefined;
+  const lines = field.multiple ? text.split("\n") : [text];
+  const commandError = inCommand
+    ? lines.map((line) => getCommandValueError(line.trim(), COMMAND_SHELL)).find(Boolean)
+    : undefined;
   if (commandError) return commandError;
   if (!field.pattern) return undefined;
   try {
@@ -110,6 +122,57 @@ function InstallField({
           placeholder={field.placeholder ?? ""}
           aria-invalid={Boolean(error)}
         />
+      ) : field.picker && field.multiple ? (
+        <InputGroup>
+          <InputGroupTextarea
+            id={field.id}
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            placeholder={field.placeholder ?? "One per line"}
+            autoComplete="off"
+            spellCheck={false}
+            aria-invalid={Boolean(error)}
+          />
+          <InputGroupAddon align="block-end">
+            <InputGroupButton
+              onClick={() =>
+                void open({ directory: field.picker === "directory", multiple: true }).then(
+                  (selected) => {
+                    if (!selected?.length) return;
+                    onChange([value.trim(), ...selected].filter(Boolean).join("\n"));
+                  },
+                )
+              }
+            >
+              <IconFolderOpen />
+              Add
+            </InputGroupButton>
+          </InputGroupAddon>
+        </InputGroup>
+      ) : field.picker ? (
+        <InputGroup>
+          <InputGroupInput
+            id={field.id}
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            placeholder={field.placeholder}
+            autoComplete="off"
+            spellCheck={false}
+            aria-invalid={Boolean(error)}
+          />
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton
+              onClick={() =>
+                void open({ directory: field.picker === "directory" }).then((selected) => {
+                  if (typeof selected === "string") onChange(selected);
+                })
+              }
+            >
+              <IconFolderOpen />
+              Browse
+            </InputGroupButton>
+          </InputGroupAddon>
+        </InputGroup>
       ) : (
         <Input
           id={field.id}
@@ -142,25 +205,34 @@ export interface InstallOAuthClient {
   clientSecret: string;
 }
 
+export interface InstallInitialValues {
+  name?: string;
+  timeoutSec?: number;
+  requiresApproval?: boolean;
+  fieldValues?: Record<string, string>;
+}
+
 function getDefaults(
   template: ExtensionInstallTemplate,
   name: string,
+  initial?: InstallInitialValues,
 ): { form: McpServerConfigFormValues; fields: Record<string, string> } {
   return {
     form: {
       type: template.type,
-      name,
+      name: initial?.name ?? name,
       command: template.commandTemplate ?? "",
       env: {},
       url: template.urlTemplate ?? "",
       headers: {},
-      timeoutSec: 30,
-      requiresApproval: true,
+      timeoutSec: initial?.timeoutSec ?? 30,
+      requiresApproval: initial?.requiresApproval ?? true,
     },
     fields: Object.fromEntries(
       template.fields.map((field) => [
         field.id,
-        field.defaultValue || (field.options?.[0]?.value ?? field.choices?.[0] ?? ""),
+        initial?.fieldValues?.[field.id] ??
+          (field.defaultValue || (field.options?.[0]?.value ?? field.choices?.[0] ?? "")),
       ]),
     ),
   };
@@ -171,6 +243,8 @@ function InstallDialogBody({
   templates,
   notes,
   signInAfterInstall,
+  untrusted,
+  initialValues,
   oauthClient,
   onClose,
   onInstall,
@@ -179,23 +253,29 @@ function InstallDialogBody({
   templates: ExtensionInstallTemplate[];
   notes: string[];
   signInAfterInstall: boolean;
+  untrusted: boolean;
+  initialValues?: InstallInitialValues;
   oauthClient?: { helpUrl?: string };
   onClose: () => void;
   onInstall: (
     server: ExtensionInstallResult,
     template: ExtensionInstallTemplate,
     oauthClient?: InstallOAuthClient,
+    fieldValues?: Record<string, string>,
   ) => void;
 }) {
   const [templateId, setTemplateId] = useState(templates[0].id);
   const template = templates.find((item) => item.id === templateId) ?? templates[0];
-  const [formValues, setFormValues] = useState(() => getDefaults(templates[0], name).form);
+  const [formValues, setFormValues] = useState(
+    () => getDefaults(templates[0], name, initialValues).form,
+  );
   const [fieldValues, setFieldValues] = useState<Record<string, string>>(
-    () => getDefaults(templates[0], name).fields,
+    () => getDefaults(templates[0], name, initialValues).fields,
   );
   const [runtimeCheck, setRuntimeCheck] = useState<{ command: string; available: boolean }>();
   const [clientId, setClientId] = useState("");
   const [clientSecret, setClientSecret] = useState("");
+  const [trusted, setTrusted] = useState(false);
   const needsOAuthClient = Boolean(oauthClient) && template.type === "http";
 
   const selectTemplate = (id: string) => {
@@ -234,6 +314,7 @@ function InstallDialogBody({
     formValues.timeoutSec >= 0.1 &&
     (template.type === "stdio" ? formValues.command.trim() !== "" : formValues.url.trim() !== "") &&
     (!needsOAuthClient || clientId.trim() !== "") &&
+    (!untrusted || trusted) &&
     template.fields.every((field) => {
       const value = fieldValues[field.id] ?? "";
       return (
@@ -262,6 +343,7 @@ function InstallDialogBody({
       needsOAuthClient
         ? { clientId: clientId.trim(), clientSecret: clientSecret.trim() }
         : undefined,
+      Object.fromEntries(template.fields.map((field) => [field.id, fieldValues[field.id] ?? ""])),
     );
     onClose();
   };
@@ -308,7 +390,17 @@ function InstallDialogBody({
             </Field>
           ) : null}
 
-          {template.type === "stdio" ? (
+          {untrusted ? (
+            <Alert variant="destructive">
+              <IconAlertTriangle />
+              <AlertTitle>Only install this if you trust where it came from</AlertTitle>
+              <AlertDescription>
+                This extension isn't from the AgentOne extensions page. It can run any program and
+                read or change any file on your device. If a website, message, or someone you don't
+                know told you to open it, don't install it.
+              </AlertDescription>
+            </Alert>
+          ) : template.type === "stdio" ? (
             <Alert>
               <IconAlertTriangle />
               <AlertTitle>This extension runs code on your device</AlertTitle>
@@ -403,6 +495,17 @@ function InstallDialogBody({
         </FieldGroup>
       </div>
 
+      {untrusted ? (
+        <Field orientation="horizontal">
+          <Checkbox
+            id="install-trust"
+            checked={trusted}
+            onCheckedChange={(checked) => setTrusted(checked === true)}
+          />
+          <FieldLabel htmlFor="install-trust">I trust the developer of this extension</FieldLabel>
+        </Field>
+      ) : null}
+
       <DialogFooter>
         <Button variant="outline" onClick={onClose}>
           Cancel
@@ -421,6 +524,8 @@ export function InstallDialog({
   templates,
   notes = [],
   signInAfterInstall = false,
+  untrusted = false,
+  initialValues,
   oauthClient,
   open,
   onOpenChange,
@@ -431,6 +536,8 @@ export function InstallDialog({
   templates: ExtensionInstallTemplate[];
   notes?: string[];
   signInAfterInstall?: boolean;
+  untrusted?: boolean;
+  initialValues?: InstallInitialValues;
   oauthClient?: { helpUrl?: string };
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -438,6 +545,7 @@ export function InstallDialog({
     server: ExtensionInstallResult,
     template: ExtensionInstallTemplate,
     oauthClient?: InstallOAuthClient,
+    fieldValues?: Record<string, string>,
   ) => void;
 }) {
   return (
@@ -450,6 +558,8 @@ export function InstallDialog({
             templates={templates}
             notes={notes}
             signInAfterInstall={signInAfterInstall}
+            untrusted={untrusted}
+            initialValues={initialValues}
             oauthClient={oauthClient}
             onClose={() => onOpenChange(false)}
             onInstall={onInstall}

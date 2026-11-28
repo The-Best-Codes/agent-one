@@ -38,6 +38,7 @@ interface LoadingOperation {
   controller: AbortController;
   configHash: string;
   promise: Promise<void>;
+  transport?: MCPTransport;
 }
 
 const serverCache = new Map<string, ManagedMCPServer>();
@@ -417,6 +418,7 @@ async function getPaginatedMcpToolDefinitions(
 async function getMcpClientAndTools(
   server: McpServerConfig,
   signal: AbortSignal,
+  onTransport?: (transport: MCPTransport) => void,
 ): Promise<{
   client: MCPClient;
   tools: ToolSet;
@@ -429,6 +431,7 @@ async function getMcpClientAndTools(
   }
 
   const transport = createTransport(server);
+  onTransport?.(transport);
 
   const onAbort = () => {
     transport.close().catch((error) => {
@@ -536,10 +539,13 @@ export async function getMcpToolsForServer(server: McpServerConfig): Promise<Too
   }
 
   const controller = new AbortController();
+  const operation: LoadingOperation = { controller, configHash, promise: Promise.resolve() };
 
   const promise = (async () => {
     try {
-      const result = await getMcpClientAndTools(server, controller.signal);
+      const result = await getMcpClientAndTools(server, controller.signal, (transport) => {
+        operation.transport = transport;
+      });
       const entry = { ...result, configHash };
       reconnectAfterExit(server, entry);
       serverCache.set(server.id, entry);
@@ -578,7 +584,8 @@ export async function getMcpToolsForServer(server: McpServerConfig): Promise<Too
     }
   })();
 
-  loadingOperations.set(server.id, { controller, configHash, promise });
+  operation.promise = promise;
+  loadingOperations.set(server.id, operation);
 
   try {
     await promise;
@@ -626,17 +633,20 @@ export function isServerCached(server: McpServerConfig): boolean {
   return cached !== undefined && cached.configHash === getConfigHash(server);
 }
 
-export function closeServerCache(serverId: string): void {
+export async function stopMcpServer(serverId: string): Promise<void> {
+  const loading = loadingOperations.get(serverId);
   abortMcpServerLoad(serverId);
   appResourceCache.delete(serverId);
 
   const cached = serverCache.get(serverId);
-  if (cached) {
-    cached.transport?.close().catch((error) => {
-      logger.error(`Error closing MCP server ${serverId}:`, error);
-    });
-    serverCache.delete(serverId);
-  }
+  serverCache.delete(serverId);
+  await Promise.all([cached?.transport?.close(), loading?.transport?.close()]);
+}
+
+export function closeServerCache(serverId: string): void {
+  stopMcpServer(serverId).catch((error) => {
+    logger.error(`Error closing MCP server ${serverId}:`, error);
+  });
 }
 
 export function invalidateServerCache(): void {
