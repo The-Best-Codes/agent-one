@@ -47,10 +47,13 @@ export function DeepLinkHandler() {
         .catch((error) => logger.verbose("Opened files aren't available:", error));
 
     void listen("mcpb-opened", () => void openFiles()).then((stop) => {
-      if (disposed) stop();
-      else unlisten = stop;
+      if (disposed) {
+        stop();
+        return;
+      }
+      unlisten = stop;
+      void openFiles();
     });
-    void openFiles();
 
     return () => {
       disposed = true;

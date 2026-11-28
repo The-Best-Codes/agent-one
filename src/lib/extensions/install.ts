@@ -205,15 +205,22 @@ function expandMultipleValues(
       .split("\n")
       .map((item) => item.trim())
       .filter(Boolean);
+    let prefix = `${field.key}__`;
+    while (
+      Object.keys(values).some((key) => key.startsWith(prefix)) ||
+      result.includes(`{${prefix}`)
+    ) {
+      prefix += "_";
+    }
     items.forEach((item, index) => {
-      values[`${field.key}__${index}`] = item;
+      values[`${prefix}${index}`] = item;
     });
     values[field.key] = items.join(",");
     result = result.replace(
       new RegExp(`(^|\\s)(['"])\\{${field.key}\\}\\2(?=\\s|$)`, "g"),
       (_match, lead: string, quote: string) =>
         items.length
-          ? lead + items.map((_, index) => `${quote}{${field.key}__${index}}${quote}`).join(" ")
+          ? lead + items.map((_, index) => `${quote}{${prefix}${index}}${quote}`).join(" ")
           : "",
     );
   }
