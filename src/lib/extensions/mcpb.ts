@@ -191,8 +191,13 @@ export async function readMcpBundle(path: string): Promise<McpBundle> {
 
   const system = await getSystemVariables(info.dir);
   const { platform_overrides: overrides, ...base } = manifest.server.mcp_config;
-  const launch = { ...base, ...overrides?.[bundlePlatform] };
-  const parts = [launch.command ?? base.command, ...(launch.args ?? [])];
+  const override = overrides?.[bundlePlatform];
+  const launch = {
+    command: override?.command || base.command,
+    args: override?.args ?? base.args,
+    env: { ...base.env, ...override?.env },
+  };
+  const parts = [launch.command, ...(launch.args ?? [])];
   const env = Object.entries(launch.env ?? {});
   const literalText = [...parts, ...env.map(([, value]) => value), ...Object.values(system)].join(
     "\n",
