@@ -12,7 +12,7 @@ import {
 import { getInstalledExtensionMetadata } from "@/lib/extensions/metadata";
 import { getLogger } from "@/lib/logger";
 
-import { InstallDialog } from "./components/install-dialog";
+import { InstallDialog, type InstallInitialValues } from "./components/install-dialog";
 import { getExtensionPath } from "./model";
 import { useExtensionActions } from "./use-extension-actions";
 
@@ -25,6 +25,7 @@ export function InstallFromFile() {
   const [bundle, setBundle] = useState<McpBundle>();
   const path = searchParams.get("mcpb");
   const latest = useRef({ servers, navigate, setSearchParams });
+  const [initialValues, setInitialValues] = useState<InstallInitialValues>();
 
   useEffect(() => {
     latest.current = { servers, navigate, setSearchParams };
@@ -55,6 +56,14 @@ export function InstallFromFile() {
           void latest.current.navigate(getExtensionPath(existing.id));
           return;
         }
+        setInitialValues(
+          existing && {
+            name: existing.name,
+            timeoutSec: existing.timeoutMs / 1000,
+            requiresApproval: existing.requiresApproval,
+            fieldValues: existing.installValues,
+          },
+        );
         setBundle(result);
       })
       .catch((error) => {
@@ -78,11 +87,12 @@ export function InstallFromFile() {
       name={bundle?.metadata.displayName ?? ""}
       templates={bundle ? [bundle.template] : []}
       untrusted
+      initialValues={initialValues}
       open={Boolean(bundle)}
       onOpenChange={(open) => {
         if (!open) setBundle(undefined);
       }}
-      onInstall={(result) => {
+      onInstall={(result, _template, _oauthClient, fieldValues) => {
         if (!bundle) return;
         const existed = servers.some((server) => server.id === bundle.id);
         const toastId = toast.loading(`Installing ${result.name}...`);
@@ -90,7 +100,11 @@ export function InstallFromFile() {
           .then(() => installMcpBundle(bundle))
           .then(() => {
             toast.dismiss(toastId);
-            const server = installServer(result, { id: bundle.id, metadata: bundle.metadata });
+            const server = installServer(result, {
+              id: bundle.id,
+              metadata: bundle.metadata,
+              installValues: fieldValues,
+            });
             if (existed) restartServer(server.id);
             void navigate(getExtensionPath(server.id));
           })

@@ -110,6 +110,7 @@ export interface McpServerConfigBase {
   requiresApproval: boolean;
   toolApprovalOverrides?: Record<string, boolean>;
   registryMetadata?: McpRegistryMetadata;
+  installValues?: Record<string, string>;
 }
 
 export interface McpStdioServerConfig extends McpServerConfigBase {

@@ -144,6 +144,10 @@ function quoteArgument(segments: Segment[], shell: CommandShell): string {
   return `"${toTemplate(segments, (literal) => literal.replace(/(\\+)$/, "$1$1"))}"`;
 }
 
+function isMultiplePath(config: z.infer<typeof userConfigSchema>): boolean {
+  return Boolean(config.multiple) && (config.type === "directory" || config.type === "file");
+}
+
 function getDefaultValue(
   config: z.infer<typeof userConfigSchema>,
   system: Record<string, string>,
@@ -155,7 +159,7 @@ function getDefaultValue(
         ? config.default
         : [config.default];
   if (config.type === "boolean") return String(values[0] ?? false);
-  return (config.multiple ? values : values.slice(0, 1))
+  return (isMultiplePath(config) ? values : values.slice(0, 1))
     .map((value) => toTemplate(toSegments(String(value), system, new Map()), (literal) => literal))
     .join("\n");
 }
@@ -225,8 +229,8 @@ export async function readMcpBundle(path: string): Promise<McpBundle> {
     ]),
   );
 
-  const fields: ExtensionInstallField[] = userConfig.map(([name, config], index) => ({
-    id: `mcpb-field-${index}`,
+  const fields: ExtensionInstallField[] = userConfig.map(([name, config]) => ({
+    id: `mcpb:${name}`,
     kind: "variable",
     key: keys.get(name) ?? name,
     label: config.title || name,
@@ -242,7 +246,7 @@ export async function readMcpBundle(path: string): Promise<McpBundle> {
           ]
         : undefined,
     picker: config.type === "directory" || config.type === "file" ? config.type : undefined,
-    multiple: config.multiple && (config.type === "directory" || config.type === "file"),
+    multiple: isMultiplePath(config),
   }));
 
   const displayName = manifest.display_name || manifest.name;

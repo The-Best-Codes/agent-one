@@ -38,7 +38,14 @@ export function useExtensionActions() {
   );
 
   const installServer = useCallback(
-    (installed: ExtensionInstallResult, source?: { id: string; metadata: McpRegistryMetadata }) => {
+    (
+      installed: ExtensionInstallResult,
+      source?: {
+        id: string;
+        metadata: McpRegistryMetadata;
+        installValues?: Record<string, string>;
+      },
+    ) => {
       const base = {
         id: source?.id ?? crypto.randomUUID(),
         name: installed.name,
@@ -47,6 +54,7 @@ export function useExtensionActions() {
         requiresApproval: installed.requiresApproval,
         toolApprovalOverrides: {},
         registryMetadata: source?.metadata,
+        installValues: source?.installValues,
       };
       const server: McpServerConfig =
         installed.type === "stdio"

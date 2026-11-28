@@ -205,25 +205,34 @@ export interface InstallOAuthClient {
   clientSecret: string;
 }
 
+export interface InstallInitialValues {
+  name?: string;
+  timeoutSec?: number;
+  requiresApproval?: boolean;
+  fieldValues?: Record<string, string>;
+}
+
 function getDefaults(
   template: ExtensionInstallTemplate,
   name: string,
+  initial?: InstallInitialValues,
 ): { form: McpServerConfigFormValues; fields: Record<string, string> } {
   return {
     form: {
       type: template.type,
-      name,
+      name: initial?.name ?? name,
       command: template.commandTemplate ?? "",
       env: {},
       url: template.urlTemplate ?? "",
       headers: {},
-      timeoutSec: 30,
-      requiresApproval: true,
+      timeoutSec: initial?.timeoutSec ?? 30,
+      requiresApproval: initial?.requiresApproval ?? true,
     },
     fields: Object.fromEntries(
       template.fields.map((field) => [
         field.id,
-        field.defaultValue || (field.options?.[0]?.value ?? field.choices?.[0] ?? ""),
+        initial?.fieldValues?.[field.id] ??
+          (field.defaultValue || (field.options?.[0]?.value ?? field.choices?.[0] ?? "")),
       ]),
     ),
   };
@@ -235,6 +244,7 @@ function InstallDialogBody({
   notes,
   signInAfterInstall,
   untrusted,
+  initialValues,
   oauthClient,
   onClose,
   onInstall,
@@ -244,19 +254,23 @@ function InstallDialogBody({
   notes: string[];
   signInAfterInstall: boolean;
   untrusted: boolean;
+  initialValues?: InstallInitialValues;
   oauthClient?: { helpUrl?: string };
   onClose: () => void;
   onInstall: (
     server: ExtensionInstallResult,
     template: ExtensionInstallTemplate,
     oauthClient?: InstallOAuthClient,
+    fieldValues?: Record<string, string>,
   ) => void;
 }) {
   const [templateId, setTemplateId] = useState(templates[0].id);
   const template = templates.find((item) => item.id === templateId) ?? templates[0];
-  const [formValues, setFormValues] = useState(() => getDefaults(templates[0], name).form);
+  const [formValues, setFormValues] = useState(
+    () => getDefaults(templates[0], name, initialValues).form,
+  );
   const [fieldValues, setFieldValues] = useState<Record<string, string>>(
-    () => getDefaults(templates[0], name).fields,
+    () => getDefaults(templates[0], name, initialValues).fields,
   );
   const [runtimeCheck, setRuntimeCheck] = useState<{ command: string; available: boolean }>();
   const [clientId, setClientId] = useState("");
@@ -329,6 +343,7 @@ function InstallDialogBody({
       needsOAuthClient
         ? { clientId: clientId.trim(), clientSecret: clientSecret.trim() }
         : undefined,
+      Object.fromEntries(template.fields.map((field) => [field.id, fieldValues[field.id] ?? ""])),
     );
     onClose();
   };
@@ -510,6 +525,7 @@ export function InstallDialog({
   notes = [],
   signInAfterInstall = false,
   untrusted = false,
+  initialValues,
   oauthClient,
   open,
   onOpenChange,
@@ -521,6 +537,7 @@ export function InstallDialog({
   notes?: string[];
   signInAfterInstall?: boolean;
   untrusted?: boolean;
+  initialValues?: InstallInitialValues;
   oauthClient?: { helpUrl?: string };
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -528,6 +545,7 @@ export function InstallDialog({
     server: ExtensionInstallResult,
     template: ExtensionInstallTemplate,
     oauthClient?: InstallOAuthClient,
+    fieldValues?: Record<string, string>,
   ) => void;
 }) {
   return (
@@ -541,6 +559,7 @@ export function InstallDialog({
             notes={notes}
             signInAfterInstall={signInAfterInstall}
             untrusted={untrusted}
+            initialValues={initialValues}
             oauthClient={oauthClient}
             onClose={() => onOpenChange(false)}
             onInstall={onInstall}
