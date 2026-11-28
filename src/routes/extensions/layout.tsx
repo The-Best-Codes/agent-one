@@ -8,9 +8,12 @@ import { useBack } from "@/hooks/use-back";
 import { setMcpOAuthClient } from "@/lib/ai/tools/mcp/oauth";
 
 import { AddServerDialog } from "./add-server-dialog";
+import { InstallFromFile } from "./install-from-file";
 import { InstallFromLink } from "./install-from-link";
 import { getExtensionPath } from "./model";
 import { useExtensionActions } from "./use-extension-actions";
+
+const PREFILL_KEYS = ["mcpName", "mcpType", "mcpCommand", "mcpUrl"];
 
 export default function ExtensionsLayout() {
   const navigate = useNavigate();
@@ -38,7 +41,7 @@ export default function ExtensionsLayout() {
   const clearPrefill = () =>
     setSearchParams(
       (previous) => {
-        for (const key of ["mcpName", "mcpType", "mcpCommand", "mcpUrl"]) {
+        for (const key of PREFILL_KEYS) {
           previous.delete(key);
         }
         return previous;
@@ -91,10 +94,17 @@ export default function ExtensionsLayout() {
           if (inPlace) clearPrefill();
           void navigate(getExtensionPath(server.id), { replace: Boolean(prefill) && !inPlace });
         }}
+        onImportFile={(path) => {
+          const next = new URLSearchParams(searchParams);
+          for (const key of PREFILL_KEYS) next.delete(key);
+          next.set("mcpb", path);
+          setSearchParams(next, { replace: true });
+        }}
         initialValues={prefill}
       />
 
       <InstallFromLink />
+      <InstallFromFile />
     </main>
   );
 }

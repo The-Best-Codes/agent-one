@@ -4,6 +4,9 @@ pub mod headless_webview;
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 pub mod cron;
 
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+pub mod mcpb;
+
 pub mod device;
 pub mod project_files;
 pub mod update_management;

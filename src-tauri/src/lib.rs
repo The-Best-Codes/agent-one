@@ -49,8 +49,13 @@ pub fn run() {
     // Single instance plugin should be the first plugin registered
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
     {
-        builder = builder.plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
+        builder = builder.plugin(tauri_plugin_single_instance::init(|app, args, cwd| {
             println!("New instance started, args: {:?}", args);
+
+            utils::mcpb::queue_opened(
+                app,
+                utils::mcpb::paths_from_args(&args, std::path::Path::new(&cwd)),
+            );
 
             // Check if this was triggered by a deep link on Linux/Windows
             // Deep links are passed as argv when using the single-instance plugin with deep-link feature
@@ -69,7 +74,9 @@ pub fn run() {
 
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
     {
-        builder = builder.plugin(tauri_plugin_global_shortcut::Builder::new().build());
+        builder = builder
+            .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+            .manage(utils::mcpb::OpenedBundles::default());
     }
 
     let mut builder = builder
@@ -219,6 +226,12 @@ pub fn run() {
                 println!("Deep link opened: {:?}", event.urls());
             });
 
+            #[cfg(any(target_os = "linux", windows))]
+            if let Ok(cwd) = std::env::current_dir() {
+                let args: Vec<String> = std::env::args().collect();
+                utils::mcpb::queue_opened(app.handle(), utils::mcpb::paths_from_args(&args, &cwd));
+            }
+
             #[cfg(not(any(target_os = "android", target_os = "ios")))]
             {
                 use tauri_plugin_notification::NotificationExt;
@@ -288,6 +301,10 @@ pub fn run() {
                     computer_use::computer_use_search_installed_apps,
                     computer_use::computer_use_get_state,
                     computer_use::computer_use_act,
+                    utils::mcpb::mcpb_read,
+                    utils::mcpb::mcpb_install,
+                    utils::mcpb::mcpb_remove,
+                    utils::mcpb::mcpb_take_opened,
                     keyring::storage_get_item,
                     keyring::storage_set_item,
                     keyring::storage_remove_item,
@@ -336,6 +353,15 @@ pub fn run() {
                 ]
             }
         })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while running tauri application")
+        .run(|_app, _event| {
+            #[cfg(target_os = "macos")]
+            if let tauri::RunEvent::Opened { urls } = _event {
+                utils::mcpb::queue_opened(
+                    _app,
+                    urls.into_iter().filter_map(|url| url.to_file_path().ok()),
+                );
+            }
+        });
 }

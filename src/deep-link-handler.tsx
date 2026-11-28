@@ -1,3 +1,5 @@
+import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { getCurrent, onOpenUrl } from "@tauri-apps/plugin-deep-link";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
@@ -28,6 +30,33 @@ export function DeepLinkHandler() {
   useEffect(() => {
     actionsRef.current = { navigate, programmaticNewChat };
   }, [navigate, programmaticNewChat]);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    let disposed = false;
+
+    const openFiles = () =>
+      invoke<string[]>("mcpb_take_opened")
+        .then(([path]) => {
+          if (!path) return;
+          void actionsRef.current.navigate(
+            `/extensions?${new URLSearchParams({ mcpb: path }).toString()}`,
+            { replace: window.location.pathname === "/extensions" },
+          );
+        })
+        .catch((error) => logger.verbose("Opened files aren't available:", error));
+
+    void listen("mcpb-opened", () => void openFiles()).then((stop) => {
+      if (disposed) stop();
+      else unlisten = stop;
+    });
+    void openFiles();
+
+    return () => {
+      disposed = true;
+      unlisten?.();
+    };
+  }, []);
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;

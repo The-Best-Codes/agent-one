@@ -1,9 +1,11 @@
-import { IconAlertTriangle } from "@tabler/icons-react";
+import { IconAlertTriangle, IconFileImport } from "@tabler/icons-react";
+import { open as openFile } from "@tauri-apps/plugin-dialog";
 import { useMemo, useState } from "react";
 
 import { SecretInput } from "@/components/a1/input/secret-input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +36,7 @@ interface AddServerDialogProps {
     requiresApproval: boolean;
     oauthClient?: { clientId: string; clientSecret?: string };
   }) => void;
+  onImportFile: (path: string) => void;
   initialValues?: {
     name: string;
     type: "stdio" | "http";
@@ -46,6 +49,7 @@ export function AddServerDialog({
   open,
   onOpenChange,
   onAddServer,
+  onImportFile,
   initialValues,
 }: AddServerDialogProps) {
   const [formValues, setFormValues] = useState<McpServerConfigFormValues>({
@@ -59,6 +63,7 @@ export function AddServerDialog({
     requiresApproval: true,
   });
   const [isFromDeepLink, setIsFromDeepLink] = useState(!!initialValues);
+  const [trusted, setTrusted] = useState(false);
   const [oauthClientId, setOAuthClientId] = useState("");
   const [oauthClientSecret, setOAuthClientSecret] = useState("");
 
@@ -71,10 +76,14 @@ export function AddServerDialog({
       return false;
     }
 
+    if (isFromDeepLink && !trusted) {
+      return false;
+    }
+
     return formValues.type === "stdio"
       ? formValues.command.trim() !== ""
       : formValues.url.trim() !== "";
-  }, [formValues]);
+  }, [formValues, isFromDeepLink, trusted]);
 
   const resetAddForm = () => {
     setFormValues({
@@ -88,6 +97,7 @@ export function AddServerDialog({
       requiresApproval: true,
     });
     setIsFromDeepLink(false);
+    setTrusted(false);
     setOAuthClientId("");
     setOAuthClientSecret("");
   };
@@ -122,27 +132,36 @@ export function AddServerDialog({
     onOpenChange(false);
   };
 
+  const handleImportFile = async () => {
+    const path = await openFile({ filters: [{ name: "Extension file", extensions: ["mcpb"] }] });
+    if (typeof path !== "string") return;
+    handleCancelAdd();
+    onImportFile(path);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Custom Extension</DialogTitle>
           <DialogDescription>
-            Configure a custom extension by defining an MCP server.
+            Configure a custom extension by defining an MCP server, or import an extension file
+            (.mcpb).
           </DialogDescription>
         </DialogHeader>
 
-        {isFromDeepLink ? (
-          <Alert variant="destructive">
-            <IconAlertTriangle />
-            <AlertTitle>Extension details were auto-filled</AlertTitle>
-            <AlertDescription>
-              Review the details below before installing. Only install extensions you trust.
-            </AlertDescription>
-          </Alert>
-        ) : null}
-
-        <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
+        <div className="-mx-4 flex max-h-[60vh] flex-col gap-4 overflow-y-auto px-4">
+          {isFromDeepLink ? (
+            <Alert variant="destructive">
+              <IconAlertTriangle />
+              <AlertTitle>A link filled in these details</AlertTitle>
+              <AlertDescription>
+                {formValues.type === "stdio"
+                  ? "This extension isn't from the AgentOne extensions page. It can run any program and read or change any file on your device. If you didn't expect this or don't trust where the link came from, cancel."
+                  : "This extension isn't from the AgentOne extensions page. It can see what your agent sends it. If you didn't expect this or don't trust where the link came from, cancel."}
+              </AlertDescription>
+            </Alert>
+          ) : null}
           <McpServerConfigForm
             idPrefix="new-server-dialog"
             className="py-1"
@@ -191,7 +210,24 @@ export function AddServerDialog({
           />
         </div>
 
+        {isFromDeepLink ? (
+          <Field orientation="horizontal">
+            <Checkbox
+              id="new-server-dialog-trust"
+              checked={trusted}
+              onCheckedChange={(checked) => setTrusted(checked === true)}
+            />
+            <FieldLabel htmlFor="new-server-dialog-trust">
+              I trust the developer of this extension
+            </FieldLabel>
+          </Field>
+        ) : null}
+
         <DialogFooter>
+          <Button variant="outline" onClick={() => void handleImportFile()}>
+            <IconFileImport data-icon="inline-start" />
+            Import File
+          </Button>
           <Button variant="outline" onClick={handleCancelAdd}>
             Cancel
           </Button>

@@ -626,17 +626,19 @@ export function isServerCached(server: McpServerConfig): boolean {
   return cached !== undefined && cached.configHash === getConfigHash(server);
 }
 
-export function closeServerCache(serverId: string): void {
+export async function stopMcpServer(serverId: string): Promise<void> {
   abortMcpServerLoad(serverId);
   appResourceCache.delete(serverId);
 
   const cached = serverCache.get(serverId);
-  if (cached) {
-    cached.transport?.close().catch((error) => {
-      logger.error(`Error closing MCP server ${serverId}:`, error);
-    });
-    serverCache.delete(serverId);
-  }
+  serverCache.delete(serverId);
+  await cached?.transport?.close();
+}
+
+export function closeServerCache(serverId: string): void {
+  stopMcpServer(serverId).catch((error) => {
+    logger.error(`Error closing MCP server ${serverId}:`, error);
+  });
 }
 
 export function invalidateServerCache(): void {

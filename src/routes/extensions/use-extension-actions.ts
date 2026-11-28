@@ -3,10 +3,15 @@ import { useCallback } from "react";
 import { toast } from "sonner";
 
 import { useTools } from "@/contexts/use-tools/tools-hooks";
+import { stopMcpServer } from "@/lib/ai/tools/mcp";
 import { setMcpOAuthClient } from "@/lib/ai/tools/mcp/oauth";
 import type { ExtensionInstallResult } from "@/lib/extensions/install";
+import { isMcpBundleServerId, removeMcpBundle } from "@/lib/extensions/mcpb";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom, mcpServersAtom } from "@/lib/jotai/mcp-atoms";
+import { getLogger } from "@/lib/logger";
 import type { McpRegistryMetadata, McpServerConfig } from "@/lib/settings/types";
+
+const logger = getLogger(import.meta.url);
 
 export function useExtensionActions() {
   const [servers, setServers] = useAtom(mcpServersAtom);
@@ -47,7 +52,17 @@ export function useExtensionActions() {
         installed.type === "stdio"
           ? { ...base, type: "stdio", command: installed.command, env: installed.env }
           : { ...base, type: "http", url: installed.url, headers: installed.headers };
-      setServers((previous) => [server, ...previous.filter((item) => item.id !== server.id)]);
+      setServers((previous) => {
+        const existing = previous.find((item) => item.id === server.id);
+        const next: McpServerConfig = existing
+          ? {
+              ...server,
+              enabled: existing.enabled,
+              toolApprovalOverrides: existing.toolApprovalOverrides ?? {},
+            }
+          : server;
+        return [next, ...previous.filter((item) => item.id !== server.id)];
+      });
       toast.success(`${installed.name} installed`);
       return server;
     },
@@ -58,7 +73,14 @@ export function useExtensionActions() {
     (serverIds: string[]) => {
       const ids = new Set(serverIds);
       setServers((previous) => previous.filter((server) => !ids.has(server.id)));
-      for (const id of ids) void setMcpOAuthClient(id, "").catch(() => undefined);
+      for (const id of ids) {
+        void setMcpOAuthClient(id, "").catch(() => undefined);
+        if (isMcpBundleServerId(id)) {
+          void stopMcpServer(id)
+            .then(() => removeMcpBundle(id))
+            .catch((error) => logger.warn("Failed to remove extension files", error));
+        }
+      }
     },
     [setServers],
   );
